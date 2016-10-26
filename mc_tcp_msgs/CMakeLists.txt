@@ -10,6 +10,7 @@ add_service_files(
   open_grippers.srv
   close_grippers.srv
   set_gripper.srv
+  get_joint_pos.srv
   set_joint_pos.srv
   play_next_stance.srv
   send_msg.srv
