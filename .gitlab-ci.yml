@@ -5,6 +5,7 @@ variables:
   ROS_GIT_DEPENDENCIES: "git@gite.lirmm.fr:multi-contact/mc_ros#karim_drc git@gite.lirmm.fr:mc-hrp2/hrp2_drc#master git@gite.lirmm.fr:mc-hrp4/hrp4#master"
   MASTER_PPA: "v-launchpad-jochen-sprickerhof-de/pcl pierre-gergondet+ppa/multi-contact-unstable hrg/daily keithw/glfw3"
   ROS_DISTRO: "indigo"
+  ALLOW_CATKINLINT_FAILURE: "true"
 
 before_script:
   - git submodule update --quiet --init --recursive
