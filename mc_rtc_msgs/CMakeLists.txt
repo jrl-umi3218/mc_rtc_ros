@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.4.6)
-project(mc_tcp_msgs)
+project(mc_rtc_msgs)
 
 find_package(catkin REQUIRED COMPONENTS roscpp message_generation geometry_msgs)
 
