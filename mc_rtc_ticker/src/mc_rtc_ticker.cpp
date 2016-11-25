@@ -9,15 +9,15 @@
 #include <chrono>
 #include <iostream>
 
-#include <mc_tcp_msgs/close_grippers.h>
-#include <mc_tcp_msgs/EnableController.h>
-#include <mc_tcp_msgs/get_joint_pos.h>
-#include <mc_tcp_msgs/open_grippers.h>
-#include <mc_tcp_msgs/play_next_stance.h>
-#include <mc_tcp_msgs/send_msg.h>
-#include <mc_tcp_msgs/send_recv_msg.h>
-#include <mc_tcp_msgs/set_gripper.h>
-#include <mc_tcp_msgs/set_joint_pos.h>
+#include <mc_rtc_msgs/close_grippers.h>
+#include <mc_rtc_msgs/EnableController.h>
+#include <mc_rtc_msgs/get_joint_pos.h>
+#include <mc_rtc_msgs/open_grippers.h>
+#include <mc_rtc_msgs/play_next_stance.h>
+#include <mc_rtc_msgs/send_msg.h>
+#include <mc_rtc_msgs/send_recv_msg.h>
+#include <mc_rtc_msgs/set_gripper.h>
+#include <mc_rtc_msgs/set_joint_pos.h>
 
 #include "ContactForcePublisher.h"
 
@@ -50,67 +50,67 @@ namespace
     {
     }
 
-    bool close_grippers(mc_tcp_msgs::close_grippersRequest &,
-                        mc_tcp_msgs::close_grippersResponse & res)
+    bool close_grippers(mc_rtc_msgs::close_grippersRequest &,
+                        mc_rtc_msgs::close_grippersResponse & res)
     {
       controller.setGripperOpenPercent(0);
       res.success = true;
       return true;
     }
 
-    bool EnableController(mc_tcp_msgs::EnableControllerRequest & req,
-                        mc_tcp_msgs::EnableControllerResponse & res)
+    bool EnableController(mc_rtc_msgs::EnableControllerRequest & req,
+                        mc_rtc_msgs::EnableControllerResponse & res)
     {
       res.success = controller.EnableController(req.name);
       return res.success;
     }
 
-    bool get_joint_pos(mc_tcp_msgs::get_joint_posRequest & req,
-                        mc_tcp_msgs::get_joint_posResponse & res)
+    bool get_joint_pos(mc_rtc_msgs::get_joint_posRequest & req,
+                        mc_rtc_msgs::get_joint_posResponse & res)
     {
       res.success = controller.get_joint_pos(req.jname, res.q);
       return res.success;
     }
 
-    bool open_grippers(mc_tcp_msgs::open_grippersRequest &,
-                        mc_tcp_msgs::open_grippersResponse & res)
+    bool open_grippers(mc_rtc_msgs::open_grippersRequest &,
+                        mc_rtc_msgs::open_grippersResponse & res)
     {
       controller.setGripperOpenPercent(1.);
       res.success = true;
       return res.success;
     }
 
-    bool play_next_stance(mc_tcp_msgs::play_next_stanceRequest &,
-                        mc_tcp_msgs::play_next_stanceResponse & res)
+    bool play_next_stance(mc_rtc_msgs::play_next_stanceRequest &,
+                        mc_rtc_msgs::play_next_stanceResponse & res)
     {
       res.success = controller.play_next_stance();
       return res.success;
     }
 
-    bool send_msg(mc_tcp_msgs::send_msgRequest & req,
-                        mc_tcp_msgs::send_msgResponse & res)
+    bool send_msg(mc_rtc_msgs::send_msgRequest & req,
+                        mc_rtc_msgs::send_msgResponse & res)
     {
       res.success = controller.send_msg(req.msg);
       return res.success;
     }
 
-    bool send_recv_msg(mc_tcp_msgs::send_recv_msgRequest & req,
-                        mc_tcp_msgs::send_recv_msgResponse & res)
+    bool send_recv_msg(mc_rtc_msgs::send_recv_msgRequest & req,
+                        mc_rtc_msgs::send_recv_msgResponse & res)
     {
       res.success = controller.send_recv_msg(req.msg, res.msg);
       return res.success;
     }
 
-    bool set_gripper(mc_tcp_msgs::set_gripperRequest & req,
-                        mc_tcp_msgs::set_gripperResponse & res)
+    bool set_gripper(mc_rtc_msgs::set_gripperRequest & req,
+                        mc_rtc_msgs::set_gripperResponse & res)
     {
       controller.setGripperTargetQ(req.gname, req.values);
       res.success = true;
       return res.success;
     }
 
-    bool set_joint_pos(mc_tcp_msgs::set_joint_posRequest & req,
-                        mc_tcp_msgs::set_joint_posResponse & res)
+    bool set_joint_pos(mc_rtc_msgs::set_joint_posRequest & req,
+                        mc_rtc_msgs::set_joint_posResponse & res)
     {
       res.success = controller.set_joint_pos(req.jname, req.q);
       return res.success;

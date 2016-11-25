@@ -3,9 +3,9 @@ project(mc_rtc_ticker)
 
 include(cmake/base.cmake)
 
-find_package(catkin REQUIRED COMPONENTS mc_tcp_msgs)
+find_package(catkin REQUIRED COMPONENTS mc_rtc_msgs)
 
-catkin_package(CATKIN_DEPENDS mc_tcp_msgs)
+catkin_package(CATKIN_DEPENDS mc_rtc_msgs)
 
 ADD_REQUIRED_DEPENDENCY("mc_rtc")
 
