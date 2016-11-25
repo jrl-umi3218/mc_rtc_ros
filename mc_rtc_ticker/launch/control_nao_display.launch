@@ -1,0 +1,15 @@
+<launch>
+  <arg name="model" value="$(find nao_description)/urdf/nao.urdf"/>
+  <arg name="gui" default="True" />
+  <param name="robot_description" textfile="$(arg model)" />
+  <arg name="env_model" value="$(find mc_env_description)/urdf/ground.urdf"/>
+  <param name="env/robot_description" textfile="$(arg env_model)" />
+  <param name="env/tf_prefix" value="/env"/>
+  <node name="env_state_publisher" pkg="robot_state_publisher" type="state_publisher" ns="env"></node>
+
+  <node name="map_to_env" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 /robot_map /env/base_link 1000" />
+
+  <group if="$(arg gui)">
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mc_rtc_ticker)/launch/display.rviz"/>
+  </group>
+</launch>
