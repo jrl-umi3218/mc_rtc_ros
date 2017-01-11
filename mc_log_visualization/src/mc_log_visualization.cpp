@@ -167,8 +167,8 @@ public:
                                robot.mbc().q[0][4], robot.mbc().q[0][5], robot.mbc().q[0][6]};
       rbd::forwardKinematics(real_robot.mb(), real_robot.mbc());
 
-      publisher.update(dt, robot, {0, 0, 0}, {1, 0, 0, 0}, {0, 0, 0}, {0, 0, 0}, gripperJ, gripperQ);
-      real_publisher.update(dt, real_robot, {0, 0, 0}, {1, 0, 0, 0}, {0, 0, 0}, {0, 0, 0}, gripperJ, gripperQ);
+      publisher.update(dt, robot, {0, 0, 0}, {1, 0, 0, 0}, {0, 0, 0}, {0, 0, 0}, gripperJ, gripperQ, {});
+      real_publisher.update(dt, real_robot, {0, 0, 0}, {1, 0, 0, 0}, {0, 0, 0}, {0, 0, 0}, gripperJ, gripperQ, {});
 
       if(log.count("stance_index") && log.count("polygonInterpolatorPercent"))
       {
