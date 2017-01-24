@@ -1,0 +1,15 @@
+<launch>
+  <arg name="robot" default="door"/>
+
+  <arg name="pkgpth" default="$(find mc_int_obj_description)"/>
+  <arg name="model" value="$(arg pkgpth)/urdf/$(arg robot).urdf"/>
+
+  <arg name="gui" default="True" />
+
+  <param name="robot_description" textfile="$(arg model)" />
+
+  <node name="joint_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+  <node name="surfaces_publisher" pkg="surfaces_visualization_ros" type="surfaces_publisher" args="--pkgpth $(arg pkgpth) --name $(arg robot)"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find surfaces_visualization_ros)/surfaces.rviz"/>
+</launch>

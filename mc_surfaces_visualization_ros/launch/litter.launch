@@ -1,0 +1,9 @@
+<launch>
+  <arg name="model" value="$(find mc_int_obj_description)/urdf/litter.urdf"/>
+  <arg name="gui" default="True" />
+  <param name="robot_description" textfile="$(arg model)" />
+
+  <node name="state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+  <node name="surfaces_publisher" pkg="surfaces_visualization_ros" type="surfaces_publisher" output="screen"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find surfaces_visualization_ros)/surfaces.rviz"/>
+</launch>
