@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(sch_visualization_ros)
+project(mc_convex_visualization)
 
 include(cmake/base.cmake)
 

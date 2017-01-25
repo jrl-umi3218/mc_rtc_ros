@@ -21,15 +21,15 @@ namespace
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "sch_visualization");
+  ros::init(argc, argv, "mc_convex_visualization");
 
   ros::NodeHandle n;
   std::vector<std::string> robot_params = {"HRP2DRC"};
   std::string tf_prefix = "";
   std::vector<std::string> filtered_convexes = {};
-  getParam(n, "sch_visualization/robot_params", robot_params);
-  getParam(n, "sch_visualization/tf_prefix", tf_prefix);
-  getParam(n, "sch_visualization/filtered_convexes", filtered_convexes);
+  getParam(n, "mc_convex_visualization/robot_params", robot_params);
+  getParam(n, "mc_convex_visualization/tf_prefix", tf_prefix);
+  getParam(n, "mc_convex_visualization/filtered_convexes", filtered_convexes);
 
   ros::Publisher sch_pub = n.advertise<visualization_msgs::MarkerArray>("sch_marker", 1000);
 
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR_STREAM("Invalid robot_params size passed to sch_visualization: " << robot_params.size());
+    ROS_ERROR_STREAM("Invalid robot_params size passed to mc_convex_visualization: " << robot_params.size());
   }
   auto cols = robot->convexHull();
 

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>sch_visualization_ros</name>
+  <name>mc_convex_visualization</name>
   <version>0.0.1</version>
   <description>Visualize hulls in RVIz</description>
 

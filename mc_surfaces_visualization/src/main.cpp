@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <mc_rbdyn/RobotLoader.h>
-#include <mc_rbdyn/SCHAddon.h>
 #include <mc_rbdyn/CylindricalSurface.h>
 #include <mc_rbdyn/GripperSurface.h>
 #include <mc_rbdyn/PlanarSurface.h>
@@ -75,7 +74,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR_STREAM("Invalid robot_params size passed to sch_visualization: " << robot_params.size());
+    ROS_ERROR_STREAM("Invalid robot_params size passed to mc_surfaces_visualization: " << robot_params.size());
   }
 
   auto robot = mc_rbdyn::loadRobot(*robotModule, robotModule->rsdf_dir);
