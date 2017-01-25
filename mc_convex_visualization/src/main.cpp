@@ -27,9 +27,9 @@ int main(int argc, char **argv)
   std::vector<std::string> robot_params = {"HRP2DRC"};
   std::string tf_prefix = "";
   std::vector<std::string> filtered_convexes = {};
-  getParam(n, "mc_convex_visualization/robot_params", robot_params);
-  getParam(n, "mc_convex_visualization/tf_prefix", tf_prefix);
-  getParam(n, "mc_convex_visualization/filtered_convexes", filtered_convexes);
+  getParam(n, "robot_module", robot_params);
+  getParam(n, "tf_prefix", tf_prefix);
+  getParam(n, "filtered_convexes", filtered_convexes);
 
   ros::Publisher sch_pub = n.advertise<visualization_msgs::MarkerArray>("sch_marker", 1000);
 
