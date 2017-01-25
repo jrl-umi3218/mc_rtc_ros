@@ -9,6 +9,7 @@
   <run_depend>mc_log_visualization</run_depend>
   <run_depend>mc_rtc_msgs</run_depend>
   <run_depend>mc_rtc_ticker</run_depend>
+  <run_depend>mc_surfaces_visualization</run_depend>
   <run_depend>sch_visualization_ros</run_depend>
   <export>
     <metapackage/>

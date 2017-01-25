@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(surfaces_visualization_ros)
+project(mc_surfaces_visualization)
 
 include(cmake/base.cmake)
 
@@ -13,14 +13,11 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package()
 
-ADD_REQUIRED_DEPENDENCY("mc_rtc", "mc_rtc_d")
+add_required_dependency("mc_rtc", "mc_rtc_d")
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIR}
 )
-
-find_package(PkgConfig)
 
 set(src_files
   src/main.cpp
@@ -30,7 +27,7 @@ set(src_files
 add_definitions(-std=c++0x)
 
 add_executable(surfaces_publisher ${src_files})
-PKG_CONFIG_USE_DEPENDENCY(surfaces_publisher mc_rtc)
+pkg_config_use_dependency(surfaces_publisher mc_rtc)
 
 target_link_libraries(surfaces_publisher
    ${catkin_LIBRARIES}

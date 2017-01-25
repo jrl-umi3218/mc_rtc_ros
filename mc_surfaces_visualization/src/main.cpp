@@ -3,50 +3,60 @@
 #include <mc_rbdyn/RobotLoader.h>
 #include <mc_rbdyn/SCHAddon.h>
 #include <mc_rbdyn/CylindricalSurface.h>
+#include <mc_rbdyn/GripperSurface.h>
 #include <mc_rbdyn/PlanarSurface.h>
 
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <visualization_msgs/MarkerArray.h>
 
-#include <boost/program_options.hpp>
+namespace
+{
+  template<typename T>
+  void getParam(ros::NodeHandle & n, const std::string & param, T & out)
+  {
+    std::string true_param;
+    n.searchParam(param, true_param);
+    n.getParam(true_param, out);
+  }
 
-namespace po = boost::program_options;
+  tf::StampedTransform tfFromSurface(const std::string & prefix, const mc_rbdyn::Surface & surf)
+  {
+    tf::StampedTransform tf;
+
+    const sva::PTransformd& pt = surf.X_b_s();
+    tf.setOrigin(tf::Vector3(pt.translation().x(),
+                             pt.translation().y(),
+                             pt.translation().z()));
+
+    Eigen::Quaterniond ori(pt.rotation().transpose());
+    tf.setRotation(tf::Quaternion(ori.x(), ori.y(), ori.z(), ori.w()));
+
+    tf.frame_id_ = prefix + surf.bodyName();
+    tf.child_frame_id_ = prefix + "surfaces/" + surf.name();
+    tf.stamp_ = ros::Time::now();
+
+    return tf;
+  }
+}
+
 
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "surfaces_visualization");
 
-  po::options_description desc("Allowed options");
-  desc.add_options()("help", "produce help message")
-                    ("pkgpth", po::value<std::string>(), "package path for the environment")
-                    ("name", po::value<std::string>(), "robot name");
-  po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
-  po::notify(vm);
-
-  if(vm.count("help"))
-  {
-    std::cout << desc << std::endl;
-    return 1;
-  }
-
   ros::NodeHandle n;
-  std::vector<std::string> robot_params = {"env", "/home/herve/ros/catkin_workspace/src/multi_contact/mc_int_obj_description", "door"};
 
-  if(vm.count("pkgpth"))
-  {
-    robot_params[1] = vm["pkgpth"].as<std::string>();
-  }
-
-  if(vm.count("name"))
-  {
-    robot_params[2] = vm["name"].as<std::string>();
-  }
-
+  std::vector<std::string> robot_params = {"env", mc_rtc::MC_ENV_DESCRIPTION_PATH, "door"};
   std::string tf_prefix = "";
+  getParam(n, "robot_module", robot_params);
+  getParam(n, "tf_prefix", tf_prefix);
+  if(tf_prefix.size() && tf_prefix[tf_prefix.size() - 1] != '/')
+  {
+    tf_prefix += '/';
+  }
 
-  ros::Publisher cylinder_pub = n.advertise<visualization_msgs::MarkerArray>("surfaces", 1000);
+  ros::Publisher surface_pub = n.advertise<visualization_msgs::MarkerArray>("surfaces", 1000);
 
   std::shared_ptr<mc_rbdyn::RobotModule> robotModule;
 
@@ -78,27 +88,15 @@ int main(int argc, char **argv)
   for(const auto & pair : robot->robots()[0].surfaces())
   {
 
-    const auto surf = pair.second;
+    std::shared_ptr<mc_rbdyn::Surface> surf = pair.second;
     const std::string & frame = surf->name();
 
-    tf::Transform tf;
-    std::string surf_name = tf_prefix + "surfaces/" + frame;
-
-    const sva::PTransformd& pt = surf->X_b_s();
-    tf.setOrigin(tf::Vector3(pt.translation().x(),
-                             pt.translation().y(),
-                             pt.translation().z()));
-
-    Eigen::Quaterniond ori(pt.rotation().transpose());
-    tf.setRotation(tf::Quaternion(ori.x(), ori.y(), ori.z(), ori.w()));
-
-    tf::StampedTransform stf(tf, ros::Time::now(), tf_prefix + surf->bodyName(), surf_name);
-
+    tf::StampedTransform stf = tfFromSurface(tf_prefix, *surf);
     transforms.push_back(stf);
 
     visualization_msgs::Marker marker;
-    marker.header.frame_id = surf_name;
-    marker.header.stamp = ros::Time();
+    marker.header.frame_id = stf.child_frame_id_;
+    marker.header.stamp = stf.stamp_;
     marker.ns = frame;
     marker.id = ++id;
     marker.action = visualization_msgs::Marker::ADD;
@@ -127,8 +125,10 @@ int main(int argc, char **argv)
       marker.pose.orientation.y = new_ori.y();
       marker.pose.orientation.z = new_ori.z();
       marker.pose.orientation.w = new_ori.w();
+
+      markers.markers.push_back(marker);
     }
-    if(surf->type() == "planar")
+    else if(surf->type() == "planar")
     {
       marker.type = visualization_msgs::Marker::LINE_STRIP;
       const std::vector<std::pair<double, double>>& points =
@@ -145,25 +145,48 @@ int main(int argc, char **argv)
         p.z = 0.0;
         marker.points.push_back(p);
       }
-      p.x = points[0].first;
-      p.y = points[0].second;
-      p.z = 0.0;
-      marker.points.push_back(p);
+      marker.points.push_back(marker.points[0]);
 
       marker.scale.x = 0.01;
+
+      markers.markers.push_back(marker);
     }
-    markers.markers.push_back(marker);
+    else if(surf->type() == "gripper")
+    {
+      marker.type = visualization_msgs::Marker::ARROW;
+      marker.scale.x = 0.005;
+      marker.scale.y = 0.01;
+      marker.color.g = 0.0;
+      marker.color.b = 1.0;
+      const std::vector<sva::PTransformd> pFO = dynamic_cast<mc_rbdyn::GripperSurface*>(surf.get())->pointsFromOrigin();
+      for(const auto & p : pFO)
+      {
+        auto m = marker;
+        m.id = ++id;
+        auto p1 = p.translation();
+        auto p2 = p1 + p.rotation().col(2)*0.05;
+        geometry_msgs::Point gp;
+        gp.x = p1.x(); gp.y = p1.y(); gp.z = p1.z(); m.points.push_back(gp);
+        gp.x = p2.x(); gp.y = p2.y(); gp.z = p2.z(); m.points.push_back(gp);
+        markers.markers.push_back(m);
+      }
+    }
   }
 
   ros::Rate rate(10);
   while(ros::ok())
   {
-    cylinder_pub.publish(markers);
+    auto now = ros::Time::now();
+    for(auto & m : markers.markers)
+    {
+      m.header.stamp = now;
+    }
+    surface_pub.publish(markers);
     for(auto& stf : transforms)
     {
-      stf.stamp_ = ros::Time::now();
-      br.sendTransform(stf);
+      stf.stamp_ = now;
     }
+    br.sendTransform(transforms);
     ros::spinOnce();
     rate.sleep();
   }
