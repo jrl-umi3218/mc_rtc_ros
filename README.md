@@ -6,3 +6,7 @@ This ROS stack aims at providing various tools to use along mc_rtc.
 - **mc_rtc_msgs** defines a common set of messages used in mc_rtc_ros tools
 - **mc_rtc_ticker** provides an RViz interface to mc_rtc
 - **mc_convex_visualization** allows to publish the convex hulls of a robot as a polygon message that can be visualized in RViz
+
+## mc_rtc_ros_data
+
+This package works in conjuction with [mc_rtc_ros_data](https://gite.lirmm.fr/multi-contact/mc_rtc_ros_data).
