@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <mc_rbdyn/RobotLoader.h>
+#include <mc_rbdyn/Robots.h>
 #include <mc_rbdyn/CylindricalSurface.h>
 #include <mc_rbdyn/GripperSurface.h>
 #include <mc_rbdyn/PlanarSurface.h>

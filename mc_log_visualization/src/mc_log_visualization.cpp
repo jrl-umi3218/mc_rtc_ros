@@ -11,7 +11,7 @@
 
 #include <mc_control/generic_gripper.h>
 
-#include <mc_rbdyn/robot.h>
+#include <mc_rbdyn/Robots.h>
 #include <mc_rbdyn/RobotLoader.h>
 #include <mc_rbdyn/stance.h>
 #include <mc_rbdyn/rpy_utils.h>
@@ -161,14 +161,14 @@ public:
       auto rot_imu0 = mc_rbdyn::rpyToPT(r0, p0, y0);
       rot_imu = rot_imu * rot_imu0.inv();
       auto rootPos = real_robot.mbc().bodyPosW[0];
-      auto imuPos = real_robot.mbc().bodyPosW[robot.bodyIndexByName(mod->accelerometerBody())];
+      auto imuPos = real_robot.mbc().bodyPosW[robot.bodyIndexByName(robot.bodySensor().parentBody())];
       auto quat = Eigen::Quaterniond((rootPos*imuPos.inv()*rot_imu).rotation()).inverse();
       real_robot.mbc().q[0] = {quat.w(), quat.x(), quat.y(), quat.z(),
                                robot.mbc().q[0][4], robot.mbc().q[0][5], robot.mbc().q[0][6]};
       rbd::forwardKinematics(real_robot.mb(), real_robot.mbc());
 
-      publisher.update(dt, robot, {0, 0, 0}, {1, 0, 0, 0}, {0, 0, 0}, {0, 0, 0}, gripperJ, gripperQ, {});
-      real_publisher.update(dt, real_robot, {0, 0, 0}, {1, 0, 0, 0}, {0, 0, 0}, {0, 0, 0}, gripperJ, gripperQ, {});
+      publisher.update(dt, robot, gripperJ, gripperQ);
+      real_publisher.update(dt, real_robot, gripperJ, gripperQ);
 
       if(log.count("stance_index") && log.count("polygonInterpolatorPercent"))
       {
