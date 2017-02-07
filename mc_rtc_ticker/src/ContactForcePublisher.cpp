@@ -77,14 +77,28 @@ ContactForcePublisher::ContactForcePublisher(ros::NodeHandle & nh,
                                              mc_control::MCGlobalController & gc)
 : nh(nh), gc(gc)
 {
+  rate = floor(1/this->gc.configuration().publish_timestep);
   update_th = std::thread([this]()
                           {
-                            ros::Rate rt(1/this->gc.configuration().publish_timestep);
-                            while(running)
-                            {
-                              update();
-                              rt.sleep();
-                            }
+    ros::Rate rt(2*rate);
+    while(running)
+    {
+      if(update_ready)
+      {
+        for(const auto & pub : force_markers_publisher)
+        {
+          const auto & pub_key = pub.first;
+          auto & publisher = force_markers_publisher[pub_key];
+          auto & array = force_markers[pub_key];
+          publisher.publish(array);
+          auto & norm_publisher = force_norm_markers_publisher[pub_key];
+          auto & norm_array = force_norm_markers[pub_key];
+          norm_publisher.publish(norm_array);
+        }
+        update_ready = false;
+      }
+      rt.sleep();
+    }
                           });
 }
 
@@ -95,6 +109,10 @@ void ContactForcePublisher::stop()
 
 void ContactForcePublisher::update()
 {
+  if(iter++ % rate != 0)
+  {
+    return;
+  }
   auto compute_mass = [](const mc_rbdyn::Robot & r)
   {
     double mass = 0;
@@ -192,16 +210,7 @@ void ContactForcePublisher::update()
                                                       r2_tf_prefix));
     }
   }
-  for(size_t i = 0; i < robots.robots().size(); ++i)
-  {
-    auto pub_key = get_pub_key(robots, i);
-    auto & publisher = force_markers_publisher[pub_key];
-    auto & array = force_markers[pub_key];
-    publisher.publish(array);
-    auto & norm_publisher = force_norm_markers_publisher[pub_key];
-    auto & norm_array = force_norm_markers[pub_key];
-    norm_publisher.publish(norm_array);
-  }
+  update_ready = true;
 }
 
 }

@@ -16,6 +16,8 @@ namespace mc_rtc_ros
                           mc_control::MCGlobalController & gc);
 
     void stop();
+
+    void update();
   private:
     ros::NodeHandle & nh;
     mc_control::MCGlobalController & gc;
@@ -27,6 +29,8 @@ namespace mc_rtc_ros
     std::map<std::string, ros::Publisher> force_norm_markers_publisher;
     std::map<std::string, visualization_msgs::MarkerArray> force_norm_markers;
 
-    void update();
+    bool update_ready = false;
+    unsigned int rate = 0;
+    unsigned int iter = 0;
   };
 }

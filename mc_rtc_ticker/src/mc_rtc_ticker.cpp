@@ -270,6 +270,10 @@ int main()
         }
       }
       controller.setActualGripperQ(gAQs);
+      if(cfp_ptr)
+      {
+        cfp_ptr->update();
+      }
     }
     if(bench)
     {
