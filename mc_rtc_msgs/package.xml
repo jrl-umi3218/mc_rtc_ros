@@ -1,11 +1,11 @@
 <package>
-  <name>mc_tcp_msgs</name>
-  <description>mc_tcp_msgs</description>
+  <name>mc_rtc_msgs</name>
+  <description>mc_rtc_msgs</description>
   <version>0.1.0</version>
   <author>Pierre Gergondet</author>
   <maintainer email="pierre.gergondet@gmail.com">Pierre Gergondet</maintainer>
   <license>BSD</license>
-  <url>http://ros.org/wiki/mc_tcp_msgs</url>
+  <url>http://ros.org/wiki/mc_rtc_msgs</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 

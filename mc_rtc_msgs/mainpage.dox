@@ -2,7 +2,7 @@
 \mainpage
 \htmlinclude manifest.html
 
-\b mc_tcp_msgs 
+\b mc_rtc_msgs
 
 <!-- 
 Provide an overview of your package.

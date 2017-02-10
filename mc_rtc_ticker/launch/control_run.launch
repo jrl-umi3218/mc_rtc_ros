@@ -1,0 +1,5 @@
+<launch>
+  <param name="mc_rtc_ticker/conf" value="$(find mc_rtc_ticker)/etc/mc_rtc.conf" />
+  <param name="mc_rtc_ticker/bench" value="false" />
+  <node name="mc_rtc_ticker" pkg="mc_rtc_ticker" type="mc_rtc_ticker" output="screen"/>
+</launch>

@@ -1,0 +1,7 @@
+<launch>
+  <arg name="robot" default="env/door" />
+
+  <include file="$(find mc_scenario)/$(arg robot).xml" />
+
+  <node name="surfaces_publisher" pkg="mc_convex_visualization" type="sch_visualizer" />
+</launch>

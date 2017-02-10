@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>mc_rtc_ticker</name>
+  <version>1.0.0</version>
+  <description>The mc_rtc_ticker package</description>
+
+  <maintainer email="pierre.gergondet@gmail.com">Pierre Gergondet</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf2_eigen</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>visualization_msgs</build_depend>
+  <build_depend>xacro</build_depend>
+  <build_depend>mc_rtc_msgs</build_depend>
+
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>tf2_eigen</run_depend>
+  <run_depend>tf2_ros</run_depend>
+  <run_depend>visualization_msgs</run_depend>
+  <run_depend>xacro</run_depend>
+  <run_depend>mc_rtc_msgs</run_depend>
+
+  <export>
+  </export>
+</package>
