@@ -104,8 +104,8 @@ public:
     unsigned int pub_i = 0;
     auto ref_joint_order = mod->ref_joint_order();
 
-    mc_rtc::RobotPublisher publisher("control/", rate, 1);
-    mc_rtc::RobotPublisher real_publisher("real/", rate, 1);
+    mc_rtc::RobotPublisher publisher("control/", rate);
+    mc_rtc::RobotPublisher real_publisher("real/", rate);
 
     CoMPublisher com_pub = CoMPublisher(*mc_rtc::ROSBridge::get_node_handle());
     CoMPublisher target_com_pub = CoMPublisher(*mc_rtc::ROSBridge::get_node_handle(), "target_com_marker");
