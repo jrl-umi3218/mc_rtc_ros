@@ -12,6 +12,7 @@
 #include <mc_rtc_msgs/close_grippers.h>
 #include <mc_rtc_msgs/EnableController.h>
 #include <mc_rtc_msgs/get_joint_pos.h>
+#include <mc_rtc_msgs/move_com.h>
 #include <mc_rtc_msgs/open_grippers.h>
 #include <mc_rtc_msgs/play_next_stance.h>
 #include <mc_rtc_msgs/send_msg.h>
@@ -69,6 +70,13 @@ namespace
                         mc_rtc_msgs::get_joint_posResponse & res)
     {
       res.success = controller.get_joint_pos(req.jname, res.q);
+      return res.success;
+    }
+
+    bool move_com(mc_rtc_msgs::move_comRequest & req,
+                  mc_rtc_msgs::move_comResponse & res)
+    {
+      res.success = controller.move_com({req.com[0], req.com[1], req.com[2]});
       return res.success;
     }
 
@@ -223,6 +231,7 @@ int main()
   ADV_SVC(close_grippers)
   ADV_SVC(EnableController)
   ADV_SVC(get_joint_pos)
+  ADV_SVC(move_com)
   ADV_SVC(open_grippers)
   ADV_SVC(play_next_stance)
   ADV_SVC(send_msg)

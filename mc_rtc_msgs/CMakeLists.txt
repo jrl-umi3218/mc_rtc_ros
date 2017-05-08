@@ -15,6 +15,7 @@ add_service_files(
   play_next_stance.srv
   send_msg.srv
   send_recv_msg.srv
+  move_com.srv
 )
 
 generate_messages(DEPENDENCIES geometry_msgs)
