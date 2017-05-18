@@ -1,14 +1,31 @@
 <launch>
   <arg name="robot" />
   <arg name="env" default="ground" />
+  <arg name="display_surfaces" default="true" />
+  <arg name="display_convex" default="true" />
 
   <include file="$(find mc_scenario)/robot/$(arg robot).xml" />
   <include file="$(find mc_scenario)/env/$(arg env).xml" ns="env" />
 
-  <param name="env/tf_prefix" value="/env"/>
-  <node name="env_state_publisher" pkg="robot_state_publisher" type="state_publisher" ns="env"></node>
-
-  <node name="map_to_env" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 /robot_map /env/base_link 1000" />
-
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mc_rtc_ticker)/launch/display.rviz"/>
+
+  <include if="$(arg display_surfaces)" file="$(find mc_surfaces_visualization)/launch/surfaces_publisher.launch" ns="control">
+    <arg name="robot" value="robot/$(arg robot)" />
+    <arg name="tf_prefix" value="control" />
+  </include>
+
+  <include if="$(arg display_surfaces)" file="$(find mc_surfaces_visualization)/launch/surfaces_publisher.launch" ns="control/env_1">
+    <arg name="robot" value="env/$(arg env)" />
+    <arg name="tf_prefix" value="control/env_1" />
+  </include>
+
+  <include if="$(arg display_convex)" file="$(find mc_convex_visualization)/launch/convex_publisher.launch" ns="control">
+    <arg name="robot" value="robot/$(arg robot)" />
+    <arg name="tf_prefix" value="control" />
+  </include>
+
+  <include if="$(arg display_convex)" file="$(find mc_convex_visualization)/launch/convex_publisher.launch" ns="control/env_1">
+    <arg name="robot" value="env/$(arg env)" />
+    <arg name="tf_prefix" value="control/env_1" />
+  </include>
 </launch>

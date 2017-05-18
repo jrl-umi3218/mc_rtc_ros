@@ -8,6 +8,8 @@ Panels:
         - /Status1
         - /Env1
         - /Robot1
+        - /MarkerArray4
+        - /MarkerArray4/Namespaces1
       Splitter Ratio: 0.5
     Tree Height: 647
   - Class: rviz/Selection
@@ -52,7 +54,7 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: Env
-      Robot Description: env/robot_description
+      Robot Description: /control/env_1/robot_description
       TF Prefix: /control/env_1
       Update Interval: 0
       Value: true
@@ -319,11 +321,115 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
       Name: Robot
-      Robot Description: robot_description
+      Robot Description: /control/robot_description
       TF Prefix: /control
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /control/surfaces
+      Name: MarkerArray
+      Namespaces:
+        Back: true
+        Butthock: true
+        CenterRightHand: true
+        InteriorRightHand: true
+        InteriorRightHandInverted: true
+        InternLeftHand: true
+        InternRightHand: true
+        LExternSole: true
+        LFrontSole: true
+        LFullSole: true
+        LInternSole: true
+        LeftFingers: true
+        LeftGripper: true
+        LeftGripperReverse: true
+        LeftThight: true
+        LowerBack: true
+        RExternSole: true
+        RFrontSole: true
+        RFullSole: true
+        RInternSole: true
+        RightFingers: true
+        RightForearmSupport: true
+        RightGripper: true
+        RightGripperReverse: true
+        RightThight: true
+        RightWristSupport: true
+        XYLargeButthock: true
+        YLargeButthock: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /control/env_1/surfaces
+      Name: MarkerArray
+      Namespaces:
+        AllGround: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /control/sch_marker
+      Name: MarkerArray
+      Namespaces:
+        BODY: true
+        CHEST_LINK0: true
+        CHEST_LINK1: true
+        CHEST_LINK1_FULL: true
+        HEAD_LINK0: true
+        HEAD_LINK1: true
+        LARM_LINK0: true
+        LARM_LINK1: true
+        LARM_LINK2: true
+        LARM_LINK3: true
+        LARM_LINK4: true
+        LARM_LINK5: true
+        LARM_LINK6: true
+        LARM_LINK6_sub1: true
+        LARM_LINK7: true
+        LHAND_LINK0: true
+        LHAND_LINK1: true
+        LHAND_LINK2: true
+        LHAND_LINK3: true
+        LHAND_LINK4: true
+        LLEG_LINK0: true
+        LLEG_LINK1: true
+        LLEG_LINK2: true
+        LLEG_LINK3: true
+        LLEG_LINK4: true
+        LLEG_LINK5: true
+        RARM_LINK0: true
+        RARM_LINK1: true
+        RARM_LINK2: true
+        RARM_LINK3: true
+        RARM_LINK4: true
+        RARM_LINK5: true
+        RARM_LINK6: true
+        RARM_LINK6_sub1: true
+        RARM_LINK7: true
+        RHAND_LINK0: true
+        RHAND_LINK1: true
+        RHAND_LINK2: true
+        RHAND_LINK3: true
+        RHAND_LINK4: true
+        RLEG_LINK0: true
+        RLEG_LINK1: true
+        RLEG_LINK2: true
+        RLEG_LINK3: true
+        RLEG_LINK4: true
+        RLEG_LINK5: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /control/env_1/sch_marker
+      Name: MarkerArray
+      Namespaces:
+        ground: true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -348,22 +454,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.80086
+      Distance: 3.91668
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.156694
-        Y: 0.317384
-        Z: 1.17897
+        X: -0.355779
+        Y: 0.371184
+        Z: 0.805445
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.0397569
+      Pitch: 0.229757
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.01037
+      Yaw: 5.77037
     Saved: ~
 Window Geometry:
   Displays:
