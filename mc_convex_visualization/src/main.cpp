@@ -29,6 +29,10 @@ int main(int argc, char **argv)
   std::vector<std::string> filtered_convexes = {};
   getParam(n, "robot_module", robot_params);
   getParam(n, "tf_prefix", tf_prefix);
+  if(tf_prefix.size() && tf_prefix[tf_prefix.size() - 1] != '/')
+  {
+    tf_prefix += '/';
+  }
   getParam(n, "filtered_convexes", filtered_convexes);
 
   ros::Publisher sch_pub = n.advertise<visualization_msgs::MarkerArray>("sch_marker", 1000);

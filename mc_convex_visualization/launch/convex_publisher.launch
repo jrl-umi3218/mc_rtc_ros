@@ -1,7 +1,10 @@
 <launch>
   <arg name="robot" default="env/door" />
+  <arg name="tf_prefix" default="" />
 
   <include file="$(find mc_scenario)/$(arg robot).xml" />
 
-  <node name="surfaces_publisher" pkg="mc_convex_visualization" type="sch_visualizer" />
+  <param name="tf_prefix" value="$(arg tf_prefix)" />
+
+  <node name="convex_publisher" pkg="mc_convex_visualization" type="sch_visualizer" />
 </launch>
