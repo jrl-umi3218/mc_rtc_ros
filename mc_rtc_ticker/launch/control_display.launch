@@ -9,23 +9,25 @@
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mc_rtc_ticker)/launch/display.rviz"/>
 
-  <include if="$(arg display_surfaces)" file="$(find mc_surfaces_visualization)/launch/surfaces_publisher.launch" ns="control">
-    <arg name="robot" value="robot/$(arg robot)" />
-    <arg name="tf_prefix" value="control" />
-  </include>
+  <group if="$(arg display_surfaces)">
+    <include file="$(find mc_surfaces_visualization)/launch/surfaces_publisher.launch" ns="control">
+      <arg name="robot" value="robot/$(arg robot)" />
+      <arg name="tf_prefix" value="control" />
+    </include>
+    <include file="$(find mc_surfaces_visualization)/launch/surfaces_publisher.launch" ns="control/env_1">
+      <arg name="robot" value="env/$(arg env)" />
+      <arg name="tf_prefix" value="control/env_1" />
+    </include>
+  </group>
 
-  <include if="$(arg display_surfaces)" file="$(find mc_surfaces_visualization)/launch/surfaces_publisher.launch" ns="control/env_1">
-    <arg name="robot" value="env/$(arg env)" />
-    <arg name="tf_prefix" value="control/env_1" />
-  </include>
-
-  <include if="$(arg display_convex)" file="$(find mc_convex_visualization)/launch/convex_publisher.launch" ns="control">
-    <arg name="robot" value="robot/$(arg robot)" />
-    <arg name="tf_prefix" value="control" />
-  </include>
-
-  <include if="$(arg display_convex)" file="$(find mc_convex_visualization)/launch/convex_publisher.launch" ns="control/env_1">
-    <arg name="robot" value="env/$(arg env)" />
-    <arg name="tf_prefix" value="control/env_1" />
-  </include>
+  <group if="$(arg display_convex)">
+    <include file="$(find mc_convex_visualization)/launch/convex_publisher.launch" ns="control">
+      <arg name="robot" value="robot/$(arg robot)" />
+      <arg name="tf_prefix" value="control" />
+    </include>
+    <include file="$(find mc_convex_visualization)/launch/convex_publisher.launch" ns="control/env_1">
+      <arg name="robot" value="env/$(arg env)" />
+      <arg name="tf_prefix" value="control/env_1" />
+    </include>
+  </group>
 </launch>
