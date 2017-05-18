@@ -1,8 +1,8 @@
 <launch>
   <arg name="robot" />
   <arg name="env" default="ground" />
-  <arg name="display_surfaces" default="true" />
-  <arg name="display_convex" default="true" />
+  <arg name="display_surfaces" default="false" />
+  <arg name="display_convex" default="false" />
 
   <include file="$(find mc_scenario)/robot/$(arg robot).xml" />
   <include file="$(find mc_scenario)/env/$(arg env).xml" ns="env" />
