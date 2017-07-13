@@ -5,7 +5,6 @@ import rosbag
 
 import sys
 import signal
-from math import degrees
 import copy
 
 from PySide import QtCore, QtGui
@@ -29,25 +28,23 @@ class UndoContactEdit(QtGui.QUndoCommand):
     self.oldStances = oldStances
     self.newStances = newStances
 
-
   def undo(self):
     self.mw.changeStances(self.oldStances)
-
 
   def redo(self):
     self.mw.changeStances(self.newStances)
 
 
-
 class Slider(QtGui.QMainWindow):
-  def __init__(self, robots, stances, frequency, timeStep, parent=None):
+  def __init__(self, robots, stances_file, frequency, timeStep, parent=None):
     super(Slider, self).__init__(parent)
     self.ui = Ui_Sequence()
     self.ui.setupUi(self)
     self.robots = robots
     self.robot = robots.robot()
-    self.stances = stances
     self.curStance = None
+    self.stances_file = stances_file
+    self.stances, self.actions = mc_rbdyn.loadStances(robots, stances_file)
 
     self.robot.mbc.gravity = Vector3d(0., 0., 9.81)
 
@@ -75,8 +72,8 @@ class Slider(QtGui.QMainWindow):
     self.jointStatePub = rospy.Publisher('sequence_joint_states', JointState)
 
     # Gui part
-    self.ui.stanceSlider.setRange(0, len(stances) - 1)
-    self.ui.stanceSpinBox.setRange(0, len(stances) - 1)
+    self.ui.stanceSlider.setRange(0, len(self.stances) - 1)
+    self.ui.stanceSpinBox.setRange(0, len(self.stances) - 1)
     self.ui.stanceSlider.valueChanged.connect(self.setStance)
     self.ui.stanceSpinBox.valueChanged.connect(self.setStance)
     self.ui.contactTable.cellDoubleClicked.connect(self.editStance)
@@ -107,7 +104,6 @@ class Slider(QtGui.QMainWindow):
     s.setValue('pos', self.pos())
     s.endGroup()
 
-
   def readSettings(self):
     s = QtCore.QSettings('IDH', 'Sequence')
     s.beginGroup('Slider')
@@ -115,10 +111,8 @@ class Slider(QtGui.QMainWindow):
     self.move(s.value('pos', self.pos()))
     s.endGroup()
 
-
   def closeEvent(self, e):
     self.writeSettings()
-
 
   def updateUi(self, stance, index):
     self.ui.stanceSlider.setValue(index)
@@ -141,14 +135,12 @@ class Slider(QtGui.QMainWindow):
       self.ui.contactTable.setItem(i, 2, posItem)
       self.ui.contactTable.setItem(i, 3, stateItem)
 
-
   def setStance(self, i):
     if self.curStance != i:
       self.curStance = i
 
       self.updateUi(self.stances[self.curStance], i)
       self.computeStance()
-
 
   def computeStance(self):
     s = self.stances[self.curStance]
@@ -272,7 +264,17 @@ class Slider(QtGui.QMainWindow):
         bag.write('/robot/joint_states', js, js.header.stamp)
       bag.close()
 
-
+  @QtCore.Slot()
+  def on_stancesSave_triggered(self):
+    filename, ext = QtGui.QFileDialog.getSaveFileName(self, "Save stances file",
+                                                      self.stances_file,
+                                                      "Stances (*.seq *.stances)")
+    if filename != u"":
+      print self.robots, filename, self.stances, self.actions
+      mc_rbdyn.saveStances(self.robots, filename, self.stances, self.actions)
+      print "Saved stances in {}".format(filename)
+    else:
+      print "No file selected!"
 
   def sendAll(self):
     curTime = rospy.Time.now()
@@ -299,12 +301,11 @@ if __name__ == '__main__':
   robots = mc_rbdyn.loadRobotAndEnv(robot_module, robot_module.rsdf_dir,
                                     env_module, env_module.rsdf_dir)
   # load stances
-  stances, actions = mc_rbdyn.loadStances(robots, stances_file)
 
   rospy.init_node('sequence_visualization_gui')
 
   app = QtGui.QApplication(sys.argv)
-  slider = Slider(robots, stances, frequency, timeStep)
+  slider = Slider(robots, stances_file, frequency, timeStep)
   slider.show()
 
 
