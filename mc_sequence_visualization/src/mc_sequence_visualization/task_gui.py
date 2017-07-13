@@ -7,7 +7,7 @@ from sensor_msgs.msg import JointState
 
 import copy
 
-from eigen import Vector3d, Quaterniond
+from eigen import Vector3d, Quaterniond, MatrixXd
 import numpy as np
 import rbdyn as rbd
 import tasks
@@ -100,7 +100,7 @@ class TaskDialog(QtGui.QDialog):
     contacts = stance.contacts[:]
     c = contacts[contactIndex]
     #del contacts[contactIndex]
-    cId = contacts[contactIndex].contactId(self.robot, self.robots.robots[1])
+    cId = contacts[contactIndex].contactId(self.robot, self.env)
     dof = np.eye(6)
     if isinstance(c.robotSurface, GripperSurface)\
        and isinstance(c.envSurface, CylindricalSurface):
@@ -125,8 +125,7 @@ class TaskDialog(QtGui.QDialog):
     else:
       print type(c.robotSurface), type(c.envSurface)
       raise Exception("Contact is neither gripper/cylindrical nor planar/planar")
-    self.contactConstraint.contactConstr.addDofContact(cId,
-                                                       toEigenX(dof))
+    self.contactConstraint.contactConstr.addDofContact(cId, MatrixXd(dof))
     self.contactConstraint.contactConstr.updateDofContacts()
     self.qpsolver.setContacts(contacts)
 
@@ -261,7 +260,7 @@ class TaskDialog(QtGui.QDialog):
       QtGui.qApp.processEvents()
 
     # set the new stance value
-    stance.q = rbdList(self.robot.mbc.q)
+    stance.q = self.robot.mbc.q
     stance.updateContact(self.contact, self.newContact)
 
     self.qpsolver.removeConstraintSet(self.kinematicsConstraint)
@@ -275,7 +274,7 @@ class LinkDialog(QtGui.QDialog):
     self.ui.setupUi(self)
 
     self.robots = robots
-    self.robot = self.robots.robots[0]
+    self.robot = self.robots.robot()
     self.qpsolver = qpsolver
     self.jointStatePub = jointStatePub
     self.tasks = {}
@@ -415,7 +414,7 @@ class LinkDialog(QtGui.QDialog):
   def changeEf(self, index):
     print "Changing to : {} == {}".format(index,
                                           self.robot.mb.body(index).name())
-    self.postureTask.posture(rbdList(self.robot.mbc.q))
+    self.postureTask.posture(self.robot.mbc.q)
     bodyId = self.robot.mb.body(index).id()
     self.qpsolver.solver.removeTask(self.efTaskSp)
     self.qpsolver.solver.removeTask(self.orientationTaskSp)
@@ -435,7 +434,7 @@ class LinkDialog(QtGui.QDialog):
     degrees = lambda x: 180*x/pi
     qu = self.robot.qu[index][0]
     ql = self.robot.ql[index][0]
-    q = rbdList(self.robot.mbc.q)[index][0]
+    q = self.robot.mbc.q[index][0]
 
     qudeg = floor(degrees(qu))
     qldeg = ceil(degrees(ql))
@@ -471,7 +470,7 @@ class LinkDialog(QtGui.QDialog):
     self.changeJointAngle(value)
 
   def changeJointAngle(self, value):
-    p = rbdList(self.postureTask.posture())
+    p = self.postureTask.posture()
     p[self.current_joint][0] = value
     self.postureTask.posture(p)
 
@@ -510,7 +509,7 @@ class LinkDialog(QtGui.QDialog):
 
     if result == QtGui.QDialog.DialogCode.Accepted:
       max_iter = 1000
-      q = rbdList(self.robot.mbc.q)
+      q = self.robot.mbc.q
       stable = self.check_stability(max_iter, q, self.stance.contacts)
 
       if not stable:
