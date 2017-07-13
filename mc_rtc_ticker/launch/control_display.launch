@@ -4,8 +4,8 @@
   <arg name="display_surfaces" default="false" />
   <arg name="display_convex" default="false" />
 
-  <include file="$(find mc_scenario)/robot/$(arg robot).xml" />
-  <include file="$(find mc_scenario)/env/$(arg env).xml" ns="env" />
+  <include file="$(find mc_scenario)/robot/$(arg robot).xml" ns="control" />
+  <include file="$(find mc_scenario)/env/$(arg env).xml" ns="control/env_1" />
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mc_rtc_ticker)/launch/display.rviz"/>
 
