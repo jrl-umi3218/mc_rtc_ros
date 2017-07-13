@@ -5,6 +5,7 @@ import rosbag
 
 import sys
 import signal
+from math import degrees
 import copy
 
 from PySide import QtCore, QtGui
@@ -79,6 +80,10 @@ class Slider(QtGui.QMainWindow):
     self.ui.stanceSlider.valueChanged.connect(self.setStance)
     self.ui.stanceSpinBox.valueChanged.connect(self.setStance)
     self.ui.contactTable.cellDoubleClicked.connect(self.editStance)
+
+    self.ui.stanceButton.setText("Edit")
+    self.ui.stanceButton.clicked.connect(self.editPosture)
+
     self.undoStack = QtGui.QUndoStack()
     self.undoStack.canUndoChanged.connect(self.ui.undo.setEnabled)
     self.undoStack.canRedoChanged.connect(self.ui.redo.setEnabled)
@@ -87,9 +92,11 @@ class Slider(QtGui.QMainWindow):
                                  self.robotPublisher,
                                  self.jointStatePub, self.timeStep, self)
 
+    self.linkDialog = LinkDialog(robots, self.qpsolver,
+                                 self.jointStatePub, self)
+
     self.adjustSize()
     self.readSettings()
-
 
   def writeSettings(self):
     s = QtCore.QSettings('IDH', 'Sequence')
@@ -158,6 +165,25 @@ class Slider(QtGui.QMainWindow):
 
     self.sendAll()
 
+  def editPosture(self):
+    print "Editing stance"
+    self.sendTimer.stop()
+    self.qpsolver.removeConstraintSet(self.dynamicsConstraint)
+    self.qpsolver.solver.removeTask(self.postureTask)
+
+    stancesCopy = copy.deepcopy(self.stances)
+    clickedStance = stancesCopy[self.curStance]
+
+    if self.linkDialog.exec_(clickedStance, self.curStance):
+      self.updateUi(clickedStance, self.curStance)
+      undoContactEdit = UndoContactEdit(self, self.stances, stancesCopy)
+      self.undoStack.push(undoContactEdit)
+
+    # restart the time and add constraint and task back
+    self.qpsolver.addConstraintSet(self.dynamicsConstraint)
+    self.qpsolver.solver.addTask(self.postureTask)
+    self.computeStance()
+    self.sendTimer.start(1000./frequency)
 
   def editStance(self, row, col):
     # stop the time and clear the qpsolver since taskDialog will use it
