@@ -23,6 +23,7 @@ set(MC_RTC_TICKER_HDR
 )
 
 add_executable(mc_rtc_ticker ${MC_RTC_TICKER_SRC} ${MC_RTC_TICKER_HDR})
+add_dependencies(mc_rtc_ticker mc_rtc_msgs_generate_messages_cpp)
 target_link_libraries(mc_rtc_ticker ${catkin_LIBRARIES})
 PKG_CONFIG_USE_DEPENDENCY(mc_rtc_ticker mc_rtc)
 
