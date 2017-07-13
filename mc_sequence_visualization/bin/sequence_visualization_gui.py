@@ -94,7 +94,8 @@ class Slider(QtGui.QMainWindow):
                                  self.jointStatePub, self.timeStep, self)
 
     self.linkDialog = LinkDialog(robots, self.qpsolver,
-                                 self.jointStatePub, self)
+                                 self.robotPublisher,
+                                 self.jointStatePub, self.timeStep, self)
 
     self.adjustSize()
     self.readSettings()
@@ -170,7 +171,7 @@ class Slider(QtGui.QMainWindow):
     print "Editing stance"
     self.sendTimer.stop()
     self.qpsolver.removeConstraintSet(self.dynamicsConstraint)
-    self.qpsolver.solver.removeTask(self.postureTask)
+    self.qpsolver.removeTask(self.postureTask)
 
     stancesCopy = copy.deepcopy(self.stances)
     clickedStance = stancesCopy[self.curStance]
@@ -182,7 +183,7 @@ class Slider(QtGui.QMainWindow):
 
     # restart the time and add constraint and task back
     self.qpsolver.addConstraintSet(self.dynamicsConstraint)
-    self.qpsolver.solver.addTask(self.postureTask)
+    self.qpsolver.addTask(self.postureTask)
     self.computeStance()
     self.sendTimer.start(1000./frequency)
 

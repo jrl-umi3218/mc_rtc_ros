@@ -268,7 +268,7 @@ class TaskDialog(QtGui.QDialog):
       self.qpsolver.removeTask(t)
 
 class LinkDialog(QtGui.QDialog):
-  def __init__(self, robots, qpsolver, jointStatePub, parent=None):
+  def __init__(self, robots, qpsolver, robotPublisher, jointStatePub, timeStep, parent=None):
     super(LinkDialog, self).__init__(parent)
     self.ui = Ui_LinkDialog()
     self.ui.setupUi(self)
@@ -282,6 +282,8 @@ class LinkDialog(QtGui.QDialog):
     self.contact = None
     self.newContact = None
     self.bodyIndexToMove = None
+    self.timeStep = timeStep
+    self.robotPublisher = robotPublisher
 
     # create qp constraint
     self.kinematicsConstraint = KinematicsConstraint(robots, 0,
@@ -320,15 +322,15 @@ class LinkDialog(QtGui.QDialog):
     self.sendTimer = QtCore.QTimer(self)
     self.sendTimer.timeout.connect(self.runQP)
 
-  def createEfTasks(self, bodyId, bodyTf):
+  def createEfTasks(self, bodyName, bodyTf):
     def spTask(task, stiffness, weight):
-      return tasks.qp.SetPointTask(self.robots.mbs, 0, task, stiffness, weight)
+      return tasks.qp.SetPointTask(self.robots.mbs(), 0, task, stiffness, weight)
 
-    self.efTask = tasks.qp.PositionTask(self.robots.mbs, 0,
-                                        bodyId, bodyTf.translation())
+    self.efTask = tasks.qp.PositionTask(self.robots.mbs(), 0,
+                                        bodyName, bodyTf.translation())
     self.efTaskSp = spTask(self.efTask, 10., 10.)
-    self.orientationTask = tasks.qp.OrientationTask(self.robots.mbs, 0,
-                                                    bodyId, bodyTf.rotation())
+    self.orientationTask = tasks.qp.OrientationTask(self.robots.mbs(), 0,
+                                                    bodyName, bodyTf.rotation())
     self.orientationTaskSp = spTask(self.orientationTask, 1., 1000.)
 
   def init(self, stance, stanceIndex, bodyIndex=0):
@@ -336,7 +338,7 @@ class LinkDialog(QtGui.QDialog):
 
     # compute contact body value
     self.bodyIndexToMove = bodyIndex
-    bodyId = self.robot.mb.body(bodyIndex).id()
+    self.bodyName = self.robot.mb.body(bodyIndex).name()
 
     # reset mbc velocity, acceleration and torque and set initial q value
     self.robot.mbc.zero(self.robot.mb)
@@ -347,13 +349,13 @@ class LinkDialog(QtGui.QDialog):
     bodyTf = list(self.robot.mbc.bodyPosW)[bodyIndex]
 
     def spTask(task, stiffness, weight):
-      return tasks.qp.SetPointTask(self.robots.mbs, 0, task, stiffness, weight)
+      return tasks.qp.SetPointTask(self.robots.mbs(), 0, task, stiffness, weight)
 
     # create qp tasks
-    self.postureTask = tasks.qp.PostureTask(self.robots.mbs, 0,
+    self.postureTask = tasks.qp.PostureTask(self.robots.mbs(), 0,
                                             stance.q, 1., 5.)
-    self.createEfTasks(bodyId, bodyTf)
-    self.comTask = tasks.qp.CoMTask(self.robots.mbs, 0,
+    self.createEfTasks(self.bodyName, bodyTf)
+    self.comTask = tasks.qp.CoMTask(self.robots.mbs(), 0,
                                     rbd.computeCoM(self.robot.mb,
                                                    self.robot.mbc))
     self.comTaskSp = spTask(self.comTask, 1., 100.)
@@ -361,17 +363,17 @@ class LinkDialog(QtGui.QDialog):
                   'Orientation': self.orientationTaskSp, 'CoM': self.comTaskSp}
 
     # Avoid crash by making sure we have no tasks in the QP
-    self.qpsolver.solver.resetTasks()
+    # XXX THIS IS NOT BINDED FOR NOW :(
+    #self.qpsolver.resetTasks()
     self.qpsolver.updateNrVars()
     # add tasks to the qp
-    self.qpsolver.solver.addTask(self.postureTask)
-    self.qpsolver.solver.addTask(self.comTaskSp)
+    self.qpsolver.addTask(self.postureTask)
+    self.qpsolver.addTask(self.comTaskSp)
 
     # add constraint to the qp
     self.qpsolver.addConstraintSet(self.kinematicsConstraint)
 
-    self.qpsolver.setContacts(stance.contacts)
-    self.qpsolver.update()
+    self.qpsolver.setContacts(stance.contacts())
 
     self.updateTaskTable()
 
@@ -416,15 +418,15 @@ class LinkDialog(QtGui.QDialog):
                                           self.robot.mb.body(index).name())
     self.postureTask.posture(self.robot.mbc.q)
     bodyId = self.robot.mb.body(index).id()
-    self.qpsolver.solver.removeTask(self.efTaskSp)
-    self.qpsolver.solver.removeTask(self.orientationTaskSp)
+    self.qpsolver.removeTask(self.efTaskSp)
+    self.qpsolver.removeTask(self.orientationTaskSp)
 
     bodyTf = list(self.robot.mbc.bodyPosW)[index]
 
     self.createEfTasks(bodyId, bodyTf)
 
-    self.qpsolver.solver.addTask(self.efTaskSp)
-    self.qpsolver.solver.addTask(self.orientationTaskSp)
+    self.qpsolver.addTask(self.efTaskSp)
+    self.qpsolver.addTask(self.orientationTaskSp)
 
     self.link_im.clear()
     self.link_im.init(bodyTf.translation(), bodyTf.rotation())
@@ -510,7 +512,7 @@ class LinkDialog(QtGui.QDialog):
     if result == QtGui.QDialog.DialogCode.Accepted:
       max_iter = 1000
       q = self.robot.mbc.q
-      stable = self.check_stability(max_iter, q, self.stance.contacts)
+      stable = self.check_stability(max_iter, q, self.stance.contacts())
 
       if not stable:
         msg = QtGui.QMessageBox()
@@ -526,7 +528,7 @@ class LinkDialog(QtGui.QDialog):
 
     #Remove tasks
     for t in self.tasks.itervalues():
-      self.qpsolver.solver.removeTask(t)
+      self.qpsolver.removeTask(t)
     self.tasks = {}
 
     self.link_im.clear()
@@ -544,7 +546,6 @@ class LinkDialog(QtGui.QDialog):
     self.postureTask.posture(q)
 
     self.qpsolver.setContacts(contacts)
-    self.qpsolver.update()
     nr_iter = 0
     stable = True
 
@@ -572,5 +573,5 @@ class LinkDialog(QtGui.QDialog):
     curTime = rospy.Time.now()
     js = JointState()
     js.header.stamp = curTime
-    self.qpsolver.send(curTime)
+    self.robotPublisher.update(self.timeStep, self.robot)
     self.jointStatePub.publish(js)
