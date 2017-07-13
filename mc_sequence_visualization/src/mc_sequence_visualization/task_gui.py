@@ -414,16 +414,15 @@ class LinkDialog(QtGui.QDialog):
         self.setterByItemPos[key](data)
 
   def changeEf(self, index):
-    print "Changing to : {} == {}".format(index,
-                                          self.robot.mb.body(index).name())
+    bodyName = self.robot.mb.body(index).name()
+    print "Changing to : {} == {}".format(index, bodyName)
     self.postureTask.posture(self.robot.mbc.q)
-    bodyId = self.robot.mb.body(index).id()
     self.qpsolver.removeTask(self.efTaskSp)
     self.qpsolver.removeTask(self.orientationTaskSp)
 
     bodyTf = list(self.robot.mbc.bodyPosW)[index]
 
-    self.createEfTasks(bodyId, bodyTf)
+    self.createEfTasks(bodyName, bodyTf)
 
     self.qpsolver.addTask(self.efTaskSp)
     self.qpsolver.addTask(self.orientationTaskSp)
@@ -511,7 +510,7 @@ class LinkDialog(QtGui.QDialog):
 
     if result == QtGui.QDialog.DialogCode.Accepted:
       max_iter = 1000
-      q = self.robot.mbc.q
+      q = copy.copy(self.robot.mbc.q)
       stable = self.check_stability(max_iter, q, self.stance.contacts())
 
       if not stable:
