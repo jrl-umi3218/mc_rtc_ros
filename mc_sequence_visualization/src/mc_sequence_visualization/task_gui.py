@@ -97,13 +97,13 @@ class TaskDialog(QtGui.QDialog):
     # add constraint to the qp
     self.qpsolver.addConstraintSet(self.kinematicsConstraint)
 
-    contacts = stance.contacts[:]
+    contacts = copy.copy(stance.contacts())
     c = contacts[contactIndex]
     #del contacts[contactIndex]
-    cId = contacts[contactIndex].contactId(self.robot, self.env)
+    cId = contacts[contactIndex].contactId(self.robots)
     dof = np.eye(6)
-    if isinstance(c.robotSurface, GripperSurface)\
-       and isinstance(c.envSurface, CylindricalSurface):
+    if isinstance(c.r1Surface(), GripperSurface)\
+       and isinstance(c.r2Surface(), CylindricalSurface):
       #Free x and rotX
       dof[0, 0] = 0
       dof[3, 3] = 0
@@ -112,8 +112,8 @@ class TaskDialog(QtGui.QDialog):
       dof[2, 3] = 0
       dof[4, 4] = 0
       dof[5, 5] = 0
-    elif isinstance(c.robotSurface, PlanarSurface)\
-          and isinstance(c.envSurface, PlanarSurface):
+    elif isinstance(c.r1Surface(), PlanarSurface)\
+          and isinstance(c.r2Surface(), PlanarSurface):
       #Free rotZ, x, y
       dof[2, 2] = 0
       dof[3, 3] = 0
@@ -265,7 +265,7 @@ class TaskDialog(QtGui.QDialog):
 
     self.qpsolver.removeConstraintSet(self.kinematicsConstraint)
     for t in tasks:
-      self.qpsolver.solver.removeTask(t)
+      self.qpsolver.removeTask(t)
 
 class LinkDialog(QtGui.QDialog):
   def __init__(self, robots, qpsolver, jointStatePub, parent=None):

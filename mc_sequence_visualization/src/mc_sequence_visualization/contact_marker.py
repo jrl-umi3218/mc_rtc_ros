@@ -5,6 +5,8 @@ from interactive_markers.interactive_marker_server import InteractiveMarkerServe
                                                           InteractiveMarker
 from visualization_msgs.msg import InteractiveMarkerControl, Marker
 
+from eigen import Quaterniond
+
 
 class ContactControlMarker(object):
   def __init__(self, name, callback):
@@ -23,6 +25,7 @@ class ContactControlMarker(object):
     self.intMarker = InteractiveMarker()
     self.intMarker.header.frame_id = '/robot_map'
     self.intMarker.name = self.name
+    self.intMarker.scale = 1.
     #FIXME : This only works for 3D and 6D
     self.intMarker.description = '{} {}D control'.format(self.name, dim)
     self.intMarker.pose.position = Point(*position)

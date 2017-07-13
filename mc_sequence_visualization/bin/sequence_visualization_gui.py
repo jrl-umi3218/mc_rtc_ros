@@ -18,7 +18,7 @@ import mc_rbdyn
 from mc_solver import QPSolver, DynamicsConstraint, ContactConstraint
 
 from mc_sequence_visualization.sequence_mainwindow import Ui_Sequence
-from mc_sequence_visualization.task_gui import TaskDialog
+from mc_sequence_visualization.task_gui import TaskDialog, LinkDialog
 
 from mc_rtc import RobotPublisher
 
@@ -89,6 +89,7 @@ class Slider(QtGui.QMainWindow):
     self.undoStack.canRedoChanged.connect(self.ui.redo.setEnabled)
 
     self.taskDialog = TaskDialog(robots, self.qpsolver,
+                                 self.contactConstraint,
                                  self.robotPublisher,
                                  self.jointStatePub, self.timeStep, self)
 

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'sequence_mainwindow.ui'
 #
-# Created: Tue Oct 29 14:07:59 2013
-#      by: pyside-uic 0.2.13 running on PySide 1.1.1
+# Created: Fri May 22 16:19:52 2015
+#      by: pyside-uic 0.2.15 running on PySide 1.2.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -27,6 +27,9 @@ class Ui_Sequence(object):
         self.stanceSpinBox = QtGui.QSpinBox(self.centralwidget)
         self.stanceSpinBox.setObjectName("stanceSpinBox")
         self.horizontalLayout.addWidget(self.stanceSpinBox)
+        self.stanceButton = QtGui.QPushButton(self.centralwidget)
+        self.stanceButton.setObjectName("stanceButton")
+        self.horizontalLayout.addWidget(self.stanceButton)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.contactTable = QtGui.QTableWidget(self.centralwidget)
         self.contactTable.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
@@ -66,7 +69,10 @@ class Ui_Sequence(object):
         self.redo.setObjectName("redo")
         self.jointState = QtGui.QAction(Sequence)
         self.jointState.setObjectName("jointState")
+        self.stancesSave = QtGui.QAction(Sequence)
+        self.stancesSave.setObjectName("stancesSave")
         self.menu_Fichier.addAction(self.jointState)
+        self.menu_Fichier.addAction(self.stancesSave)
         self.menu_diter.addAction(self.undo)
         self.menu_diter.addAction(self.redo)
         self.menubar.addAction(self.menu_Fichier.menuAction())
@@ -84,4 +90,5 @@ class Ui_Sequence(object):
         self.redo.setText(QtGui.QApplication.translate("Sequence", "&Redo", None, QtGui.QApplication.UnicodeUTF8))
         self.redo.setShortcut(QtGui.QApplication.translate("Sequence", "Ctrl+Shift+Z", None, QtGui.QApplication.UnicodeUTF8))
         self.jointState.setText(QtGui.QApplication.translate("Sequence", "&JointStates…", None, QtGui.QApplication.UnicodeUTF8))
+        self.stancesSave.setText(QtGui.QApplication.translate("Sequence", "&Stances…", None, QtGui.QApplication.UnicodeUTF8))
 

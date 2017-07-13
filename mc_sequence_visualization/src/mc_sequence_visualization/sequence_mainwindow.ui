@@ -30,6 +30,9 @@
       <item>
        <widget class="QSpinBox" name="stanceSpinBox"/>
       </item>
+      <item>
+       <widget class="QPushButton" name="stanceButton"/>
+      </item>
      </layout>
     </item>
     <item>
@@ -91,6 +94,7 @@
      <string>&amp;Fichier</string>
     </property>
     <addaction name="jointState"/>
+    <addaction name="stancesSave"/>
    </widget>
    <widget class="QMenu" name="menu_diter">
     <property name="title">
@@ -128,6 +132,11 @@
   <action name="jointState">
    <property name="text">
     <string>&amp;JointStates…</string>
+   </property>
+  </action>
+  <action name="stancesSave">
+   <property name="text">
+    <string>&amp;Stances…</string>
    </property>
   </action>
  </widget>
