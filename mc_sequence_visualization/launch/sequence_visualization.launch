@@ -1,6 +1,9 @@
 <launch>
   <arg name="robot" default="hrp2_drc"/>
   <arg name="env" default="ground" />
+  <arg name="stances_file"/>
+
+  <param name="stances_file" value="$(arg stances_file)" type="str"/>
 
   <include file="$(find mc_scenario)/robot/$(arg robot).xml" />
   <include file="$(find mc_scenario)/env/$(arg env).xml" ns="env" />
