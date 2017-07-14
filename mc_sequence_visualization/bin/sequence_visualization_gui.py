@@ -67,10 +67,6 @@ class Slider(QtGui.QMainWindow):
     self.sendTimer.timeout.connect(self.sendAll)
     self.sendTimer.start(1000./frequency)
 
-    # empty joint states publisher needed because qp_state_publisher need this message
-    # to publish
-    self.jointStatePub = rospy.Publisher('sequence_joint_states', JointState)
-
     # Gui part
     self.ui.stanceSlider.setRange(0, len(self.stances) - 1)
     self.ui.stanceSpinBox.setRange(0, len(self.stances) - 1)
@@ -88,11 +84,11 @@ class Slider(QtGui.QMainWindow):
     self.taskDialog = TaskDialog(robots, self.qpsolver,
                                  self.contactConstraint,
                                  self.robotPublisher,
-                                 self.jointStatePub, self.timeStep, self)
+                                 self.timeStep, self)
 
     self.linkDialog = LinkDialog(robots, self.qpsolver,
                                  self.robotPublisher,
-                                 self.jointStatePub, self.timeStep, self)
+                                 self.timeStep, self)
 
     self.adjustSize()
     self.readSettings()
@@ -281,14 +277,11 @@ class Slider(QtGui.QMainWindow):
     js = JointState()
     js.header.stamp = curTime
     self.robotPublisher.update(self.timeStep, self.robot)
-    self.jointStatePub.publish(js)
 
 
 if __name__ == '__main__':
 
   stances_file = rospy.get_param('/stances_file')
-
-  polyhedrons = rospy.get_param('/polyhedrons_file', None)
 
   frequency = rospy.get_param('/publish_frequency', 25)
 

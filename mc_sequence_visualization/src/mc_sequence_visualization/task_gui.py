@@ -22,7 +22,7 @@ from link_dialog import Ui_LinkDialog
 from math import pi, ceil, floor
 
 class TaskDialog(QtGui.QDialog):
-  def __init__(self, robots, qpsolver, contCstr, robotPublisher, jointStatePub, timeStep, parent=None):
+  def __init__(self, robots, qpsolver, contCstr, robotPublisher, timeStep, parent=None):
     super(TaskDialog, self).__init__(parent)
     self.ui = Ui_TaskDialog()
     self.ui.setupUi(self)
@@ -31,7 +31,6 @@ class TaskDialog(QtGui.QDialog):
     self.robot = robots.robot()
     self.env = robots.robots()[1]
     self.qpsolver = qpsolver
-    self.jointStatePub = jointStatePub
     self.robotPublisher = robotPublisher
     self.timeStep = timeStep
     self.tasks = {}
@@ -212,7 +211,6 @@ class TaskDialog(QtGui.QDialog):
     js = JointState()
     js.header.stamp = curTime
     self.robotPublisher.update(self.timeStep, self.robot)
-    self.jointStatePub.publish(js)
 
 
   def applyOnStance(self, stance):
@@ -268,7 +266,7 @@ class TaskDialog(QtGui.QDialog):
       self.qpsolver.removeTask(t)
 
 class LinkDialog(QtGui.QDialog):
-  def __init__(self, robots, qpsolver, robotPublisher, jointStatePub, timeStep, parent=None):
+  def __init__(self, robots, qpsolver, robotPublisher, timeStep, parent=None):
     super(LinkDialog, self).__init__(parent)
     self.ui = Ui_LinkDialog()
     self.ui.setupUi(self)
@@ -276,7 +274,6 @@ class LinkDialog(QtGui.QDialog):
     self.robots = robots
     self.robot = self.robots.robot()
     self.qpsolver = qpsolver
-    self.jointStatePub = jointStatePub
     self.tasks = {}
     self.setterByItemPos = {}
     self.contact = None
@@ -573,4 +570,3 @@ class LinkDialog(QtGui.QDialog):
     js = JointState()
     js.header.stamp = curTime
     self.robotPublisher.update(self.timeStep, self.robot)
-    self.jointStatePub.publish(js)
