@@ -129,7 +129,7 @@ void ContactForcePublisher::update()
     ss << "control/env_" << idx;
     return ss.str();
   };
-  auto get_pub_key = [this,&get_tf_prefix](const mc_rbdyn::Robots robots, unsigned int idx)
+  auto get_pub_key = [this,&get_tf_prefix](const mc_rbdyn::Robots & robots, unsigned int idx)
   {
     std::stringstream ss;
     ss << get_tf_prefix(robots, idx) << "/contact_force";
