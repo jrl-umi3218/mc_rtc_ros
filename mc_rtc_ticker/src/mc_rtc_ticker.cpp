@@ -249,6 +249,18 @@ int main()
   }
 
   ros::Rate rt(1/dt);
+  std::thread spin_th;
+  if(bench)
+  {
+    spin_th = std::thread([&rt]()
+                          {
+                            while(ros::ok())
+                            {
+                            ros::spinOnce();
+                            rt.sleep();
+                            }
+                          });
+  }
   while(ros::ok())
   {
     if(bench)
@@ -303,6 +315,7 @@ int main()
   if(bench)
   {
     report_dt(false);
+    spin_th.join();
   }
   if(cfp_ptr)
   {
