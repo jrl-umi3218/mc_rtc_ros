@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+    <name>mc_rtc_rviz_panel</name>
+    <version>0.0.1</version>
+    <description>mc_rtc generic edition panel</description>
+    <maintainer email="pierre.gergondet@gmail.com">Pierre Gergondet</maintainer>
+    <maintainer email="stephane.caron@lirmm.fr">Stéphane Caron</maintainer>
+    <maintainer email="kevin.chappellet@lirmm.fr">Kevin Chappellet</maintainer>
+    <license>LGPLv3</license>
+    <url type="repository"></url>
+    <buildtool_depend>catkin</buildtool_depend>
+    <build_depend>roscpp</build_depend>
+    <build_depend>tf</build_depend>
+    <build_depend>rviz</build_depend>
+    <build_depend>roslib</build_depend>
+    <run_depend>roslib</run_depend>
+    <run_depend>rviz</run_depend>
+    <run_depend>roscpp</run_depend>
+    <run_depend>tf</run_depend>
+    <export>
+        <rviz plugin="${prefix}/src/rviz_plugin.xml"/>
+    </export>
+</package>

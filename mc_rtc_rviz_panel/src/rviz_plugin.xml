@@ -1,0 +1,7 @@
+<library path="lib/libmc_rtc_rviz_panel">
+  <class name="mc_rtc_rviz_panel/mc_rtc panel" type="mc_rtc_rviz::Panel" base_class_type="rviz::Panel">
+    <description>
+      mc_rtc interaction panel for RViz
+    </description>
+  </class>
+</library>

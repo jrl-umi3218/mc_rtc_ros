@@ -7,7 +7,7 @@
   <include file="$(find mc_scenario)/robot/$(arg robot).xml" ns="control" />
   <include file="$(find mc_scenario)/env/$(arg env).xml" ns="control/env_1" />
 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mc_rtc_ticker)/launch/display.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mc_rtc_ticker)/launch/display.rviz" output="screen"/>
 
   <group if="$(arg display_surfaces)">
     <include file="$(find mc_surfaces_visualization)/launch/surfaces_publisher.launch" ns="control">
