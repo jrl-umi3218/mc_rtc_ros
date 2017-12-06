@@ -12,6 +12,7 @@
 #include <mc_rtc_msgs/close_grippers.h>
 #include <mc_rtc_msgs/EnableController.h>
 #include <mc_rtc_msgs/get_joint_pos.h>
+#include <mc_rtc_msgs/GoToHalfSitPose.h>
 #include <mc_rtc_msgs/move_com.h>
 #include <mc_rtc_msgs/open_grippers.h>
 #include <mc_rtc_msgs/play_next_stance.h>
@@ -70,6 +71,13 @@ namespace
                         mc_rtc_msgs::get_joint_posResponse & res)
     {
       res.success = controller.get_joint_pos(req.jname, res.q);
+      return res.success;
+    }
+
+    bool GoToHalfSitPose(mc_rtc_msgs::GoToHalfSitPoseRequest &,
+                         mc_rtc_msgs::GoToHalfSitPoseResponse & res)
+    {
+      res.success = controller.GoToHalfSitPose();
       return res.success;
     }
 
@@ -231,6 +239,7 @@ int main()
   ADV_SVC(close_grippers)
   ADV_SVC(EnableController)
   ADV_SVC(get_joint_pos)
+  ADV_SVC(GoToHalfSitPose)
   ADV_SVC(move_com)
   ADV_SVC(open_grippers)
   ADV_SVC(play_next_stance)

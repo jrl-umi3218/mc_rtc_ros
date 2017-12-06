@@ -7,6 +7,7 @@ add_service_files(
   DIRECTORY srv
   FILES
   EnableController.srv
+  GoToHalfSitPose.srv
   open_grippers.srv
   close_grippers.srv
   set_gripper.srv

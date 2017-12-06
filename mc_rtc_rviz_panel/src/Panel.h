@@ -33,9 +33,14 @@ public:
   Panel(QWidget* parent = 0);
 private:
   void handle_gui_state(const char * data, size_t size);
+  /** GUI stuff */
   QTabWidget tabW_;
   std::map<std::string, QWidget*> tabs_;
   std::map<std::string, int> tabs_index_;
+  std::map<std::string, std::map<std::string, QWidget*>> widgets_;
+  /** ROS stuff */
+  ros::NodeHandle nh_;
+  interactive_markers::InteractiveMarkerServer int_server_;
 private slots:
   void handle_gui_state_impl(const char * data);
 signals:

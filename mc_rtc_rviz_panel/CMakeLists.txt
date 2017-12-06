@@ -1,15 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(CXX_DISABLE_WERROR 0)
-
-include(cmake/base.cmake)
-
 set(PROJECT_NAME mc_rtc_rviz_panel)
 set(PROJECT_DESCRIPTION "mc_rtc RVIz panel for prototyping controllers")
 set(PROJECT_URL "")
+project(${PROJECT_NAME})
 
-add_definitions(-std=c++0x -Wno-error -Wno-pedantic)
-add_required_dependency(mc_rtc)
+set(CXX_DISABLE_WERROR 0)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -25,6 +21,11 @@ catkin_package(
   rviz
   roslib
 )
+
+include(cmake/base.cmake)
+
+add_definitions(-std=c++0x -Wno-error -Wno-pedantic)
+add_required_dependency(mc_rtc)
 
 include_directories(${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
