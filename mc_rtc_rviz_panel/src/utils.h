@@ -19,6 +19,7 @@ vm::Marker makeVisual(int t, const vm::InteractiveMarker & marker)
   ret.color.g = 0.0;
   ret.color.b = 0.0;
   ret.color.a = 1.0;
+  ret.pose.orientation.w = 1.0;
   return ret;
 }
 
@@ -27,6 +28,7 @@ vm::InteractiveMarkerControl & makeVisualControl(int t,
 {
   vm::InteractiveMarkerControl ret;
   ret.always_visible = true;
+  ret.orientation.w = 1.0;
   ret.markers.push_back(makeVisual(t, marker));
   marker.controls.push_back(ret);
   return marker.controls.back();
@@ -44,8 +46,8 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   makeVisualControl((control_position && control_orientation) ? vm::Marker::CUBE : vm::Marker::SPHERE, ret);
 
   vm::InteractiveMarkerControl control;
-  control.orientation.w = 1;
-  control.orientation.x = 1;
+  control.orientation.w = 0.707107;
+  control.orientation.x = 0.707107;
   control.orientation.y = 0;
   control.orientation.z = 0;
   if(control_orientation)
@@ -61,9 +63,9 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
     ret.controls.push_back(control);
   }
 
-  control.orientation.w = 1;
+  control.orientation.w = 0.707107;
   control.orientation.x = 0;
-  control.orientation.y = 1;
+  control.orientation.y = 0.707107;
   control.orientation.z = 0;
   if(control_orientation)
   {
@@ -78,10 +80,10 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
     ret.controls.push_back(control);
   }
 
-  control.orientation.w = 1;
+  control.orientation.w = 0.707107;
   control.orientation.x = 0;
   control.orientation.y = 0;
-  control.orientation.z = 1;
+  control.orientation.z = 0.707107;
   if(control_orientation)
   {
     control.name = "rotate_y";
