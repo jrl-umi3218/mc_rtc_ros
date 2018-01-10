@@ -12,7 +12,7 @@ struct BaseWidget : public QWidget
 {
   /** Constructor */
   template<typename Layout = QHBoxLayout>
-  BaseWidget(Layout * layout = nullptr, QWidget * parent = nullptr) : QWidget(parent), layout(layout ? layout : new Layout()) {}
+  BaseWidget(Layout * layout = nullptr, QWidget * parent = nullptr) : QWidget(parent), layout(layout ? layout : new Layout()) { setLayout(this->layout); }
 
   virtual ~BaseWidget() = default;
 
