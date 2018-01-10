@@ -10,13 +10,17 @@ struct Point3DWidget : public BaseWidget
   Point3DWidget(const std::string & name,
                 const mc_rtc::Configuration & data,
                 request_t request,
-                interactive_markers::InteractiveMarkerServer & int_server_);
+                std::shared_ptr<interactive_markers::InteractiveMarkerServer> nt_server_);
 
-  virtual ~Point3DWidget() = default;
+  virtual ~Point3DWidget();
 
   void update(const mc_rtc::Configuration & data) override final;
 
   PointInputDialog * input = nullptr;
-  interactive_markers::InteractiveMarkerServer & server;
+  std::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
   std::string marker_name_;
+  visualization_msgs::InteractiveMarker marker_;
+  interactive_markers::InteractiveMarkerServer::FeedbackCallback marker_cb_;
+  QPushButton * visible = nullptr;
+  void onVisibleToggle(bool);
 };
