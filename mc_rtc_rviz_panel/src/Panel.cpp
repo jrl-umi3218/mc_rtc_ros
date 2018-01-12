@@ -6,6 +6,7 @@
 #include "LabelWidget.h"
 #include "Point3DWidget.h"
 #include "SchemaWidget.h"
+#include "TransformWidget.h"
 
 #include <mc_rtc/Configuration.h>
 
@@ -114,6 +115,15 @@ namespace
     if(gui_type == "Point3D")
     {
       return new Point3DWidget(name, data,
+          [&client,category,name](const mc_rtc::Configuration & data)
+          {
+            client.send_request(category, name, data);
+          },
+          int_server);
+    }
+    if(gui_type == "Transform")
+    {
+      return new TransformWidget(name, data,
           [&client,category,name](const mc_rtc::Configuration & data)
           {
             client.send_request(category, name, data);

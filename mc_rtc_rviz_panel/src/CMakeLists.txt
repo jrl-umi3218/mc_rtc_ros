@@ -19,6 +19,8 @@ set(HEADER_FILES
   PointInputDialog.h
   SchemaWidget.h
   SchemaForm.h
+  TransformWidget.h
+  utils.h
 )
 
 set(SOURCE_FILES
@@ -31,6 +33,8 @@ set(SOURCE_FILES
   Point3DWidget.cpp
   SchemaWidget.cpp
   SchemaForm.cpp
+  TransformWidget.cpp
+  utils.cpp
   ${MOC_FILES}
 )
 
