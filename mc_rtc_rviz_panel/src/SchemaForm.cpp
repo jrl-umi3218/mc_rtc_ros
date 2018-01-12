@@ -326,7 +326,11 @@ SchemaFormItem * SchemaFormItem::make(const std::string & name,
       }
       ret->send = [name,w](mc_rtc::Configuration & out)
       {
-        out.add(name, w->send());
+        auto send = w->send();
+        if(!send.empty())
+        {
+          out.add(name, send);
+        }
       };
     }
     else
