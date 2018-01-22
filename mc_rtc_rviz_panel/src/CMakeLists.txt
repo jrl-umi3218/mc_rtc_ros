@@ -12,6 +12,7 @@ qt5_wrap_cpp(MOC_FILES
 set(HEADER_FILES
   BaseWidget.h
   ButtonWidget.h
+  ComboBoxWidget.h
   FormWidget.h
   InputWidget.h
   LabelWidget.h
@@ -26,6 +27,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
   Panel.cpp
   ButtonWidget.cpp
+  ComboBoxWidget.cpp
   FormWidget.cpp
   InputWidget.cpp
   LabelWidget.cpp

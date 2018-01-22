@@ -1,6 +1,7 @@
 #include "Panel.h"
 
 #include "ButtonWidget.h"
+#include "ComboBoxWidget.h"
 #include "FormWidget.h"
 #include "InputWidget.h"
 #include "LabelWidget.h"
@@ -153,6 +154,14 @@ namespace
           {
             client.send_request(category, name, data);
           });
+    }
+    if(gui_type == "ComboList")
+    {
+      return new ComboBoxWidget(name, data,
+                                [&client,category,name](const mc_rtc::Configuration & data)
+                                {
+                                  client.send_request(category, name, data);
+                                });
     }
     std::cerr << "Cannot handle the provided GUI type " << gui_type << std::endl;
     return nullptr;
