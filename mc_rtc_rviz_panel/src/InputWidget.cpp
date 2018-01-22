@@ -6,7 +6,7 @@ InputWidget::InputWidget(const std::string & name,
 : BaseWidget(new QVBoxLayout())
 {
   input = new PointInputDialog(name,
-      data("labels", std::vector<std::string>{}),
+      data("GUI", mc_rtc::Configuration{})("labels", std::vector<std::string>{}),
       data.has("SET"),
       false,
       request);
