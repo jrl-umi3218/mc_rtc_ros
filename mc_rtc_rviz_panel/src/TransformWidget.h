@@ -8,6 +8,7 @@
 struct TransformWidget : public BaseWidget
 {
   TransformWidget(const std::string & name,
+                  const std::string & full_name,
                   const mc_rtc::Configuration & data,
                   request_t request,
                   std::shared_ptr<interactive_markers::InteractiveMarkerServer> nt_server_);

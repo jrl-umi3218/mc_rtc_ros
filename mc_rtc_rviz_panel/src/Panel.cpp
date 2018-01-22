@@ -101,6 +101,9 @@ namespace
                          std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server)
   {
     auto gui_type = data("GUI")("type");
+    std::string full_name;
+    for(const auto & c : category) { full_name += ("_" + c); }
+    full_name += name;
     if(gui_type == "Label")
     {
       return new LabelWidget(name, data);
@@ -115,7 +118,7 @@ namespace
     }
     if(gui_type == "Point3D")
     {
-      return new Point3DWidget(name, data,
+      return new Point3DWidget(name, full_name, data,
           [&client,category,name](const mc_rtc::Configuration & data)
           {
             client.send_request(category, name, data);
@@ -124,7 +127,7 @@ namespace
     }
     if(gui_type == "Transform")
     {
-      return new TransformWidget(name, data,
+      return new TransformWidget(name, full_name, data,
           [&client,category,name](const mc_rtc::Configuration & data)
           {
             client.send_request(category, name, data);

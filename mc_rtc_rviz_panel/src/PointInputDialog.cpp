@@ -8,12 +8,13 @@ PointInputDialog::PointInputDialog(const std::string & name, const std::vector<s
 : request(request),
   layout(new QGridLayout()),
   name_label(new QLabel(name.c_str())),
-  button(new QPushButton("🔒"))
+  button(nullptr)
 {
   layout->addWidget(name_label, 0, 0);
   size_t N = labels_names.size() > 1 ? labels_names.size() : 1;
   if(editable)
   {
+    button = new QPushButton("🔒");
     button->setSizePolicy({QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Preferred});
     button->setCheckable(true);
     layout->addWidget(button, 0, stacked ? 1 : N == 1 ? 2 : N - 1, Qt::AlignRight);
@@ -31,8 +32,11 @@ PointInputDialog::PointInputDialog(const std::string & name, const std::vector<s
       data[i] = new QLineEdit();
       data[i]->setValidator(new QDoubleValidator(min, max, 100));
       data[i]->setReadOnly(true);
-      connect(data[i], &QLineEdit::returnPressed,
-              this, &PointInputDialog::returnPressed);
+      if(editable)
+      {
+        connect(data[i], &QLineEdit::returnPressed,
+                this, &PointInputDialog::returnPressed);
+      }
       if(!stacked)
       {
         layout->addWidget(labels[i], 1, i, Qt::AlignCenter);
@@ -64,7 +68,7 @@ void PointInputDialog::update(const mc_rtc::Configuration & data_in)
     std::cerr << "PointInputDialog given data of invalid size " << data_in.size() << " (expected: " << data.size() << ")" << std::endl;
     return;
   }
-  if(button->isChecked()) return;
+  if(button && button->isChecked()) return;
   if(data.size() > 1)
   {
     for(size_t i = 0; i < data.size(); ++i)
@@ -114,7 +118,7 @@ void PointInputDialog::toggled(bool checked)
 
 void PointInputDialog::returnPressed()
 {
-  if(button->isChecked())
+  if(button && button->isChecked())
   {
     button->toggle();
   }
