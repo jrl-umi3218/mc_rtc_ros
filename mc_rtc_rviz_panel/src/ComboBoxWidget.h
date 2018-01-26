@@ -19,6 +19,7 @@ private:
   QComboBox * combo_ = nullptr;
   std::vector<std::string> values_;
   request_t request_;
+  bool has_default_item_ = true;
 private:
   void updateComboBox();
 };

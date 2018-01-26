@@ -17,33 +17,40 @@ ComboBoxWidget::ComboBoxWidget(const std::string & name,
   connect(combo_, sig,
           this, [this](int index)
           {
-            if(index != 0)
+            if( (has_default_item_ && index != 0) || !has_default_item_ )
             {
               mc_rtc::Configuration data;
               data.add("data", combo_->currentText().toStdString());
               request_(data("data"));
+              if(has_default_item_)
+              {
+                combo_->removeItem(0);
+                has_default_item_ = false;
+              }
             }
           });
 }
 
 void ComboBoxWidget::update(const mc_rtc::Configuration & data)
 {
-  auto values = data("GUI", mc_rtc::Configuration{})("values", std::vector<std::string>{});
-  if(values.size() != values_.size())
+  std::string selected = data;
+  int idx = combo_->findText(selected.c_str());
+  if(idx != -1)
   {
-    values_ = values;
-    updateComboBox();
+    combo_->blockSignals(true);
+    combo_->setCurrentIndex(idx);
+    if(has_default_item_)
+    {
+      combo_->removeItem(0);
+      has_default_item_ = false;
+    }
+    combo_->blockSignals(false);
   }
   else
   {
-    for(const auto & v : values)
+    if(!has_default_item_)
     {
-      if(std::find(values_.begin(), values_.end(), v) == values_.end())
-      {
-        values_ = values;
-        updateComboBox();
-        return;
-      }
+      updateComboBox();
     }
   }
 }
@@ -51,6 +58,7 @@ void ComboBoxWidget::update(const mc_rtc::Configuration & data)
 void ComboBoxWidget::updateComboBox()
 {
   combo_->clear();
+  has_default_item_ = true;
   combo_->addItem("Select an item among the list...");
   for(const auto & v : values_)
   {
