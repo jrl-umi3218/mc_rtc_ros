@@ -3,11 +3,10 @@ project(mc_rtc_ticker)
 
 include(cmake/base.cmake)
 
-find_package(catkin REQUIRED COMPONENTS mc_rtc_msgs)
+find_package(catkin REQUIRED)
+catkin_package()
 
-catkin_package(CATKIN_DEPENDS mc_rtc_msgs)
-
-ADD_REQUIRED_DEPENDENCY("mc_rtc")
+add_required_dependency("mc_rtc")
 
 include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 
@@ -23,9 +22,7 @@ set(MC_RTC_TICKER_HDR
 )
 
 add_executable(mc_rtc_ticker ${MC_RTC_TICKER_SRC} ${MC_RTC_TICKER_HDR})
-add_dependencies(mc_rtc_ticker mc_rtc_msgs_generate_messages_cpp)
-target_link_libraries(mc_rtc_ticker ${catkin_LIBRARIES})
-PKG_CONFIG_USE_DEPENDENCY(mc_rtc_ticker mc_rtc)
+pkg_config_use_dependency(mc_rtc_ticker mc_rtc)
 
 install(TARGETS mc_rtc_ticker
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
