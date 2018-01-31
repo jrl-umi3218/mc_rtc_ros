@@ -1,4 +1,0 @@
-string gname
-float64[] values
----
-bool success
