@@ -98,7 +98,8 @@ namespace
                          const std::string & name,
                          const mc_rtc::Configuration & data,
                          mc_control::ControllerClient & client,
-                         std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server)
+                         std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server,
+                         const mc_rtc::Configuration & ctl_data)
   {
     auto gui_type = data("GUI")("type");
     std::string full_name;
@@ -144,7 +145,7 @@ namespace
     }
     if(gui_type == "Schema")
     {
-      return new SchemaWidget(parent, data,
+      return new SchemaWidget(parent, data, ctl_data,
           [&client,category,name](const mc_rtc::Configuration & data)
           {
             client.send_request(category, name, data);
@@ -184,7 +185,7 @@ void Panel::handle_category(const std::string & category,
                             int level,
                             std::vector<std::string> & seen)
 {
-  if(items.size() == 0) { return; }
+  if(items.size() == 0 || category == "/DATA") { return; }
   if(items.count("GUI"))
   {
     /** Actual item */
@@ -197,7 +198,7 @@ void Panel::handle_category(const std::string & category,
         const auto & c = q_categories[i];
         categories.emplace_back(c.toStdString());
       }
-      auto w = makeEntry(parent, categories, name, data, *this, int_server_);
+      auto w = makeEntry(parent, categories, name, data, *this, int_server_, this->data());
       widgets_[category] = w;
       if(w)
       {
@@ -287,6 +288,10 @@ void Panel::handle_category(const std::string & category,
 void Panel::handle_gui_state_impl(const char * data_raw)
 {
   auto data = mc_rtc::Configuration::fromData(data_raw);
+  if(data.has("DATA"))
+  {
+    data_.load(data("DATA"));
+  }
   std::vector<std::string> seen {};
   handle_category("", "", data, data, this, 0, seen);
   /** Handle removed elements */

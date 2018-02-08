@@ -1,6 +1,7 @@
 #include "SchemaForm.h"
 
 #include <mc_rtc/Configuration.h>
+#include <mc_rtc/logging.h>
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -154,6 +155,7 @@ struct SchemaFormItem
   std::string title;
   std::function<bool()> ready = [](){ return true; };
   std::function<void(mc_rtc::Configuration&)> send = [](mc_rtc::Configuration&){};
+  std::function<void(const std::string&, SchemaFormItem&)> handle_special = [](const std::string&, SchemaFormItem&){};
 
   SchemaFormItem(std::string name) : name(std::move(name)) {}
 
@@ -162,6 +164,8 @@ struct SchemaFormItem
                              bool is_required,
                              const std::string & schema,
                              QFormLayout * layout,
+                             const mc_rtc::Configuration & ctl_data,
+                             SchemaForm & form,
                              SchemaFormItem * ret = nullptr);
 };
 
@@ -170,188 +174,293 @@ SchemaFormItem * SchemaFormItem::make(const std::string & name,
                                       bool is_required,
                                       const std::string & schema,
                                       QFormLayout * layout,
+                                      const mc_rtc::Configuration & ctl_data,
+                                      SchemaForm & form,
                                       SchemaFormItem * ret_)
 {
   SchemaFormItem * ret = ret_ ? ret_ : new SchemaFormItem{name};
-  if(data.has("enum"))
+  std::string display_name = name;
+  /** Special cases that use data from the controller data */
+  if(name == "robotIndex")
   {
-    /** Handle enum fields, display possible values if enums size is > 1, otherwise have an hidden field */
-    std::vector<std::string> enums = data("enum");
-    if(enums.size() != 1)
+    display_name = "robot";
+    if(!data.has("type") || std::string(data("type")) != "integer")
     {
-      auto cb = new QComboBox();
-      for(const auto & s : enums)
-      {
-        cb->addItem(s.c_str());
-      }
-      ret->widget = cb;
-      ret->send = [name,cb](mc_rtc::Configuration & out)
-      {
-        out.add(name, cb->currentText().toStdString());
-      };
+      LOG_ERROR_AND_THROW(std::runtime_error, "Schema " << schema << " has robotIndex entry that is not an integer" << std::endl << data.dump(true))
     }
-    else
+    auto cb = new QComboBox();
+    std::vector<std::string> robots = ctl_data("robots");
+    for(const auto & r : robots)
     {
-      if(enums.size() == 0)
-      {
-        throw(std::invalid_argument("enum field cannot be empty list"));
-      }
-      ret->send = [name,enums](mc_rtc::Configuration & out)
-      {
-        out.add(name, enums[0]);
-      };
+      cb->addItem(r.c_str());
     }
+    ret->widget = cb;
+    ret->send = [name,cb](mc_rtc::Configuration & out)
+    {
+      out.add(name, cb->currentIndex());
+    };
+    form.addSpecialItem("robot", ret);
   }
-  else if(data.has("type"))
+  else if(name == "surface")
   {
-    std::string type = data("type");
-    if(type == "boolean")
+    std::map<std::string, std::vector<std::string>> surfaces = ctl_data("surfaces");
+    auto cb = new QComboBox();
+    ret->widget = cb;
+    ret->send = [name, cb](mc_rtc::Configuration & out)
     {
-      auto cb = new QCheckBox();
-      ret->widget = cb;
-      ret->send = [name,cb](mc_rtc::Configuration & out)
-      {
-        out.add(name, cb->isChecked());
-      };
-    }
-    else if(type == "number" || type == "integer" || type == "string")
+      out.add(name, cb->currentText().toStdString());
+    };
+    ret->handle_special = [cb,surfaces](const std::string & name,
+                               SchemaFormItem & item)
     {
-      auto le = new QLineEdit();
-      QValidator * validator = nullptr;
-      if(type == "number")
+      if(name == "robot")
       {
-        double min = data("minimum", -std::numeric_limits<double>::infinity());
-        double max = data("maximum", std::numeric_limits<double>::infinity());
-        validator = new QDoubleValidator(min, max, 100);
-        ret->send = [name,le](mc_rtc::Configuration & out)
+        auto * robot_cb = static_cast<QComboBox*>(item.widget);
+        const auto & ss = surfaces.at(robot_cb->currentText().toStdString());
+        cb->clear();
+        for(const auto & s : ss)
         {
-          if(le->text().size())
-          {
-            out.add(name, le->text().toDouble());
-          }
-        };
+          cb->addItem(s.c_str());
+        }
+        cb->connect(robot_cb, &QComboBox::currentTextChanged,
+                    cb, [cb, surfaces](const QString & text)
+                    {
+                      cb->clear();
+                      const auto & ss = surfaces.at(text.toStdString());
+                      for(const auto & s : ss)
+                      {
+                        cb->addItem(s.c_str());
+                      }
+                    });
       }
-      else if(type == "integer")
+    };
+    if(form.hasSpecialItem("robot"))
+    {
+      ret->handle_special("robot", form.getSpecialItem("robot"));
+    }
+    form.addSpecialItem("surface", ret);
+  }
+  else if(name == "body")
+  {
+    std::map<std::string, std::vector<std::string>> bodies = ctl_data("bodies");
+    auto cb = new QComboBox();
+    ret->widget = cb;
+    ret->send = [name, cb](mc_rtc::Configuration & out)
+    {
+      out.add(name, cb->currentText().toStdString());
+    };
+    ret->handle_special = [cb,bodies](const std::string & name,
+                               SchemaFormItem & item)
+    {
+      if(name == "robot")
       {
-        int min = data("minimum", std::numeric_limits<int>::lowest());
-        int max = data("maximum", std::numeric_limits<int>::max());
-        validator = new QIntValidator(min, max);
-        ret->send = [name,le](mc_rtc::Configuration & out)
+        auto * robot_cb = static_cast<QComboBox*>(item.widget);
+        const auto & ss = bodies.at(robot_cb->currentText().toStdString());
+        cb->clear();
+        for(const auto & s : ss)
         {
-          if(le->text().size())
-          {
-            out.add(name, le->text().toInt());
-          }
+          cb->addItem(s.c_str());
+        }
+        cb->connect(robot_cb, &QComboBox::currentTextChanged,
+                    cb, [cb, bodies](const QString & text)
+                    {
+                      cb->clear();
+                      const auto & ss = bodies.at(text.toStdString());
+                      for(const auto & s : ss)
+                      {
+                        cb->addItem(s.c_str());
+                      }
+                    });
+      }
+    };
+    if(form.hasSpecialItem("robot"))
+    {
+      ret->handle_special("robot", form.getSpecialItem("robot"));
+    }
+    form.addSpecialItem("body", ret);
+  }
+  /** General case */
+  else
+  {
+    if(data.has("enum"))
+    {
+      /** Handle enum fields, display possible values if enums size is > 1, otherwise have an hidden field */
+      std::vector<std::string> enums = data("enum");
+      if(enums.size() != 1)
+      {
+        auto cb = new QComboBox();
+        for(const auto & s : enums)
+        {
+          cb->addItem(s.c_str());
+        }
+        ret->widget = cb;
+        ret->send = [name,cb](mc_rtc::Configuration & out)
+        {
+          out.add(name, cb->currentText().toStdString());
         };
       }
       else
       {
-        ret->send = [name,le](mc_rtc::Configuration & out)
+        if(enums.size() == 0)
         {
-          if(le->text().size())
-          {
-            out.add(name, le->text().toStdString());
-          }
-        };
-      }
-      le->setValidator(validator);
-      ret->widget = le;
-      if(is_required)
-      {
-        ret->ready = [le]()
+          throw(std::invalid_argument("enum field cannot be empty list"));
+        }
+        ret->send = [name,enums](mc_rtc::Configuration & out)
         {
-          return le->text().size() != 0;
+          out.add(name, enums[0]);
         };
       }
     }
-    else if(type == "array")
+    else if(data.has("type"))
     {
-      ret->spanning = true;
-      if(data.has("title"))
+      std::string type = data("type");
+      if(type == "boolean")
       {
-        ret->title = static_cast<std::string>(data("title"));
+        auto cb = new QCheckBox();
+        ret->widget = cb;
+        ret->send = [name,cb](mc_rtc::Configuration & out)
+        {
+          out.add(name, cb->isChecked());
+        };
       }
-      if(data.has("items"))
+      else if(type == "number" || type == "integer" || type == "string")
       {
-        auto items = data("items");
-        if(items.has("type"))
+        auto le = new QLineEdit();
+        QValidator * validator = nullptr;
+        if(type == "number")
         {
-          std::string items_type = items("type");
-#define IMPL_IT(T) \
-          unsigned int minItems = data("minItems", 0); \
-          unsigned int maxItems = data("maxItems", std::numeric_limits<unsigned int>::max()); \
-          auto ai = new ArrayInput<T>(minItems, maxItems); \
-          ret->widget = ai; \
-          if(is_required) { ret->ready = [ai]() { return ai->ready(); }; } \
-          ret->send = [name,ai](mc_rtc::Configuration & out) \
-          { \
-            if(ai->ready()) \
-            { \
-              auto arr = out.array(name); \
-              ai->send(arr); \
-            } \
-          };
-          if(items_type == "integer") { IMPL_IT(int) }
-          else if(items_type == "number") { IMPL_IT(double) }
-          else if(items_type == "string") { IMPL_IT(std::string) }
-          else
+          double min = data("minimum", -std::numeric_limits<double>::infinity());
+          double max = data("maximum", std::numeric_limits<double>::infinity());
+          validator = new QDoubleValidator(min, max, 100);
+          ret->send = [name,le](mc_rtc::Configuration & out)
           {
-            std::cerr << "Array " << name << " has items' type " << items_type << " that cannot be handled in schema " << schema << std::endl;
-          }
+            if(le->text().size())
+            {
+              out.add(name, le->text().toDouble());
+            }
+          };
         }
-        else if(items.has("$ref"))
+        else if(type == "integer")
         {
-          /**FIXME Not sure how to handle this */
-          std::cerr << "Array " << name << " has items' $ref " << items("$ref") << " that cannot be handled in schema " << schema << std::endl;
+          int min = data("minimum", std::numeric_limits<int>::lowest());
+          int max = data("maximum", std::numeric_limits<int>::max());
+          validator = new QIntValidator(min, max);
+          ret->send = [name,le](mc_rtc::Configuration & out)
+          {
+            if(le->text().size())
+            {
+              out.add(name, le->text().toInt());
+            }
+          };
         }
         else
         {
-          std::cerr << "Array " << name << " has items without type or $ref specification in schema " << schema << std::endl;
+          ret->send = [name,le](mc_rtc::Configuration & out)
+          {
+            if(le->text().size())
+            {
+              out.add(name, le->text().toStdString());
+            }
+          };
         }
+        le->setValidator(validator);
+        ret->widget = le;
+        if(is_required)
+        {
+          ret->ready = [le]()
+          {
+            return le->text().size() != 0;
+          };
+        }
+      }
+      else if(type == "array")
+      {
+        ret->spanning = true;
+        if(data.has("title"))
+        {
+          ret->title = static_cast<std::string>(data("title"));
+        }
+        if(data.has("items"))
+        {
+          auto items = data("items");
+          if(items.has("type"))
+          {
+            std::string items_type = items("type");
+          #define IMPL_IT(T) \
+            unsigned int minItems = data("minItems", 0); \
+            unsigned int maxItems = data("maxItems", std::numeric_limits<unsigned int>::max()); \
+            auto ai = new ArrayInput<T>(minItems, maxItems); \
+            ret->widget = ai; \
+            if(is_required) { ret->ready = [ai]() { return ai->ready(); }; } \
+            ret->send = [name,ai](mc_rtc::Configuration & out) \
+            { \
+              if(ai->ready()) \
+              { \
+                auto arr = out.array(name); \
+                ai->send(arr); \
+              } \
+            };
+            if(items_type == "integer") { IMPL_IT(int) }
+            else if(items_type == "number") { IMPL_IT(double) }
+            else if(items_type == "string") { IMPL_IT(std::string) }
+            else
+            {
+              std::cerr << "Array " << name << " has items' type " << items_type << " that cannot be handled in schema " << schema << std::endl;
+            }
+          }
+          else if(items.has("$ref"))
+          {
+            /**FIXME Not sure how to handle this */
+            std::cerr << "Array " << name << " has items' $ref " << items("$ref") << " that cannot be handled in schema " << schema << std::endl;
+          }
+          else
+          {
+            std::cerr << "Array " << name << " has items without type or $ref specification in schema " << schema << std::endl;
+          }
+        }
+        else
+        {
+          std::cerr << "Array " << name << " has no items specification in schema " << schema << std::endl;
+        }
+      }
+      else if(type == "object")
+      {
+        ret->spanning = true;
+        auto w = new SchemaForm(schema, ctl_data); // FIXME We don't need to open the schema again
+        ret->widget = w;
+        ret->title = w->title;
+        if(is_required)
+        {
+          ret->ready = [w](){ return w->ready().size() == 0; };
+        }
+        ret->send = [name,w](mc_rtc::Configuration & out)
+        {
+          auto send = w->send();
+          if(!send.empty())
+          {
+            out.add(name, send);
+          }
+        };
       }
       else
       {
-        std::cerr << "Array " << name << " has no items specification in schema " << schema << std::endl;
+        std::cerr << "Cannot handle type in JSON schema: " << type << std::endl;
       }
     }
-    else if(type == "object")
+    else if(data.has("$ref"))
     {
-      ret->spanning = true;
-      auto w = new SchemaForm(schema); // FIXME We don't need to open the schema again
-      ret->widget = w;
-      ret->title = w->title;
-      if(is_required)
-      {
-        ret->ready = [w](){ return w->ready().size() == 0; };
-      }
-      ret->send = [name,w](mc_rtc::Configuration & out)
-      {
-        auto send = w->send();
-        if(!send.empty())
-        {
-          out.add(name, send);
-        }
-      };
+      auto schema_dir = QFileInfo{schema.c_str()}.path().toStdString();
+      std::string ref = data("$ref");
+      ref = ref.substr(strlen("/.."), ref.size() - strlen("/.."));
+      std::string ref_schema = schema_dir + ref;
+      ret = SchemaFormItem::make(name, mc_rtc::Configuration{ref_schema}, is_required, ref_schema, layout, ctl_data, form, ret);
+      return ret;
     }
     else
     {
-      std::cerr << "Cannot handle type in JSON schema: " << type << std::endl;
+      std::cerr << "Property " << name << " in " << schema << " does not have enum, type or $ref property" << std::endl;
     }
   }
-  else if(data.has("$ref"))
-  {
-    auto schema_dir = QFileInfo{schema.c_str()}.path().toStdString();
-    std::string ref = data("$ref");
-    ref = ref.substr(strlen("/.."), ref.size() - strlen("/.."));
-    std::string ref_schema = schema_dir + ref;
-    ret = SchemaFormItem::make(name, mc_rtc::Configuration{ref_schema}, is_required, ref_schema, layout, ret);
-    return ret;
-  }
-  else
-  {
-    std::cerr << "Property " << name << " in " << schema << " does not have enum, type or $ref property" << std::endl;
-  }
-  std::string display_name = name;
   if(is_required) { display_name += " * "; }
   if(ret->title.size()) { display_name += " (" + ret->title + ")"; }
   if(ret->widget)
@@ -375,7 +484,7 @@ SchemaFormItem * SchemaFormItem::make(const std::string & name,
   return ret;
 }
 
-SchemaForm::SchemaForm(const std::string & schema)
+SchemaForm::SchemaForm(const std::string & schema, const mc_rtc::Configuration & ctl_data)
 {
   mc_rtc::Configuration config(schema);
   title = static_cast<std::string>(config("title"));
@@ -389,7 +498,19 @@ SchemaForm::SchemaForm(const std::string & schema)
   auto properties = config("properties", std::map<std::string, mc_rtc::Configuration>{});
   for(const auto & p : properties)
   {
-    items_.emplace_back(SchemaFormItem::make(p.first, p.second, is_required(p.first), schema, layout));
+    bool required = is_required(p.first);
+    if(required)
+    {
+      items_.emplace_back(SchemaFormItem::make(p.first, p.second, is_required(p.first), schema, layout, ctl_data, *this));
+    }
+  }
+  for(const auto & p : properties)
+  {
+    bool required = is_required(p.first);
+    if(!required)
+    {
+      items_.emplace_back(SchemaFormItem::make(p.first, p.second, is_required(p.first), schema, layout, ctl_data, *this));
+    }
   }
 }
 
@@ -415,4 +536,24 @@ mc_rtc::Configuration SchemaForm::send()
     i->send(ret);
   }
   return ret;
+}
+
+void SchemaForm::addSpecialItem(const std::string & name,
+                                SchemaFormItem * item)
+{
+  special_items_[name] = item;
+  for(const auto & i : items_)
+  {
+    i->handle_special(name, *item);
+  }
+}
+
+bool SchemaForm::hasSpecialItem(const std::string & name) const
+{
+  return special_items_.count(name);
+}
+
+SchemaFormItem & SchemaForm::getSpecialItem(const std::string & name)
+{
+  return *special_items_.at(name);
 }

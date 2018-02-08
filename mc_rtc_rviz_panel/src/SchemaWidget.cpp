@@ -6,7 +6,8 @@
 std::string schema_base = std::string(MC_RTC_DOCDIR) + "/json/schemas/";
 
 SchemaWidget::SchemaWidget(QWidget * parent, const mc_rtc::Configuration & data,
-    request_t request)
+                           const mc_rtc::Configuration & ctl_data,
+                           request_t request)
 : BaseWidget(new QVBoxLayout(), parent),
   request_(request),
   combo_(new QComboBox(this)),
@@ -33,7 +34,7 @@ SchemaWidget::SchemaWidget(QWidget * parent, const mc_rtc::Configuration & data,
   std::sort(files.begin(), files.end());
   for(const auto & f : files)
   {
-    auto w = new SchemaForm(f);
+    auto w = new SchemaForm(f, ctl_data);
     stack_->addWidget(w);
     combo_->addItem(w->title.c_str());
   }

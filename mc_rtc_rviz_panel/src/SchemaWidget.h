@@ -10,6 +10,7 @@ struct SchemaWidget : public BaseWidget
 {
   SchemaWidget(QWidget * parent,
                const mc_rtc::Configuration & data,
+               const mc_rtc::Configuration & ctl_data,
                request_t request);
 
   virtual ~SchemaWidget() = default;

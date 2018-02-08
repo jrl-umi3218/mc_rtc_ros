@@ -31,6 +31,8 @@ class Panel: public QWidget, public mc_control::ControllerClient
 Q_OBJECT
 public:
   Panel(QWidget* parent = 0);
+
+  const mc_rtc::Configuration & data() const { return data_; }
 private:
   void handle_gui_state(const char * data, size_t size) override;
   /** ROS stuff */
@@ -48,6 +50,8 @@ private:
                        QWidget * parent,
                        int level,
                        std::vector<std::string> & seen);
+  /** Static data available for the GUI elements */
+  mc_rtc::Configuration data_;
 private slots:
   void handle_gui_state_impl(const char * data);
 signals:
