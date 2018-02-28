@@ -9,18 +9,6 @@
 #include <chrono>
 #include <iostream>
 
-#include <mc_rtc_msgs/close_grippers.h>
-#include <mc_rtc_msgs/EnableController.h>
-#include <mc_rtc_msgs/get_joint_pos.h>
-#include <mc_rtc_msgs/GoToHalfSitPose.h>
-#include <mc_rtc_msgs/move_com.h>
-#include <mc_rtc_msgs/open_grippers.h>
-#include <mc_rtc_msgs/play_next_stance.h>
-#include <mc_rtc_msgs/send_msg.h>
-#include <mc_rtc_msgs/send_recv_msg.h>
-#include <mc_rtc_msgs/set_gripper.h>
-#include <mc_rtc_msgs/set_joint_pos.h>
-
 #include "ContactForcePublisher.h"
 
 namespace
@@ -44,96 +32,6 @@ namespace
     }
     return def;
   }
-
-  struct ServiceHandler
-  {
-    ServiceHandler(mc_control::MCGlobalController & controller)
-    : controller(controller)
-    {
-    }
-
-    bool close_grippers(mc_rtc_msgs::close_grippersRequest &,
-                        mc_rtc_msgs::close_grippersResponse & res)
-    {
-      controller.setGripperOpenPercent(0);
-      res.success = true;
-      return true;
-    }
-
-    bool EnableController(mc_rtc_msgs::EnableControllerRequest & req,
-                        mc_rtc_msgs::EnableControllerResponse & res)
-    {
-      res.success = controller.EnableController(req.name);
-      return res.success;
-    }
-
-    bool get_joint_pos(mc_rtc_msgs::get_joint_posRequest & req,
-                        mc_rtc_msgs::get_joint_posResponse & res)
-    {
-      res.success = controller.get_joint_pos(req.jname, res.q);
-      return res.success;
-    }
-
-    bool GoToHalfSitPose(mc_rtc_msgs::GoToHalfSitPoseRequest &,
-                         mc_rtc_msgs::GoToHalfSitPoseResponse & res)
-    {
-      res.success = controller.GoToHalfSitPose();
-      return res.success;
-    }
-
-    bool move_com(mc_rtc_msgs::move_comRequest & req,
-                  mc_rtc_msgs::move_comResponse & res)
-    {
-      res.success = controller.move_com({req.com[0], req.com[1], req.com[2]});
-      return res.success;
-    }
-
-    bool open_grippers(mc_rtc_msgs::open_grippersRequest &,
-                        mc_rtc_msgs::open_grippersResponse & res)
-    {
-      controller.setGripperOpenPercent(1.);
-      res.success = true;
-      return res.success;
-    }
-
-    bool play_next_stance(mc_rtc_msgs::play_next_stanceRequest &,
-                        mc_rtc_msgs::play_next_stanceResponse & res)
-    {
-      res.success = controller.play_next_stance();
-      return res.success;
-    }
-
-    bool send_msg(mc_rtc_msgs::send_msgRequest & req,
-                        mc_rtc_msgs::send_msgResponse & res)
-    {
-      res.success = controller.send_msg(req.msg);
-      return res.success;
-    }
-
-    bool send_recv_msg(mc_rtc_msgs::send_recv_msgRequest & req,
-                        mc_rtc_msgs::send_recv_msgResponse & res)
-    {
-      res.success = controller.send_recv_msg(req.msg, res.msg);
-      return res.success;
-    }
-
-    bool set_gripper(mc_rtc_msgs::set_gripperRequest & req,
-                        mc_rtc_msgs::set_gripperResponse & res)
-    {
-      controller.setGripperTargetQ(req.gname, req.values);
-      res.success = true;
-      return res.success;
-    }
-
-    bool set_joint_pos(mc_rtc_msgs::set_joint_posRequest & req,
-                        mc_rtc_msgs::set_joint_posResponse & res)
-    {
-      res.success = controller.set_joint_pos(req.jname, req.q);
-      return res.success;
-    }
-  private:
-    mc_control::MCGlobalController & controller;
-  };
 }
 
 #ifdef MC_RTC_HAS_ROS
@@ -231,23 +129,6 @@ int main()
     else { average_t = average_t / solve_dt.size(); }
     std::cout << " avg: " << average_t.count()*1000 << "ms, min: " << min_t.count()*1000 << "ms, max: " << max_t.count()*1000 << "ms, second max: " << second_max_t.count()*1000 << std::endl;
   };
-
-  /* Setup controller services */
-  ServiceHandler sh(controller);
-#define ADV_SVC(SVC)\
-  ros::ServiceServer SVC##_srv = nh.advertiseService(#SVC, &ServiceHandler::SVC, &sh);
-  ADV_SVC(close_grippers)
-  ADV_SVC(EnableController)
-  ADV_SVC(get_joint_pos)
-  ADV_SVC(GoToHalfSitPose)
-  ADV_SVC(move_com)
-  ADV_SVC(open_grippers)
-  ADV_SVC(play_next_stance)
-  ADV_SVC(send_msg)
-  ADV_SVC(send_recv_msg)
-  ADV_SVC(set_gripper)
-  ADV_SVC(set_joint_pos)
-#undef ADV_SVC
 
   const bool publish_contact_forces = getParam(nh, "mc_rtc_ticker/publish_contact_forces", true);
   std::unique_ptr<mc_rtc_ros::ContactForcePublisher> cfp_ptr = nullptr;
