@@ -5,32 +5,37 @@ qt5_wrap_cpp(MOC_FILES
 )
 
 set(HEADER_FILES
-  BaseWidget.h
+  ArrayLabelWidget.h
+  ArrayInputWidget.h
   ButtonWidget.h
-  ComboBoxWidget.h
+  CategoryWidget.h
+  CheckboxWidget.h
+  ClientWidget.h
+  ComboInputWidget.h
+  FormElement.h
   FormWidget.h
-  InputWidget.h
+  GenericInputWidget.h
+  InteractiveMarkerWidget.h
   LabelWidget.h
-  Point3DWidget.h
-  PointInputDialog.h
   SchemaWidget.h
-  SchemaForm.h
-  TransformWidget.h
   utils.h
 )
 
 set(SOURCE_FILES
-  Panel.cpp
+  ArrayLabelWidget.cpp
+  ArrayInputWidget.cpp
   ButtonWidget.cpp
-  ComboBoxWidget.cpp
+  CategoryWidget.cpp
+  CheckboxWidget.cpp
+  ClientWidget.cpp
+  ComboInputWidget.cpp
+  FormElement.cpp
   FormWidget.cpp
-  InputWidget.cpp
+  GenericInputWidget.cpp
+  InteractiveMarkerWidget.cpp
   LabelWidget.cpp
-  PointInputDialog.cpp
-  Point3DWidget.cpp
+  Panel.cpp
   SchemaWidget.cpp
-  SchemaForm.cpp
-  TransformWidget.cpp
   utils.cpp
   ${MOC_FILES}
 )

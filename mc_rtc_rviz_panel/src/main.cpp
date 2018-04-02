@@ -22,6 +22,7 @@ int main(int argc, char * argv[])
   app_ = &app;
   QMainWindow window;
   window.setWindowTitle("mc_rtc GUI");
+  window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.7);
   window.setCentralWidget(new mc_rtc_rviz::Panel(&window));
   window.show();
   std::signal(SIGINT, &signal_handler);

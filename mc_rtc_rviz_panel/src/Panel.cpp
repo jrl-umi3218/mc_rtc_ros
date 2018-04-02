@@ -1,326 +1,472 @@
 #include "Panel.h"
 
+#include "ArrayLabelWidget.h"
+#include "ArrayInputWidget.h"
 #include "ButtonWidget.h"
-#include "ComboBoxWidget.h"
+#include "CheckboxWidget.h"
+#include "ComboInputWidget.h"
 #include "FormWidget.h"
-#include "InputWidget.h"
+#include "FormElement.h"
+#include "GenericInputWidget.h"
+#include "InteractiveMarkerWidget.h"
 #include "LabelWidget.h"
-#include "Point3DWidget.h"
 #include "SchemaWidget.h"
-#include "TransformWidget.h"
-
-#include <mc_rtc/Configuration.h>
-
-#include <stack>
-
-namespace
-{
-  constexpr int MAX_TAB_LEVEL = 2;
-  static_assert(MAX_TAB_LEVEL >= 0, "Must have at least zero tab level");
-
-  struct FoldableWidget : public QWidget
-  {
-    FoldableWidget(const std::string & name, bool always_show)
-    {
-      auto layout = new QVBoxLayout();
-      setLayout(layout);
-      topLayout = new QVBoxLayout();
-      bottomLayout = new QVBoxLayout();
-      layout->addLayout(topLayout);
-      layout->addLayout(bottomLayout);
-      if(!always_show)
-      {
-        showButton = new QPushButton(name.c_str());
-        showButton->setCheckable(true);
-        topLayout->addWidget(showButton);
-        connect(showButton, &QPushButton::toggled,
-            this, [this](bool)
-            {
-            for(const auto & w : widgets_)
-            {
-              if(showButton->isChecked()) { w->show(); }
-              else { w->hide(); }
-            }
-            });
-      }
-    }
-    void addWidget(QWidget * w, bool is_foldable)
-    {
-      widgets_.push_back(w);
-      if(showButton && !showButton->isChecked())
-      {
-        w->hide();
-      }
-      else
-      {
-        w->show();
-      }
-      if(is_foldable) { bottomLayout->addWidget(w); }
-      else { topLayout->addWidget(w); }
-    }
-    void removeWidget(QWidget * w, bool is_foldable)
-    {
-      auto it = std::find(widgets_.begin(), widgets_.end(), w);
-      if(is_foldable) { bottomLayout->removeWidget(w); }
-      else { topLayout->removeWidget(w); }
-      if(it != widgets_.end())
-      {
-        widgets_.erase(it);
-      }
-    }
-    QVBoxLayout * topLayout = nullptr;
-    QVBoxLayout * bottomLayout = nullptr;
-    QPushButton * showButton = nullptr;
-    std::vector<QWidget*> widgets_ = {};
-  };
-}
 
 namespace mc_rtc_rviz
 {
 
 Panel::Panel(QWidget * parent)
-: QWidget(parent),
-  //FIXME Hard-coded parameters for the client
-  mc_control::ControllerClient("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 10.),
+: mc_control::ControllerClient("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 2),
+  CategoryWidget({*this, parent, {{},"ROOT"}}),
   nh_(),
   int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
 {
-  mainLayout = new QVBoxLayout();
-  setLayout(mainLayout);
-  connect(this, SIGNAL(gotData(const char*)),
-          this, SLOT(handle_gui_state_impl(const char*)));
+  qRegisterMetaType<std::string>("std::string");
+  qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
+  qRegisterMetaType<WidgetId>("WidgetId");
+  qRegisterMetaType<Eigen::Vector3d>("Eigen::Vector3d");
+  qRegisterMetaType<Eigen::VectorXd>("Eigen::VectorXd");
+  qRegisterMetaType<sva::PTransformd>("sva::PTransformd");
+  tree_.parent = this;
+  connect(this, SIGNAL(signal_start()),
+          this, SLOT(got_start()));
+  connect(this, SIGNAL(signal_stop()),
+          this, SLOT(got_stop()));
+  connect(this, SIGNAL(signal_category(const std::vector<std::string>&, const std::string&)),
+          this, SLOT(got_category(const std::vector<std::string>&, const std::string&)));
+  connect(this, SIGNAL(signal_label(const WidgetId&, const std::string&)),
+          this, SLOT(got_label(const WidgetId&, const std::string&)));
+  connect(this, SIGNAL(signal_array_label(const WidgetId&, const std::vector<std::string>&, const Eigen::VectorXd&)),
+          this, SLOT(got_array_label(const WidgetId&, const std::vector<std::string>&, const Eigen::VectorXd&)));
+  connect(this, SIGNAL(signal_button(const WidgetId&)),
+          this, SLOT(got_button(const WidgetId&)));
+  connect(this, SIGNAL(signal_checkbox(const WidgetId&, bool)),
+          this, SLOT(got_checkbox(const WidgetId&, bool)));
+  connect(this, SIGNAL(signal_string_input(const WidgetId&, const std::string&)),
+          this, SLOT(got_string_input(const WidgetId&, const std::string&)));
+  connect(this, SIGNAL(signal_integer_input(const WidgetId&, int)),
+          this, SLOT(got_integer_input(const WidgetId&, int)));
+  connect(this, SIGNAL(signal_number_input(const WidgetId&, double)),
+          this, SLOT(got_number_input(const WidgetId&, double)));
+  connect(this, SIGNAL(signal_array_input(const WidgetId&, const std::vector<std::string>&, const Eigen::VectorXd&)),
+          this, SLOT(got_array_input(const WidgetId&, const std::vector<std::string>&, const Eigen::VectorXd&)));
+  connect(this, SIGNAL(signal_combo_input(const WidgetId&, const std::vector<std::string>&, const std::string&)),
+          this, SLOT(got_combo_input(const WidgetId&, const std::vector<std::string>&, const std::string&)));
+  connect(this, SIGNAL(signal_data_combo_input(const WidgetId&, const std::vector<std::string>&, const std::string&)),
+          this, SLOT(got_data_combo_input(const WidgetId&, const std::vector<std::string>&, const std::string&)));
+  connect(this, SIGNAL(signal_point3d(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&)),
+          this, SLOT(got_point3d(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&)));
+  connect(this, SIGNAL(signal_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
+          this, SLOT(got_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)));
+  connect(this, SIGNAL(signal_transform(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
+          this, SLOT(got_transform(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)));
+  connect(this, SIGNAL(signal_schema(const WidgetId&, const std::string&)),
+          this, SLOT(got_schema(const WidgetId&, const std::string&)));
+  connect(this, SIGNAL(signal_form(const WidgetId&)),
+          this, SLOT(got_form(const WidgetId&)));
+  connect(this, SIGNAL(signal_form_checkbox(const WidgetId&, const std::string&, bool, bool)),
+          this, SLOT(got_form_checkbox(const WidgetId&, const std::string&, bool, bool)));
+  connect(this, SIGNAL(signal_form_integer_input(const WidgetId&, const std::string&, bool, int)),
+          this, SLOT(got_form_integer_input(const WidgetId&, const std::string&, bool, int)));
+  connect(this, SIGNAL(signal_form_number_input(const WidgetId&, const std::string&, bool, double)),
+          this, SLOT(got_form_number_input(const WidgetId&, const std::string&, bool, double)));
+  connect(this, SIGNAL(signal_form_string_input(const WidgetId&, const std::string&, bool, const std::string&)),
+          this, SLOT(got_form_string_input(const WidgetId&, const std::string&, bool, const std::string&)));
+  connect(this, SIGNAL(signal_form_array_input(const WidgetId&, const std::string&, bool, const Eigen::VectorXd&, bool)),
+          this, SLOT(got_form_array_input(const WidgetId&, const std::string&, bool, const Eigen::VectorXd&, bool)));
+  connect(this, SIGNAL(signal_form_combo_input(const WidgetId&, const std::string&, bool, const std::vector<std::string>&, bool)),
+          this, SLOT(got_form_combo_input(const WidgetId&, const std::string&, bool, const std::vector<std::string>&, bool)));
+  connect(this, SIGNAL(signal_form_data_combo_input(const WidgetId&, const std::string&, bool, const std::vector<std::string>&, bool)),
+          this, SLOT(got_form_data_combo_input(const WidgetId&, const std::string&, bool, const std::vector<std::string>&, bool)));
+  mc_control::ControllerClient::start();
 }
 
-namespace
+void Panel::started()
 {
-  BaseWidget * makeEntry(QWidget * parent,
-                         const std::vector<std::string> & category,
-                         const std::string & name,
-                         const mc_rtc::Configuration & data,
-                         mc_control::ControllerClient & client,
-                         std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server,
-                         const mc_rtc::Configuration & ctl_data)
+  Q_EMIT signal_start();
+}
+
+void Panel::got_start()
+{
+}
+
+void Panel::stopped()
+{
+  Q_EMIT signal_stop();
+}
+
+void Panel::got_stop()
+{
+  tree_.clean();
+  int_server_->applyChanges();
+  if(ros::ok()) { ros::spinOnce(); }
+}
+
+void Panel::category(const std::vector<std::string> & parent, const std::string & category)
+{
+  Q_EMIT signal_category(parent, category);
+}
+
+void Panel::label(const WidgetId & id, const std::string & data)
+{
+  Q_EMIT signal_label(id, data);
+}
+
+void Panel::array_label(const WidgetId & id,
+                        const std::vector<std::string> & labels,
+                        const Eigen::VectorXd & data)
+{
+  Q_EMIT signal_array_label(id, labels, data);
+}
+
+void Panel::button(const WidgetId & id)
+{
+  Q_EMIT signal_button(id);
+}
+
+void Panel::checkbox(const WidgetId & id, bool state)
+{
+  Q_EMIT signal_checkbox(id, state);
+}
+
+void Panel::string_input(const WidgetId & id, const std::string & data)
+{
+  Q_EMIT signal_string_input(id, data);
+}
+
+void Panel::integer_input(const WidgetId & id, int data)
+{
+  Q_EMIT signal_integer_input(id, data);
+}
+
+void Panel::number_input(const WidgetId & id, double data)
+{
+  Q_EMIT signal_number_input(id, data);
+}
+
+void Panel::array_input(const WidgetId & id,
+                        const std::vector<std::string> & inputs,
+                        const Eigen::VectorXd & data)
+{
+  Q_EMIT signal_array_input(id, inputs, data);
+}
+
+void Panel::combo_input(const WidgetId & id,
+                        const std::vector<std::string> & values,
+                        const std::string & data)
+{
+  Q_EMIT signal_combo_input(id, values, data);
+}
+
+void Panel::data_combo_input(const WidgetId & id,
+                             const std::vector<std::string> & ref,
+                             const std::string & data)
+{
+  Q_EMIT signal_data_combo_input(id, ref, data);
+}
+
+void Panel::point3d(const WidgetId & id,
+                    const WidgetId & requestId,
+                    bool ro, const Eigen::Vector3d & pos)
+{
+  Q_EMIT signal_point3d(id, requestId, ro, pos);
+}
+
+void Panel::rotation(const WidgetId & id,
+                     const WidgetId & requestId,
+                     bool ro, const sva::PTransformd & pos)
+{
+  Q_EMIT signal_rotation(id, requestId, ro, pos);
+}
+
+void Panel::transform(const WidgetId & id,
+                      const WidgetId & requestId,
+                      bool ro, const sva::PTransformd & pos)
+{
+  Q_EMIT signal_transform(id, requestId, ro, pos);
+}
+
+void Panel::schema(const WidgetId & id, const std::string & schema)
+{
+  Q_EMIT signal_schema(id, schema);
+}
+
+void Panel::form(const WidgetId & id)
+{
+  Q_EMIT signal_form(id);
+}
+
+void Panel::form_checkbox(const WidgetId & formId,
+                          const std::string & name,
+                          bool required,
+                          bool def)
+{
+  Q_EMIT signal_form_checkbox(formId, name, required, def);
+}
+
+void Panel::form_integer_input(const WidgetId & formId,
+                               const std::string & name,
+                               bool required,
+                               int def)
+{
+  Q_EMIT signal_form_integer_input(formId, name, required, def);
+}
+
+void Panel::form_number_input(const WidgetId & formId,
+                              const std::string & name,
+                              bool required,
+                              double def)
+{
+  Q_EMIT signal_form_number_input(formId, name, required, def);
+}
+
+void Panel::form_string_input(const WidgetId & formId,
+                              const std::string & name,
+                              bool required,
+                              const std::string & def)
+{
+  Q_EMIT signal_form_string_input(formId, name, required, def);
+}
+
+void Panel::form_array_input(const WidgetId & formId,
+                             const std::string & name,
+                             bool required,
+                             const Eigen::VectorXd & def,
+                             bool fixed_size)
+{
+  Q_EMIT signal_form_array_input(formId, name, required, def, fixed_size);
+}
+
+void Panel::form_combo_input(const WidgetId & formId,
+                             const std::string & name,
+                             bool required,
+                             const std::vector<std::string> & values,
+                             bool send_index)
+{
+  Q_EMIT signal_form_combo_input(formId, name, required, values, send_index);
+}
+
+void Panel::form_data_combo_input(const WidgetId & formId,
+                                  const std::string & name,
+                                  bool required,
+                                  const std::vector<std::string> & ref,
+                                  bool send_index)
+{
+  Q_EMIT signal_form_data_combo_input(formId, name, required, ref, send_index);
+}
+
+void Panel::got_category(const std::vector<std::string> & parent, const std::string & category)
+{
+  auto & tree = get_category(parent);
+  if(tree.sub_trees_.count(category) == 0)
   {
-    auto gui_type = data("GUI")("type");
-    std::string full_name;
-    for(const auto & c : category) { full_name += ("_" + c); }
-    full_name += name;
-    if(gui_type == "Label")
-    {
-      return new LabelWidget(name, data);
-    }
-    if(gui_type == "Button")
-    {
-      return new ButtonWidget(name,
-        [&client,category,name](const mc_rtc::Configuration & data)
-        {
-          client.send_request(category, name, data);
-        });
-    }
-    if(gui_type == "Point3D")
-    {
-      return new Point3DWidget(name, full_name, data,
-          [&client,category,name](const mc_rtc::Configuration & data)
-          {
-            client.send_request(category, name, data);
-          },
-          int_server);
-    }
-    if(gui_type == "Transform")
-    {
-      return new TransformWidget(name, full_name, data,
-          [&client,category,name](const mc_rtc::Configuration & data)
-          {
-            client.send_request(category, name, data);
-          },
-          int_server);
-    }
-    if(gui_type == "Input")
-    {
-      return new InputWidget(name, data,
-          [&client,category,name](const mc_rtc::Configuration & data)
-          {
-            client.send_request(category, name, data);
-          });
-    }
-    if(gui_type == "Schema")
-    {
-      return new SchemaWidget(parent, data, ctl_data,
-          [&client,category,name](const mc_rtc::Configuration & data)
-          {
-            client.send_request(category, name, data);
-          });
-    }
-    if(gui_type == "Form")
-    {
-      return new FormWidget(parent, data,
-          [&client,category,name](const mc_rtc::Configuration & data)
-          {
-            client.send_request(category, name, data);
-          });
-    }
-    if(gui_type == "ComboList")
-    {
-      return new ComboBoxWidget(name, data,
-                                [&client,category,name](const mc_rtc::Configuration & data)
-                                {
-                                  client.send_request(category, name, data);
-                                });
-    }
-    std::cerr << "Cannot handle the provided GUI type " << gui_type << std::endl;
-    return nullptr;
+    auto cat = new CategoryWidget({*this, tree.parent, {parent, category}});
+    tree.parent->addWidget(cat);
+    tree.sub_trees_[category].parent = cat;
   }
+  tree.sub_trees_[category].parent->seen(true);
 }
 
-void Panel::handle_gui_state(const char * data_raw, size_t size)
+void Panel::got_label(const WidgetId & id, const std::string & data)
 {
-  Q_EMIT gotData(data_raw);
+  auto & w = get_widget<LabelWidget>(id);
+  w.update(data);
 }
 
-void Panel::handle_category(const std::string & category,
+void Panel::got_array_label(const WidgetId & id,
+                        const std::vector<std::string> & labels,
+                        const Eigen::VectorXd & data)
+{
+  auto & w = get_widget<ArrayLabelWidget>(id, labels);
+  w.update(data);
+}
+
+void Panel::got_button(const WidgetId & id)
+{
+  auto & w = get_widget<ButtonWidget>(id);
+}
+
+void Panel::got_checkbox(const WidgetId & id, bool state)
+{
+  auto & w = get_widget<CheckboxWidget>(id);
+  w.update(state);
+}
+
+void Panel::got_string_input(const WidgetId & id, const std::string & data)
+{
+  auto & w = get_widget<StringInputWidget>(id);
+  w.update(data);
+}
+
+void Panel::got_integer_input(const WidgetId & id, int data)
+{
+  auto & w = get_widget<IntegerInputWidget>(id);
+  w.update(data);
+}
+
+void Panel::got_number_input(const WidgetId & id, double data)
+{
+  auto & w = get_widget<NumberInputWidget>(id);
+  w.update(data);
+}
+
+void Panel::got_array_input(const WidgetId & id,
+                        const std::vector<std::string> & inputs,
+                        const Eigen::VectorXd & data)
+{
+  auto & w = get_widget<ArrayInputWidget>(id, inputs);
+  w.update(data);
+}
+
+void Panel::got_combo_input(const WidgetId & id,
+                            const std::vector<std::string> & values,
+                            const std::string & data)
+{
+  auto & w = get_widget<ComboInputWidget>(id, values);
+  w.update(data);
+}
+
+void Panel::got_data_combo_input(const WidgetId & id,
+                            const std::vector<std::string> & values,
+                            const std::string & data)
+{
+  auto & w = get_widget<ComboInputWidget>(id, data_, values);
+  w.update(data);
+}
+
+void Panel::got_point3d(const WidgetId & id,
+                        const WidgetId & requestId,
+                        bool ro, const Eigen::Vector3d & pos)
+{
+  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, sva::PTransformd{pos}, false, !ro);
+  w.update(pos);
+}
+
+void Panel::got_rotation(const WidgetId & id,
+                         const WidgetId & requestId,
+                         bool ro, const sva::PTransformd & pos)
+{
+  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, false);
+  w.update(pos);
+}
+
+void Panel::got_transform(const WidgetId & id,
+                          const WidgetId & requestId,
+                          bool ro, const sva::PTransformd & pos)
+{
+  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, !ro);
+  w.update(pos);
+}
+
+void Panel::got_schema(const WidgetId & id, const std::string & schema)
+{
+  auto & w = get_widget<SchemaWidget>(id, schema, data_);
+}
+
+void Panel::got_form(const WidgetId & id)
+{
+  auto & w = get_widget<FormWidget>(id);
+}
+
+void Panel::got_form_checkbox(const WidgetId & formId,
+                       const std::string & name,
+                       bool required,
+                       bool def)
+{
+  auto & form = get_widget<FormWidget>(formId);
+  form.element<form::Checkbox>(name, required, def);
+}
+
+void Panel::got_form_integer_input(const WidgetId & formId,
                             const std::string & name,
-                            const std::map<std::string, mc_rtc::Configuration> & items,
-                            const mc_rtc::Configuration & data,
-                            QWidget * parent,
-                            int level,
-                            std::vector<std::string> & seen)
+                            bool required,
+                            int def)
 {
-  if(items.size() == 0 || category == "/DATA") { return; }
-  if(items.count("GUI"))
-  {
-    /** Actual item */
-    if(!widgets_.count(category))
-    {
-      auto q_categories = QString(category.c_str()).split("/");
-      std::vector<std::string> categories {};
-      for(int i = 1; i < q_categories.count() - 1; ++i)
-      {
-        const auto & c = q_categories[i];
-        categories.emplace_back(c.toStdString());
-      }
-      auto w = makeEntry(parent, categories, name, data, *this, int_server_, this->data());
-      widgets_[category] = w;
-      if(w)
-      {
-        if(level <= MAX_TAB_LEVEL)
-        {
-          parent->layout()->addWidget(w);
-          remove_w_[category] = [parent](QWidget * w)
-          {
-            parent->layout()->removeWidget(w);
-          };
-        }
-        else
-        {
-          static_cast<FoldableWidget*>(parent)->addWidget(w, false);
-          remove_w_[category] = [parent](QWidget * w)
-          {
-            static_cast<FoldableWidget*>(parent)->removeWidget(w, false);
-          };
-        }
-      }
-    }
-    seen.push_back(category);
-    auto w = static_cast<BaseWidget*>(widgets_[category]);
-    if(w && items.count("data"))
-    {
-      w->update(items.at("data"));
-    }
-  }
-  else
-  {
-    /** Category */
-    if(!widgets_.count(category))
-    {
-      QWidget * w = nullptr;
-      if(level < MAX_TAB_LEVEL)
-      {
-        w = new QTabWidget();
-        w->setLayout(new QVBoxLayout());
-      }
-      else
-      {
-        w = new FoldableWidget(name, level == MAX_TAB_LEVEL);
-      }
-      if(level == 0)
-      {
-        assert(parent == this);
-        this->mainLayout->addWidget(w);
-        remove_w_[category] = [this](QWidget * w)
-        {
-          this->mainLayout->removeWidget(w);
-        };
-      }
-      else if(level <= MAX_TAB_LEVEL)
-      {
-        auto p = static_cast<QTabWidget*>(parent);
-        p->addTab(w, name.c_str());
-        remove_w_[category] = [p](QWidget * w)
-        {
-          p->removeTab(p->indexOf(w));
-        };
-      }
-      else
-      {
-        auto p = static_cast<FoldableWidget*>(parent);
-        p->addWidget(w, true);
-        remove_w_[category] = [p](QWidget * w)
-        {
-          p->removeWidget(w, true);
-        };
-      }
-      widgets_[category] = w;
-    }
-    seen.push_back(category);
-    auto w = widgets_[category];
-    for(const auto & i : items)
-    {
-      handle_category(category + "/" + i.first,
-                      i.first,
-                      i.second,
-                      i.second,
-                      w,
-                      level + 1, seen);
-    }
-  }
+  auto & form = get_widget<FormWidget>(formId);
+  form.element<form::IntegerInput>(name, required, def);
 }
 
-void Panel::handle_gui_state_impl(const char * data_raw)
+void Panel::got_form_number_input(const WidgetId & formId,
+                           const std::string & name,
+                           bool required,
+                           double def)
 {
-  auto data = mc_rtc::Configuration::fromData(data_raw);
-  if(data.has("DATA"))
+  auto & form = get_widget<FormWidget>(formId);
+  form.element<form::NumberInput>(name, required, def);
+}
+
+void Panel::got_form_string_input(const WidgetId & formId,
+                           const std::string & name,
+                           bool required,
+                           const std::string & def)
+{
+  auto & form = get_widget<FormWidget>(formId);
+  form.element<form::StringInput>(name, required, def);
+}
+
+void Panel::got_form_array_input(const WidgetId & formId,
+                          const std::string & name,
+                          bool required,
+                          const Eigen::VectorXd & def,
+                          bool fixed_size)
+{
+  auto & form = get_widget<FormWidget>(formId);
+  form.element<form::NumberArrayInput>(name, required, def, fixed_size);
+}
+
+void Panel::got_form_combo_input(const WidgetId & formId,
+                          const std::string & name,
+                          bool required,
+                          const std::vector<std::string> & values,
+                          bool send_index)
+{
+  auto & form = get_widget<FormWidget>(formId);
+  form.element<form::ComboInput>(name, required, values, send_index);
+}
+
+void Panel::got_form_data_combo_input(const WidgetId & formId,
+                               const std::string & name,
+                               bool required,
+                               const std::vector<std::string> & ref,
+                               bool send_index)
+{
+  auto & form = get_widget<FormWidget>(formId);
+  form.element<form::DataComboInput>(name, required, data_, ref, send_index);
+}
+
+
+Panel::WidgetTree & Panel::get_category(const std::vector<std::string> & category)
+{
+  auto ret = &tree_;
+  for(const auto & c : category)
   {
-    data_.load(data("DATA"));
+    ret = &(ret->sub_trees_[c]);
   }
-  std::vector<std::string> seen {};
-  handle_category("", "", data, data, this, 0, seen);
-  /** Handle removed elements */
-  std::stack<QWidget*> to_delete;
-  for(auto w_iter = widgets_.begin(); w_iter != widgets_.end();)
+  return *ret;
+}
+
+void Panel::WidgetTree::clean()
+{
+  for(auto it = sub_trees_.begin(); it != sub_trees_.end();)
   {
-    const auto & w = *w_iter;
-    if(std::find(seen.begin(), seen.end(), w.first) == seen.end())
+
+    auto & t = it->second;
+    t.clean();
+    int rem = 0;
+    if(t.parent)
     {
-      if(w.second && remove_w_.count(w.first))
-      {
-        remove_w_[w.first](w.second);
-        remove_w_.erase(w.first);
-      }
-      to_delete.push(w.second);
-      w_iter = widgets_.erase(w_iter);
+      rem = t.parent->clean();
+    }
+    if(rem == 0 && t.sub_trees_.size() == 0)
+    {
+      if(parent && t.parent) { parent->removeWidget(t.parent); }
+      sub_trees_.erase(it++);
     }
     else
     {
-      ++w_iter;
+      ++it;
     }
   }
-  while(to_delete.size())
-  {
-    auto w = to_delete.top();
-    delete w;
-    to_delete.pop();
-  }
-  int_server_->applyChanges();
 }
 
 MyPanel::MyPanel(QWidget * parent)

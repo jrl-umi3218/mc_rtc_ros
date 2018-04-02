@@ -1,5 +1,8 @@
 #include "utils.h"
 
+namespace mc_rtc_rviz
+{
+
 vm::Marker makeVisual(int t, const vm::InteractiveMarker & marker)
 {
   vm::Marker ret;
@@ -28,14 +31,15 @@ vm::InteractiveMarkerControl & makeVisualControl(int t,
 
 vm::InteractiveMarker make6DMarker(const std::string & name,
                                    bool control_position,
-                                   bool control_orientation)
+                                   bool control_orientation,
+                                   int type)
 {
   vm::InteractiveMarker ret;
   ret.header.frame_id = "robot_map";
   ret.scale = 0.15;
   ret.name = name;
   ret.description = "";
-  makeVisualControl((control_position && control_orientation) ? vm::Marker::CUBE : vm::Marker::SPHERE, ret);
+  makeVisualControl(type, ret);
 
   vm::InteractiveMarkerControl control;
   control.orientation.w = 0.707107;
@@ -90,4 +94,6 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   }
 
   return ret;
+}
+
 }
