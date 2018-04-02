@@ -103,6 +103,9 @@ private:
   bool fixed_size_;
   int min_size_;
   int max_size_;
+  int stride_ = 1;
+  int next_row_ = 0;
+  int next_column_ = 0;
   QGridLayout * layout_;
   QPushButton * add_button_ = nullptr;
   std::vector<QLineEdit*> edits_;
@@ -130,6 +133,10 @@ ArrayInput<T>::ArrayInput(QWidget * parent, const std::string & name, bool requi
 : FormElement(parent, name, required),
   fixed_size_(fixed_size), min_size_(min_size), max_size_(max_size)
 {
+  if(min_size == max_size && (min_size == 9 || min_size == 36))
+  {
+    stride_ = min_size == 9 ? 3 : 6;
+  }
   spanning_ = true;
   auto mainLayout = new QVBoxLayout(this);
   auto w = new QWidget(this);
@@ -137,7 +144,8 @@ ArrayInput<T>::ArrayInput(QWidget * parent, const std::string & name, bool requi
   layout_ = new QGridLayout(w);
   for(int i = 0; i < min_size; ++i)
   {
-    add_edit(T{});
+    if(stride_ == 1) { add_edit(T{}); }
+    else { add_edit(i % stride_ == next_row_ ? T{1} : T{0}); }
   }
   if(!fixed_size)
   {
@@ -170,7 +178,12 @@ void ArrayInput<T>::add_edit(const T & def)
   connect(edit, &QLineEdit::textChanged,
           this, [this](const QString&) { ready_ = true; });
   auto row = layout_->rowCount();
-  layout_->addWidget(edit, row, 0);
+  layout_->addWidget(edit, next_row_, next_column_++);
+  if(next_column_ == stride_)
+  {
+    next_column_ = 0;
+    next_row_++;
+  }
   edits_.push_back(edit);
   if(edits_.size() == max_size_ && add_button_)
   {
