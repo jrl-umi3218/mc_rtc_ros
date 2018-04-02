@@ -261,6 +261,7 @@ SchemaWidget::SchemaWidget(const ClientWidgetParam & params, const std::string &
   bfs::directory_iterator dit(schema_path), endit;
   std::vector<bfs::path> drange;
   std::copy(dit, endit, std::back_inserter(drange));
+  std::sort(std::begin(drange), std::end(drange));
 
   auto layout = new QVBoxLayout(this);
   auto combo = new QComboBox(this);
