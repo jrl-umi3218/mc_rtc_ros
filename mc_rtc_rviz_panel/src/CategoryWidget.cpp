@@ -42,14 +42,7 @@ CategoryWidget::CategoryWidget(const ClientWidgetParam & param)
     toggle_ = new QPushButton(name().c_str(), this);
     toggle_->setCheckable(true);
     l->addWidget(toggle_);
-    connect(toggle_, &QPushButton::toggled,
-            this, [this](bool c)
-            {
-              for(const auto & w : widgets_)
-              {
-                if(c) { w->show(); } else { w->hide(); }
-              }
-            });
+    connect(toggle_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
 
   }
 }
@@ -143,15 +136,28 @@ size_t CategoryWidget::clean()
   return widgets_.size();
 }
 
-ClientWidget & CategoryWidget::widget(const std::string & name,
-                                      std::function<ClientWidget*()> make_fn)
+ClientWidget * CategoryWidget::widget(const std::string & name)
 {
   for(auto & w : widgets_)
   {
-    if(w->name() == name) { w->seen(true); return *w; }
+    if(w->name() == name) { w->seen(true); return w; }
   }
-  addWidget(make_fn());
-  return *widgets_.back();
+  return nullptr;
+}
+
+void CategoryWidget::toggled(bool c)
+{
+  for(const auto & w : widgets_)
+  {
+    if(c)
+    {
+      w->show();
+    }
+    else
+    {
+      w->hide();
+    }
+  }
 }
 
 }

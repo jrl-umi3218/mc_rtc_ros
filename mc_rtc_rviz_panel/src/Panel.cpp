@@ -17,7 +17,7 @@ namespace mc_rtc_rviz
 
 Panel::Panel(QWidget * parent)
 : mc_control::ControllerClient("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 2),
-  CategoryWidget({*this, parent, {{},"ROOT"}}),
+  CategoryWidget(ClientWidgetParam{*this, parent, {{},"ROOT"}}),
   nh_(),
   int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
 {
@@ -260,7 +260,7 @@ void Panel::got_category(const std::vector<std::string> & parent, const std::str
   auto & tree = get_category(parent);
   if(tree.sub_trees_.count(category) == 0)
   {
-    auto cat = new CategoryWidget({*this, tree.parent, {parent, category}});
+    auto cat = new CategoryWidget(ClientWidgetParam{*this, tree.parent, {parent, category}});
     tree.parent->addWidget(cat);
     tree.sub_trees_[category].parent = cat;
   }

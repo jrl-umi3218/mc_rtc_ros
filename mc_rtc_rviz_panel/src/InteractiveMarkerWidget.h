@@ -8,6 +8,8 @@ namespace mc_rtc_rviz
 
 struct InteractiveMarkerWidget : public ClientWidget
 {
+  Q_OBJECT
+public:
   InteractiveMarkerWidget(const ClientWidgetParam & params,
                           interactive_markers::InteractiveMarkerServer & server,
                           const WidgetId & requestId,
@@ -24,6 +26,9 @@ private:
   WidgetId request_id_;
   bool control_orientation_;
   bool control_position_;
+  QPushButton * button_;
+private slots:
+  void toggled(bool);
 };
 
 }

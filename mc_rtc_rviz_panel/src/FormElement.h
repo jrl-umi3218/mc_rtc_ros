@@ -1,6 +1,11 @@
 #pragma once
 
+#include <QtGlobal>
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include <QtGui>
+#else
 #include <QtWidgets>
+#endif
 
 #include <mc_rtc/Configuration.h>
 
@@ -14,6 +19,8 @@ namespace form
 
 struct FormElement : public QWidget
 {
+  Q_OBJECT
+public:
   friend struct form::Form;
 
   FormElement(QWidget * parent, const std::string & name, bool required);
@@ -55,42 +62,62 @@ namespace form
 
 struct Checkbox : public FormElement
 {
+  Q_OBJECT
+public:
   Checkbox(QWidget * parent, const std::string & name, bool required, bool def);
 protected:
   void fill_(mc_rtc::Configuration & out) override;
 private:
   QCheckBox * cbox_;
+private slots:
+  void toggled(bool);
 };
 
-struct IntegerInput : public FormElement
+struct CommonInput : public FormElement
+{
+  Q_OBJECT
+protected:
+  CommonInput(QWidget * parent, const std::string & name, bool required);
+
+  QLineEdit * edit_;
+private slots:
+  void textChanged(const QString&);
+};
+
+struct IntegerInput : public CommonInput
 {
   IntegerInput(QWidget * parent, const std::string & name, bool required, int def);
 protected:
   void fill_(mc_rtc::Configuration & out) override;
-private:
-  QLineEdit * edit_;
 };
 
-struct NumberInput : public FormElement
+struct NumberInput : public CommonInput
 {
   NumberInput(QWidget * parent, const std::string & name, bool required, double def);
 protected:
   void fill_(mc_rtc::Configuration & out) override;
-private:
-  QLineEdit * edit_;
 };
 
-struct StringInput : public FormElement
+struct StringInput : public CommonInput
 {
   StringInput(QWidget * parent, const std::string & name, bool required, const std::string & def);
 protected:
   void fill_(mc_rtc::Configuration & out) override;
-private:
-  QLineEdit * edit_;
+};
+
+struct CommonArrayInput : public FormElement
+{
+  Q_OBJECT
+protected:
+  CommonArrayInput(QWidget * parent, const std::string & name, bool required);
+protected slots:
+  virtual void plusReleased() = 0;
+  virtual void minusReleased() = 0;
+  void textChanged(const QString&);
 };
 
 template<typename T>
-struct ArrayInput : public FormElement
+struct ArrayInput : public CommonArrayInput
 {
   ArrayInput(QWidget * parent, const std::string & name, bool required, bool fixed_size, int min_size = 0, int max_size = 256);
 protected:
@@ -109,6 +136,9 @@ private:
   QGridLayout * layout_;
   QPushButton * add_button_ = nullptr;
   std::vector<QLineEdit*> edits_;
+protected: // Implement virtual slots
+  void plusReleased() override;
+  void minusReleased() override;
 };
 
 template<>
@@ -130,7 +160,7 @@ std::string ArrayInput<std::string>::edit2data(QLineEdit * edit);
 
 template<typename T>
 ArrayInput<T>::ArrayInput(QWidget * parent, const std::string & name, bool required, bool fixed_size, int min_size, int max_size)
-: FormElement(parent, name, required),
+: CommonArrayInput(parent, name, required),
   fixed_size_(fixed_size), min_size_(min_size), max_size_(max_size)
 {
   if(min_size == max_size && (min_size == 9 || min_size == 36))
@@ -150,11 +180,17 @@ ArrayInput<T>::ArrayInput(QWidget * parent, const std::string & name, bool requi
   if(!fixed_size)
   {
     add_button_ = new QPushButton("+");
-    connect(add_button_, &QPushButton::released,
-            this, [this](){ ready_ = true; add_edit(T{}); });
+    connect(add_button_, SIGNAL(released()), this, SLOT(plusReleased()));
     mainLayout->addWidget(add_button_);
     if(edits_.size() == max_size_) { add_button_->hide(); }
   }
+}
+
+template<typename T>
+void ArrayInput<T>::plusReleased()
+{
+  ready_ = true;
+  add_edit(T{});
 }
 
 template<typename T>
@@ -175,15 +211,9 @@ void ArrayInput<T>::add_edit(const T & def)
   auto edit = new QLineEdit(this);
   add_validator(edit);
   data2edit(def, edit);
-  connect(edit, &QLineEdit::textChanged,
-          this, [this](const QString&) { ready_ = true; });
-  auto row = layout_->rowCount();
+  connect(edit, SIGNAL(textChanged(const QString&)),
+          this, SLOT(textChanged(const QString&)));
   layout_->addWidget(edit, next_row_, next_column_++);
-  if(next_column_ == stride_)
-  {
-    next_column_ = 0;
-    next_row_++;
-  }
   edits_.push_back(edit);
   if(edits_.size() == max_size_ && add_button_)
   {
@@ -192,20 +222,40 @@ void ArrayInput<T>::add_edit(const T & def)
   if(!fixed_size_ && edits_.size() > min_size_)
   {
     auto button = new QPushButton("-");
-    connect(button, &QPushButton::released,
-            this, [this,edit,button]()
-            {
-              ready_ = true;
-              edits_.erase(std::find(edits_.begin(), edits_.end(), edit));
-              if(edits_.size() < max_size_ && add_button_)
-              {
-                add_button_->show();
-              }
-              delete edit;
-              delete button;
-            });
-    layout_->addWidget(button, row, 1);
+    connect(button, SIGNAL(released()), this, SLOT(minusReleased()));
+    layout_->addWidget(button, next_row_, 1);
   }
+  if(next_column_ == stride_)
+  {
+    next_column_ = 0;
+    next_row_++;
+  }
+}
+
+template<typename T>
+void ArrayInput<T>::minusReleased()
+{
+  ready_ = true;
+  auto button = qobject_cast<QWidget*>(sender());
+  QLineEdit * edit = nullptr;
+  for(int i = 0; i < layout_->rowCount(); ++i)
+  {
+    auto item = layout_->itemAtPosition(i, 1);
+    if(!item) { continue; }
+    auto w = item->widget();
+    if(w == button)
+    {
+      edit = qobject_cast<QLineEdit*>(layout_->itemAtPosition(i, 0)->widget());
+      break;
+    }
+  }
+  edits_.erase(std::find(edits_.begin(), edits_.end(), edit));
+  if(edits_.size() < max_size_ && add_button_)
+  {
+    add_button_->show();
+  }
+  delete edit;
+  delete button;
 }
 
 using IntegerArrayInput = ArrayInput<int>;
@@ -220,16 +270,22 @@ struct NumberArrayInput : public ArrayInput<double>
 
 struct ComboInput : public FormElement
 {
+  Q_OBJECT
+public:
   ComboInput(QWidget * parent, const std::string & name, bool required, const std::vector<std::string> & values, bool send_index);
 protected:
   void fill_(mc_rtc::Configuration & out) override;
 private:
   bool send_index_;
   QComboBox * combo_;
+private slots:
+  void currentIndexChanged(int);
 };
 
 struct DataComboInput : public FormElement
 {
+  Q_OBJECT
+public:
   DataComboInput(QWidget * parent, const std::string & name, bool required, const mc_rtc::Configuration & data, const std::vector<std::string> & ref, bool send_index, const std::string & rename = "");
 
   void update_dependencies(FormElement * other) override;
@@ -251,6 +307,9 @@ private:
   void update_field(const std::string & name, const std::string & value);
 
   void update_values();
+private slots:
+  void currentIndexChanged(int);
+  void currentIndexChanged(const QString&);
 };
 
 struct Form : public FormElement

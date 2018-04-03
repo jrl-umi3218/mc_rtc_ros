@@ -12,31 +12,11 @@ ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param,
   auto labelLayout = new QHBoxLayout();
   mainLayout->addLayout(labelLayout);
   labelLayout->addWidget(new QLabel(name().c_str()));
-  lock_button_ = new QPushButton("🔒");
+  lock_button_ = new QPushButton("EDIT");
   lock_button_->setCheckable(true);
   labelLayout->addWidget(lock_button_);
-  connect(lock_button_, &QPushButton::toggled,
-          this, [this](bool unlocked)
-          {
-            if(unlocked)
-            {
-              lock_button_->setText("🔓");;
-              for(auto e : edits_) { e->setReadOnly(false); }
-            }
-            else
-            {
-              lock_button_->setText("🔒");
-              std::vector<double> v;
-              v.reserve(edits_.size());
-              for(auto e : edits_)
-              {
-                v.push_back(e->text().toDouble());
-                e->setReadOnly(true);
-              }
-              client().send_request(id(), v);
-            }
-          });
-
+  connect(lock_button_, SIGNAL(toggled(bool)),
+          this, SLOT(lock_toggled(bool)));
   edits_layout_ = new QGridLayout();
   mainLayout->addLayout(edits_layout_);
   if(labels.size())
@@ -62,8 +42,8 @@ void ArrayInputWidget::update(const Eigen::VectorXd & data)
       edits_[i] = new QLineEdit(this);
       edits_[i]->setReadOnly(true);
       edits_[i]->setValidator(new QDoubleValidator(this));
-      connect(edits_[i], &QLineEdit::returnPressed,
-              this, [this]() { if(lock_button_->isChecked()) { lock_button_->toggle(); } });
+      connect(edits_[i], SIGNAL(returnPressed()),
+              this, SLOT(edit_return_pressed()));
       edits_layout_->addWidget(edits_[i], edits_row_, i);
     }
   }
@@ -72,6 +52,32 @@ void ArrayInputWidget::update(const Eigen::VectorXd & data)
     edits_[i]->setText(QString::number(data(i)));
     edits_[i]->setCursorPosition(0);
   }
+}
+
+void ArrayInputWidget::lock_toggled(bool unlocked)
+{
+  if(unlocked)
+  {
+    lock_button_->setText("SEND");
+    for(auto e : edits_) { e->setReadOnly(false); }
+  }
+  else
+  {
+    lock_button_->setText("EDIT");
+    std::vector<double> v;
+    v.reserve(edits_.size());
+    for(auto e : edits_)
+    {
+      v.push_back(e->text().toDouble());
+      e->setReadOnly(true);
+    }
+    client().send_request(id(), v);
+  }
+}
+
+void ArrayInputWidget::edit_return_pressed()
+{
+  if(lock_button_->isChecked()) { lock_button_->toggle(); }
 }
 
 }

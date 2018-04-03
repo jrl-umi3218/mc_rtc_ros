@@ -127,8 +127,13 @@ protected:
   {
     auto parent = get_category(id.category).parent;
     assert(parent);
-    auto & w = static_cast<T&>(parent->widget(id.name,
-                               [&](){ return new T({*this, parent, id}, std::forward<Args>(args)...); }));
+    auto w_ptr = parent->widget(id.name);
+    if(!w_ptr)
+    {
+      w_ptr = new T(ClientWidgetParam{*this, parent, id}, std::forward<Args>(args)...);
+      parent->addWidget(w_ptr);
+    }
+    auto & w = static_cast<T&>(*w_ptr);
     w.seen(true);
     return w;
   }

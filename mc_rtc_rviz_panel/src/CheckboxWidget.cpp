@@ -9,11 +9,7 @@ CheckboxWidget::CheckboxWidget(const ClientWidgetParam & param)
   auto layout = new QHBoxLayout(this);
   cbox_ = new QCheckBox(name().c_str(), this);
   layout->addWidget(cbox_);
-  connect(cbox_, &QCheckBox::toggled,
-          this, [this](bool s)
-          {
-            this->client().send_request(id());
-          });
+  connect(cbox_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
 }
 
 void CheckboxWidget::update(bool b)
@@ -27,5 +23,9 @@ void CheckboxWidget::update(bool b)
   }
 }
 
+void CheckboxWidget::toggled(bool)
+{
+  this->client().send_request(id());
+}
 
 }

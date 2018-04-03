@@ -37,19 +37,21 @@ ComboInputWidget::ComboInputWidget(const ClientWidgetParam & param,
   {
     combo_->addItem(v.c_str());
   }
-  connect(combo_, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          this, [this](int idx)
-          {
-            if(idx == -1) return;
-            client().send_request(id(), combo_->currentText().toStdString());
-          });
+  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
+}
+
+void ComboInputWidget::currentIndexChanged(int idx)
+{
+  if(idx == -1) return;
+  client().send_request(id(), combo_->currentText().toStdString());
 }
 
 void ComboInputWidget::update(const std::string & data)
 {
   auto blocked = combo_->signalsBlocked();
   combo_->blockSignals(true);
-  combo_->setCurrentText(data.c_str());
+  auto idx = combo_->findText(data.c_str());
+  if(idx != -1) { combo_->setCurrentIndex(idx); }
   combo_->blockSignals(blocked);
 }
 

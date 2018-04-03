@@ -1,9 +1,5 @@
 #include "FormWidget.h"
 
-#include "FormElement.h"
-
-#include <iostream>
-
 namespace mc_rtc_rviz
 {
 
@@ -12,42 +8,33 @@ FormWidget::FormWidget(const ClientWidgetParam & param)
 {
   layout_ = new QFormLayout(this);
   auto button = new QPushButton(name().c_str());
-  connect(button, &QPushButton::released,
-          this, [this]()
-          {
-            mc_rtc::Configuration out;
-            std::string msg;
-            bool ok = true;
-            for(auto el : elements_)
-            {
-              bool ret = el->fill(out, msg);
-              if(!ret)
-              {
-                msg += '\n';
-              }
-              ok = ret && ok;
-            }
-            if(ok)
-            {
-              client().send_request(id(), out);
-            }
-            else
-            {
-              msg = msg.substr(0, msg.size() - 1); // remove last \n
-              QMessageBox::critical(this, (name() + " filling incomplete").c_str(), msg.c_str());
-            }
-          });
+  connect(button, SIGNAL(released()), this, SLOT(released()));
   layout_->addRow(button);
 }
 
-void FormWidget::element(const std::string & name, std::function<FormElement*()> make_fn)
+void FormWidget::released()
 {
-  for(const auto & el : elements_)
+  mc_rtc::Configuration out;
+  std::string msg;
+  bool ok = true;
+  for(auto el : elements_)
   {
-    if(el->name() == name) { return; }
+    bool ret = el->fill(out, msg);
+    if(!ret)
+    {
+      msg += '\n';
+    }
+    ok = ret && ok;
   }
-  auto element = make_fn();
-  add_element(element);
+  if(ok)
+  {
+    client().send_request(id(), out);
+  }
+  else
+  {
+    msg = msg.substr(0, msg.size() - 1); // remove last \n
+    QMessageBox::critical(this, (name() + " filling incomplete").c_str(), msg.c_str());
+  }
 }
 
 void FormWidget::add_element(FormElement * element)

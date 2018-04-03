@@ -265,8 +265,8 @@ SchemaWidget::SchemaWidget(const ClientWidgetParam & params, const std::string &
 
   auto layout = new QVBoxLayout(this);
   auto combo = new QComboBox(this);
-  auto stack = new QStackedWidget(this);
-  stack->addWidget(new QWidget(this));
+  stack_ = new QStackedWidget(this);
+  stack_->addWidget(new QWidget(this));
   for(const auto & p : drange)
   {
     auto path = bfs::canonical(p);
@@ -279,21 +279,23 @@ SchemaWidget::SchemaWidget(const ClientWidgetParam & params, const std::string &
     }
     form->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     combo->addItem(s.title().c_str());
-    stack->addWidget(form);
+    stack_->addWidget(form);
   }
   combo->setCurrentIndex(-1);
-  stack->setCurrentIndex(-1);
-  connect(combo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          stack, [stack](int idx)
-          {
-            stack->currentWidget()->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-            stack->setCurrentIndex(idx+1);
-            stack->currentWidget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-            stack->currentWidget()->adjustSize();
-            stack->adjustSize();
-          });
+  stack_->setCurrentIndex(-1);
+  connect(combo, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(currentIndexChanged(int)));
   layout->addWidget(combo);
-  layout->addWidget(stack);
+  layout->addWidget(stack_);
+}
+
+void SchemaWidget::currentIndexChanged(int idx)
+{
+  stack_->currentWidget()->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+  stack_->setCurrentIndex(idx+1);
+  stack_->currentWidget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  stack_->currentWidget()->adjustSize();
+  stack_->adjustSize();
 }
 
 }

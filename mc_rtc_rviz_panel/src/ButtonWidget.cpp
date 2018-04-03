@@ -9,11 +9,14 @@ ButtonWidget::ButtonWidget(const ClientWidgetParam & param)
   auto layout = new QHBoxLayout(this);
   auto button = new QPushButton(name().c_str(), this);
   layout->addWidget(button);
-  connect(button, &QPushButton::released,
-          this, [this]()
-          {
-            this->client().send_request(id());
-          });
+  connect(button, SIGNAL(released()),
+          this, SLOT(button_released()));
 }
+
+void ButtonWidget::button_released()
+{
+  client().send_request(id());
+}
+
 
 }

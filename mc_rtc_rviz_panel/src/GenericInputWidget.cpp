@@ -3,6 +3,11 @@
 namespace mc_rtc_rviz
 {
 
+CommonInputWidget::CommonInputWidget(const ClientWidgetParam & param)
+: ClientWidget(param)
+{
+}
+
 template<>
 void GenericInputWidget<double>::set_validator()
 {

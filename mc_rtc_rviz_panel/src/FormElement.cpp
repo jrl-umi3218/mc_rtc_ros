@@ -54,27 +54,34 @@ Checkbox::Checkbox(QWidget * parent, const std::string & name, bool required, bo
   auto layout = new QVBoxLayout(this);
   cbox_ = new QCheckBox(this);
   cbox_->setChecked(def);
-  connect(cbox_, &QCheckBox::toggled,
-          this, [this](bool) { ready_ = true; });
+  connect(cbox_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
   layout->addWidget(cbox_);
 }
+
+void Checkbox::toggled(bool) { ready_ = true; }
 
 void Checkbox::fill_(mc_rtc::Configuration & out)
 {
   out.add(name(), cbox_->isChecked());
 }
 
-
-IntegerInput::IntegerInput(QWidget * parent, const std::string & name, bool required, int def)
+CommonInput::CommonInput(QWidget * parent, const std::string & name, bool required)
 : FormElement(parent, name, required)
 {
   auto layout = new QVBoxLayout(this);
   edit_ = new QLineEdit(this);
+  layout->addWidget(edit_);
+}
+
+void CommonInput::textChanged(const QString&) { ready_ = true; }
+
+IntegerInput::IntegerInput(QWidget * parent, const std::string & name, bool required, int def)
+: CommonInput(parent, name, required)
+{
   edit_->setValidator(new QIntValidator());
   edit_->setText(QString::number(def));
-  connect(edit_, &QLineEdit::textChanged,
-          this, [this](const QString&) { ready_ = true; });
-  layout->addWidget(edit_);
+  connect(edit_, SIGNAL(textChanged(const QString&)),
+          this, SLOT(textChanged(const QString&)));
 }
 
 void IntegerInput::fill_(mc_rtc::Configuration & out)
@@ -83,15 +90,12 @@ void IntegerInput::fill_(mc_rtc::Configuration & out)
 }
 
 NumberInput::NumberInput(QWidget * parent, const std::string & name, bool required, double def)
-: FormElement(parent, name, required)
+: CommonInput(parent, name, required)
 {
-  auto layout = new QVBoxLayout(this);
-  edit_ = new QLineEdit(this);
   edit_->setValidator(new QDoubleValidator());
   edit_->setText(QString::number(def));
-  connect(edit_, &QLineEdit::textChanged,
-          this, [this](const QString&) { ready_ = true; });
-  layout->addWidget(edit_);
+  connect(edit_, SIGNAL(textChanged(const QString&)),
+          this, SLOT(textChanged(const QString&)));
 }
 
 void NumberInput::fill_(mc_rtc::Configuration & out)
@@ -100,19 +104,26 @@ void NumberInput::fill_(mc_rtc::Configuration & out)
 }
 
 StringInput::StringInput(QWidget * parent, const std::string & name, bool required, const std::string & def)
-: FormElement(parent, name, required)
+: CommonInput(parent, name, required)
 {
-  auto layout = new QVBoxLayout(this);
-  edit_ = new QLineEdit(this);
   edit_->setText(def.c_str());
-  connect(edit_, &QLineEdit::textChanged,
-          this, [this](const QString&) { ready_ = true; });
-  layout->addWidget(edit_);
+  connect(edit_, SIGNAL(textChanged(const QString&)),
+          this, SLOT(textChanged(const QString&)));
 }
 
 void StringInput::fill_(mc_rtc::Configuration & out)
 {
   out.add(name(), edit_->text().toStdString());
+}
+
+CommonArrayInput::CommonArrayInput(QWidget * parent, const std::string & name, bool required)
+: FormElement(parent, name, required)
+{
+}
+
+void CommonArrayInput::textChanged(const QString&)
+{
+  ready_ = true;
 }
 
 template<>
@@ -189,8 +200,13 @@ ComboInput::ComboInput(QWidget * parent, const std::string & name, bool required
     combo_->setCurrentIndex(0);
     ready_ = true;
   }
-  connect(combo_, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          this, [this](int idx) { ready_ = idx != -1; });
+  connect(combo_, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(currentIndexChanged(int)));
+}
+
+void ComboInput::currentIndexChanged(int idx)
+{
+  ready_ = idx != -1;
 }
 
 void ComboInput::fill_(mc_rtc::Configuration & out)
@@ -222,8 +238,13 @@ DataComboInput::DataComboInput(QWidget * parent, const std::string & name, bool 
   {
     update_values();
   }
-  connect(combo_, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          this, [this](int idx) { ready_ = idx != -1; });
+  connect(combo_, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(currentIndexChanged(int)));
+}
+
+void DataComboInput::currentIndexChanged(int idx)
+{
+  ready_ = idx != -1;
 }
 
 void DataComboInput::update_dependencies(FormElement * other)
@@ -233,21 +254,22 @@ void DataComboInput::update_dependencies(FormElement * other)
     if(k.size() && k[0] == '$')
     {
       auto need = k.substr(1, k.size() - 1);
-      if(!connected_.count(need))
+      if(other->name() == need && !connected_.count(need))
       {
-        if(other->name() == need)
-        {
-          auto combo = static_cast<QComboBox*>(other->layout()->itemAt(0)->widget());
-          connect(combo, static_cast<void(QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged),
-                  this, [this,need](const QString & text)
-                  {
-                    update_field(need, text.toStdString());
-                  });
-          connected_.insert(need);
-        }
+        auto combo = static_cast<QComboBox*>(other->layout()->itemAt(0)->widget());
+        connect(combo, SIGNAL(currentIndexChanged(const QString&)),
+                this, SLOT(currentIndexChanged(const QString&)));
+        connected_.insert(need);
       }
     }
   }
+}
+
+void DataComboInput::currentIndexChanged(const QString & text)
+{
+  auto source = qobject_cast<FormElement*>(sender()->parent());
+  assert(source);
+  update_field(source->name(), text.toStdString());
 }
 
 void DataComboInput::fill_(mc_rtc::Configuration & out)

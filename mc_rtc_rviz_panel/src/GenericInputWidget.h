@@ -5,8 +5,18 @@
 namespace mc_rtc_rviz
 {
 
+struct CommonInputWidget : public ClientWidget
+{
+  Q_OBJECT
+public:
+  CommonInputWidget(const ClientWidgetParam & param);
+protected slots:
+  virtual void toggled(bool) = 0;
+  virtual void returnPressed() = 0;
+};
+
 template<typename T>
-struct GenericInputWidget : public ClientWidget
+struct GenericInputWidget : public CommonInputWidget
 {
   GenericInputWidget(const ClientWidgetParam & param);
 
@@ -20,6 +30,9 @@ private:
 
   QPushButton * lock_button_;
   QLineEdit * edit_;
+protected: // Override slots
+  void toggled(bool unlocked) override;
+  void returnPressed() override;
 };
 
 using StringInputWidget = GenericInputWidget<std::string>;
@@ -28,36 +41,41 @@ using NumberInputWidget = GenericInputWidget<double>;
 
 template<typename T>
 GenericInputWidget<T>::GenericInputWidget(const ClientWidgetParam & param)
-: ClientWidget(param)
+: CommonInputWidget(param)
 {
   setLayout(new QHBoxLayout());
   layout()->addWidget(new QLabel(name().c_str()));
-  lock_button_ = new QPushButton("🔒");
+  lock_button_ = new QPushButton("EDIT");
   lock_button_->setCheckable(true);
-  connect(lock_button_, &QPushButton::toggled,
-    this, [this](bool unlocked)
-    {
-      if(unlocked)
-      {
-        lock_button_->setText("🔓");;
-        edit_->setReadOnly(false);
-      }
-      else
-      {
-        client().send_request(id(), from_edit());
-        lock_button_->setText("🔒");
-        edit_->setReadOnly(true);
-      }
-    }
-  );
-
+  connect(lock_button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
   layout()->addWidget(lock_button_);
   edit_ = new QLineEdit(this);
   edit_->setReadOnly(true);
   set_validator();
-  connect(edit_, &QLineEdit::returnPressed,
-          this, [this]() { if(lock_button_->isChecked()) { lock_button_->toggle(); } });
+  connect(edit_, SIGNAL(returnPressed()), this, SLOT(returnPressed()));
   layout()->addWidget(edit_);
+}
+
+template<typename T>
+void GenericInputWidget<T>::toggled(bool unlocked)
+{
+  if(unlocked)
+  {
+    lock_button_->setText("SEND");
+    edit_->setReadOnly(false);
+  }
+  else
+  {
+    client().send_request(id(), from_edit());
+    lock_button_->setText("EDIT");
+    edit_->setReadOnly(true);
+  }
+}
+
+template<typename T>
+void GenericInputWidget<T>::returnPressed()
+{
+  if(lock_button_->isChecked()) { lock_button_->toggle(); }
 }
 
 template<typename T>

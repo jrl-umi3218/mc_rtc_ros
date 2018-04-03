@@ -1,6 +1,11 @@
 #pragma once
 
+#include <QtGlobal>
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include <QtGui>
+#else
 #include <QtWidgets>
+#endif
 
 #include <mc_control/ControllerClient.h>
 
@@ -45,9 +50,8 @@ public:
   /** To be implemented in containers, returns the number of remaining elements */
   virtual size_t clean() { return 1; }
 
-  /** To be implemented in container, return a widget by its name and creates
-   * it with provided function if not created yet */
-  virtual ClientWidget & widget(const std::string & name, std::function<ClientWidget*()> make_fn) {}
+  /** To be implemented in container, return a widget by its name or a nullptr if the widget does not exist */
+  virtual ClientWidget * widget(const std::string & name) { return nullptr; }
 protected:
   mc_control::ControllerClient & client() { return client_; }
 private:
