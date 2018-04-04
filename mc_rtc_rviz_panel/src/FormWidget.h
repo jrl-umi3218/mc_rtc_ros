@@ -1,25 +1,51 @@
-
 #pragma once
 
-#include "BaseWidget.h"
+#include "ClientWidget.h"
 
-#include <QComboBox>
-#include <QScrollArea>
-#include <QStackedWidget>
-
-struct FormWidget : public BaseWidget
+namespace mc_rtc_rviz
 {
-  FormWidget(QWidget * parent,
-             const mc_rtc::Configuration & data,
-             request_t request);
+  struct FormElement;
 
-  virtual ~FormWidget() = default;
+  struct FormWidget;
 
-  void update(const mc_rtc::Configuration & data) override final {}
-private:
-  request_t request_;
-  using element_callback_t = std::function<void(mc_rtc::Configuration&)>;
-  std::vector<element_callback_t> element_callbacks_;
-  QFormLayout * layout_;
-  QPushButton * confirm_button_ = new QPushButton("Confirm");
-};
+  template<typename T, typename ... Args>
+  T * make_new(FormWidget * self, const std::string & name, Args && ... args)
+  {
+    return new T(self, name, std::forward<Args>(args)...);
+  }
+
+  struct FormWidget : public ClientWidget
+  {
+    Q_OBJECT
+  public:
+    FormWidget(const ClientWidgetParam & param);
+
+    template<typename T, typename ... Args>
+    void element(const std::string & name, Args && ... args);
+
+    void add_element(FormElement * element);
+  private:
+    QFormLayout * layout_;
+    std::vector<FormElement*> elements_;
+  private slots:
+    void released();
+  };
+
+}
+
+#include "FormElement.h"
+
+namespace mc_rtc_rviz
+{
+
+  template<typename T, typename ... Args>
+  void FormWidget::element(const std::string & name, Args && ... args)
+  {
+    for(const auto & el : elements_)
+    {
+      if(el->name() == name) { return; }
+    }
+    add_element(new T(this, name, std::forward<Args>(args)...));
+  }
+}
+

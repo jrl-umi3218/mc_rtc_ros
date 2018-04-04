@@ -1,85 +1,301 @@
 #include "SchemaWidget.h"
-#include "SchemaForm.h"
 
-#include <iostream>
+#include "FormElement.h"
+#include "FormWidget.h"
 
-std::string schema_base = std::string(MC_RTC_DOCDIR) + "/json/schemas/";
+#include <mc_rtc/logging.h>
 
-SchemaWidget::SchemaWidget(QWidget * parent, const mc_rtc::Configuration & data,
-                           const mc_rtc::Configuration & ctl_data,
-                           request_t request)
-: BaseWidget(new QVBoxLayout(), parent),
-  request_(request),
-  combo_(new QComboBox(this)),
-  scroll_(new QScrollArea(this)),
-  stack_(new QStackedWidget(this))
+#include <boost/filesystem.hpp>
+namespace bfs = boost::filesystem;
+
+namespace mc_rtc_rviz
 {
-  stack_->addWidget(new QWidget());
-  scroll_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  scroll_->setMaximumHeight(1000);
-  scroll_->setWidget(stack_);
-  scroll_->setWidgetResizable(true);
-  combo_->addItem("Please select a task in the list...");
-  void (QComboBox::*sig)(int) = &QComboBox::currentIndexChanged;
-  layout->addWidget(combo_);
-  layout->addWidget(scroll_);
-  /*FIXME Fill combo box */
-  std::string schema_dir = schema_base + static_cast<std::string>(data("GUI")("schema_dir"));
-  QDirIterator dIt(schema_dir.c_str(), {"*.json"}, QDir::Files | QDir::NoDotAndDotDot);
-  std::vector<std::string> files;
-  while(dIt.hasNext())
+
+namespace
+{
+
+struct Schema;
+
+using SchemaStore = std::map<std::string, Schema>;
+using Form = std::vector<FormElement*>;
+using FormMaker = std::function<Form(QWidget *, const mc_rtc::Configuration&)>;
+
+struct Schema
+{
+  Schema() = default;
+  Schema(const std::string & file);
+
+  const std::string & title() const { return title_; }
+
+  bool is_object() const { return is_object_; }
+
+  FormMaker create_form = [](QWidget*, const mc_rtc::Configuration&) -> Form { return {}; };
+private:
+  std::string title_;
+  bool is_object_ = false;
+};
+
+static SchemaStore store = {};
+static const std::string schema_dir = std::string(MC_RTC_DOCDIR) + "/json/schemas/";
+
+Schema::Schema(const std::string & file)
+{
+  mc_rtc::Configuration s{file};
+  title_ = s("title", "No title property in " + file);
+  auto required = s("required", std::vector<std::string>{});
+  auto is_required = [&required](const std::string & label)
   {
-    files.push_back(dIt.next().toStdString());
-  }
-  std::sort(files.begin(), files.end());
-  for(const auto & f : files)
+    return std::find(required.begin(), required.end(), label) != required.end();
+  };
+  /** Handle enum entries */
+  auto handle_enum = [this](const std::string & k, bool required, const std::vector<std::string> & values)
   {
-    auto w = new SchemaForm(f, ctl_data);
-    stack_->addWidget(w);
-    combo_->addItem(w->title.c_str());
+    auto cf = create_form;
+    create_form = [cf,k,required,values](QWidget * parent, const mc_rtc::Configuration & data)
+    {
+      auto v = cf(parent, data);
+      v.emplace_back(new form::ComboInput(parent, k, required, values, false));
+      if(values.size() == 1 && required) { v.back()->hide(); }
+      return v;
+    };
+  };
+  /** Handle: boolean/integer/number/string */
+  auto handle_type = [this,&file](const std::string & k, bool required, const std::string & type)
+  {
+    auto cf = create_form;
+    if(type == "boolean")
+    {
+      create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
+      {
+        auto v = cf(parent, data);
+        v.emplace_back(new form::Checkbox(parent, k, required, true));
+        return v;
+      };
+    }
+    else if(type == "integer")
+    {
+      if(k == "robotIndex")
+      {
+        create_form = [cf,required](QWidget * parent, const mc_rtc::Configuration & data)
+        {
+          auto v = cf(parent, data);
+          v.emplace_back(new form::DataComboInput(parent, "robot", required, data, {"robots"}, true, "robotIndex"));
+          return v;
+        };
+        return;
+      }
+      create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
+      {
+        auto v = cf(parent, data);
+        v.emplace_back(new form::IntegerInput(parent, k, required, 0));
+        return v;
+      };
+    }
+    else if(type == "number")
+    {
+      create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
+      {
+        auto v = cf(parent, data);
+        v.emplace_back(new form::NumberInput(parent, k, required, 0));
+        return v;
+      };
+    }
+    else
+    {
+      if(type != "string")
+      {
+        LOG_WARNING("Property " << k << " in " << file << " has unknown or missing type (value: " << type << "), treating as string")
+      }
+      if(k == "body")
+      {
+        create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
+        {
+          auto v = cf(parent, data);
+          v.emplace_back(new form::DataComboInput(parent, "body", required, data, {"bodies", "$robot"}, false));
+          return v;
+        };
+      }
+      else if(k == "surface")
+      {
+        create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
+        {
+          auto v = cf(parent, data);
+          v.emplace_back(new form::DataComboInput(parent, "surface", required, data, {"surfaces", "$robot"}, false));
+          return v;
+        };
+      }
+      else
+      {
+        create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
+        {
+          auto v = cf(parent, data);
+          v.emplace_back(new form::StringInput(parent, k, required, ""));
+          return v;
+        };
+      }
+    }
+  };
+  /** Handle an array */
+  auto handle_array = [this,&file](const std::string & k, bool required, const std::string & type, size_t min, size_t max)
+  {
+    auto cf = create_form;
+    if(type == "integer")
+    {
+      create_form = [cf,k,required,min,max](QWidget * parent, const mc_rtc::Configuration & data)
+      {
+        auto v = cf(parent, data);
+        v.emplace_back(new form::IntegerArrayInput(parent, k, required, min==max, min, max));
+        return v;
+      };
+    }
+    else if(type == "number")
+    {
+      create_form = [cf,k,required,min,max](QWidget * parent, const mc_rtc::Configuration & data)
+      {
+        auto v = cf(parent, data);
+        v.emplace_back(new form::NumberArrayInput(parent, k, required, min==max, min, max));
+        return v;
+      };
+    }
+    else if(type == "array")
+    {
+      LOG_WARNING("Property " << k << " in " << file << " is an array of array, will not display for now")
+    }
+    else
+    {
+      if(type != "string")
+      {
+        LOG_WARNING("Property " << k << " in " << file << " has unknonw or missing array items' type (value: " << type << "), treating as string")
+      }
+      create_form = [cf,k,required,min,max](QWidget * parent, const mc_rtc::Configuration & data)
+      {
+        auto v = cf(parent, data);
+        v.emplace_back(new form::StringArrayInput(parent, k, required, min==max, min, max));
+        return v;
+      };
+    }
+  };
+  std::string type = s("type");
+  if(type == "array")
+  {
+    handle_array(title_, false, s("items", mc_rtc::Configuration{})("type", std::string{""}), s("minItems", 0), s("maxItems", 256));
+    return;
   }
-  layout->addWidget(confirm_button_);
-  scroll_->hide();
-  confirm_button_->hide();
-  static_cast<QVBoxLayout*>(layout)->addStretch(1);
-  setLayout(layout);
-  /** Connections */
-  connect(combo_, sig,
-          this, &SchemaWidget::comboCurrentIndexChanged);
-  connect(confirm_button_, &QPushButton::released,
-          this, &SchemaWidget::confirmPushed);
+  if(type != "object")
+  {
+    LOG_ERROR(title_ << " from " << file << " has unexpected type: " << type)
+    return;
+  }
+  is_object_ = true;
+  auto properties = s("properties", mc_rtc::Configuration{});
+  for(const auto & k : properties.keys())
+  {
+    auto prop = properties(k);
+    if(prop.has("enum"))
+    {
+      handle_enum(k, is_required(k), prop("enum"));
+    }
+    else if(prop.has("type"))
+    {
+      std::string type = prop("type");
+      if(type == "array")
+      {
+        handle_array(k, is_required(k), prop("items", mc_rtc::Configuration{})("type", std::string{""}), prop("minItems", 0), prop("maxItems", 256));
+      }
+      else
+      {
+        handle_type(k, is_required(k), type);
+      }
+    }
+    else if(prop.has("$ref"))
+    {
+      std::string ref = prop("$ref");
+      ref = ref.substr(3); // remove leading /..
+      bfs::path ref_schema{file};
+      ref_schema = bfs::canonical(ref_schema.parent_path() / ref);
+      if(!store.count(ref_schema.string()))
+      {
+        store[ref_schema.string()] = Schema{ref_schema.string()};
+      }
+      auto cf = create_form;
+      bool required = is_required(k);
+      std::string ref_schema_str = ref_schema.string();
+      create_form = [cf,k,required,ref_schema_str](QWidget * parent, const mc_rtc::Configuration & data)
+      {
+        auto v = cf(parent, data);
+        const auto & schema = store.at(ref_schema_str);
+        if(schema.is_object())
+        {
+          v.emplace_back(new form::Form(parent, k, required, store.at(ref_schema_str).create_form(parent, data)));
+        }
+        else
+        {
+          auto el = schema.create_form(parent, data).at(0);
+          el->name(k);
+          v.push_back(el);
+        }
+        return v;
+      };
+    }
+    else
+    {
+      LOG_ERROR("Cannot handle property " << k << " in " << file << ": " << prop.dump())
+    }
+  }
 }
 
-void SchemaWidget::comboCurrentIndexChanged(int idx)
-{
-  stack_->setCurrentWidget(stack_->widget(idx));
-  stack_->currentWidget()->setMaximumWidth(scroll_->width());
-  if(idx != 0)
-  {
-    scroll_->show();
-    stack_->currentWidget()->setMaximumWidth(scroll_->width()  - 20);
-    confirm_button_->show();
-  }
-  else
-  {
-    scroll_->hide();
-    confirm_button_->hide();
-  }
 }
 
-void SchemaWidget::confirmPushed()
+
+SchemaWidget::SchemaWidget(const ClientWidgetParam & params, const std::string & schema,
+                           const mc_rtc::Configuration & data)
+: ClientWidget(params)
 {
-  auto idx = combo_->currentIndex();
-  if(idx == 0) return;
-  auto w = static_cast<SchemaForm*>(stack_->currentWidget());
-  auto ready = w->ready();
-  if(ready.size() == 0)
+  bfs::path schema_path = schema_dir;
+  schema_path /= schema;
+  if(!bfs::exists(schema_path))
   {
-    request_(w->send());
+    LOG_ERROR("Schema path: " << schema_path.string() << " does not exist in this machine")
+    return;
   }
-  else
+  bfs::directory_iterator dit(schema_path), endit;
+  std::vector<bfs::path> drange;
+  std::copy(dit, endit, std::back_inserter(drange));
+  std::sort(std::begin(drange), std::end(drange));
+
+  auto layout = new QVBoxLayout(this);
+  auto combo = new QComboBox(this);
+  stack_ = new QStackedWidget(this);
+  stack_->addWidget(new QWidget(this));
+  for(const auto & p : drange)
   {
-    /** FIXME Display error box */
-    std::cerr << "Form is not complete" << std::endl << ready << std::endl;
+    auto path = bfs::canonical(p);
+    Schema s{path.string()};
+    store[path.string()] = s;
+    auto form = new FormWidget(params);
+    for(auto el : s.create_form(this, data))
+    {
+      form->add_element(el);
+    }
+    form->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    combo->addItem(s.title().c_str());
+    stack_->addWidget(form);
   }
+  combo->setCurrentIndex(-1);
+  stack_->setCurrentIndex(-1);
+  connect(combo, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(currentIndexChanged(int)));
+  layout->addWidget(combo);
+  layout->addWidget(stack_);
+}
+
+void SchemaWidget::currentIndexChanged(int idx)
+{
+  stack_->currentWidget()->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+  stack_->setCurrentIndex(idx+1);
+  stack_->currentWidget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  stack_->currentWidget()->adjustSize();
+  stack_->adjustSize();
+}
+
 }

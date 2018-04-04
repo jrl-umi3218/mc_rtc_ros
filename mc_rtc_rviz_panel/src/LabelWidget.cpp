@@ -1,36 +1,20 @@
 #include "LabelWidget.h"
 
-LabelWidget::LabelWidget(const std::string & name,
-                          const mc_rtc::Configuration & data)
-: nameLabel(new QLabel(name.c_str())),
-  dataLabel(new QLabel())
+namespace mc_rtc_rviz
 {
-  layout->addWidget(nameLabel);
-  layout->addWidget(dataLabel);
-  dataLabel->setWordWrap(true);
-  is_vector = data("GUI")("vector", false);
+
+LabelWidget::LabelWidget(const ClientWidgetParam & param)
+: ClientWidget(param)
+{
+  auto layout = new QHBoxLayout(this);
+  layout->addWidget(new QLabel(name().c_str(), this));
+  label_ = new QLabel("", this);
+  layout->addWidget(label_);
 }
 
-void LabelWidget::update(const mc_rtc::Configuration & data)
+void LabelWidget::update(const std::string & in)
 {
-  std::string dataStr;
-  if(is_vector)
-  {
-    Eigen::VectorXd dataV = data;
-    std::stringstream ss;
-    ss << dataV.norm();
-    dataStr = ss.str();
-  }
-  else
-  {
-    try
-    {
-      dataStr = static_cast<std::string>(data);
-    }
-    catch(const mc_rtc::Configuration::Exception &)
-    {
-      dataStr = data.dump().substr(0, 25);
-    }
-  }
-  dataLabel->setText(dataStr.c_str());
+  label_->setText(in.c_str());
+}
+
 }

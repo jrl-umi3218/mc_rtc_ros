@@ -1,15 +1,15 @@
 #pragma once
 
-#include "BaseWidget.h"
+#include "ClientWidget.h"
 
-struct ButtonWidget : public BaseWidget
+namespace mc_rtc_rviz
 {
-  ButtonWidget(const std::string & name,
-               request_t request);
-
-  virtual ~ButtonWidget() = default;
-
-  void update(const mc_rtc::Configuration & data) override final {}
-
-  QPushButton * button_;
-};
+  struct ButtonWidget : public ClientWidget
+  {
+    Q_OBJECT
+  public:
+    ButtonWidget(const ClientWidgetParam & param);
+  private slots:
+    void button_released();
+  };
+}

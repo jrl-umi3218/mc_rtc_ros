@@ -1,29 +1,19 @@
 #pragma once
 
-#include "BaseWidget.h"
+#include "ClientWidget.h"
 
-#include <QComboBox>
-#include <QScrollArea>
-#include <QStackedWidget>
-
-struct SchemaWidget : public BaseWidget
+namespace mc_rtc_rviz
 {
-  SchemaWidget(QWidget * parent,
-               const mc_rtc::Configuration & data,
-               const mc_rtc::Configuration & ctl_data,
-               request_t request);
 
-  virtual ~SchemaWidget() = default;
-
-  void update(const mc_rtc::Configuration & data) override final {}
+struct SchemaWidget : public ClientWidget
+{
+Q_OBJECT
+public:
+  SchemaWidget(const ClientWidgetParam & params, const std::string & schema, const mc_rtc::Configuration & data);
 private:
-  request_t request_;
-  QComboBox * combo_;
-  QScrollArea * scroll_;
   QStackedWidget * stack_;
-  QWidget * current_form_ = nullptr;
-  QPushButton * confirm_button_ = new QPushButton("Confirm");
-
-  void comboCurrentIndexChanged(int);
-  void confirmPushed();
+private slots:
+  void currentIndexChanged(int idx);
 };
+
+}

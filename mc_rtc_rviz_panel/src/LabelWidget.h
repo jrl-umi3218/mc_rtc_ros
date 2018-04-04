@@ -1,18 +1,15 @@
 #pragma once
 
-#include "BaseWidget.h"
+#include "ClientWidget.h"
 
-struct LabelWidget : public BaseWidget
+namespace mc_rtc_rviz
 {
-  LabelWidget(const std::string & name,
-              const mc_rtc::Configuration & data);
+  struct LabelWidget : public ClientWidget
+  {
+    LabelWidget(const ClientWidgetParam & param);
 
-  virtual ~LabelWidget() = default;
-
-  void update(const mc_rtc::Configuration & data) override final;
-
-  QLabel * nameLabel;
-  QLabel * dataLabel;
-  bool is_vector;
-  // FIXME Need a tooltip thingy for vectors
-};
+    void update(const std::string & in);
+  protected:
+    QLabel * label_;
+  };
+}

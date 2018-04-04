@@ -1,12 +1,22 @@
 #include "ButtonWidget.h"
 
-ButtonWidget::ButtonWidget(const std::string & name,
-                           request_t request)
-: button_(new QPushButton(name.c_str()))
+namespace mc_rtc_rviz
 {
-  layout->addWidget(button_);
-  connect(button_, &QPushButton::released,
-          this, [request](){
-            request({});
-          });
+
+ButtonWidget::ButtonWidget(const ClientWidgetParam & param)
+: ClientWidget(param)
+{
+  auto layout = new QHBoxLayout(this);
+  auto button = new QPushButton(name().c_str(), this);
+  layout->addWidget(button);
+  connect(button, SIGNAL(released()),
+          this, SLOT(button_released()));
+}
+
+void ButtonWidget::button_released()
+{
+  client().send_request(id());
+}
+
+
 }

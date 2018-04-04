@@ -1,47 +1,66 @@
-find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
-
-qt5_wrap_cpp(MOC_FILES
+set(MOC_HEADERS
   Panel.h
+  ArrayInputWidget.h
+  ButtonWidget.h
+  CategoryWidget.h
+  CheckboxWidget.h
+  ComboInputWidget.h
+  FormElement.h
+  FormWidget.h
+  GenericInputWidget.h
+  InteractiveMarkerWidget.h
+  SchemaWidget.h
 )
 
+# Stricty speaking we'd want to check <= indigo but the goal is to support 14.04 and strictly go forward from that
+if($ENV{ROS_DISTRO} STREQUAL "indigo")
+  find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+  qt4_wrap_cpp(MOC_FILES
+    ${MOC_HEADERS}
+  )
+else()
+  find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+  qt5_wrap_cpp(MOC_FILES
+    ${MOC_HEADERS}
+  )
+endif()
+
 set(HEADER_FILES
-  BaseWidget.h
-  ButtonWidget.h
-  ComboBoxWidget.h
-  FormWidget.h
-  InputWidget.h
+  ArrayLabelWidget.h
+  ClientWidget.h
   LabelWidget.h
-  Point3DWidget.h
-  PointInputDialog.h
-  SchemaWidget.h
-  SchemaForm.h
-  TransformWidget.h
   utils.h
 )
 
 set(SOURCE_FILES
-  Panel.cpp
+  ArrayLabelWidget.cpp
+  ArrayInputWidget.cpp
   ButtonWidget.cpp
-  ComboBoxWidget.cpp
+  CategoryWidget.cpp
+  CheckboxWidget.cpp
+  ClientWidget.cpp
+  ComboInputWidget.cpp
+  FormElement.cpp
   FormWidget.cpp
-  InputWidget.cpp
+  GenericInputWidget.cpp
+  InteractiveMarkerWidget.cpp
   LabelWidget.cpp
-  PointInputDialog.cpp
-  Point3DWidget.cpp
+  Panel.cpp
   SchemaWidget.cpp
-  SchemaForm.cpp
-  TransformWidget.cpp
   utils.cpp
   ${MOC_FILES}
 )
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 pkg_config_use_dependency(${PROJECT_NAME} mc_rtc)
-target_link_libraries(${PROJECT_NAME} mc_control_client)
+target_link_libraries(${PROJECT_NAME} mc_control_client ${catkin_LIBRARIES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DMC_RTC_DOCDIR="${MC_RTC_DOCDIR}")
-qt5_use_modules(${PROJECT_NAME} Core Gui Widgets)
+if($ENV{ROS_DISTRO} STREQUAL "indigo")
+  target_link_libraries(${PROJECT_NAME} Qt4::QtCore Qt4::QtGui)
+else()
+  target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)
+endif()
 
 add_executable(mc_rtc_gui main.cpp)
 target_link_libraries(mc_rtc_gui ${PROJECT_NAME})
