@@ -21,6 +21,7 @@ public:
 private:
   int level = 0;
   QTabWidget * tabs_ = nullptr;
+  int tab_idx_ = 0;
   QVBoxLayout * page_layout_ = nullptr;
   QPushButton * toggle_ = nullptr;
   std::vector<ClientWidget *> widgets_;
