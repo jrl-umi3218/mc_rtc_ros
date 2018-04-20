@@ -73,6 +73,11 @@ int main()
           q.push_back(qj);
         }
       }
+      else
+      {
+        //FIXME This assumes that a joint that is in ref_joint_order but missing from the robot is of size 1 (very likely to be true)
+        q.push_back(0);
+      }
     }
   }
   controller.setEncoderValues(q);
