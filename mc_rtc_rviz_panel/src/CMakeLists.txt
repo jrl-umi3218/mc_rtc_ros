@@ -13,7 +13,12 @@ set(MOC_HEADERS
 )
 
 # Stricty speaking we'd want to check <= indigo but the goal is to support 14.04 and strictly go forward from that
-if(NOT $ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5} AND $ENV{ROS_DISTRO} STREQUAL "indigo")
+if(NOT DEFINED ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
+  set(FORCE_QT5 0)
+else()
+  set(FORCE_QT5 $ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
+endif()
+if(NOT ${FORCE_QT5} AND $ENV{ROS_DISTRO} STREQUAL "indigo")
   find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
   qt4_wrap_cpp(MOC_FILES
     ${MOC_HEADERS}
@@ -56,7 +61,7 @@ add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 pkg_config_use_dependency(${PROJECT_NAME} mc_rtc)
 target_link_libraries(${PROJECT_NAME} mc_control_client ${catkin_LIBRARIES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DMC_RTC_DOCDIR="${MC_RTC_DOCDIR}")
-if(NOT $ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5} AND $ENV{ROS_DISTRO} STREQUAL "indigo")
+if(NOT ${FORCE_QT5} AND $ENV{ROS_DISTRO} STREQUAL "indigo")
   target_link_libraries(${PROJECT_NAME} Qt4::QtCore Qt4::QtGui)
 else()
   target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)
