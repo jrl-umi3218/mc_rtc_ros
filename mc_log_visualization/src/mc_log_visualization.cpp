@@ -104,8 +104,8 @@ public:
     unsigned int pub_i = 0;
     auto ref_joint_order = mod->ref_joint_order();
 
-    mc_rtc::RobotPublisher publisher("control/", rate);
-    mc_rtc::RobotPublisher real_publisher("real/", rate);
+    mc_rtc::RobotPublisher publisher("control/", rate, dt);
+    mc_rtc::RobotPublisher real_publisher("real/", rate, dt);
 
     CoMPublisher com_pub = CoMPublisher(*mc_rtc::ROSBridge::get_node_handle());
     CoMPublisher target_com_pub = CoMPublisher(*mc_rtc::ROSBridge::get_node_handle(), "target_com_marker");
@@ -127,16 +127,16 @@ public:
         ss2 << "qIn" << j;
         robot.mbc().q[robot.jointIndexByName(jn)][0] = log.at(ss.str())[cur_i];
         real_robot.mbc().q[robot.jointIndexByName(jn)][0] = log.at(ss2.str())[cur_i];
-        for(const auto & gJ : gripperJ)
+        for(const auto & g : grippers)
         {
-          for(size_t k = 0; k < gJ.second.size(); ++k)
+          for(size_t k = 0; k < g.second->names.size(); ++k)
           {
-            const auto & gJn = gJ.second[k];
+            const auto & gJn = g.second->names[k];
             if(gJn == jn)
             {
               std::stringstream ss2;
               ss2 << "qIn" << j;
-              gripperQ[gJ.first][k] = log.at(ss2.str())[cur_i];
+              g.second->_q[k] = log.at(ss2.str())[cur_i];
             }
           }
         }
@@ -167,8 +167,8 @@ public:
                                robot.mbc().q[0][4], robot.mbc().q[0][5], robot.mbc().q[0][6]};
       rbd::forwardKinematics(real_robot.mb(), real_robot.mbc());
 
-      publisher.update(dt, robot, gripperJ, gripperQ);
-      real_publisher.update(dt, real_robot, gripperJ, gripperQ);
+      publisher.update(dt, robot, grippers);
+      real_publisher.update(dt, real_robot, grippers);
 
       if(log.count("stance_index") && log.count("polygonInterpolatorPercent"))
       {
@@ -206,8 +206,8 @@ public:
     /*FIXME Should be a parameter */
     mod = mc_rbdyn::RobotLoader::get_robot_module("HRP2DRC");
     env_mod = mc_rbdyn::RobotLoader::get_robot_module("env", std::string(mc_rtc::HRP2_DRC_DESCRIPTION_PATH), std::string("drc_stairs2"));
-    robots = mc_rbdyn::loadRobotAndEnv(*mod, mod->rsdf_dir, *env_mod, env_mod->rsdf_dir);
-    real_robots = mc_rbdyn::loadRobot(*mod, mod->rsdf_dir);
+    robots = mc_rbdyn::loadRobotAndEnv(*mod, *env_mod);
+    real_robots = mc_rbdyn::loadRobot(*mod);
 
     mc_rbdyn::loadStances(*robots, std::string(mc_rtc::DATA_PATH) + std::string("/drc_stairs_climbing.json"), stances, stance_actions, interpolators);
 
@@ -220,9 +220,8 @@ public:
     }
     for(auto & g : mod->grippers())
     {
-      mc_control::Gripper gC = mc_control::Gripper(robots->robot(), g.joints, urdf.str(), std::vector<double>(g.joints.size(), 0), dt, g.reverse_limits);
-      gripperJ[g.name] = gC.names;
-      gripperQ[g.name] = gC.q();
+      auto g_ptr = std::make_shared<mc_control::Gripper>(robots->robot(), g.joints, urdf.str(), std::vector<double>(g.joints.size(), 0), dt, g.reverse_limits);
+      grippers[g.name] = g_ptr;
     }
 
     pub_th = std::thread(std::bind(&LogPublisher::pubThread, this));
@@ -365,7 +364,7 @@ private:
   LogReader log;
 
   double dt = 0.005;
-  unsigned int rate = static_cast<unsigned int>(1/dt);
+  double rate = 1/dt;
   ros::Rate rt = ros::Rate(rate);
 
   /* Play/pause playback */
@@ -382,8 +381,7 @@ private:
   std::shared_ptr<mc_rbdyn::RobotModule> env_mod;
   std::shared_ptr<mc_rbdyn::Robots> robots;
   std::shared_ptr<mc_rbdyn::Robots> real_robots;
-  std::map<std::string, std::vector<std::string>> gripperJ = {};
-  std::map<std::string, std::vector<double>> gripperQ = {};
+  std::map<std::string, std::shared_ptr<mc_control::Gripper>> grippers;
 
   /* Store plan data */
   std::vector<mc_rbdyn::Stance> stances;
