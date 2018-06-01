@@ -9,6 +9,7 @@ LabelWidget::LabelWidget(const ClientWidgetParam & param)
   auto layout = new QHBoxLayout(this);
   layout->addWidget(new QLabel(name().c_str(), this));
   label_ = new QLabel("", this);
+  label_->setWordWrap(true);
   layout->addWidget(label_);
 }
 
