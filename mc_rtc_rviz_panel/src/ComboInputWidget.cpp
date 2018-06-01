@@ -30,9 +30,9 @@ ComboInputWidget::ComboInputWidget(const ClientWidgetParam & param,
                                    const std::vector<std::string> & values)
 : ClientWidget(param)
 {
-  auto layout = new QVBoxLayout(this);
+  auto layout = new QFormLayout(this);
   combo_ = new QComboBox(this);
-  layout->addWidget(combo_);
+  layout->addRow(name().c_str(), combo_);
   for(const auto & v : values)
   {
     combo_->addItem(v.c_str());
