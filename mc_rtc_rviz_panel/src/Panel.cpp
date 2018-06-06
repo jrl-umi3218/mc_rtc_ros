@@ -10,6 +10,7 @@
 #include "GenericInputWidget.h"
 #include "InteractiveMarkerWidget.h"
 #include "LabelWidget.h"
+#include "NumberSliderWidget.h"
 #include "SchemaWidget.h"
 
 namespace mc_rtc_rviz
@@ -48,6 +49,8 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_integer_input(const WidgetId&, int)));
   connect(this, SIGNAL(signal_number_input(const WidgetId&, double)),
           this, SLOT(got_number_input(const WidgetId&, double)));
+  connect(this, SIGNAL(signal_number_slider(const WidgetId&, double, double, double)),
+          this, SLOT(got_number_slider(const WidgetId&, double, double, double)));
   connect(this, SIGNAL(signal_array_input(const WidgetId&, const std::vector<std::string>&, const Eigen::VectorXd&)),
           this, SLOT(got_array_input(const WidgetId&, const std::vector<std::string>&, const Eigen::VectorXd&)));
   connect(this, SIGNAL(signal_combo_input(const WidgetId&, const std::vector<std::string>&, const std::string&)),
@@ -142,6 +145,11 @@ void Panel::integer_input(const WidgetId & id, int data)
 void Panel::number_input(const WidgetId & id, double data)
 {
   Q_EMIT signal_number_input(id, data);
+}
+
+void Panel::number_slider(const WidgetId & id, double data, double min, double max)
+{
+  Q_EMIT signal_number_slider(id, data, min, max);
 }
 
 void Panel::array_input(const WidgetId & id,
@@ -307,6 +315,12 @@ void Panel::got_integer_input(const WidgetId & id, int data)
 void Panel::got_number_input(const WidgetId & id, double data)
 {
   auto & w = get_widget<NumberInputWidget>(id);
+  w.update(data);
+}
+
+void Panel::got_number_slider(const WidgetId & id, double data, double min, double max)
+{
+  auto & w = get_widget<NumberSliderWidget>(id, min, max);
   w.update(data);
 }
 

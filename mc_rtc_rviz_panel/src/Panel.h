@@ -56,6 +56,8 @@ protected:
 
   void number_input(const WidgetId & id, double data) override;
 
+  void number_slider(const WidgetId & id, double data, double min, double max) override;
+
   void array_input(const WidgetId & id,
                    const std::vector<std::string> & labels,
                    const Eigen::VectorXd & data) override;
@@ -154,6 +156,7 @@ private slots:
   void got_string_input(const WidgetId & id, const std::string & data);
   void got_integer_input(const WidgetId & id, int data);
   void got_number_input(const WidgetId & id, double data);
+  void got_number_slider(const WidgetId & id, double data, double min, double max);
   void got_array_input(const WidgetId & id,
                        const std::vector<std::string> & labels,
                        const Eigen::VectorXd & data);
@@ -218,6 +221,7 @@ signals:
   void signal_string_input(const WidgetId & id, const std::string & data);
   void signal_integer_input(const WidgetId & id, int data);
   void signal_number_input(const WidgetId & id, double data);
+  void signal_number_slider(const WidgetId & id, double data, double min, double max);
   void signal_array_input(const WidgetId & id,
                           const std::vector<std::string> & labels,
                           const Eigen::VectorXd & data);

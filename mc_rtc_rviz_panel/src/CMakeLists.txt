@@ -9,6 +9,7 @@ set(MOC_HEADERS
   FormWidget.h
   GenericInputWidget.h
   InteractiveMarkerWidget.h
+  NumberSliderWidget.h
   SchemaWidget.h
 )
 
@@ -50,6 +51,7 @@ set(SOURCE_FILES
   GenericInputWidget.cpp
   InteractiveMarkerWidget.cpp
   LabelWidget.cpp
+  NumberSliderWidget.cpp
   Panel.cpp
   SchemaWidget.cpp
   utils.cpp
