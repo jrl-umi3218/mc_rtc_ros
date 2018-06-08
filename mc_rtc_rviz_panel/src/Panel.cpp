@@ -8,7 +8,9 @@
 #include "FormWidget.h"
 #include "FormElement.h"
 #include "GenericInputWidget.h"
+#ifndef DISABLE_ROS
 #include "InteractiveMarkerWidget.h"
+#endif
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
 #include "SchemaWidget.h"
@@ -352,24 +354,30 @@ void Panel::got_point3d(const WidgetId & id,
                         const WidgetId & requestId,
                         bool ro, const Eigen::Vector3d & pos)
 {
+#ifndef DISABLE_ROS
   auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, sva::PTransformd{pos}, false, !ro);
   w.update(pos);
+#endif
 }
 
 void Panel::got_rotation(const WidgetId & id,
                          const WidgetId & requestId,
                          bool ro, const sva::PTransformd & pos)
 {
+#ifndef DISABLE_ROS
   auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, false);
   w.update(pos);
+#endif
 }
 
 void Panel::got_transform(const WidgetId & id,
                           const WidgetId & requestId,
                           bool ro, const sva::PTransformd & pos)
 {
+#ifndef DISABLE_ROS
   auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, !ro);
   w.update(pos);
+#endif
 }
 
 void Panel::got_schema(const WidgetId & id, const std::string & schema)
@@ -483,16 +491,4 @@ void Panel::WidgetTree::clean()
   }
 }
 
-MyPanel::MyPanel(QWidget * parent)
-: rviz::Panel(parent)
-{
-  auto layout = new QVBoxLayout();
-  panel = new mc_rtc_rviz::Panel(parent);
-  layout->QLayout::addWidget(panel);
-  setLayout(layout);
-}
-
-}
-
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(mc_rtc_rviz::MyPanel, rviz::Panel)
+} // namespace mc_rtc_rviz

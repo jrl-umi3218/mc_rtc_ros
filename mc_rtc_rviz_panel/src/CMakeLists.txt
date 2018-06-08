@@ -8,23 +8,30 @@ set(MOC_HEADERS
   FormElement.h
   FormWidget.h
   GenericInputWidget.h
-  InteractiveMarkerWidget.h
   NumberSliderWidget.h
   SchemaWidget.h
 )
 
+if(NOT ${DISABLE_ROS})
+  list(APPEND MOC_HEADERS InteractiveMarkerWidget.h plugin.h)
+endif()
+
 # Stricty speaking we'd want to check <= indigo but the goal is to support 14.04 and strictly go forward from that
-if(NOT DEFINED ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
+if(${DISABLE_ROS})
+  set(FORCE_QT5 1)
+elseif(NOT DEFINED ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
   set(FORCE_QT5 0)
 else()
   set(FORCE_QT5 $ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
 endif()
 if(NOT ${FORCE_QT5} AND $ENV{ROS_DISTRO} STREQUAL "indigo")
+  MESSAGE("USE QT4")
   find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
   qt4_wrap_cpp(MOC_FILES
     ${MOC_HEADERS}
   )
 else()
+  MESSAGE("USE QT5")
   find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
   qt5_wrap_cpp(MOC_FILES
     ${MOC_HEADERS}
@@ -38,6 +45,10 @@ set(HEADER_FILES
   utils.h
 )
 
+if(NOT ${DISABLE_ROS})
+  list(APPEND HEADER_FILES utils.h)
+endif()
+
 set(SOURCE_FILES
   ArrayLabelWidget.cpp
   ArrayInputWidget.cpp
@@ -49,19 +60,24 @@ set(SOURCE_FILES
   FormElement.cpp
   FormWidget.cpp
   GenericInputWidget.cpp
-  InteractiveMarkerWidget.cpp
   LabelWidget.cpp
   NumberSliderWidget.cpp
   Panel.cpp
   SchemaWidget.cpp
-  utils.cpp
   ${MOC_FILES}
 )
 
+if(NOT ${DISABLE_ROS})
+  list(APPEND SOURCE_FILES InteractiveMarkerWidget.cpp utils.cpp plugin.cpp)
+endif()
+
 add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
-add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 pkg_config_use_dependency(${PROJECT_NAME} mc_rtc)
-target_link_libraries(${PROJECT_NAME} mc_control_client ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} mc_control_client)
+if(NOT ${DISABLE_ROS})
+  add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DMC_RTC_DOCDIR="${MC_RTC_DOCDIR}")
 if(NOT ${FORCE_QT5} AND $ENV{ROS_DISTRO} STREQUAL "indigo")
   target_link_libraries(${PROJECT_NAME} Qt4::QtCore Qt4::QtGui)
@@ -81,8 +97,10 @@ install(
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(
-  FILES
-  rviz_plugin.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+if(NOT ${DISABLE_ROS})
+  install(
+    FILES
+    rviz_plugin.xml
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  )
+endif()

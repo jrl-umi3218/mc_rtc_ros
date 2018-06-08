@@ -5,13 +5,37 @@
 #include <memory>
 #include <unordered_map>
 
-#include <interactive_markers/interactive_marker_server.h>
-#include <ros/ros.h>
-#include <rviz/panel.h>
-#include <tf/tfMessage.h>
-#include <tf/transform_listener.h>
-
 #include "CategoryWidget.h"
+
+#endif
+
+#ifndef DISABLE_ROS
+
+  #include <interactive_markers/interactive_marker_server.h>
+  #include <ros/ros.h>
+  #include <rviz/panel.h>
+  #include <tf/tfMessage.h>
+  #include <tf/transform_listener.h>
+
+#else
+
+namespace ros
+{
+  struct NodeHandle {};
+  inline void spinOnce() {}
+  inline bool ok() { return true; }
+  inline void init(int argc, char * argv[], const std::string &) {}
+}
+
+namespace interactive_markers
+{
+  struct InteractiveMarkerServer
+  {
+    struct FeedbackCallback {};
+    InteractiveMarkerServer(const std::string &) {}
+    void applyChanges() {}
+  };
+}
 
 #endif
 
@@ -273,15 +297,6 @@ signals:
                                     bool required,
                                     const std::vector<std::string> & ref,
                                     bool send_index);
-};
-
-class MyPanel : public rviz::Panel
-{
-Q_OBJECT
-public:
-  MyPanel(QWidget * parent = 0);
-
-  mc_rtc_rviz::Panel * panel;
 };
 
 }
