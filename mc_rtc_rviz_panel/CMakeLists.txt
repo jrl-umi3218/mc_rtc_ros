@@ -7,15 +7,17 @@ project(${PROJECT_NAME})
 
 set(CXX_DISABLE_WERROR 0)
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  tf
-  rviz
-  roslib
-)
+find_package(catkin)
 
 if(${catkin_FOUND})
   SET(DISABLE_ROS 0)
+  find_package(catkin REQUIRED COMPONENTS
+    roscpp
+    tf
+    rviz
+    roslib
+  )
+
   catkin_package(
     CATKIN_DEPENDS
     roscpp

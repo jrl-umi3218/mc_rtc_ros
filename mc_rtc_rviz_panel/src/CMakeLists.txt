@@ -16,6 +16,12 @@ if(NOT ${DISABLE_ROS})
   list(APPEND MOC_HEADERS InteractiveMarkerWidget.h plugin.h)
 endif()
 
+if(NOT DEFINED ENV{ROS_DISTRO})
+  set(ROS_DISTRO "none")
+else()
+  set(ROS_DISTRO "$ENV{ROS_DISTRO}")
+endif()
+
 # Stricty speaking we'd want to check <= indigo but the goal is to support 14.04 and strictly go forward from that
 if(${DISABLE_ROS})
   set(FORCE_QT5 1)
@@ -24,14 +30,12 @@ elseif(NOT DEFINED ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
 else()
   set(FORCE_QT5 $ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
 endif()
-if(NOT ${FORCE_QT5} AND $ENV{ROS_DISTRO} STREQUAL "indigo")
-  MESSAGE("USE QT4")
+if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
   find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
   qt4_wrap_cpp(MOC_FILES
     ${MOC_HEADERS}
   )
 else()
-  MESSAGE("USE QT5")
   find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
   qt5_wrap_cpp(MOC_FILES
     ${MOC_HEADERS}
@@ -79,7 +83,7 @@ if(NOT ${DISABLE_ROS})
   target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DMC_RTC_DOCDIR="${MC_RTC_DOCDIR}")
-if(NOT ${FORCE_QT5} AND $ENV{ROS_DISTRO} STREQUAL "indigo")
+if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
   target_link_libraries(${PROJECT_NAME} Qt4::QtCore Qt4::QtGui)
 else()
   target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)
