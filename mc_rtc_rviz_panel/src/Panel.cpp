@@ -10,6 +10,7 @@
 #include "GenericInputWidget.h"
 #ifndef DISABLE_ROS
 #include "InteractiveMarkerWidget.h"
+#include "DisplayTrajectoryWidget.h"
 #endif
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
@@ -30,6 +31,8 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<Eigen::Vector3d>("Eigen::Vector3d");
   qRegisterMetaType<Eigen::VectorXd>("Eigen::VectorXd");
   qRegisterMetaType<sva::PTransformd>("sva::PTransformd");
+  qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
+  qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   tree_.parent = this;
   connect(this, SIGNAL(signal_start()),
           this, SLOT(got_start()));
@@ -61,6 +64,10 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_data_combo_input(const WidgetId&, const std::vector<std::string>&, const std::string&)));
   connect(this, SIGNAL(signal_point3d(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&)),
           this, SLOT(got_point3d(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&)));
+  connect(this, SIGNAL(signal_displayTrajectory(const WidgetId&,  const WidgetId&, const std::vector<Eigen::Vector3d>&)),
+          this, SLOT(got_displayTrajectory(const WidgetId&, const WidgetId&, const std::vector<Eigen::Vector3d>&)));
+  connect(this, SIGNAL(signal_displayTrajectory(const WidgetId&,  const WidgetId&, const std::vector<sva::PTransformd>&)),
+          this, SLOT(got_displayTrajectory(const WidgetId&, const WidgetId&, const std::vector<sva::PTransformd>&)));
   connect(this, SIGNAL(signal_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
           this, SLOT(got_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)));
   connect(this, SIGNAL(signal_transform(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
@@ -180,6 +187,20 @@ void Panel::point3d(const WidgetId & id,
                     bool ro, const Eigen::Vector3d & pos)
 {
   Q_EMIT signal_point3d(id, requestId, ro, pos);
+}
+
+void Panel::displayTrajectory(const WidgetId & id,
+                    const WidgetId & requestId,
+                    const std::vector<Eigen::Vector3d> & points)
+{
+  Q_EMIT signal_displayTrajectory(id, requestId, points);
+}
+
+void Panel::displayTrajectory(const WidgetId & id,
+                    const WidgetId & requestId,
+                    const std::vector<sva::PTransformd> & points)
+{
+  Q_EMIT signal_displayTrajectory(id, requestId, points);
 }
 
 void Panel::rotation(const WidgetId & id,
@@ -378,6 +399,26 @@ void Panel::got_transform(const WidgetId & id,
   auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, !ro);
   w.update(pos);
 #endif
+}
+
+void Panel::got_displayTrajectory(const WidgetId & id,
+                const WidgetId & requestId,
+                const std::vector<Eigen::Vector3d> & points)
+{
+  #ifndef DISABLE_ROS
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, requestId);
+  w.update(points);
+  #endif
+}
+
+void Panel::got_displayTrajectory(const WidgetId & id,
+                const WidgetId & requestId,
+                const std::vector<sva::PTransformd> & points)
+{
+  #ifndef DISABLE_ROS
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, requestId);
+  w.update(points);
+  #endif
 }
 
 void Panel::got_schema(const WidgetId & id, const std::string & schema)

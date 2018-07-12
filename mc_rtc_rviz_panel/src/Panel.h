@@ -98,6 +98,14 @@ protected:
                const WidgetId & requestId,
                bool ro, const Eigen::Vector3d & pos) override;
 
+  void displayTrajectory(const WidgetId & id,
+               const WidgetId & requestId,
+               const std::vector<Eigen::Vector3d> & pos) override;
+
+  void displayTrajectory(const WidgetId & id,
+               const WidgetId & requestId,
+               const std::vector<sva::PTransformd> & pos) override;
+
   void rotation(const WidgetId & id,
                 const WidgetId & requestId,
                 bool ro, const sva::PTransformd & pos) override;
@@ -199,6 +207,12 @@ private slots:
   void got_transform(const WidgetId & id,
                      const WidgetId & requestId,
                      bool ro, const sva::PTransformd & pos);
+  void got_displayTrajectory(const WidgetId & id,
+                            const WidgetId & requestId,
+                            const std::vector<Eigen::Vector3d> & points);
+  void got_displayTrajectory(const WidgetId & id,
+                            const WidgetId & requestId,
+                            const std::vector<sva::PTransformd> & points);
   void got_schema(const WidgetId & id, const std::string & schema);
   void got_form(const WidgetId & id);
   void got_form_checkbox(const WidgetId & formId,
@@ -258,6 +272,12 @@ signals:
   void signal_point3d(const WidgetId & id,
                       const WidgetId & requestId,
                       bool ro, const Eigen::Vector3d & pos);
+  void signal_displayTrajectory(const WidgetId & id,
+                      const WidgetId & requestId,
+                      const std::vector<Eigen::Vector3d> & pos);
+  void signal_displayTrajectory(const WidgetId & id,
+                      const WidgetId & requestId,
+                      const std::vector<sva::PTransformd> & pos);
   void signal_rotation(const WidgetId & id,
                        const WidgetId & requestId,
                        bool ro, const sva::PTransformd & pos);

@@ -13,7 +13,7 @@ set(MOC_HEADERS
 )
 
 if(NOT ${DISABLE_ROS})
-  list(APPEND MOC_HEADERS InteractiveMarkerWidget.h plugin.h)
+  list(APPEND MOC_HEADERS InteractiveMarkerWidget.h DisplayTrajectoryWidget.h plugin.h)
 endif()
 
 if(NOT DEFINED ENV{ROS_DISTRO})
@@ -72,7 +72,7 @@ set(SOURCE_FILES
 )
 
 if(NOT ${DISABLE_ROS})
-  list(APPEND SOURCE_FILES InteractiveMarkerWidget.cpp utils.cpp plugin.cpp)
+  list(APPEND SOURCE_FILES InteractiveMarkerWidget.cpp DisplayTrajectoryWidget.cpp utils.cpp plugin.cpp)
 endif()
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
