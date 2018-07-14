@@ -11,6 +11,7 @@
 #ifndef DISABLE_ROS
 #include "InteractiveMarkerWidget.h"
 #include "DisplayTrajectoryWidget.h"
+#include "PolygonMarkerWidget.h"
 #endif
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
@@ -68,6 +69,8 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_displayTrajectory(const WidgetId&, const WidgetId&, const std::vector<Eigen::Vector3d>&)));
   connect(this, SIGNAL(signal_displayTrajectory(const WidgetId&,  const WidgetId&, const std::vector<sva::PTransformd>&)),
           this, SLOT(got_displayTrajectory(const WidgetId&, const WidgetId&, const std::vector<sva::PTransformd>&)));
+  connect(this, SIGNAL(signal_displayPolygon(const WidgetId&,  const WidgetId&, const std::vector<Eigen::Vector3d>&)),
+          this, SLOT(got_displayPolygon(const WidgetId&, const WidgetId&, const std::vector<Eigen::Vector3d>&)));
   connect(this, SIGNAL(signal_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
           this, SLOT(got_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)));
   connect(this, SIGNAL(signal_transform(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
@@ -190,17 +193,24 @@ void Panel::point3d(const WidgetId & id,
 }
 
 void Panel::displayTrajectory(const WidgetId & id,
-                    const WidgetId & requestId,
-                    const std::vector<Eigen::Vector3d> & points)
+                              const WidgetId & requestId,
+                              const std::vector<Eigen::Vector3d> & points)
 {
   Q_EMIT signal_displayTrajectory(id, requestId, points);
 }
 
 void Panel::displayTrajectory(const WidgetId & id,
-                    const WidgetId & requestId,
-                    const std::vector<sva::PTransformd> & points)
+                              const WidgetId & requestId,
+                              const std::vector<sva::PTransformd> & points)
 {
   Q_EMIT signal_displayTrajectory(id, requestId, points);
+}
+
+void Panel::displayPolygon(const WidgetId & id,
+                           const WidgetId & requestId,
+                           const std::vector<Eigen::Vector3d> & points)
+{
+  Q_EMIT signal_displayPolygon(id, requestId, points);
 }
 
 void Panel::rotation(const WidgetId & id,
@@ -402,8 +412,8 @@ void Panel::got_transform(const WidgetId & id,
 }
 
 void Panel::got_displayTrajectory(const WidgetId & id,
-                const WidgetId & requestId,
-                const std::vector<Eigen::Vector3d> & points)
+                                  const WidgetId & requestId,
+                                  const std::vector<Eigen::Vector3d> & points)
 {
   #ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, requestId);
@@ -412,11 +422,21 @@ void Panel::got_displayTrajectory(const WidgetId & id,
 }
 
 void Panel::got_displayTrajectory(const WidgetId & id,
-                const WidgetId & requestId,
-                const std::vector<sva::PTransformd> & points)
+                                  const WidgetId & requestId,
+                                  const std::vector<sva::PTransformd> & points)
 {
   #ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, requestId);
+  w.update(points);
+  #endif
+}
+
+void Panel::got_displayPolygon(const WidgetId & id,
+                               const WidgetId & requestId,
+                               const std::vector<Eigen::Vector3d> & points)
+{
+  #ifndef DISABLE_ROS
+  auto & w = get_widget<PolygonMarkerWidget>(id, requestId);
   w.update(points);
   #endif
 }
