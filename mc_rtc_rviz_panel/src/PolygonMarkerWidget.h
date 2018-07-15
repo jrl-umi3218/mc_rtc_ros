@@ -14,7 +14,7 @@ public:
   PolygonMarkerWidget(const ClientWidgetParam & params,
                       const WidgetId & requestId);
 
-  void update(const std::vector<Eigen::Vector3d> & t);
+  void update(const std::vector<Eigen::Vector3d> & t, const Eigen::Vector3d& c);
 private:
   ros::Publisher pub;
   WidgetId request_id_;

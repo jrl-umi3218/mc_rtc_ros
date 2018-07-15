@@ -108,7 +108,8 @@ protected:
 
   void displayPolygon(const WidgetId & id,
                       const WidgetId & requestId,
-                      const std::vector<Eigen::Vector3d> & pos) override;
+                      const std::vector<Eigen::Vector3d> & pos,
+                      const Eigen::Vector3d& color) override;
 
   void rotation(const WidgetId & id,
                 const WidgetId & requestId,
@@ -219,7 +220,8 @@ private slots:
                             const std::vector<sva::PTransformd> & points);
   void got_displayPolygon(const WidgetId & id,
                           const WidgetId & requestId,
-                          const std::vector<Eigen::Vector3d> & points);
+                          const std::vector<Eigen::Vector3d> & points,
+                          const Eigen::Vector3d& c);
   void got_schema(const WidgetId & id, const std::string & schema);
   void got_form(const WidgetId & id);
   void got_form_checkbox(const WidgetId & formId,
@@ -287,7 +289,8 @@ signals:
                       const std::vector<sva::PTransformd> & pos);
   void signal_displayPolygon(const WidgetId & id,
                              const WidgetId & requestId,
-                             const std::vector<Eigen::Vector3d> & pos);
+                             const std::vector<Eigen::Vector3d> & pos,
+                             const Eigen::Vector3d& c);
   void signal_rotation(const WidgetId & id,
                        const WidgetId & requestId,
                        bool ro, const sva::PTransformd & pos);

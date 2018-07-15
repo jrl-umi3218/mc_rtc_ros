@@ -28,7 +28,7 @@ PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params,
 
 }
 
-void PolygonMarkerWidget::update(const std::vector<Eigen::Vector3d>& points)
+void PolygonMarkerWidget::update(const std::vector<Eigen::Vector3d>& points, const Eigen::Vector3d& c = {0., 1., 0.})
 {
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::LINE_STRIP;
@@ -43,9 +43,9 @@ void PolygonMarkerWidget::update(const std::vector<Eigen::Vector3d>& points)
   }
   m.scale.x = 0.005;
   m.color.a = 1.0;
-  m.color.r = 0.0;
-  m.color.g = 1.0;
-  m.color.b = 0.0;
+  m.color.r = c.x();
+  m.color.g = c.y();
+  m.color.b = c.z();
   m.header.stamp = ros::Time();
   m.header.frame_id = "robot_map";
   pub.publish(m);
