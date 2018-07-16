@@ -13,6 +13,7 @@
 #include "DisplayTrajectoryWidget.h"
 #include "PolygonMarkerWidget.h"
 #include "ForceMarkerWidget.h"
+#include "ArrowMarkerWidget.h"
 #endif
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
@@ -36,6 +37,7 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<sva::PTransformd>("sva::PTransformd");
   qRegisterMetaType<sva::ForceVecd>("sva::ForceVecd");
   qRegisterMetaType<mc_rtc::gui::Force>("mc_rtc::gui::Force");
+  qRegisterMetaType<mc_rtc::gui::Arrow>("mc_rtc::gui::Arrow");
   qRegisterMetaType<mc_rtc::gui::Color>("mc_rtc::gui::Color");
   qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
@@ -78,6 +80,8 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_displayPolygon(const WidgetId&, const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::Color&)));
   connect(this, SIGNAL(signal_displayForce(const WidgetId&,  const WidgetId&, const sva::ForceVecd&, const sva::PTransformd&, const mc_rtc::gui::Force&)),
           this, SLOT(got_displayForce(const WidgetId&, const WidgetId&, const sva::ForceVecd&, const sva::PTransformd&, const mc_rtc::gui::Force&)));
+  connect(this, SIGNAL(signal_displayArrow(const WidgetId&,  const WidgetId&, const Eigen::Vector3d&, const Eigen::Vector3d&, const mc_rtc::gui::Arrow&)),
+          this, SLOT(got_displayArrow(const WidgetId&, const WidgetId&, const Eigen::Vector3d&, const Eigen::Vector3d&, const mc_rtc::gui::Arrow&)));
   connect(this, SIGNAL(signal_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
           this, SLOT(got_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)));
   connect(this, SIGNAL(signal_transform(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
@@ -231,6 +235,15 @@ void Panel::displayForce(const WidgetId & id,
                          const mc_rtc::gui::Force& forceConfig)
 {
   Q_EMIT signal_displayForce(id, requestId, force, surface, forceConfig);
+}
+
+void Panel::displayArrow(const WidgetId & id,
+                         const WidgetId & requestId,
+                         const Eigen::Vector3d& start,
+                         const Eigen::Vector3d& end,
+                         const mc_rtc::gui::Arrow& config)
+{
+  Q_EMIT signal_displayArrow(id, requestId, start, end, config);
 }
 
 void Panel::rotation(const WidgetId & id,
@@ -472,6 +485,18 @@ void Panel::got_displayForce(const WidgetId & id,
   #ifndef DISABLE_ROS
   auto & w = get_widget<ForceMarkerWidget>(id, requestId, marker_array_);
   w.update(force, surface, forceConfig);
+  #endif
+}
+
+void Panel::got_displayArrow(const WidgetId & id,
+                             const WidgetId & requestId,
+                             const Eigen::Vector3d& start,
+                             const Eigen::Vector3d& end,
+                             const mc_rtc::gui::Arrow& config)
+{
+  #ifndef DISABLE_ROS
+  auto & w = get_widget<ArrowMarkerWidget>(id, requestId, marker_array_);
+  w.update(start, end, config);
   #endif
 }
 

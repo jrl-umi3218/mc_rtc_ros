@@ -118,6 +118,12 @@ protected:
                     const sva::PTransformd & surface,
                     const mc_rtc::gui::Force& forceConfig) override;
 
+  void displayArrow(const WidgetId & id,
+                    const WidgetId & requestId,
+                    const Eigen::Vector3d& start,
+                    const Eigen::Vector3d& end,
+                    const mc_rtc::gui::Arrow& config) override;
+
   void rotation(const WidgetId & id,
                 const WidgetId & requestId,
                 bool ro, const sva::PTransformd & pos) override;
@@ -236,6 +242,11 @@ private slots:
                         const sva::ForceVecd & force,
                         const sva::PTransformd & surface,
                         const mc_rtc::gui::Force& forceConfig);
+  void got_displayArrow(const WidgetId & id,
+                        const WidgetId & requestId,
+                        const Eigen::Vector3d& force,
+                        const Eigen::Vector3d& surface,
+                        const mc_rtc::gui::Arrow& config);
   void got_schema(const WidgetId & id, const std::string & schema);
   void got_form(const WidgetId & id);
   void got_form_checkbox(const WidgetId & formId,
@@ -310,6 +321,11 @@ signals:
                           const sva::ForceVecd & force,
                           const sva::PTransformd & surface,
                           const mc_rtc::gui::Force& forceConfig);
+  void signal_displayArrow(const WidgetId & id,
+                           const WidgetId & requestId,
+                           const Eigen::Vector3d& force,
+                           const Eigen::Vector3d& surface,
+                           const mc_rtc::gui::Arrow& config);
   void signal_rotation(const WidgetId & id,
                        const WidgetId & requestId,
                        bool ro, const sva::PTransformd & pos);

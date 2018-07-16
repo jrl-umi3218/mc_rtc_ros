@@ -29,7 +29,6 @@ DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & param
 
 void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d>& points)
 {
-  LOG_INFO("DisplayTrajectoryWidget::update with " << points.size());
    // Publish path
    nav_msgs::Path path;
    path.header.frame_id="/robot_map";
@@ -49,7 +48,6 @@ void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d>& points)
 
 void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd>& points)
 {
-   LOG_INFO("DisplayTrajectoryWidget::update with " << points.size());
    // Publish path
    nav_msgs::Path path;
    path.header.frame_id="/robot_map";
