@@ -12,6 +12,7 @@
 #ifndef DISABLE_ROS
 
   #include <interactive_markers/interactive_marker_server.h>
+  #include <visualization_msgs/MarkerArray.h>
   #include <ros/ros.h>
   #include <rviz/panel.h>
   #include <tf/tfMessage.h>
@@ -109,7 +110,13 @@ protected:
   void displayPolygon(const WidgetId & id,
                       const WidgetId & requestId,
                       const std::vector<Eigen::Vector3d> & pos,
-                      const Eigen::Vector3d& color) override;
+                      const mc_rtc::gui::Color& color) override;
+
+  void displayForce(const WidgetId & id,
+                    const WidgetId & requestId,
+                    const sva::ForceVecd & force,
+                    const sva::PTransformd & surface,
+                    const mc_rtc::gui::Force& forceConfig) override;
 
   void rotation(const WidgetId & id,
                 const WidgetId & requestId,
@@ -180,6 +187,8 @@ private:
   /** ROS stuff */
   ros::NodeHandle nh_;
   std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server_;
+  visualization_msgs::MarkerArray marker_array_;
+  ros::Publisher marker_array_pub_;
 private slots:
   void got_start();
   void got_stop();
@@ -221,7 +230,12 @@ private slots:
   void got_displayPolygon(const WidgetId & id,
                           const WidgetId & requestId,
                           const std::vector<Eigen::Vector3d> & points,
-                          const Eigen::Vector3d& c);
+                          const mc_rtc::gui::Color& c);
+  void got_displayForce(const WidgetId & id,
+                        const WidgetId & requestId,
+                        const sva::ForceVecd & force,
+                        const sva::PTransformd & surface,
+                        const mc_rtc::gui::Force& forceConfig);
   void got_schema(const WidgetId & id, const std::string & schema);
   void got_form(const WidgetId & id);
   void got_form_checkbox(const WidgetId & formId,
@@ -290,7 +304,12 @@ signals:
   void signal_displayPolygon(const WidgetId & id,
                              const WidgetId & requestId,
                              const std::vector<Eigen::Vector3d> & pos,
-                             const Eigen::Vector3d& c);
+                             const mc_rtc::gui::Color& c);
+ void signal_displayForce(const WidgetId & id,
+                          const WidgetId & requestId,
+                          const sva::ForceVecd & force,
+                          const sva::PTransformd & surface,
+                          const mc_rtc::gui::Force& forceConfig);
   void signal_rotation(const WidgetId & id,
                        const WidgetId & requestId,
                        bool ro, const sva::PTransformd & pos);

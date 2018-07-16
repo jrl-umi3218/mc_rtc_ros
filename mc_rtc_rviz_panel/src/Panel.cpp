@@ -12,6 +12,7 @@
 #include "InteractiveMarkerWidget.h"
 #include "DisplayTrajectoryWidget.h"
 #include "PolygonMarkerWidget.h"
+#include "ForceMarkerWidget.h"
 #endif
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
@@ -26,12 +27,16 @@ Panel::Panel(QWidget * parent)
   nh_(),
   int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
 {
+  marker_array_pub_ = mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::MarkerArray>( "/mc_rtc_rviz", 0 );
   qRegisterMetaType<std::string>("std::string");
   qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
   qRegisterMetaType<WidgetId>("WidgetId");
   qRegisterMetaType<Eigen::Vector3d>("Eigen::Vector3d");
   qRegisterMetaType<Eigen::VectorXd>("Eigen::VectorXd");
   qRegisterMetaType<sva::PTransformd>("sva::PTransformd");
+  qRegisterMetaType<sva::ForceVecd>("sva::ForceVecd");
+  qRegisterMetaType<mc_rtc::gui::Force>("mc_rtc::gui::Force");
+  qRegisterMetaType<mc_rtc::gui::Color>("mc_rtc::gui::Color");
   qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   tree_.parent = this;
@@ -69,8 +74,10 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_displayTrajectory(const WidgetId&, const WidgetId&, const std::vector<Eigen::Vector3d>&)));
   connect(this, SIGNAL(signal_displayTrajectory(const WidgetId&,  const WidgetId&, const std::vector<sva::PTransformd>&)),
           this, SLOT(got_displayTrajectory(const WidgetId&, const WidgetId&, const std::vector<sva::PTransformd>&)));
-  connect(this, SIGNAL(signal_displayPolygon(const WidgetId&,  const WidgetId&, const std::vector<Eigen::Vector3d>&, const Eigen::Vector3d&)),
-          this, SLOT(got_displayPolygon(const WidgetId&, const WidgetId&, const std::vector<Eigen::Vector3d>&, const Eigen::Vector3d&)));
+  connect(this, SIGNAL(signal_displayPolygon(const WidgetId&,  const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::Color&)),
+          this, SLOT(got_displayPolygon(const WidgetId&, const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::Color&)));
+  connect(this, SIGNAL(signal_displayForce(const WidgetId&,  const WidgetId&, const sva::ForceVecd&, const sva::PTransformd&, const mc_rtc::gui::Force&)),
+          this, SLOT(got_displayForce(const WidgetId&, const WidgetId&, const sva::ForceVecd&, const sva::PTransformd&, const mc_rtc::gui::Force&)));
   connect(this, SIGNAL(signal_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
           this, SLOT(got_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)));
   connect(this, SIGNAL(signal_transform(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
@@ -114,6 +121,8 @@ void Panel::got_stop()
 {
   tree_.clean();
   int_server_->applyChanges();
+  marker_array_pub_.publish(marker_array_);
+  marker_array_.markers.clear();
   if(ros::ok()) { ros::spinOnce(); }
 }
 
@@ -209,9 +218,19 @@ void Panel::displayTrajectory(const WidgetId & id,
 void Panel::displayPolygon(const WidgetId & id,
                            const WidgetId & requestId,
                            const std::vector<Eigen::Vector3d> & points,
-                           const Eigen::Vector3d& color)
+                           const mc_rtc::gui::Color& color)
 {
   Q_EMIT signal_displayPolygon(id, requestId, points, color);
+}
+
+
+void Panel::displayForce(const WidgetId & id,
+                         const WidgetId & requestId,
+                         const sva::ForceVecd & force,
+                         const sva::PTransformd & surface,
+                         const mc_rtc::gui::Force& forceConfig)
+{
+  Q_EMIT signal_displayForce(id, requestId, force, surface, forceConfig);
 }
 
 void Panel::rotation(const WidgetId & id,
@@ -435,11 +454,24 @@ void Panel::got_displayTrajectory(const WidgetId & id,
 void Panel::got_displayPolygon(const WidgetId & id,
                                const WidgetId & requestId,
                                const std::vector<Eigen::Vector3d> & points,
-                               const Eigen::Vector3d& c)
+                               const mc_rtc::gui::Color& c)
 {
   #ifndef DISABLE_ROS
-  auto & w = get_widget<PolygonMarkerWidget>(id, requestId);
+  auto & w = get_widget<PolygonMarkerWidget>(id, requestId, marker_array_);
   w.update(points, c);
+  #endif
+}
+
+
+void Panel::got_displayForce(const WidgetId & id,
+                      const WidgetId & requestId,
+                      const sva::ForceVecd & force,
+                      const sva::PTransformd & surface,
+                      const mc_rtc::gui::Force& forceConfig)
+{
+  #ifndef DISABLE_ROS
+  auto & w = get_widget<ForceMarkerWidget>(id, requestId, marker_array_);
+  w.update(force, surface, forceConfig);
   #endif
 }
 

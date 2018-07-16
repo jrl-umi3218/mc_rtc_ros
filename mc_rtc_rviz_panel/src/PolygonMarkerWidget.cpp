@@ -20,15 +20,15 @@ namespace
 }
 
 PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params,
-                                         const WidgetId & requestId)
+                                         const WidgetId & requestId,
+                                         visualization_msgs::MarkerArray& markers)
 : ClientWidget(params),
-  request_id_(requestId)
+  request_id_(requestId),
+  markers_(markers)
 {
-  pub = mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::Marker>( "/mc_rtc_rviz/"+id2name(requestId), 0 );
-
 }
 
-void PolygonMarkerWidget::update(const std::vector<Eigen::Vector3d>& points, const Eigen::Vector3d& c = {0., 1., 0.})
+void PolygonMarkerWidget::update(const std::vector<Eigen::Vector3d>& points, const mc_rtc::gui::Color& c)
 {
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::LINE_STRIP;
@@ -42,13 +42,14 @@ void PolygonMarkerWidget::update(const std::vector<Eigen::Vector3d>& points, con
     m.points.push_back(p);
   }
   m.scale.x = 0.005;
-  m.color.a = 1.0;
-  m.color.r = c.x();
-  m.color.g = c.y();
-  m.color.b = c.z();
+  m.color.r = c.r;
+  m.color.g = c.g;
+  m.color.b = c.b;
+  m.color.a = c.a;
   m.header.stamp = ros::Time();
   m.header.frame_id = "robot_map";
-  pub.publish(m);
+  m.ns = id2name(request_id_);
+  markers_.markers.push_back(m);
 }
 
 }

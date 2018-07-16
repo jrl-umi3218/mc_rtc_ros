@@ -9,15 +9,15 @@
 namespace mc_rtc_rviz
 {
 
-struct PolygonMarkerWidget : public ClientWidget
+struct ForceMarkerWidget : public ClientWidget
 {
   Q_OBJECT
 public:
-  PolygonMarkerWidget(const ClientWidgetParam & params,
+  ForceMarkerWidget(const ClientWidgetParam & params,
                       const WidgetId & requestId,
                       visualization_msgs::MarkerArray& markers);
 
-  void update(const std::vector<Eigen::Vector3d> & t, const mc_rtc::gui::Color& c);
+  void update(const sva::ForceVecd& force, const sva::PTransformd& surface, const mc_rtc::gui::Force& c);
 private:
   ros::Publisher pub;
   WidgetId request_id_;
