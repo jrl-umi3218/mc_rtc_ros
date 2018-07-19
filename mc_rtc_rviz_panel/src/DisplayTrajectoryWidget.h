@@ -12,13 +12,11 @@ struct DisplayTrajectoryWidget : public ClientWidget
 {
   Q_OBJECT
 public:
-  DisplayTrajectoryWidget(const ClientWidgetParam & params,
-                          const WidgetId & requestId);
+  DisplayTrajectoryWidget(const ClientWidgetParam & params);
 
   void update(const std::vector<Eigen::Vector3d>& points);
   void update(const std::vector<sva::PTransformd>& points);
 private:
-  WidgetId request_id_;
   ros::Publisher path_pub;
 };
 

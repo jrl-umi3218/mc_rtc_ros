@@ -20,10 +20,8 @@ namespace
 }
 
 PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params,
-                                         const WidgetId & requestId,
                                          visualization_msgs::MarkerArray& markers)
 : ClientWidget(params),
-  request_id_(requestId),
   markers_(markers)
 {
 }
@@ -48,7 +46,7 @@ void PolygonMarkerWidget::update(const std::vector<Eigen::Vector3d>& points, con
   m.color.a = c.a;
   m.header.stamp = ros::Time();
   m.header.frame_id = "robot_map";
-  m.ns = id2name(request_id_);
+  m.ns = id2name(id());
   markers_.markers.push_back(m);
 }
 

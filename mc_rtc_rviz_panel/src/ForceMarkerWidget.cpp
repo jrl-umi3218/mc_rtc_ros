@@ -28,7 +28,7 @@ ForceMarkerWidget::ForceMarkerWidget(const ClientWidgetParam & params,
 {
 }
 
-void ForceMarkerWidget::update(const sva::ForceVecd& force, const sva::PTransformd& surface, const mc_rtc::gui::Force& c)
+void ForceMarkerWidget::update(const sva::ForceVecd& force, const sva::PTransformd& surface, const mc_rtc::gui::ForceConfig & c)
 {
     Eigen::Vector3d cop = surface.translation();
     visualization_msgs::Marker m;

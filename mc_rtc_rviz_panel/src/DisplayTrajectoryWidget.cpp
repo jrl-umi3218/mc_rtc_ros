@@ -19,12 +19,10 @@ namespace
   }
 }
 
-DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & params,
-                                                 const WidgetId & requestId)
-: ClientWidget(params),
-  request_id_(requestId)
+DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & params)
+: ClientWidget(params)
 {
-  path_pub = mc_rtc::ROSBridge::get_node_handle()->advertise<nav_msgs::Path>("/mc_rtc_rviz/"+id2name(requestId), 1);
+  path_pub = mc_rtc::ROSBridge::get_node_handle()->advertise<nav_msgs::Path>("/mc_rtc_rviz/"+id2name(params.id), 1);
 }
 
 void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d>& points)

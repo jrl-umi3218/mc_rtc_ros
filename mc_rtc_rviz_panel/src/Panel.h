@@ -99,30 +99,26 @@ protected:
                const WidgetId & requestId,
                bool ro, const Eigen::Vector3d & pos) override;
 
-  void displayTrajectory(const WidgetId & id,
-               const WidgetId & requestId,
-               const std::vector<Eigen::Vector3d> & pos) override;
+  void trajectory(const WidgetId & id,
+                  const std::vector<Eigen::Vector3d> & pos) override;
 
-  void displayTrajectory(const WidgetId & id,
-               const WidgetId & requestId,
-               const std::vector<sva::PTransformd> & pos) override;
+  void trajectory(const WidgetId & id,
+                  const std::vector<sva::PTransformd> & pos) override;
 
-  void displayPolygon(const WidgetId & id,
-                      const WidgetId & requestId,
-                      const std::vector<Eigen::Vector3d> & pos,
-                      const mc_rtc::gui::Color& color) override;
+  void polygon(const WidgetId & id,
+               const std::vector<Eigen::Vector3d> & pos,
+               const mc_rtc::gui::Color& color) override;
 
-  void displayForce(const WidgetId & id,
-                    const WidgetId & requestId,
-                    const sva::ForceVecd & force,
-                    const sva::PTransformd & surface,
-                    const mc_rtc::gui::Force& forceConfig) override;
+  void force(const WidgetId & id,
+             const WidgetId & requestId,
+             const sva::ForceVecd & force,
+             const sva::PTransformd & surface,
+             const mc_rtc::gui::ForceConfig & forceConfig) override;
 
-  void displayArrow(const WidgetId & id,
-                    const WidgetId & requestId,
-                    const Eigen::Vector3d& start,
-                    const Eigen::Vector3d& end,
-                    const mc_rtc::gui::Arrow& config) override;
+  void arrow(const WidgetId & id,
+             const Eigen::Vector3d& start,
+             const Eigen::Vector3d& end,
+             const mc_rtc::gui::ArrowConfig & config) override;
 
   void rotation(const WidgetId & id,
                 const WidgetId & requestId,
@@ -227,26 +223,22 @@ private slots:
   void got_transform(const WidgetId & id,
                      const WidgetId & requestId,
                      bool ro, const sva::PTransformd & pos);
-  void got_displayTrajectory(const WidgetId & id,
-                            const WidgetId & requestId,
-                            const std::vector<Eigen::Vector3d> & points);
-  void got_displayTrajectory(const WidgetId & id,
-                            const WidgetId & requestId,
-                            const std::vector<sva::PTransformd> & points);
-  void got_displayPolygon(const WidgetId & id,
-                          const WidgetId & requestId,
-                          const std::vector<Eigen::Vector3d> & points,
-                          const mc_rtc::gui::Color& c);
-  void got_displayForce(const WidgetId & id,
-                        const WidgetId & requestId,
-                        const sva::ForceVecd & force,
-                        const sva::PTransformd & surface,
-                        const mc_rtc::gui::Force& forceConfig);
-  void got_displayArrow(const WidgetId & id,
-                        const WidgetId & requestId,
-                        const Eigen::Vector3d& force,
-                        const Eigen::Vector3d& surface,
-                        const mc_rtc::gui::Arrow& config);
+  void got_trajectory(const WidgetId & id,
+                      const std::vector<Eigen::Vector3d> & points);
+  void got_trajectory(const WidgetId & id,
+                      const std::vector<sva::PTransformd> & points);
+  void got_polygon(const WidgetId & id,
+                   const std::vector<Eigen::Vector3d> & points,
+                   const mc_rtc::gui::Color & c);
+  void got_force(const WidgetId & id,
+                 const WidgetId & requestId,
+                 const sva::ForceVecd & force,
+                 const sva::PTransformd & surface,
+                 const mc_rtc::gui::ForceConfig & forceConfig);
+  void got_arrow(const WidgetId & id,
+                 const Eigen::Vector3d & force,
+                 const Eigen::Vector3d & surface,
+                 const mc_rtc::gui::ArrowConfig & config);
   void got_schema(const WidgetId & id, const std::string & schema);
   void got_form(const WidgetId & id);
   void got_form_checkbox(const WidgetId & formId,
@@ -306,26 +298,22 @@ signals:
   void signal_point3d(const WidgetId & id,
                       const WidgetId & requestId,
                       bool ro, const Eigen::Vector3d & pos);
-  void signal_displayTrajectory(const WidgetId & id,
-                      const WidgetId & requestId,
-                      const std::vector<Eigen::Vector3d> & pos);
-  void signal_displayTrajectory(const WidgetId & id,
-                      const WidgetId & requestId,
-                      const std::vector<sva::PTransformd> & pos);
-  void signal_displayPolygon(const WidgetId & id,
-                             const WidgetId & requestId,
-                             const std::vector<Eigen::Vector3d> & pos,
-                             const mc_rtc::gui::Color& c);
- void signal_displayForce(const WidgetId & id,
-                          const WidgetId & requestId,
-                          const sva::ForceVecd & force,
-                          const sva::PTransformd & surface,
-                          const mc_rtc::gui::Force& forceConfig);
-  void signal_displayArrow(const WidgetId & id,
-                           const WidgetId & requestId,
-                           const Eigen::Vector3d& force,
-                           const Eigen::Vector3d& surface,
-                           const mc_rtc::gui::Arrow& config);
+  void signal_trajectory(const WidgetId & id,
+                         const std::vector<Eigen::Vector3d> & pos);
+  void signal_trajectory(const WidgetId & id,
+                         const std::vector<sva::PTransformd> & pos);
+  void signal_polygon(const WidgetId & id,
+                      const std::vector<Eigen::Vector3d> & pos,
+                      const mc_rtc::gui::Color & c);
+ void signal_force(const WidgetId & id,
+                   const WidgetId & requestId,
+                   const sva::ForceVecd & force,
+                   const sva::PTransformd & surface,
+                   const mc_rtc::gui::ForceConfig & forceConfig);
+  void signal_arrow(const WidgetId & id,
+                    const Eigen::Vector3d & force,
+                    const Eigen::Vector3d & surface,
+                    const mc_rtc::gui::ArrowConfig & config);
   void signal_rotation(const WidgetId & id,
                        const WidgetId & requestId,
                        bool ro, const sva::PTransformd & pos);

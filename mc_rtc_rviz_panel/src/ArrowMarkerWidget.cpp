@@ -20,15 +20,13 @@ namespace
 }
 
 ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params,
-                                         const WidgetId & requestId,
                                          visualization_msgs::MarkerArray& markers)
 : ClientWidget(params),
-  request_id_(requestId),
   markers_(markers)
 {
 }
 
-void ArrowMarkerWidget::update(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const mc_rtc::gui::Arrow& c)
+void ArrowMarkerWidget::update(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const mc_rtc::gui::ArrowConfig & c)
 {
     visualization_msgs::Marker m;
     m.type = visualization_msgs::Marker::ARROW;
@@ -52,7 +50,7 @@ void ArrowMarkerWidget::update(const Eigen::Vector3d& start, const Eigen::Vector
     m.color.b = c.color.b;
     m.header.stamp = ros::Time();
     m.header.frame_id = "robot_map";
-    m.ns = id2name(request_id_);
+    m.ns = id2name(id());
     markers_.markers.push_back(m);
 }
 

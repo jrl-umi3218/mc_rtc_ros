@@ -14,10 +14,10 @@ struct ForceMarkerWidget : public ClientWidget
   Q_OBJECT
 public:
   ForceMarkerWidget(const ClientWidgetParam & params,
-                      const WidgetId & requestId,
-                      visualization_msgs::MarkerArray& markers);
+                    const WidgetId & requestId,
+                    visualization_msgs::MarkerArray& markers);
 
-  void update(const sva::ForceVecd& force, const sva::PTransformd& surface, const mc_rtc::gui::Force& c);
+  void update(const sva::ForceVecd& force, const sva::PTransformd& surface, const mc_rtc::gui::ForceConfig & c);
 private:
   ros::Publisher pub;
   WidgetId request_id_;
