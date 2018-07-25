@@ -18,7 +18,7 @@ void CheckboxWidget::update(bool b)
   {
     auto blocked = cbox_->signalsBlocked();
     cbox_->blockSignals(true);
-    cbox_->setChecked(true);
+    cbox_->setChecked(b);
     cbox_->blockSignals(blocked);
   }
 }
