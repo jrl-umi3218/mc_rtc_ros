@@ -338,6 +338,7 @@ Form::Form(QWidget * parent, const std::string & name, bool required, const std:
   auto layout = new QFormLayout(group);
   for(auto & el : elements_)
   {
+    el->update_dependencies(elements_);
     auto el_name = el->required() ? el->name() + "*" : el->name();
     if(!el->spanning())
     {
