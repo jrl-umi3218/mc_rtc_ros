@@ -48,7 +48,7 @@ void ArrowMarkerWidget::update(const Eigen::Vector3d& start, const Eigen::Vector
     m.color.r = c.color.r;
     m.color.g = c.color.g;
     m.color.b = c.color.b;
-    m.header.stamp = ros::Time();
+    m.header.stamp = ros::Time::now();
     m.header.frame_id = "robot_map";
     m.ns = id2name(id());
     markers_.markers.push_back(m);

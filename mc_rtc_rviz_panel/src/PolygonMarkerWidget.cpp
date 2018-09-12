@@ -44,7 +44,7 @@ void PolygonMarkerWidget::update(const std::vector<Eigen::Vector3d>& points, con
   m.color.g = c.g;
   m.color.b = c.b;
   m.color.a = c.a;
-  m.header.stamp = ros::Time();
+  m.header.stamp = ros::Time::now();
   m.header.frame_id = "robot_map";
   m.ns = id2name(id());
   markers_.markers.push_back(m);
