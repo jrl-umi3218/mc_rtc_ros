@@ -92,6 +92,7 @@ endif()
 add_executable(mc_rtc_gui main.cpp)
 target_link_libraries(mc_rtc_gui ${PROJECT_NAME})
 target_compile_options(mc_rtc_gui PRIVATE -fPIC)
+pkg_config_use_dependency(mc_rtc_gui mc_rtc)
 
 install(
   TARGETS

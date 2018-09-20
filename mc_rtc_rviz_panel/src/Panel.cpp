@@ -28,7 +28,9 @@ Panel::Panel(QWidget * parent)
   nh_(),
   int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
 {
+#ifndef DISABLE_ROS
   marker_array_pub_ = mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::MarkerArray>( "/mc_rtc_rviz", 0 );
+#endif
   qRegisterMetaType<std::string>("std::string");
   qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
   qRegisterMetaType<WidgetId>("WidgetId");
@@ -125,8 +127,10 @@ void Panel::got_stop()
 {
   tree_.clean();
   int_server_->applyChanges();
+#ifndef DISABLE_ROS
   marker_array_pub_.publish(marker_array_);
   marker_array_.markers.clear();
+#endif
   if(ros::ok()) { ros::spinOnce(); }
 }
 

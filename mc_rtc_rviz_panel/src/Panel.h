@@ -23,6 +23,7 @@
 namespace ros
 {
   struct NodeHandle {};
+  struct Publisher {};
   inline void spinOnce() {}
   inline bool ok() { return true; }
   inline void init(int argc, char * argv[], const std::string &) {}
@@ -36,6 +37,11 @@ namespace interactive_markers
     InteractiveMarkerServer(const std::string &) {}
     void applyChanges() {}
   };
+}
+
+namespace visualization_msgs
+{
+  struct MarkerArray {};
 }
 
 #endif
