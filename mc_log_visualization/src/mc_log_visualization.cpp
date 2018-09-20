@@ -115,16 +115,16 @@ public:
     while(running)
     {
       /* Publication */
-      robot.mbc().q[0] = { log.at("ff_qw")[cur_i], log.at("ff_qx")[cur_i], log.at("ff_qy")[cur_i], log.at("ff_qz")[cur_i],
+      robot.mbc().q[0] = { log.at("ff_qw")[cur_i], -log.at("ff_qx")[cur_i], -log.at("ff_qy")[cur_i], -log.at("ff_qz")[cur_i],
                            log.at("ff_tx")[cur_i], log.at("ff_ty")[cur_i], log.at("ff_tz")[cur_i] };
       real_robot.mbc().q[0] = {1, 0, 0, 0, 0, 0, 0};
       for(size_t j = 0; j < ref_joint_order.size(); ++j)
       {
         const auto & jn = ref_joint_order[j];
         std::stringstream ss;
-        ss << "qOut" << j;
+        ss << "qOut_" << j;
         std::stringstream ss2;
-        ss2 << "qIn" << j;
+        ss2 << "qIn_" << j;
         robot.mbc().q[robot.jointIndexByName(jn)][0] = log.at(ss.str())[cur_i];
         real_robot.mbc().q[robot.jointIndexByName(jn)][0] = log.at(ss2.str())[cur_i];
         for(const auto & g : grippers)
@@ -135,7 +135,7 @@ public:
             if(gJn == jn)
             {
               std::stringstream ss2;
-              ss2 << "qIn" << j;
+              ss2 << "qIn_" << j;
               g.second->_q[k] = log.at(ss2.str())[cur_i];
             }
           }
@@ -151,14 +151,16 @@ public:
       }
 
       rbd::forwardKinematics(real_robot.mb(), real_robot.mbc());
-      double r = log.at("rpy_r")[cur_i];
-      double p = log.at("rpy_p")[cur_i];
-      double y = log.at("rpy_y")[cur_i];
-      double r0 = log.at("rpy_r")[0];
-      double p0 = log.at("rpy_p")[0];
-      double y0 = log.at("rpy_y")[0];
-      auto rot_imu = mc_rbdyn::rpyToPT(r, p, y);
-      auto rot_imu0 = mc_rbdyn::rpyToPT(r0, p0, y0);
+      auto rot_imu = sva::PTransformd(Eigen::Quaterniond(log.at("rpyIn_w")[cur_i],
+                                                         log.at("rpyIn_x")[cur_i],
+                                                         log.at("rpyIn_y")[cur_i],
+                                                         log.at("rpyIn_z")[cur_i])
+                                                        .normalized());
+      auto rot_imu0 = sva::PTransformd(Eigen::Quaterniond(log.at("rpyIn_w")[0],
+                                                          log.at("rpyIn_x")[0],
+                                                          log.at("rpyIn_y")[0],
+                                                          log.at("rpyIn_z")[0])
+                                                        .normalized());
       rot_imu = rot_imu * rot_imu0.inv();
       auto rootPos = real_robot.mbc().bodyPosW[0];
       auto imuPos = real_robot.mbc().bodyPosW[robot.bodyIndexByName(robot.bodySensor().parentBody())];
@@ -407,6 +409,7 @@ int main(int argc, char * argv[])
     return 1;
   }
 
+  auto nh = mc_rtc::ROSBridge::get_node_handle();
   LogPublisher appli(argv[1]);
   appli.run();
 
