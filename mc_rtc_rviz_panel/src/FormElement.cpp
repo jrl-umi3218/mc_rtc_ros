@@ -78,7 +78,9 @@ void CommonInput::textChanged(const QString&) { ready_ = true; }
 IntegerInput::IntegerInput(QWidget * parent, const std::string & name, bool required, int def)
 : CommonInput(parent, name, required)
 {
-  edit_->setValidator(new QIntValidator());
+  auto validator = new QIntValidator(this);
+  validator->setLocale(QLocale::C);
+  edit_->setValidator(validator);
   edit_->setText(QString::number(def));
   connect(edit_, SIGNAL(textChanged(const QString&)),
           this, SLOT(textChanged(const QString&)));
@@ -92,7 +94,9 @@ void IntegerInput::fill_(mc_rtc::Configuration & out)
 NumberInput::NumberInput(QWidget * parent, const std::string & name, bool required, double def)
 : CommonInput(parent, name, required)
 {
-  edit_->setValidator(new QDoubleValidator());
+  auto validator = new QDoubleValidator(this);
+  validator->setLocale(QLocale::C);
+  edit_->setValidator(validator);
   edit_->setText(QString::number(def));
   connect(edit_, SIGNAL(textChanged(const QString&)),
           this, SLOT(textChanged(const QString&)));
@@ -129,12 +133,16 @@ void CommonArrayInput::textChanged(const QString&)
 template<>
 void ArrayInput<int>::add_validator(QLineEdit * edit)
 {
-  edit->setValidator(new QIntValidator());
+  auto validator = new QIntValidator(this);
+  validator->setLocale(QLocale::C);
+  edit->setValidator(validator);
 }
 template<>
 void ArrayInput<double>::add_validator(QLineEdit * edit)
 {
-  edit->setValidator(new QDoubleValidator());
+  auto validator = new QDoubleValidator();
+  validator->setLocale(QLocale::C);
+  edit->setValidator(validator);
 }
 template<>
 void ArrayInput<int>::data2edit(const int & value, QLineEdit * edit)

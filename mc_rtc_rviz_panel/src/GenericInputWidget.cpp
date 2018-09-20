@@ -12,6 +12,7 @@ template<>
 void GenericInputWidget<double>::set_validator()
 {
   auto validator = new QDoubleValidator(this);
+  validator->setLocale(QLocale::C);
   edit_->setValidator(validator);
 }
 
@@ -19,6 +20,7 @@ template<>
 void GenericInputWidget<int>::set_validator()
 {
   auto validator = new QIntValidator(this);
+  validator->setLocale(QLocale::C);
   edit_->setValidator(validator);
 }
 

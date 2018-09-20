@@ -41,7 +41,9 @@ void ArrayInputWidget::update(const Eigen::VectorXd & data)
     {
       edits_[i] = new QLineEdit(this);
       edits_[i]->setReadOnly(true);
-      edits_[i]->setValidator(new QDoubleValidator(this));
+      auto validator = new QDoubleValidator(this);
+      validator->setLocale(QLocale::C);
+      edits_[i]->setValidator(validator);
       connect(edits_[i], SIGNAL(returnPressed()),
               this, SLOT(edit_return_pressed()));
       edits_layout_->addWidget(edits_[i], edits_row_, i);
