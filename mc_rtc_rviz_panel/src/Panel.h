@@ -155,6 +155,10 @@ protected:
                  const WidgetId & requestId,
                  bool ro, const sva::PTransformd & pos) override;
 
+  void xytheta(const WidgetId & id,
+               const WidgetId & requestId,
+               bool ro, const Eigen::Vector3d& vec) override;
+
   void schema(const WidgetId & id, const std::string & schema) override;
 
   void form(const WidgetId & id) override;
@@ -264,6 +268,10 @@ private slots:
   void got_transform(const WidgetId & id,
                      const WidgetId & requestId,
                      bool ro, const sva::PTransformd & pos);
+  void got_xytheta(const WidgetId & id,
+                   const WidgetId & requestId,
+                   bool ro,
+                   const Eigen::Vector3d& vec);
   void got_trajectory(const WidgetId & id,
                       const std::vector<Eigen::Vector3d> & points,
                       const mc_rtc::gui::LineConfig & config);
@@ -378,6 +386,10 @@ signals:
   void signal_transform(const WidgetId & id,
                         const WidgetId & requestId,
                         bool ro, const sva::PTransformd & pos);
+  void signal_xytheta(const WidgetId & id,
+                      const WidgetId & requestId,
+                      bool ro,
+                      const Eigen::Vector3d& vec);
   void signal_schema(const WidgetId & id, const std::string & schema);
   void signal_form(const WidgetId & id);
   void signal_form_checkbox(const WidgetId & formId,
