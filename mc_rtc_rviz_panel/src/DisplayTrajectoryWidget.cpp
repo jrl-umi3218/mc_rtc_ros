@@ -71,6 +71,7 @@ void DisplayTrajectoryWidget::configure(visualization_msgs::Marker & path)
    path.color.a = config_.color.a;
    path.action = visualization_msgs::Marker::ADD;
    path.lifetime = ros::Duration(1);
+   path.ns = id2name(id());
 }
 
 }
