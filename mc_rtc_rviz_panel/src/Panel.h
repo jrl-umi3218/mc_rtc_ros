@@ -113,6 +113,14 @@ protected:
                   const std::vector<sva::PTransformd> & pos,
                   const mc_rtc::gui::LineConfig & config) override;
 
+  void trajectory(const WidgetId & id,
+                  const Eigen::Vector3d & point,
+                  const mc_rtc::gui::LineConfig & config) override;
+
+  void trajectory(const WidgetId & id,
+                  const sva::PTransformd & point,
+                  const mc_rtc::gui::LineConfig & config) override;
+
   void polygon(const WidgetId & id,
                const std::vector<Eigen::Vector3d> & pos,
                const mc_rtc::gui::Color& color) override;
@@ -237,6 +245,12 @@ private slots:
   void got_trajectory(const WidgetId & id,
                       const std::vector<sva::PTransformd> & points,
                       const mc_rtc::gui::LineConfig & config);
+  void got_trajectory(const WidgetId & id,
+                      const Eigen::Vector3d & point,
+                      const mc_rtc::gui::LineConfig & config);
+  void got_trajectory(const WidgetId & id,
+                      const sva::PTransformd & point,
+                      const mc_rtc::gui::LineConfig & config);
   void got_polygon(const WidgetId & id,
                    const std::vector<Eigen::Vector3d> & points,
                    const mc_rtc::gui::Color & c);
@@ -313,6 +327,12 @@ signals:
                          const mc_rtc::gui::LineConfig & config);
   void signal_trajectory(const WidgetId & id,
                          const std::vector<sva::PTransformd> & pos,
+                         const mc_rtc::gui::LineConfig & config);
+  void signal_trajectory(const WidgetId & id,
+                         const Eigen::Vector3d & point,
+                         const mc_rtc::gui::LineConfig & config);
+  void signal_trajectory(const WidgetId & id,
+                         const sva::PTransformd & point,
                          const mc_rtc::gui::LineConfig & config);
   void signal_polygon(const WidgetId & id,
                       const std::vector<Eigen::Vector3d> & pos,

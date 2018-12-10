@@ -79,6 +79,10 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_trajectory(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::LineConfig&)));
   connect(this, SIGNAL(signal_trajectory(const WidgetId&, const std::vector<sva::PTransformd>&, const mc_rtc::gui::LineConfig&)),
           this, SLOT(got_trajectory(const WidgetId&, const std::vector<sva::PTransformd>&, const mc_rtc::gui::LineConfig&)));
+  connect(this, SIGNAL(signal_trajectory(const WidgetId&, const Eigen::Vector3d&, const mc_rtc::gui::LineConfig&)),
+          this, SLOT(got_trajectory(const WidgetId&, const Eigen::Vector3d&, const mc_rtc::gui::LineConfig&)));
+  connect(this, SIGNAL(signal_trajectory(const WidgetId&, const sva::PTransformd&, const mc_rtc::gui::LineConfig&)),
+          this, SLOT(got_trajectory(const WidgetId&, const sva::PTransformd&, const mc_rtc::gui::LineConfig&)));
   connect(this, SIGNAL(signal_polygon(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::Color&)),
           this, SLOT(got_polygon(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::Color&)));
   connect(this, SIGNAL(signal_force(const WidgetId&,  const WidgetId&, const sva::ForceVecd&, const sva::PTransformd&, const mc_rtc::gui::ForceConfig&)),
@@ -222,6 +226,20 @@ void Panel::trajectory(const WidgetId & id,
                        const mc_rtc::gui::LineConfig & config)
 {
   Q_EMIT signal_trajectory(id, points, config);
+}
+
+void Panel::trajectory(const WidgetId & id,
+                       const Eigen::Vector3d & point,
+                       const mc_rtc::gui::LineConfig & config)
+{
+  Q_EMIT signal_trajectory(id, point, config);
+}
+
+void Panel::trajectory(const WidgetId & id,
+                       const sva::PTransformd & point,
+                       const mc_rtc::gui::LineConfig & config)
+{
+  Q_EMIT signal_trajectory(id, point, config);
 }
 
 void Panel::polygon(const WidgetId & id,
@@ -464,6 +482,26 @@ void Panel::got_trajectory(const WidgetId & id,
   #ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, marker_array_, config);
   w.update(points);
+  #endif
+}
+
+void Panel::got_trajectory(const WidgetId & id,
+                           const Eigen::Vector3d & point,
+                           const mc_rtc::gui::LineConfig & config)
+{
+  #ifndef DISABLE_ROS
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, marker_array_, config);
+  w.update(point);
+  #endif
+}
+
+void Panel::got_trajectory(const WidgetId & id,
+                           const sva::PTransformd & point,
+                           const mc_rtc::gui::LineConfig & config)
+{
+  #ifndef DISABLE_ROS
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, marker_array_, config);
+  w.update(point);
   #endif
 }
 
