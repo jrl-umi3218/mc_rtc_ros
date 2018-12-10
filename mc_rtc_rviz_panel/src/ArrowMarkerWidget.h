@@ -14,12 +14,11 @@ struct ArrowMarkerWidget : public ClientWidget
   Q_OBJECT
 public:
   ArrowMarkerWidget(const ClientWidgetParam & params,
-                    visualization_msgs::MarkerArray& markers);
+                    visualization_msgs::MarkerArray & markers);
 
-  void update(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const mc_rtc::gui::ArrowConfig & c);
+  void update(const Eigen::Vector3d & start, const Eigen::Vector3d & end, const mc_rtc::gui::ArrowConfig & c);
 private:
-  ros::Publisher pub;
-  visualization_msgs::MarkerArray& markers_;
+  visualization_msgs::MarkerArray & markers_;
 };
 
 }

@@ -106,10 +106,12 @@ protected:
                bool ro, const Eigen::Vector3d & pos) override;
 
   void trajectory(const WidgetId & id,
-                  const std::vector<Eigen::Vector3d> & pos) override;
+                  const std::vector<Eigen::Vector3d> & pos,
+                  const mc_rtc::gui::LineConfig & config) override;
 
   void trajectory(const WidgetId & id,
-                  const std::vector<sva::PTransformd> & pos) override;
+                  const std::vector<sva::PTransformd> & pos,
+                  const mc_rtc::gui::LineConfig & config) override;
 
   void polygon(const WidgetId & id,
                const std::vector<Eigen::Vector3d> & pos,
@@ -230,9 +232,11 @@ private slots:
                      const WidgetId & requestId,
                      bool ro, const sva::PTransformd & pos);
   void got_trajectory(const WidgetId & id,
-                      const std::vector<Eigen::Vector3d> & points);
+                      const std::vector<Eigen::Vector3d> & points,
+                      const mc_rtc::gui::LineConfig & config);
   void got_trajectory(const WidgetId & id,
-                      const std::vector<sva::PTransformd> & points);
+                      const std::vector<sva::PTransformd> & points,
+                      const mc_rtc::gui::LineConfig & config);
   void got_polygon(const WidgetId & id,
                    const std::vector<Eigen::Vector3d> & points,
                    const mc_rtc::gui::Color & c);
@@ -305,9 +309,11 @@ signals:
                       const WidgetId & requestId,
                       bool ro, const Eigen::Vector3d & pos);
   void signal_trajectory(const WidgetId & id,
-                         const std::vector<Eigen::Vector3d> & pos);
+                         const std::vector<Eigen::Vector3d> & pos,
+                         const mc_rtc::gui::LineConfig & config);
   void signal_trajectory(const WidgetId & id,
-                         const std::vector<sva::PTransformd> & pos);
+                         const std::vector<sva::PTransformd> & pos,
+                         const mc_rtc::gui::LineConfig & config);
   void signal_polygon(const WidgetId & id,
                       const std::vector<Eigen::Vector3d> & pos,
                       const mc_rtc::gui::Color & c);

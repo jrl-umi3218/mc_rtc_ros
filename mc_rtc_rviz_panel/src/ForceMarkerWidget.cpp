@@ -21,19 +21,20 @@ namespace
 
 ForceMarkerWidget::ForceMarkerWidget(const ClientWidgetParam & params,
                                          const WidgetId & requestId,
-                                         visualization_msgs::MarkerArray& markers)
+                                         visualization_msgs::MarkerArray & markers)
 : ClientWidget(params),
   request_id_(requestId),
   markers_(markers)
 {
 }
 
-void ForceMarkerWidget::update(const sva::ForceVecd& force, const sva::PTransformd& surface, const mc_rtc::gui::ForceConfig & c)
+void ForceMarkerWidget::update(const sva::ForceVecd & force, const sva::PTransformd & surface, const mc_rtc::gui::ForceConfig & c)
 {
     Eigen::Vector3d cop = surface.translation();
     visualization_msgs::Marker m;
     m.type = visualization_msgs::Marker::ARROW;
     m.action = visualization_msgs::Marker::ADD;
+    m.lifetime = ros::Duration(1);
     auto rosPoint = [](const Eigen::Vector3d & vec)
     {
       geometry_msgs::Point p;

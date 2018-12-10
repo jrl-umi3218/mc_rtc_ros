@@ -23,8 +23,8 @@ namespace mc_rtc_rviz
 {
 
 Panel::Panel(QWidget * parent)
-: mc_control::ControllerClient("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 2),
-  CategoryWidget(ClientWidgetParam{*this, parent, {{},"ROOT"}}),
+: CategoryWidget(ClientWidgetParam{*this, parent, {{},"ROOT"}}),
+  mc_control::ControllerClient("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 2),
   nh_(),
   int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
 {
@@ -38,9 +38,10 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<Eigen::VectorXd>("Eigen::VectorXd");
   qRegisterMetaType<sva::PTransformd>("sva::PTransformd");
   qRegisterMetaType<sva::ForceVecd>("sva::ForceVecd");
-  qRegisterMetaType<mc_rtc::gui::ForceConfig>("mc_rtc::gui::ForceConfig");
   qRegisterMetaType<mc_rtc::gui::ArrowConfig>("mc_rtc::gui::ArrowConfig");
   qRegisterMetaType<mc_rtc::gui::Color>("mc_rtc::gui::Color");
+  qRegisterMetaType<mc_rtc::gui::ForceConfig>("mc_rtc::gui::ForceConfig");
+  qRegisterMetaType<mc_rtc::gui::LineConfig>("mc_rtc::gui::LineConfig");
   qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   tree_.parent = this;
@@ -74,10 +75,10 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_data_combo_input(const WidgetId&, const std::vector<std::string>&, const std::string&)));
   connect(this, SIGNAL(signal_point3d(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&)),
           this, SLOT(got_point3d(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&)));
-  connect(this, SIGNAL(signal_trajectory(const WidgetId&, const std::vector<Eigen::Vector3d>&)),
-          this, SLOT(got_trajectory(const WidgetId&, const std::vector<Eigen::Vector3d>&)));
-  connect(this, SIGNAL(signal_trajectory(const WidgetId&, const std::vector<sva::PTransformd>&)),
-          this, SLOT(got_trajectory(const WidgetId&, const std::vector<sva::PTransformd>&)));
+  connect(this, SIGNAL(signal_trajectory(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::LineConfig&)),
+          this, SLOT(got_trajectory(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::LineConfig&)));
+  connect(this, SIGNAL(signal_trajectory(const WidgetId&, const std::vector<sva::PTransformd>&, const mc_rtc::gui::LineConfig&)),
+          this, SLOT(got_trajectory(const WidgetId&, const std::vector<sva::PTransformd>&, const mc_rtc::gui::LineConfig&)));
   connect(this, SIGNAL(signal_polygon(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::Color&)),
           this, SLOT(got_polygon(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::Color&)));
   connect(this, SIGNAL(signal_force(const WidgetId&,  const WidgetId&, const sva::ForceVecd&, const sva::PTransformd&, const mc_rtc::gui::ForceConfig&)),
@@ -210,15 +211,17 @@ void Panel::point3d(const WidgetId & id,
 }
 
 void Panel::trajectory(const WidgetId & id,
-                       const std::vector<Eigen::Vector3d> & points)
+                       const std::vector<Eigen::Vector3d> & points,
+                       const mc_rtc::gui::LineConfig & config)
 {
-  Q_EMIT signal_trajectory(id, points);
+  Q_EMIT signal_trajectory(id, points, config);
 }
 
 void Panel::trajectory(const WidgetId & id,
-                       const std::vector<sva::PTransformd> & points)
+                       const std::vector<sva::PTransformd> & points,
+                       const mc_rtc::gui::LineConfig & config)
 {
-  Q_EMIT signal_trajectory(id, points);
+  Q_EMIT signal_trajectory(id, points, config);
 }
 
 void Panel::polygon(const WidgetId & id,
@@ -357,7 +360,7 @@ void Panel::got_array_label(const WidgetId & id,
 
 void Panel::got_button(const WidgetId & id)
 {
-  auto & w = get_widget<ButtonWidget>(id);
+  get_widget<ButtonWidget>(id);
 }
 
 void Panel::got_checkbox(const WidgetId & id, bool state)
@@ -403,7 +406,7 @@ void Panel::got_combo_input(const WidgetId & id,
                             const std::string & data)
 {
   auto & w = get_widget<ComboInputWidget>(id, values);
-  w.update(data);
+  w.update(data, values);
 }
 
 void Panel::got_data_combo_input(const WidgetId & id,
@@ -411,7 +414,7 @@ void Panel::got_data_combo_input(const WidgetId & id,
                             const std::string & data)
 {
   auto & w = get_widget<ComboInputWidget>(id, data_, values);
-  w.update(data);
+  w.update(data, data_, values);
 }
 
 void Panel::got_point3d(const WidgetId & id,
@@ -445,19 +448,21 @@ void Panel::got_transform(const WidgetId & id,
 }
 
 void Panel::got_trajectory(const WidgetId & id,
-                           const std::vector<Eigen::Vector3d> & points)
+                           const std::vector<Eigen::Vector3d> & points,
+                           const mc_rtc::gui::LineConfig & config)
 {
   #ifndef DISABLE_ROS
-  auto & w = get_widget<DisplayTrajectoryWidget>(id);
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, marker_array_, config);
   w.update(points);
   #endif
 }
 
 void Panel::got_trajectory(const WidgetId & id,
-                           const std::vector<sva::PTransformd> & points)
+                           const std::vector<sva::PTransformd> & points,
+                           const mc_rtc::gui::LineConfig & config)
 {
   #ifndef DISABLE_ROS
-  auto & w = get_widget<DisplayTrajectoryWidget>(id);
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, marker_array_, config);
   w.update(points);
   #endif
 }
@@ -498,12 +503,12 @@ void Panel::got_arrow(const WidgetId & id,
 
 void Panel::got_schema(const WidgetId & id, const std::string & schema)
 {
-  auto & w = get_widget<SchemaWidget>(id, schema, data_);
+  get_widget<SchemaWidget>(id, schema, data_);
 }
 
 void Panel::got_form(const WidgetId & id)
 {
-  auto & w = get_widget<FormWidget>(id);
+  get_widget<FormWidget>(id);
 }
 
 void Panel::got_form_checkbox(const WidgetId & formId,

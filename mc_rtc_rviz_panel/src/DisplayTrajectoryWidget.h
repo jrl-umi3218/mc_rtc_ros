@@ -3,7 +3,7 @@
 #include "ClientWidget.h"
 #include "utils.h"
 #include <mc_rtc/ros.h>
-#include <nav_msgs/Path.h>
+#include <visualization_msgs/MarkerArray.h>
 
 namespace mc_rtc_rviz
 {
@@ -12,12 +12,16 @@ struct DisplayTrajectoryWidget : public ClientWidget
 {
   Q_OBJECT
 public:
-  DisplayTrajectoryWidget(const ClientWidgetParam & params);
+  DisplayTrajectoryWidget(const ClientWidgetParam & params,
+                          visualization_msgs::MarkerArray & markers,
+                          const mc_rtc::gui::LineConfig & config);
 
   void update(const std::vector<Eigen::Vector3d>& points);
   void update(const std::vector<sva::PTransformd>& points);
 private:
-  ros::Publisher path_pub;
+  visualization_msgs::MarkerArray & markers_;
+  mc_rtc::gui::LineConfig config_;
+  void configure(visualization_msgs::Marker & path);
 };
 
 }

@@ -20,17 +20,18 @@ namespace
 }
 
 ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params,
-                                         visualization_msgs::MarkerArray& markers)
+                                         visualization_msgs::MarkerArray & markers)
 : ClientWidget(params),
   markers_(markers)
 {
 }
 
-void ArrowMarkerWidget::update(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const mc_rtc::gui::ArrowConfig & c)
+void ArrowMarkerWidget::update(const Eigen::Vector3d & start, const Eigen::Vector3d & end, const mc_rtc::gui::ArrowConfig & c)
 {
     visualization_msgs::Marker m;
     m.type = visualization_msgs::Marker::ARROW;
     m.action = visualization_msgs::Marker::ADD;
+    m.lifetime = ros::Duration(1);
     auto rosPoint = [](const Eigen::Vector3d & vec)
     {
       geometry_msgs::Point p;

@@ -15,13 +15,12 @@ struct ForceMarkerWidget : public ClientWidget
 public:
   ForceMarkerWidget(const ClientWidgetParam & params,
                     const WidgetId & requestId,
-                    visualization_msgs::MarkerArray& markers);
+                    visualization_msgs::MarkerArray & markers);
 
-  void update(const sva::ForceVecd& force, const sva::PTransformd& surface, const mc_rtc::gui::ForceConfig & c);
+  void update(const sva::ForceVecd & force, const sva::PTransformd & surface, const mc_rtc::gui::ForceConfig & c);
 private:
-  ros::Publisher pub;
   WidgetId request_id_;
-  visualization_msgs::MarkerArray& markers_;
+  visualization_msgs::MarkerArray & markers_;
 };
 
 }

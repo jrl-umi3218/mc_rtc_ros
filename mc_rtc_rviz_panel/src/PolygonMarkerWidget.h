@@ -14,12 +14,11 @@ struct PolygonMarkerWidget : public ClientWidget
   Q_OBJECT
 public:
   PolygonMarkerWidget(const ClientWidgetParam & params,
-                      visualization_msgs::MarkerArray& markers);
+                      visualization_msgs::MarkerArray & markers);
 
   void update(const std::vector<Eigen::Vector3d> & t, const mc_rtc::gui::Color& c);
 private:
-  ros::Publisher pub;
-  visualization_msgs::MarkerArray& markers_;
+  visualization_msgs::MarkerArray & markers_;
 };
 
 }

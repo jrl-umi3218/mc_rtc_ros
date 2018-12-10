@@ -20,7 +20,7 @@ namespace
 }
 
 PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params,
-                                         visualization_msgs::MarkerArray& markers)
+                                         visualization_msgs::MarkerArray & markers)
 : ClientWidget(params),
   markers_(markers)
 {
@@ -31,6 +31,7 @@ void PolygonMarkerWidget::update(const std::vector<Eigen::Vector3d>& points, con
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::LINE_STRIP;
   m.action = visualization_msgs::Marker::ADD;
+  m.lifetime = ros::Duration(1);
   for(const auto& point : points)
   {
     geometry_msgs::Point p;

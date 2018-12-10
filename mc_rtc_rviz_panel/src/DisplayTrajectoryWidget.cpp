@@ -19,54 +19,58 @@ namespace
   }
 }
 
-DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & params)
-: ClientWidget(params)
+DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & params,
+                                                 visualization_msgs::MarkerArray & markers,
+                                                 const mc_rtc::gui::LineConfig & config)
+: ClientWidget(params),
+  markers_(markers),
+  config_(config)
 {
-  path_pub = mc_rtc::ROSBridge::get_node_handle()->advertise<nav_msgs::Path>("/mc_rtc_rviz/"+id2name(params.id), 1);
 }
 
 void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d>& points)
 {
-   // Publish path
-   nav_msgs::Path path;
-   path.header.frame_id="/robot_map";
-   path.header.stamp = ros::Time::now();
-   for(const auto&p : points)
-   {
-     geometry_msgs::PoseStamped pose;
-     pose.header.stamp = ros::Time::now();
-     pose.header.frame_id = "/robot_map";
-     pose.pose.position.x = p.x();
-     pose.pose.position.y = p.y();
-     pose.pose.position.z = p.z();
-     path.poses.push_back(pose);
-   }
-   path_pub.publish(path);
+  visualization_msgs::Marker path;
+  configure(path);
+  for(const auto & p : points)
+  {
+    geometry_msgs::Point pose;
+    pose.x = p.x();
+    pose.y = p.y();
+    pose.z = p.z();
+    path.points.push_back(pose);
+  }
+  markers_.markers.push_back(path);
 }
 
 void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd>& points)
 {
-   // Publish path
-   nav_msgs::Path path;
+  visualization_msgs::Marker path;
+  configure(path);
+  for(const auto&p : points)
+  {
+    geometry_msgs::Point pose;
+    pose.x = p.translation().x();
+    pose.y = p.translation().y();
+    pose.z = p.translation().z();
+    path.points.push_back(pose);
+  }
+  markers_.markers.push_back(path);
+}
+
+void DisplayTrajectoryWidget::configure(visualization_msgs::Marker & path)
+{
+  path.type = config_.style == mc_rtc::gui::LineStyle::Dotted ? visualization_msgs::Marker::POINTS : visualization_msgs::Marker::LINE_STRIP;
    path.header.frame_id="/robot_map";
    path.header.stamp = ros::Time::now();
-   for(const auto&p : points)
-   {
-     geometry_msgs::PoseStamped pose;
-     pose.header.stamp = ros::Time::now();
-     pose.header.frame_id = "/robot_map";
-     pose.pose.position.x = p.translation().x();
-     pose.pose.position.y = p.translation().y();
-     pose.pose.position.z = p.translation().z();
-     Eigen::Quaterniond q(p.rotation());
-     Eigen::Quaterniond qi = q.inverse();
-     pose.pose.orientation.w = qi.w();
-     pose.pose.orientation.x = qi.x();
-     pose.pose.orientation.y = qi.y();
-     pose.pose.orientation.z = qi.z();
-     path.poses.push_back(pose);
-   }
-   path_pub.publish(path);
+   path.scale.x = config_.width;
+   path.scale.y = config_.width;
+   path.color.r = config_.color.r;
+   path.color.g = config_.color.g;
+   path.color.b = config_.color.b;
+   path.color.a = config_.color.a;
+   path.action = visualization_msgs::Marker::ADD;
+   path.lifetime = ros::Duration(1);
 }
 
 }
