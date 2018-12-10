@@ -11,9 +11,9 @@
 
 #include <mc_control/generic_gripper.h>
 
+#include <mc_rbdyn/PolygonInterpolator.h>
 #include <mc_rbdyn/Robots.h>
 #include <mc_rbdyn/RobotLoader.h>
-#include <mc_rbdyn/stance.h>
 #include <mc_rbdyn/rpy_utils.h>
 
 #include <mc_rtc/logging.h>
@@ -211,8 +211,6 @@ public:
     robots = mc_rbdyn::loadRobotAndEnv(*mod, *env_mod);
     real_robots = mc_rbdyn::loadRobot(*mod);
 
-    mc_rbdyn::loadStances(*robots, std::string(mc_rtc::DATA_PATH) + std::string("/drc_stairs_climbing.json"), stances, stance_actions, interpolators);
-
     std::string urdfPath = mod->urdf_path;
     std::ifstream ifs(urdfPath);
     std::stringstream urdf;
@@ -386,8 +384,6 @@ private:
   std::map<std::string, std::shared_ptr<mc_control::Gripper>> grippers;
 
   /* Store plan data */
-  std::vector<mc_rbdyn::Stance> stances;
-  std::vector<std::shared_ptr<mc_rbdyn::StanceAction>> stance_actions;
   std::vector<mc_rbdyn::PolygonInterpolator> interpolators;
 
   /* UI related */
