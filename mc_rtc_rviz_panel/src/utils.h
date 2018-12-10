@@ -56,26 +56,32 @@ struct SharedMarker
 
   void update(const Eigen::Vector3d & t)
   {
-    geometry_msgs::Pose pose;
-    pose.orientation.w = 1.0;
-    pose.position.x = t.x();
-    pose.position.y = t.y();
-    pose.position.z = t.z();
-    server_.setPose(marker_.name, pose);
+    if(!hidden_)
+    {
+      geometry_msgs::Pose pose;
+      pose.orientation.w = 1.0;
+      pose.position.x = t.x();
+      pose.position.y = t.y();
+      pose.position.z = t.z();
+      server_.setPose(marker_.name, pose);
+    }
   }
 
   void update(const sva::PTransformd & pos)
   {
-    geometry_msgs::Pose pose;
-    Eigen::Quaterniond q {pos.rotation().transpose()};
-    pose.orientation.w = q.w();
-    pose.orientation.x = q.x();
-    pose.orientation.y = q.y();
-    pose.orientation.z = q.z();
-    pose.position.x = pos.translation().x();
-    pose.position.y = pos.translation().y();
-    pose.position.z = pos.translation().z();
-    server_.setPose(marker_.name, pose);
+    if(!hidden_)
+    {
+      geometry_msgs::Pose pose;
+      Eigen::Quaterniond q {pos.rotation().transpose()};
+      pose.orientation.w = q.w();
+      pose.orientation.x = q.x();
+      pose.orientation.y = q.y();
+      pose.orientation.z = q.z();
+      pose.position.x = pos.translation().x();
+      pose.position.y = pos.translation().y();
+      pose.position.z = pos.translation().z();
+      server_.setPose(marker_.name, pose);
+    }
   }
 private:
   interactive_markers::InteractiveMarkerServer & server_;
