@@ -1,6 +1,7 @@
 #include "ArrowMarkerWidget.h"
 
 #include <mc_rbdyn/configuration_io.h>
+#include "utils.h"
 
 namespace mc_rtc_rviz
 {
@@ -53,6 +54,9 @@ void ArrowMarkerWidget::update(const Eigen::Vector3d & start, const Eigen::Vecto
     m.header.frame_id = "robot_map";
     m.ns = id2name(id());
     markers_.markers.push_back(m);
+
+    markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.arrow_start_point_scale));
+    markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.arrow_end_point_scale));
 }
 
 }

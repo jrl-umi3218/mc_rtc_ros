@@ -43,8 +43,10 @@ void ForceMarkerWidget::update(const sva::ForceVecd & force, const sva::PTransfo
       p.z = vec.z();
       return p;
     };
-    m.points.push_back(rosPoint(cop));
-    m.points.push_back(rosPoint(cop + c.force_scale * force.force()));
+    const auto& start = cop;
+    const auto& end = cop + c.force_scale * force.force();
+    m.points.push_back(rosPoint(start));
+    m.points.push_back(rosPoint(end));
     m.scale.x = c.arrow_shaft_diam;
     m.scale.y = c.arrow_head_diam;
     m.scale.z = c.arrow_head_len;
@@ -56,6 +58,9 @@ void ForceMarkerWidget::update(const sva::ForceVecd & force, const sva::PTransfo
     m.header.frame_id = "robot_map";
     m.ns = id2name(request_id_);
     markers_.markers.push_back(m);
+
+    markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.arrow_start_point_scale));
+    markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.arrow_end_point_scale));
 }
 
 }
