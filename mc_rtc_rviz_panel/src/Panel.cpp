@@ -44,6 +44,7 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<mc_rtc::gui::LineConfig>("mc_rtc::gui::LineConfig");
   qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
+  qRegisterMetaType<std::vector<std::vector<Eigen::Vector3d>>>("std::vector<std::vector<Eigen::Vector3d>>");
   tree_.parent = this;
   connect(this, SIGNAL(signal_start()),
           this, SLOT(got_start()));
@@ -85,6 +86,8 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_trajectory(const WidgetId&, const sva::PTransformd&, const mc_rtc::gui::LineConfig&)));
   connect(this, SIGNAL(signal_polygon(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::Color&)),
           this, SLOT(got_polygon(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::Color&)));
+  connect(this, SIGNAL(signal_polygon(const WidgetId&, const std::vector<std::vector<Eigen::Vector3d>>&, const mc_rtc::gui::Color&)),
+          this, SLOT(got_polygon(const WidgetId&, const std::vector<std::vector<Eigen::Vector3d>>&, const mc_rtc::gui::Color&)));
   connect(this, SIGNAL(signal_force(const WidgetId&,  const WidgetId&, const sva::ForceVecd&, const sva::PTransformd&, const mc_rtc::gui::ForceConfig&)),
           this, SLOT(got_force(const WidgetId&, const WidgetId&, const sva::ForceVecd&, const sva::PTransformd&, const mc_rtc::gui::ForceConfig&)));
   connect(this, SIGNAL(signal_arrow(const WidgetId&, const Eigen::Vector3d&, const Eigen::Vector3d&, const mc_rtc::gui::ArrowConfig&)),
@@ -247,6 +250,13 @@ void Panel::polygon(const WidgetId & id,
                     const mc_rtc::gui::Color& color)
 {
   Q_EMIT signal_polygon(id, points, color);
+}
+
+void Panel::polygon(const WidgetId & id,
+                    const std::vector<std::vector<Eigen::Vector3d>> & polygons,
+                    const mc_rtc::gui::Color& color)
+{
+  Q_EMIT signal_polygon(id, polygons, color);
 }
 
 
@@ -512,6 +522,16 @@ void Panel::got_polygon(const WidgetId & id,
   #ifndef DISABLE_ROS
   auto & w = get_widget<PolygonMarkerWidget>(id, marker_array_);
   w.update(points, c);
+  #endif
+}
+
+void Panel::got_polygon(const WidgetId & id,
+                        const std::vector<std::vector<Eigen::Vector3d>> & polygons,
+                        const mc_rtc::gui::Color& c)
+{
+  #ifndef DISABLE_ROS
+  auto & w = get_widget<PolygonMarkerWidget>(id, marker_array_);
+  w.update(polygons, c);
   #endif
 }
 
