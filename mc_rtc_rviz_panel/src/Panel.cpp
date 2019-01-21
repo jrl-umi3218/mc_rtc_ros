@@ -76,10 +76,8 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_combo_input(const WidgetId&, const std::vector<std::string>&, const std::string&)));
   connect(this, SIGNAL(signal_data_combo_input(const WidgetId&, const std::vector<std::string>&, const std::string&)),
           this, SLOT(got_data_combo_input(const WidgetId&, const std::vector<std::string>&, const std::string&)));
-  connect(this, SIGNAL(signal_point3d(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&)),
-          this, SLOT(got_point3d(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&)));
-  connect(this, SIGNAL(signal_point(const WidgetId&, const WidgetId&, const Eigen::Vector3d&, const mc_rtc::gui::PointConfig&)),
-          this, SLOT(got_point(const WidgetId&, const WidgetId&, const Eigen::Vector3d&, const mc_rtc::gui::PointConfig&)));
+  connect(this, SIGNAL(signal_point3d(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&, const mc_rtc::gui::PointConfig&)),
+          this, SLOT(got_point3d(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&, const mc_rtc::gui::PointConfig&)));
   connect(this, SIGNAL(signal_trajectory(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::LineConfig&)),
           this, SLOT(got_trajectory(const WidgetId&, const std::vector<Eigen::Vector3d>&, const mc_rtc::gui::LineConfig&)));
   connect(this, SIGNAL(signal_trajectory(const WidgetId&, const std::vector<sva::PTransformd>&, const mc_rtc::gui::LineConfig&)),
@@ -214,17 +212,10 @@ void Panel::data_combo_input(const WidgetId & id,
 
 void Panel::point3d(const WidgetId & id,
                     const WidgetId & requestId,
-                    bool ro, const Eigen::Vector3d & pos)
+                    bool ro, const Eigen::Vector3d & pos,
+                    const mc_rtc::gui::PointConfig& config)
 {
-  Q_EMIT signal_point3d(id, requestId, ro, pos);
-}
-
-void Panel::point(const WidgetId & id,
-                  const WidgetId & requestId,
-                  const Eigen::Vector3d & pos,
-                  const mc_rtc::gui::PointConfig& config)
-{
-  Q_EMIT signal_point(id, requestId, pos, config);
+  Q_EMIT signal_point3d(id, requestId, ro, pos, config);
 }
 
 void Panel::trajectory(const WidgetId & id,
@@ -450,22 +441,20 @@ void Panel::got_data_combo_input(const WidgetId & id,
 
 void Panel::got_point3d(const WidgetId & id,
                         const WidgetId & requestId,
-                        bool ro, const Eigen::Vector3d & pos)
+                        bool ro, const Eigen::Vector3d & pos,
+                        const mc_rtc::gui::PointConfig& config)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, sva::PTransformd{pos}, false, !ro);
-  w.update(pos);
-#endif
-}
-
-void Panel::got_point(const WidgetId & id,
-                      const WidgetId & requestId,
-                      const Eigen::Vector3d & pos,
-                      const mc_rtc::gui::PointConfig& config)
-{
-#ifndef DISABLE_ROS
-  auto & w = get_widget<PointMarkerWidget>(id, marker_array_);
-  w.update(pos, config);
+  if(ro)
+  {
+    auto & w = get_widget<PointMarkerWidget>(id, marker_array_);
+    w.update(pos, config);
+  }
+  else
+  {
+    auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, sva::PTransformd{pos}, false, !ro);
+    w.update(pos);
+  }
 #endif
 }
 

@@ -33,9 +33,9 @@ void ForceMarkerWidget::update(const sva::ForceVecd & force, const sva::PTransfo
     const auto& end = cop + c.force_scale * force.force();
     m.points.push_back(rosPoint(start));
     m.points.push_back(rosPoint(end));
-    m.scale.x = c.arrow_shaft_diam;
-    m.scale.y = c.arrow_head_diam;
-    m.scale.z = c.arrow_head_len;
+    m.scale.x = c.shaft_diam;
+    m.scale.y = c.head_diam;
+    m.scale.z = c.head_len;
     m.color.a = c.color.a;
     m.color.r = c.color.r;
     m.color.g = c.color.g;
@@ -45,13 +45,13 @@ void ForceMarkerWidget::update(const sva::ForceVecd & force, const sva::PTransfo
     m.ns = id2name(request_id_);
     markers_.markers.push_back(m);
 
-    if(c.arrow_start_point_scale > 0)
+    if(c.start_point_scale > 0)
     {
-      markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.arrow_start_point_scale));
+      markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.start_point_scale));
     }
-    if(c.arrow_end_point_scale > 0)
+    if(c.end_point_scale > 0)
     {
-      markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.arrow_end_point_scale));
+      markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.end_point_scale));
     }
 }
 

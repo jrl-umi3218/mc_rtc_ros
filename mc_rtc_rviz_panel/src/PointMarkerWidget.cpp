@@ -15,7 +15,6 @@ PointMarkerWidget::PointMarkerWidget(const ClientWidgetParam & params,
 
 void PointMarkerWidget::update(const Eigen::Vector3d & pos, const mc_rtc::gui::PointConfig & c)
 {
-  LOG_INFO("PointMarkerWidget config scale: " << c.scale);
   if(c.scale > 0)
   {
     markers_.markers.push_back(getPointMarker(id2name(id()), pos, c.color, c.scale));
