@@ -127,9 +127,6 @@ protected:
                   const mc_rtc::gui::LineConfig & config) override;
 
   void polygon(const WidgetId & id,
-               const std::vector<Eigen::Vector3d> & pos,
-               const mc_rtc::gui::Color& color) override;
-  void polygon(const WidgetId & id,
                const std::vector<std::vector<Eigen::Vector3d>> & pos,
                const mc_rtc::gui::Color& color) override;
 
@@ -264,9 +261,6 @@ private slots:
                       const sva::PTransformd & point,
                       const mc_rtc::gui::LineConfig & config);
   void got_polygon(const WidgetId & id,
-                   const std::vector<Eigen::Vector3d> & points,
-                   const mc_rtc::gui::Color & c);
-  void got_polygon(const WidgetId & id,
                    const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                    const mc_rtc::gui::Color & c);
   void got_force(const WidgetId & id,
@@ -353,9 +347,6 @@ signals:
   void signal_trajectory(const WidgetId & id,
                          const sva::PTransformd & point,
                          const mc_rtc::gui::LineConfig & config);
-  void signal_polygon(const WidgetId & id,
-                      const std::vector<Eigen::Vector3d> & pos,
-                      const mc_rtc::gui::Color & c);
   void signal_polygon(const WidgetId & id,
                       const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                       const mc_rtc::gui::Color & c);

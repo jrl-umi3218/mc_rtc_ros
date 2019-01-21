@@ -12,11 +12,6 @@ PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params,
 {
 }
 
-void PolygonMarkerWidget::update(const std::vector<Eigen::Vector3d>& polygon, const mc_rtc::gui::Color& c)
-{
-  update(id2name(id()), polygon, c);
-}
-
 void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>>& polygons, const mc_rtc::gui::Color& c)
 {
   for (size_t i = 0; i < polygons.size(); ++i)
