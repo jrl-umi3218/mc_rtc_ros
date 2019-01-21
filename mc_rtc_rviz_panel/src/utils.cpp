@@ -103,7 +103,7 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
 }
 
 
-visualization_msgs::Marker getPointMarker(const std::string & ns, const Eigen::Vector3d & pos, const mc_rtc::gui::Color& color, double scale = 1.)
+visualization_msgs::Marker getPointMarker(const std::string & ns, const Eigen::Vector3d & pos, const mc_rtc::gui::Color& color, double scale = 0.02)
 {
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::SPHERE;

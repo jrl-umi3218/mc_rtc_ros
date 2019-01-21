@@ -21,6 +21,8 @@ struct ClientWidgetParam
   const WidgetId & id;
 };
 
+std::string id2name(const WidgetId& id);
+
 /** Base class for all widget handled by the controller client */
 struct ClientWidget : public QWidget
 {

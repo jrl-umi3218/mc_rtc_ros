@@ -13,7 +13,7 @@ set(MOC_HEADERS
 )
 
 if(NOT ${DISABLE_ROS})
-  list(APPEND MOC_HEADERS InteractiveMarkerWidget.h DisplayTrajectoryWidget.h PolygonMarkerWidget.h ForceMarkerWidget.h ArrowMarkerWidget.h plugin.h)
+  list(APPEND MOC_HEADERS InteractiveMarkerWidget.h DisplayTrajectoryWidget.h PolygonMarkerWidget.h ForceMarkerWidget.h ArrowMarkerWidget.h PointMarkerWidget.h plugin.h)
 endif()
 
 if(NOT DEFINED ENV{ROS_DISTRO})
@@ -72,7 +72,7 @@ set(SOURCE_FILES
 )
 
 if(NOT ${DISABLE_ROS})
-  list(APPEND SOURCE_FILES InteractiveMarkerWidget.cpp DisplayTrajectoryWidget.cpp PolygonMarkerWidget.cpp ForceMarkerWidget.cpp ArrowMarkerWidget.cpp utils.cpp plugin.cpp)
+  list(APPEND SOURCE_FILES InteractiveMarkerWidget.cpp DisplayTrajectoryWidget.cpp PolygonMarkerWidget.cpp ForceMarkerWidget.cpp ArrowMarkerWidget.cpp PointMarkerWidget.cpp utils.cpp plugin.cpp)
 endif()
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})

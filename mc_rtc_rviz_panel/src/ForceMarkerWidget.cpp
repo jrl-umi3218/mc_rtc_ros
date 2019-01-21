@@ -5,20 +5,6 @@
 namespace mc_rtc_rviz
 {
 
-namespace
-{
-  std::string id2name(const WidgetId & id)
-  {
-    std::string ret;
-    for(auto & c : id.category)
-    {
-      ret += c + "/";
-    }
-    ret += id.name;
-    return ret;
-  }
-}
-
 ForceMarkerWidget::ForceMarkerWidget(const ClientWidgetParam & params,
                                          const WidgetId & requestId,
                                          visualization_msgs::MarkerArray & markers)
@@ -59,8 +45,14 @@ void ForceMarkerWidget::update(const sva::ForceVecd & force, const sva::PTransfo
     m.ns = id2name(request_id_);
     markers_.markers.push_back(m);
 
-    markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.arrow_start_point_scale));
-    markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.arrow_end_point_scale));
+    if(c.arrow_start_point_scale > 0)
+    {
+      markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.arrow_start_point_scale));
+    }
+    if(c.arrow_end_point_scale > 0)
+    {
+      markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.arrow_end_point_scale));
+    }
 }
 
 }

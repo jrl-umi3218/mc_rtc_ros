@@ -105,6 +105,11 @@ protected:
                const WidgetId & requestId,
                bool ro, const Eigen::Vector3d & pos) override;
 
+  void point(const WidgetId & id,
+             const WidgetId & requestId,
+             const Eigen::Vector3d & pos,
+             const mc_rtc::gui::PointConfig & config) override;
+
   void trajectory(const WidgetId & id,
                   const std::vector<Eigen::Vector3d> & pos,
                   const mc_rtc::gui::LineConfig & config) override;
@@ -236,6 +241,10 @@ private slots:
   void got_point3d(const WidgetId & id,
                    const WidgetId & requestId,
                    bool ro, const Eigen::Vector3d & pos);
+  void got_point(const WidgetId & id,
+                 const WidgetId & requestId,
+                 const Eigen::Vector3d & pos,
+                 const mc_rtc::gui::PointConfig& config);
   void got_rotation(const WidgetId & id,
                     const WidgetId & requestId,
                     bool ro, const sva::PTransformd & pos);
@@ -328,6 +337,10 @@ signals:
   void signal_point3d(const WidgetId & id,
                       const WidgetId & requestId,
                       bool ro, const Eigen::Vector3d & pos);
+  void signal_point(const WidgetId & id,
+                    const WidgetId & requestId,
+                    const Eigen::Vector3d & pos,
+                    const mc_rtc::gui::PointConfig& config);
   void signal_trajectory(const WidgetId & id,
                          const std::vector<Eigen::Vector3d> & pos,
                          const mc_rtc::gui::LineConfig & config);

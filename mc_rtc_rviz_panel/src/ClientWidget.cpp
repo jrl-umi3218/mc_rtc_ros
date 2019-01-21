@@ -3,6 +3,18 @@
 namespace mc_rtc_rviz
 {
 
+std::string id2name(const WidgetId& id)
+{
+  std::string ret;
+  for(auto & c : id.category)
+  {
+    ret += c + "/";
+  }
+  ret += id.name;
+  return ret;
+}
+
+
 ClientWidget::ClientWidget(const ClientWidgetParam & params)
 : QWidget(params.parent), client_(params.client), id_(params.id)
 {
