@@ -73,6 +73,11 @@ int main()
           q.push_back(qj);
         }
       }
+      else
+      {
+        //FIXME This assumes that a joint that is in ref_joint_order but missing from the robot is of size 1 (very likely to be true)
+        q.push_back(0);
+      }
     }
   }
   controller.setEncoderValues(q);
@@ -157,6 +162,22 @@ int main()
     {
       begin = std::chrono::system_clock::now();
     }
+    auto & mbc = controller.robot().mbc();
+    const auto & rjo = controller.ref_joint_order();
+    size_t index = 0;
+    for(size_t i = 0; i < rjo.size(); ++i)
+    {
+      const auto & jn = rjo[i];
+      if(controller.robot().hasJoint(jn))
+      {
+        for(auto & qj : mbc.q[controller.robot().jointIndexByName(jn)])
+        {
+          q[index] = qj;
+          index++;
+        }
+      }
+    }
+    controller.setEncoderValues(q);
     if(controller.run())
     {
       std::map<std::string, std::vector<double>> gAQs; // will store only the active joints values

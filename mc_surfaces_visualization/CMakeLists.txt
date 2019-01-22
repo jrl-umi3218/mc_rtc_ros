@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package()
 
-add_required_dependency("mc_rtc", "mc_rtc_d")
+add_required_dependency("mc_rtc" "mc_rtc_d")
 
 include_directories(
   ${catkin_INCLUDE_DIRS}

@@ -32,6 +32,10 @@ namespace
     marker.color.g = 0.0;
     marker.color.b = 0.0;
     marker.color.a = 1.0;
+    marker.pose.orientation.w = 1;
+    marker.pose.orientation.x = 0;
+    marker.pose.orientation.y = 0;
+    marker.pose.orientation.z = 0;
     marker.points.emplace_back(pointFromVector(start));
     marker.points.emplace_back(pointFromVector(end));
     return marker;

@@ -78,7 +78,7 @@ int main(int argc, char **argv)
     ROS_ERROR_STREAM("Invalid robot_params size passed to mc_surfaces_visualization: " << robot_params.size());
   }
 
-  auto robot = mc_rbdyn::loadRobot(*robotModule, robotModule->rsdf_dir);
+  auto robot = mc_rbdyn::loadRobot(*robotModule);
 
   tf::TransformBroadcaster br;
   std::vector<tf::StampedTransform> transforms;

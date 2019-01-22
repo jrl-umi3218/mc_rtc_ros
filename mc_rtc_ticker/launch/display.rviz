@@ -1,6 +1,6 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 89
+    Help Height: 78
     Name: Displays
     Property Tree Widget:
       Expanded:
@@ -11,7 +11,7 @@ Panels:
         - /MarkerArray4
         - /MarkerArray4/Namespaces1
       Splitter Ratio: 0.5
-    Tree Height: 647
+    Tree Height: 78
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -20,7 +20,7 @@ Panels:
       - /2D Nav Goal1
       - /Publish Point1
     Name: Tool Properties
-    Splitter Ratio: 0.588679
+    Splitter Ratio: 0.588679016
   - Class: rviz/Views
     Expanded:
       - /Current View1
@@ -31,6 +31,8 @@ Panels:
     Name: Time
     SyncMode: 0
     SyncSource: ""
+  - Class: mc_rtc_rviz_panel/mc_rtc panel
+    Name: mc_rtc panel
 Visualization Manager:
   Class: ""
   Displays:
@@ -59,7 +61,7 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Alpha: 1
+    - Alpha: 0.5
       Class: rviz/RobotModel
       Collision Enabled: false
       Enabled: true
@@ -331,34 +333,7 @@ Visualization Manager:
       Marker Topic: /control/surfaces
       Name: MarkerArray
       Namespaces:
-        Back: true
-        Butthock: true
-        CenterRightHand: true
-        InteriorRightHand: true
-        InteriorRightHandInverted: true
-        InternLeftHand: true
-        InternRightHand: true
-        LExternSole: true
-        LFrontSole: true
-        LFullSole: true
-        LInternSole: true
-        LeftFingers: true
-        LeftGripper: true
-        LeftGripperReverse: true
-        LeftThight: true
-        LowerBack: true
-        RExternSole: true
-        RFrontSole: true
-        RFullSole: true
-        RInternSole: true
-        RightFingers: true
-        RightForearmSupport: true
-        RightGripper: true
-        RightGripperReverse: true
-        RightThight: true
-        RightWristSupport: true
-        XYLargeButthock: true
-        YLargeButthock: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -366,7 +341,7 @@ Visualization Manager:
       Marker Topic: /control/env_1/surfaces
       Name: MarkerArray
       Namespaces:
-        AllGround: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -374,52 +349,7 @@ Visualization Manager:
       Marker Topic: /control/sch_marker
       Name: MarkerArray
       Namespaces:
-        BODY: true
-        CHEST_LINK0: true
-        CHEST_LINK1: true
-        CHEST_LINK1_FULL: true
-        HEAD_LINK0: true
-        HEAD_LINK1: true
-        LARM_LINK0: true
-        LARM_LINK1: true
-        LARM_LINK2: true
-        LARM_LINK3: true
-        LARM_LINK4: true
-        LARM_LINK5: true
-        LARM_LINK6: true
-        LARM_LINK6_sub1: true
-        LARM_LINK7: true
-        LHAND_LINK0: true
-        LHAND_LINK1: true
-        LHAND_LINK2: true
-        LHAND_LINK3: true
-        LHAND_LINK4: true
-        LLEG_LINK0: true
-        LLEG_LINK1: true
-        LLEG_LINK2: true
-        LLEG_LINK3: true
-        LLEG_LINK4: true
-        LLEG_LINK5: true
-        RARM_LINK0: true
-        RARM_LINK1: true
-        RARM_LINK2: true
-        RARM_LINK3: true
-        RARM_LINK4: true
-        RARM_LINK5: true
-        RARM_LINK6: true
-        RARM_LINK6_sub1: true
-        RARM_LINK7: true
-        RHAND_LINK0: true
-        RHAND_LINK1: true
-        RHAND_LINK2: true
-        RHAND_LINK3: true
-        RHAND_LINK4: true
-        RLEG_LINK0: true
-        RLEG_LINK1: true
-        RLEG_LINK2: true
-        RLEG_LINK3: true
-        RLEG_LINK4: true
-        RLEG_LINK5: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -427,8 +357,25 @@ Visualization Manager:
       Marker Topic: /control/env_1/sch_marker
       Name: MarkerArray
       Namespaces:
-        ground: true
+        {}
       Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /control/contact_force
+      Name: MarkerArray
+      Namespaces:
+        control/contact_force: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/InteractiveMarkers
+      Enable Transparency: true
+      Enabled: true
+      Name: InteractiveMarkers
+      Show Axes: false
+      Show Descriptions: true
+      Show Visual Aids: false
+      Update Topic: /mc_rtc_rviz_interactive_markers/update
       Value: true
   Enabled: true
   Global Options:
@@ -454,30 +401,33 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.91668
+      Distance: 2.61645889
       Enable Stereo Rendering:
-        Stereo Eye Separation: 0.06
+        Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.355779
-        Y: 0.371184
-        Z: 0.805445
+        X: 0.468569279
+        Y: 0.37348929
+        Z: 1.15054739
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.0500000007
+      Invert Z Axis: false
       Name: Current View
-      Near Clip Distance: 0.01
-      Pitch: 0.229757
+      Near Clip Distance: 0.00999999978
+      Pitch: 0.419756889
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.77037
+      Yaw: 5.80036497
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 990
+  Height: 1559
   Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd00000004000000000000027300000328fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005700fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000004bb000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d00000328000000c200fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000013b0000027dfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000500000027d000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000069000000052fc0100000002fb0000000800540069006d00650100000000000006900000031600fffffffb0000000800540069006d00650100000000000004500000000000000000000004170000032800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000027a00000546fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000007200fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000004bb000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb00000018006d0063005f007200740063002000700061006e0065006c01000000400000043a0000043a00fffffffb000000100044006900730070006c0061007900730100000486000001000000010000fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000013b0000027dfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000500000027d000000e800fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000078000000058fc0100000002fb0000000800540069006d00650100000000000007800000057800fffffffb0000000800540069006d00650100000000000004500000000000000000000004fa0000054600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -486,6 +436,8 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 1680
-  X: 0
-  Y: 31
+  Width: 1920
+  X: 640
+  Y: 24
+  mc_rtc panel:
+    collapsed: false
