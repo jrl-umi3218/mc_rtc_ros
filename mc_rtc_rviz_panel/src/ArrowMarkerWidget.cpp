@@ -1,23 +1,10 @@
 #include "ArrowMarkerWidget.h"
 
 #include <mc_rbdyn/configuration_io.h>
+#include "utils.h"
 
 namespace mc_rtc_rviz
 {
-
-namespace
-{
-  std::string id2name(const WidgetId & id)
-  {
-    std::string ret;
-    for(auto & c : id.category)
-    {
-      ret += c + "/";
-    }
-    ret += id.name;
-    return ret;
-  }
-}
 
 ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params,
                                          visualization_msgs::MarkerArray & markers)
@@ -42,9 +29,9 @@ void ArrowMarkerWidget::update(const Eigen::Vector3d & start, const Eigen::Vecto
     };
     m.points.push_back(rosPoint(start));
     m.points.push_back(rosPoint(end));
-    m.scale.x = c.arrow_shaft_diam;
-    m.scale.y = c.arrow_head_diam;
-    m.scale.z = c.arrow_head_len;
+    m.scale.x = c.shaft_diam;
+    m.scale.y = c.head_diam;
+    m.scale.z = c.head_len;
     m.color.a = c.color.a;
     m.color.r = c.color.r;
     m.color.g = c.color.g;
@@ -53,6 +40,16 @@ void ArrowMarkerWidget::update(const Eigen::Vector3d & start, const Eigen::Vecto
     m.header.frame_id = "robot_map";
     m.ns = id2name(id());
     markers_.markers.push_back(m);
+
+    if(c.start_point_scale > 0)
+    {
+      markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.start_point_scale));
+    }
+
+    if(c.end_point_scale > 0)
+    {
+      markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.end_point_scale));
+    }
 }
 
 }

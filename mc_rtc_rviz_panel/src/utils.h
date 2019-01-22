@@ -5,11 +5,14 @@
 #include <visualization_msgs/InteractiveMarkerControl.h>
 
 #include <SpaceVecAlg/SpaceVecAlg>
+#include <mc_rtc/GUITypes.h>
 
 namespace vm = visualization_msgs;
 
 namespace mc_rtc_rviz
 {
+
+visualization_msgs::Marker getPointMarker(const std::string & ns, const Eigen::Vector3d & pos, const mc_rtc::gui::Color& color, double scale);
 
 struct SharedMarker
 {

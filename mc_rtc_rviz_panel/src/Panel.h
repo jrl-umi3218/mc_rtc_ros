@@ -103,7 +103,8 @@ protected:
 
   void point3d(const WidgetId & id,
                const WidgetId & requestId,
-               bool ro, const Eigen::Vector3d & pos) override;
+               bool ro, const Eigen::Vector3d & pos,
+               const mc_rtc::gui::PointConfig & config) override;
 
   void trajectory(const WidgetId & id,
                   const std::vector<Eigen::Vector3d> & pos,
@@ -122,7 +123,7 @@ protected:
                   const mc_rtc::gui::LineConfig & config) override;
 
   void polygon(const WidgetId & id,
-               const std::vector<Eigen::Vector3d> & pos,
+               const std::vector<std::vector<Eigen::Vector3d>> & pos,
                const mc_rtc::gui::Color& color) override;
 
   void force(const WidgetId & id,
@@ -232,7 +233,8 @@ private slots:
                             const std::string & data);
   void got_point3d(const WidgetId & id,
                    const WidgetId & requestId,
-                   bool ro, const Eigen::Vector3d & pos);
+                   bool ro, const Eigen::Vector3d & pos,
+                   const mc_rtc::gui::PointConfig&);
   void got_rotation(const WidgetId & id,
                     const WidgetId & requestId,
                     bool ro, const sva::PTransformd & pos);
@@ -252,7 +254,7 @@ private slots:
                       const sva::PTransformd & point,
                       const mc_rtc::gui::LineConfig & config);
   void got_polygon(const WidgetId & id,
-                   const std::vector<Eigen::Vector3d> & points,
+                   const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                    const mc_rtc::gui::Color & c);
   void got_force(const WidgetId & id,
                  const WidgetId & requestId,
@@ -321,7 +323,8 @@ signals:
                                const std::string & data);
   void signal_point3d(const WidgetId & id,
                       const WidgetId & requestId,
-                      bool ro, const Eigen::Vector3d & pos);
+                      bool ro, const Eigen::Vector3d & pos,
+                      const mc_rtc::gui::PointConfig&);
   void signal_trajectory(const WidgetId & id,
                          const std::vector<Eigen::Vector3d> & pos,
                          const mc_rtc::gui::LineConfig & config);
@@ -335,7 +338,7 @@ signals:
                          const sva::PTransformd & point,
                          const mc_rtc::gui::LineConfig & config);
   void signal_polygon(const WidgetId & id,
-                      const std::vector<Eigen::Vector3d> & pos,
+                      const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                       const mc_rtc::gui::Color & c);
  void signal_force(const WidgetId & id,
                    const WidgetId & requestId,

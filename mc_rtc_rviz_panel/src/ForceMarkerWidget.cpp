@@ -5,20 +5,6 @@
 namespace mc_rtc_rviz
 {
 
-namespace
-{
-  std::string id2name(const WidgetId & id)
-  {
-    std::string ret;
-    for(auto & c : id.category)
-    {
-      ret += c + "/";
-    }
-    ret += id.name;
-    return ret;
-  }
-}
-
 ForceMarkerWidget::ForceMarkerWidget(const ClientWidgetParam & params,
                                          const WidgetId & requestId,
                                          visualization_msgs::MarkerArray & markers)
@@ -43,11 +29,13 @@ void ForceMarkerWidget::update(const sva::ForceVecd & force, const sva::PTransfo
       p.z = vec.z();
       return p;
     };
-    m.points.push_back(rosPoint(cop));
-    m.points.push_back(rosPoint(cop + c.force_scale * force.force()));
-    m.scale.x = c.arrow_shaft_diam;
-    m.scale.y = c.arrow_head_diam;
-    m.scale.z = c.arrow_head_len;
+    const auto& start = cop;
+    const auto& end = cop + c.force_scale * force.force();
+    m.points.push_back(rosPoint(start));
+    m.points.push_back(rosPoint(end));
+    m.scale.x = c.shaft_diam;
+    m.scale.y = c.head_diam;
+    m.scale.z = c.head_len;
     m.color.a = c.color.a;
     m.color.r = c.color.r;
     m.color.g = c.color.g;
@@ -56,6 +44,15 @@ void ForceMarkerWidget::update(const sva::ForceVecd & force, const sva::PTransfo
     m.header.frame_id = "robot_map";
     m.ns = id2name(request_id_);
     markers_.markers.push_back(m);
+
+    if(c.start_point_scale > 0)
+    {
+      markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.start_point_scale));
+    }
+    if(c.end_point_scale > 0)
+    {
+      markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.end_point_scale));
+    }
 }
 
 }

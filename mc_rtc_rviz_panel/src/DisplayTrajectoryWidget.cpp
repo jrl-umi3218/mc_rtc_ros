@@ -5,20 +5,6 @@
 namespace mc_rtc_rviz
 {
 
-namespace
-{
-  std::string id2name(const WidgetId & id)
-  {
-    std::string ret;
-    for(auto & c : id.category)
-    {
-      ret += c + "/";
-    }
-    ret += id.name;
-    return ret;
-  }
-}
-
 DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & params,
                                                  visualization_msgs::MarkerArray & markers,
                                                  const mc_rtc::gui::LineConfig & config)

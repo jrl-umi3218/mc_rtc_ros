@@ -99,7 +99,33 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   return ret;
 }
 
+
 }
+
+
+visualization_msgs::Marker getPointMarker(const std::string & ns, const Eigen::Vector3d & pos, const mc_rtc::gui::Color& color, double scale = 0.02)
+{
+  visualization_msgs::Marker m;
+  m.type = visualization_msgs::Marker::SPHERE;
+  m.action = visualization_msgs::Marker::ADD;
+  m.pose.position.x = pos(0);
+  m.pose.position.y = pos(1);
+  m.pose.position.z = pos(2);
+  m.scale.x = scale;
+  m.scale.y = scale;
+  m.scale.z = scale;
+  m.color.a = 1.0;
+  m.color.r = color.r;
+  m.color.g = color.g;
+  m.color.b = color.b;
+  m.header.stamp = ros::Time();
+  m.header.frame_id = "robot_map";
+  m.ns = ns;
+  m.lifetime = ros::Duration(1.);
+  return m;
+}
+
+
 
 SharedMarker::SharedMarker(interactive_markers::InteractiveMarkerServer & server,
                            const std::string & name,
