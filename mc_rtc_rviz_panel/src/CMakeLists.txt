@@ -45,6 +45,7 @@ endif()
 set(HEADER_FILES
   ArrayLabelWidget.h
   ClientWidget.h
+  ConnectionDialog.h
   LabelWidget.h
   utils.h
 )
@@ -61,6 +62,7 @@ set(SOURCE_FILES
   CheckboxWidget.cpp
   ClientWidget.cpp
   ComboInputWidget.cpp
+  ConnectionDialog.cpp
   FormElement.cpp
   FormWidget.cpp
   GenericInputWidget.cpp

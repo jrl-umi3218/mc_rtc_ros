@@ -20,6 +20,8 @@
 #include "NumberSliderWidget.h"
 #include "SchemaWidget.h"
 
+#include "ConnectionDialog.h"
+
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
@@ -133,6 +135,9 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   qRegisterMetaType<std::vector<std::vector<Eigen::Vector3d>>>("std::vector<std::vector<Eigen::Vector3d>>");
   tree_.parent = this;
+  setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+          this, SLOT(contextMenu(const QPoint&)));
   connect(this, SIGNAL(signal_start()),
           this, SLOT(got_start()));
   connect(this, SIGNAL(signal_stop()),
@@ -746,6 +751,54 @@ void Panel::WidgetTree::clean()
       ++it;
     }
   }
+}
+
+void Panel::contextMenu(const QPoint & pos)
+{
+  QMenu menu("Context menu", this);
+  QAction edit("Edit connection parameters", this);
+  connect(&edit, SIGNAL(triggered()),
+          this, SLOT(contextMenu_editConnection()));
+  menu.addAction(&edit);
+  QAction reconnect("Reconnect", this);
+  connect(&reconnect, SIGNAL(triggered()),
+          this, SLOT(contextMenu_reconnect()));
+  menu.addAction(&reconnect);
+  menu.exec(mapToGlobal(pos));
+}
+
+void Panel::contextMenu_editConnection()
+{
+  std::string sub_uri = sub_uri_;
+  std::string push_uri = push_uri_;
+  ConnectionDialog dialog(sub_uri, push_uri, this);
+  if(dialog.exec())
+  {
+    try
+    {
+      reconnect(sub_uri, push_uri);
+    }
+    catch(std::runtime_error & exc)
+    {
+      LOG_ERROR("Reconnection failed with provided URIs")
+      exc.what();
+      return;
+    }
+    sub_uri_ = sub_uri;
+    push_uri_ = push_uri;
+    if(!config_.has("URI"))
+    {
+      config_.add("URI");
+    }
+    config_("URI").add("sub", sub_uri_);
+    config_("URI").add("push", push_uri_);
+    savePanelConfiguration(config_);
+  }
+}
+
+void Panel::contextMenu_reconnect()
+{
+  reconnect(sub_uri_, push_uri_);
 }
 
 } // namespace mc_rtc_rviz

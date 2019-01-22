@@ -213,6 +213,9 @@ private:
   std::string sub_uri_;
   std::string push_uri_;
 private slots:
+  void contextMenu(const QPoint & pos);
+  void contextMenu_editConnection();
+  void contextMenu_reconnect();
   void got_start();
   void got_stop();
   void got_category(const std::vector<std::string> & parent, const std::string & category);
