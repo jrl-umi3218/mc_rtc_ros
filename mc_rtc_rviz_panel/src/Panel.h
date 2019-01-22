@@ -208,6 +208,10 @@ private:
   std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server_;
   visualization_msgs::MarkerArray marker_array_;
   ros::Publisher marker_array_pub_;
+  /** Configuration */
+  mc_rtc::Configuration config_;
+  std::string sub_uri_;
+  std::string push_uri_;
 private slots:
   void got_start();
   void got_stop();

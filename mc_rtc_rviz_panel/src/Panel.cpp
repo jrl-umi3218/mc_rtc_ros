@@ -20,14 +20,99 @@
 #include "NumberSliderWidget.h"
 #include "SchemaWidget.h"
 
+#include <boost/filesystem.hpp>
+namespace bfs = boost::filesystem;
+
 namespace mc_rtc_rviz
 {
 
+namespace
+{
+
+bfs::path getUserDirectory()
+{
+#ifndef WIN32
+  return bfs::path(std::getenv("HOME")) / ".config";
+#else
+  // Should work for Windows Vista and up
+  return bfs::path(std::getenv("APPDATA"));
+#endif
+}
+
+bfs::path getConfigDirectory()
+{
+  return getUserDirectory() / "mc_rtc/rviz_panel";
+}
+
+bfs::path getConfigPath()
+{
+  return getConfigDirectory() / "rviz_panel.conf";
+}
+
+mc_rtc::Configuration loadPanelConfiguration()
+{
+  mc_rtc::Configuration config;
+  auto config_path = getConfigPath();
+  if(bfs::exists(config_path) && bfs::is_regular(config_path))
+  {
+    config.load(config_path.string());
+  }
+  return config;
+}
+
+void savePanelConfiguration(const mc_rtc::Configuration & config)
+{
+  auto config_directory = getConfigDirectory();
+  if(!bfs::exists(config_directory))
+  {
+    bfs::create_directories(config_directory);
+  }
+  if(!bfs::is_directory(config_directory))
+  {
+    LOG_ERROR("Cannot save configuration to " << config_directory << ", " << config_directory << " is not a directory")
+    return;
+  }
+  auto config_path = getConfigPath();
+  if(bfs::exists(config_path) && !bfs::is_regular(config_path))
+  {
+    LOG_ERROR("Cannot save configuration to " << config_path << ", " << config_path << " is not a regular file")
+    return;
+  }
+  config.save(config_path.string());
+}
+
+std::string getSubURI(const mc_rtc::Configuration & config)
+{
+  return config("URI", mc_rtc::Configuration{})("sub", std::string("ipc:///tmp/mc_rtc_pub.ipc"));
+}
+
+std::string getSubURI()
+{
+  auto config = loadPanelConfiguration();
+  return getSubURI(config);
+}
+
+std::string getPushURI(const mc_rtc::Configuration & config)
+{
+  return config("URI", mc_rtc::Configuration{})("push", std::string("ipc:///tmp/mc_rtc_rep.ipc"));
+}
+
+std::string getPushURI()
+{
+  auto config = loadPanelConfiguration();
+  return getPushURI(config);
+}
+
+}
+
 Panel::Panel(QWidget * parent)
 : CategoryWidget(ClientWidgetParam{*this, parent, {{},"ROOT"}}),
-  mc_control::ControllerClient("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 2),
+  mc_control::ControllerClient(getSubURI(), getPushURI(), 2),
   nh_(),
-  int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
+  int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers")),
+  config_(loadPanelConfiguration()),
+  sub_uri_(getSubURI(config_)),
+  push_uri_(getPushURI(config_))
 {
 #ifndef DISABLE_ROS
   marker_array_pub_ = mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::MarkerArray>( "/mc_rtc_rviz", 0 );
