@@ -20,6 +20,11 @@ InteractiveMarkerWidget::InteractiveMarkerWidget(const ClientWidgetParam & param
   auto layout = new QVBoxLayout(this);
   button_ = new QPushButton(("Hide " + request_id_.name + " marker").c_str());
   button_->setCheckable(true);
+  button_->setChecked(!visible());
+  if(!visible())
+  {
+    marker_.toggle();
+  }
   connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
   layout->addWidget(button_);
 }
@@ -35,6 +40,7 @@ void InteractiveMarkerWidget::toggled(bool hide)
   {
     button_->setText(("Hide " + request_id_.name + " marker").c_str());
   }
+  visible(!hide);
 }
 
 void InteractiveMarkerWidget::operator()(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)

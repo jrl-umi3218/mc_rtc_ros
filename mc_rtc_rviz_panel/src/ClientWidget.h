@@ -43,6 +43,12 @@ public:
   /** Set seen value */
   void seen(bool s) { seen_ = s; }
 
+  /** Get the element visibility stored in the configuration */
+  bool visible();
+
+  /** Set the element visibility stored in the configuration */
+  void visible(bool visibility);
+
   /** To be implemented for containers, default implementation throws */
   virtual void addWidget(ClientWidget * w);
 

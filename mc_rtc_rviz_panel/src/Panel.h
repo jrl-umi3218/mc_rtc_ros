@@ -54,6 +54,16 @@ class Panel: public CategoryWidget, public mc_control::ControllerClient
 Q_OBJECT
 public:
   Panel(QWidget* parent = 0);
+
+  /** Returns true if the provided widget should be visible
+   *
+   * If the widget has never been seen, returns true
+   *
+   */
+  bool visible(const WidgetId & id) const;
+
+  /** Save visibility setting of a specific widget */
+  void visible(const WidgetId & id, bool visibility);
 protected:
   void started() override;
 
@@ -202,6 +212,9 @@ protected:
     w.seen(true);
     return w;
   }
+
+  /** Returns the configuration of a given widget */
+  mc_rtc::Configuration config(const WidgetId & id) const;
 private:
   /** ROS stuff */
   ros::NodeHandle nh_;
@@ -209,7 +222,7 @@ private:
   visualization_msgs::MarkerArray marker_array_;
   ros::Publisher marker_array_pub_;
   /** Configuration */
-  mc_rtc::Configuration config_;
+  mutable mc_rtc::Configuration config_;
   std::string sub_uri_;
   std::string push_uri_;
 private slots:

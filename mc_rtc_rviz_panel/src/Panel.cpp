@@ -801,4 +801,38 @@ void Panel::contextMenu_reconnect()
   reconnect(sub_uri_, push_uri_);
 }
 
+bool Panel::visible(const WidgetId & id) const
+{
+  return config(id)("visible", true);
+}
+
+void Panel::visible(const WidgetId & id, bool visibility)
+{
+  config(id).add("visible", visibility);
+  savePanelConfiguration(config_);
+}
+
+mc_rtc::Configuration Panel::config(const WidgetId & id) const
+{
+  if(!config_.has("widgets"))
+  {
+    config_.add("widgets");
+  }
+  auto ret = config_("widgets");
+  for(const auto & c : id.category)
+  {
+    if(!ret.has(c))
+    {
+      ret.add(c);
+    }
+    ret = ret(c);
+  }
+  if(!ret.has(id.name))
+  {
+    ret.add(id.name);
+  }
+  return ret(id.name);
+}
+
+
 } // namespace mc_rtc_rviz
