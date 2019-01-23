@@ -19,10 +19,13 @@ public:
   void update(const std::vector<std::vector<Eigen::Vector3d>>& polygons, const mc_rtc::gui::Color& c);
 
 private:
-  void update(const std::string& ns, const std::vector<Eigen::Vector3d>& points, const mc_rtc::gui::Color& c);
+  void update(const std::string& ns, const unsigned id, const std::vector<Eigen::Vector3d>& points, const mc_rtc::gui::Color& c);
+  void clear();
 
 private:
   visualization_msgs::MarkerArray & markers_;
+  unsigned prevPolygonNum_ = 0;
+  unsigned currPolygonNum_ = 0;
 };
 
 }
