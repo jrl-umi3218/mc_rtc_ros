@@ -14,14 +14,21 @@ PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params,
 
 void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>>& polygons, const mc_rtc::gui::Color& c)
 {
+  currPolygonNum_ = polygons.size();
+  if(prevPolygonNum_ > currPolygonNum_)
+  {
+    clear();
+  }
+
   for (size_t i = 0; i < polygons.size(); ++i)
   {
     const auto& polygon = polygons[i];
-    update(id2name(id()) + "/" + std::to_string(i), polygon, c);
+    update(id2name(id()), i, polygon, c);
   }
+  prevPolygonNum_ = polygons.size();
 }
 
-void PolygonMarkerWidget::update(const std::string& ns, const std::vector<Eigen::Vector3d>& points, const mc_rtc::gui::Color& c)
+void PolygonMarkerWidget::update(const std::string& ns, const unsigned id, const std::vector<Eigen::Vector3d>& points, const mc_rtc::gui::Color& c)
 {
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::LINE_STRIP;
@@ -44,7 +51,20 @@ void PolygonMarkerWidget::update(const std::string& ns, const std::vector<Eigen:
   m.header.stamp = ros::Time::now();
   m.header.frame_id = "robot_map";
   m.ns = ns;
+  m.id = id;
   markers_.markers.push_back(m);
+}
+
+void PolygonMarkerWidget::clear()
+{
+  for (unsigned i = currPolygonNum_; i < prevPolygonNum_; ++i)
+  {
+    visualization_msgs::Marker m;
+    m.action = visualization_msgs::Marker::DELETE;
+    m.ns = id2name(id());
+    m.id = i;
+    markers_.markers.push_back(m);
+  }
 }
 
 }
