@@ -365,7 +365,7 @@ Visualization Manager:
       Marker Topic: /control/contact_force
       Name: MarkerArray
       Namespaces:
-        control/contact_force: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/InteractiveMarkers
@@ -376,6 +376,14 @@ Visualization Manager:
       Show Descriptions: true
       Show Visual Aids: false
       Update Topic: /mc_rtc_rviz_interactive_markers/update
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /mc_rtc_rviz
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
