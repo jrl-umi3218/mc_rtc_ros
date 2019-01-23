@@ -26,6 +26,11 @@ private:
   visualization_msgs::MarkerArray & markers_;
   unsigned prevPolygonNum_ = 0;
   unsigned currPolygonNum_ = 0;
+  bool visible_;
+  bool was_visible_;
+  QPushButton * button_;
+private slots:
+  void toggled(bool);
 };
 
 }

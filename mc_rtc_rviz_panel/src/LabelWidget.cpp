@@ -6,11 +6,11 @@ namespace mc_rtc_rviz
 LabelWidget::LabelWidget(const ClientWidgetParam & param)
 : ClientWidget(param)
 {
-  auto layout = new QHBoxLayout(this);
-  layout->addWidget(new QLabel(name().c_str(), this));
+  layout_ = new QHBoxLayout(this);
+  layout_->addWidget(new QLabel(name().c_str(), this));
   label_ = new QLabel("", this);
   label_->setWordWrap(true);
-  layout->addWidget(label_);
+  layout_->addWidget(label_);
 }
 
 void LabelWidget::update(const std::string & in)

@@ -10,6 +10,7 @@ namespace mc_rtc_rviz
 
     void update(const std::string & in);
   protected:
+    QHBoxLayout * layout_;
     QLabel * label_;
   };
 }

@@ -210,6 +210,7 @@ protected:
     }
     auto & w = static_cast<T&>(*w_ptr);
     w.seen(true);
+    latestWidget_ = w_ptr;
     return w;
   }
 
@@ -221,6 +222,8 @@ private:
   std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server_;
   visualization_msgs::MarkerArray marker_array_;
   ros::Publisher marker_array_pub_;
+  /** Latest widget added */
+  ClientWidget * latestWidget_ = nullptr;
   /** Configuration */
   mutable mc_rtc::Configuration config_;
   std::string sub_uri_;

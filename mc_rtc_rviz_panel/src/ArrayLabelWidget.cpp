@@ -46,4 +46,11 @@ void ArrayLabelWidget::update(const Eigen::VectorXd & v)
   }
 }
 
+QPushButton * ArrayLabelWidget::showHideButton()
+{
+  auto ret = new QPushButton("Hide");
+  layout_->addWidget(ret);
+  return ret;
+}
+
 }

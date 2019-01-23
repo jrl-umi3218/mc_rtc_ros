@@ -12,8 +12,11 @@ public:
   ArrayInputWidget(const ClientWidgetParam & param, const std::vector<std::string> & labels);
 
   void update(const Eigen::VectorXd & data);
+
+  QPushButton * showHideButton() override;
 private:
   QPushButton * lock_button_;
+  QHBoxLayout * labels_layout_;
   QGridLayout * edits_layout_;
   int edits_row_ = 0;
   std::vector<QLineEdit*> edits_;

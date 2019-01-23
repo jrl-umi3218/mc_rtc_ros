@@ -49,6 +49,12 @@ public:
   /** Set the element visibility stored in the configuration */
   void visible(bool visibility);
 
+  /** Add a show/hide button to the widget for 3D elements
+   *
+   * To be implemented when relevant, the default implementation does nothing
+   */
+  virtual QPushButton * showHideButton() { return nullptr; }
+
   /** To be implemented for containers, default implementation throws */
   virtual void addWidget(ClientWidget * w);
 

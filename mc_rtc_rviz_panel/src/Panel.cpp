@@ -214,6 +214,7 @@ void Panel::started()
 
 void Panel::got_start()
 {
+  latestWidget_ = nullptr;
 }
 
 void Panel::stopped()
@@ -537,12 +538,14 @@ void Panel::got_point3d(const WidgetId & id,
 #ifndef DISABLE_ROS
   if(ro)
   {
-    auto & w = get_widget<PointMarkerWidget>(id, marker_array_);
+    auto label = latestWidget_;
+    auto & w = get_widget<PointMarkerWidget>(id, marker_array_, label);
     w.update(pos, config);
   }
   else
   {
-    auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, sva::PTransformd{pos}, false, !ro);
+    auto label = latestWidget_;
+    auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, sva::PTransformd{pos}, false, !ro, label);
     w.update(pos);
   }
 #endif
@@ -553,7 +556,8 @@ void Panel::got_rotation(const WidgetId & id,
                          bool ro, const sva::PTransformd & pos)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, false);
+  auto label = latestWidget_;
+  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, false, label);
   w.update(pos);
 #endif
 }
@@ -563,7 +567,8 @@ void Panel::got_transform(const WidgetId & id,
                           bool ro, const sva::PTransformd & pos)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, !ro);
+  auto label = latestWidget_;
+  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, !ro, label);
   w.update(pos);
 #endif
 }
@@ -626,7 +631,8 @@ void Panel::got_force(const WidgetId & id,
                       const mc_rtc::gui::ForceConfig & forceConfig)
 {
   #ifndef DISABLE_ROS
-  auto & w = get_widget<ForceMarkerWidget>(id, requestId, marker_array_);
+  auto label = latestWidget_;
+  auto & w = get_widget<ForceMarkerWidget>(id, requestId, marker_array_, label);
   w.update(force_, surface, forceConfig);
   #endif
 }

@@ -10,8 +10,17 @@ DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & param
                                                  const mc_rtc::gui::LineConfig & config)
 : ClientWidget(params),
   markers_(markers),
-  config_(config)
+  config_(config),
+  visible_(visible()),
+  was_visible_(visible_)
 {
+  auto layout = new QHBoxLayout(this);
+  layout->addWidget(new QLabel(id().name.c_str()));
+  button_ = new QPushButton(this);
+  button_->setCheckable(true);
+  button_->setChecked(!visible_);
+  toggled(!visible_);
+  layout->addWidget(button_);
 }
 
 void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d>& points)
@@ -26,7 +35,7 @@ void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d>& points)
     pose.z = p.z();
     path_.points.push_back(pose);
   }
-  markers_.markers.push_back(path_);
+  publish();
 }
 
 void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd>& points)
@@ -41,7 +50,7 @@ void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd>& points
     pose.z = p.translation().z();
     path_.points.push_back(pose);
   }
-  markers_.markers.push_back(path_);
+  publish();
 }
 
 void DisplayTrajectoryWidget::update(const Eigen::Vector3d & point)
@@ -52,7 +61,7 @@ void DisplayTrajectoryWidget::update(const Eigen::Vector3d & point)
   pose.y = point.y();
   pose.z = point.z();
   path_.points.push_back(pose);
-  markers_.markers.push_back(path_);
+  publish();
 }
 
 void DisplayTrajectoryWidget::update(const sva::PTransformd & point)
@@ -63,7 +72,7 @@ void DisplayTrajectoryWidget::update(const sva::PTransformd & point)
   pose.y = point.translation().y();
   pose.z = point.translation().z();
   path_.points.push_back(pose);
-  markers_.markers.push_back(path_);
+  publish();
 }
 
 void DisplayTrajectoryWidget::configure()
@@ -81,5 +90,26 @@ void DisplayTrajectoryWidget::configure()
   path_.lifetime = ros::Duration(1);
   path_.ns = id2name(id());
 }
+
+void DisplayTrajectoryWidget::publish()
+{
+  if(visible_ || was_visible_)
+  {
+    markers_.markers.push_back(path_);
+    if(!visible_)
+    {
+      markers_.markers.back().action = visualization_msgs::Marker::DELETE;
+    }
+  }
+  was_visible_ = visible_;
+}
+
+void DisplayTrajectoryWidget::toggled(bool hide)
+{
+  visible_ = !hide;
+  button_->setText(hide ? "Show" : "Hide");
+  visible(!hide);
+}
+
 
 }

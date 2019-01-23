@@ -19,6 +19,11 @@ public:
   void update(const Eigen::Vector3d & start, const Eigen::Vector3d & end, const mc_rtc::gui::ArrowConfig & c);
 private:
   visualization_msgs::MarkerArray & markers_;
+  QPushButton * button_;
+  bool visible_ = true;
+  bool was_visible_ = true;
+private slots:
+  void toggled(bool);
 };
 
 }
