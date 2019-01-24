@@ -9,12 +9,12 @@ ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param,
 {
   auto mainLayout = new QVBoxLayout(this);
 
-  auto labelLayout = new QHBoxLayout();
-  mainLayout->addLayout(labelLayout);
-  labelLayout->addWidget(new QLabel(name().c_str()));
+  labels_layout_ = new QHBoxLayout();
+  mainLayout->addLayout(labels_layout_);
+  labels_layout_->addWidget(new QLabel(name().c_str()));
   lock_button_ = new QPushButton("EDIT");
   lock_button_->setCheckable(true);
-  labelLayout->addWidget(lock_button_);
+  labels_layout_->addWidget(lock_button_);
   connect(lock_button_, SIGNAL(toggled(bool)),
           this, SLOT(lock_toggled(bool)));
   edits_layout_ = new QGridLayout();
@@ -80,6 +80,13 @@ void ArrayInputWidget::lock_toggled(bool unlocked)
 void ArrayInputWidget::edit_return_pressed()
 {
   if(lock_button_->isChecked()) { lock_button_->toggle(); }
+}
+
+QPushButton * ArrayInputWidget::showHideButton()
+{
+  QPushButton * ret = new QPushButton("Hide");
+  labels_layout_->addWidget(ret);
+  return ret;
 }
 
 }

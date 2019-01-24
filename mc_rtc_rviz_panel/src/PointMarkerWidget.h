@@ -14,12 +14,17 @@ struct PointMarkerWidget : public ClientWidget
   Q_OBJECT
 public:
   PointMarkerWidget(const ClientWidgetParam & params,
-                    visualization_msgs::MarkerArray & markers);
+                    visualization_msgs::MarkerArray & markers,
+                    ClientWidget * label);
 
   void update(const Eigen::Vector3d & pos, const mc_rtc::gui::PointConfig & c);
-
 private:
   visualization_msgs::MarkerArray & markers_;
+  QPushButton * button_;
+  bool visible_ = true;
+  bool was_visible_ = true;
+private slots:
+  void toggled(bool);
 };
 
 }

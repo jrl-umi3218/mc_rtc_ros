@@ -15,7 +15,8 @@ public:
                           const WidgetId & requestId,
                           const sva::PTransformd & pos,
                           bool control_orientation,
-                          bool control_position);
+                          bool control_position,
+                          ClientWidget * label);
 
   void operator()(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback);
 

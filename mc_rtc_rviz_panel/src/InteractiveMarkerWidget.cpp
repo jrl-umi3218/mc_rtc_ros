@@ -10,7 +10,8 @@ InteractiveMarkerWidget::InteractiveMarkerWidget(const ClientWidgetParam & param
                                                  const WidgetId & requestId,
                                                  const sva::PTransformd & pos,
                                                  bool control_orientation,
-                                                 bool control_position)
+                                                 bool control_position,
+                                                 ClientWidget * label)
 : ClientWidget(params),
   marker_(server, id2name(requestId), control_position, control_orientation, vm::Marker::CUBE, [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback){ (*this)(feedback); }),
   request_id_(requestId),
@@ -18,23 +19,26 @@ InteractiveMarkerWidget::InteractiveMarkerWidget(const ClientWidgetParam & param
   control_position_(control_position)
 {
   auto layout = new QVBoxLayout(this);
-  button_ = new QPushButton(("Hide " + request_id_.name + " marker").c_str());
+  button_ = label->showHideButton();
+  if(!button_)
+  {
+    button_ = new QPushButton("Hide");
+    layout->addWidget(button_);
+  }
   button_->setCheckable(true);
+  button_->setChecked(!visible());
+  if(!visible())
+  {
+    toggled(!visible());
+  }
   connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
-  layout->addWidget(button_);
 }
 
 void InteractiveMarkerWidget::toggled(bool hide)
 {
   marker_.toggle();
-  if(hide)
-  {
-    button_->setText(("Show " + request_id_.name + " marker").c_str());
-  }
-  else
-  {
-    button_->setText(("Hide " + request_id_.name + " marker").c_str());
-  }
+  button_->setText(hide ? "Show" : "Hide");
+  visible(!hide);
 }
 
 void InteractiveMarkerWidget::operator()(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)

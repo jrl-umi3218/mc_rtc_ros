@@ -8,8 +8,19 @@ namespace mc_rtc_rviz
 PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params,
                                          visualization_msgs::MarkerArray & markers)
 : ClientWidget(params),
-  markers_(markers)
+  markers_(markers),
+  visible_(visible()),
+  was_visible_(visible_)
 {
+  auto layout = new QHBoxLayout(this);
+  layout->addWidget(new QLabel(id().name.c_str()));
+  button_ = new QPushButton(this);
+  button_->setCheckable(true);
+  button_->setChecked(!visible_);
+  toggled(!visible_);
+  connect(button_, SIGNAL(toggled(bool)),
+          this, SLOT(toggled(bool)));
+  layout->addWidget(button_);
 }
 
 void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>>& polygons, const mc_rtc::gui::Color& c)
@@ -52,7 +63,15 @@ void PolygonMarkerWidget::update(const std::string& ns, const unsigned id, const
   m.header.frame_id = "robot_map";
   m.ns = ns;
   m.id = id;
-  markers_.markers.push_back(m);
+  if(visible_ || was_visible_)
+  {
+    markers_.markers.push_back(m);
+    if(!visible_)
+    {
+      markers_.markers.back().action = visualization_msgs::Marker::DELETE;
+    }
+  }
+  was_visible_ = visible_;
 }
 
 void PolygonMarkerWidget::clear()
@@ -65,6 +84,13 @@ void PolygonMarkerWidget::clear()
     m.id = i;
     markers_.markers.push_back(m);
   }
+}
+
+void PolygonMarkerWidget::toggled(bool hide)
+{
+  visible_ = !hide;
+  button_->setText(hide ? "Show" : "Hide");
+  visible(!hide);
 }
 
 }

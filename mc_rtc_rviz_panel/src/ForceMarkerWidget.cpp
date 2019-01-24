@@ -6,12 +6,21 @@ namespace mc_rtc_rviz
 {
 
 ForceMarkerWidget::ForceMarkerWidget(const ClientWidgetParam & params,
-                                         const WidgetId & requestId,
-                                         visualization_msgs::MarkerArray & markers)
+                                     const WidgetId & requestId,
+                                     visualization_msgs::MarkerArray & markers,
+                                     ClientWidget * label)
 : ClientWidget(params),
   request_id_(requestId),
-  markers_(markers)
+  markers_(markers),
+  visible_(visible()),
+  was_visible_(visible_)
 {
+  button_ = label->showHideButton();
+  button_->setCheckable(true);
+  button_->setChecked(!visible_);
+  toggled(!visible_);
+  connect(button_, SIGNAL(toggled(bool)),
+          this, SLOT(toggled(bool)));
 }
 
 void ForceMarkerWidget::update(const sva::ForceVecd & force, const sva::PTransformd & surface, const mc_rtc::gui::ForceConfig & c)
@@ -43,16 +52,39 @@ void ForceMarkerWidget::update(const sva::ForceVecd & force, const sva::PTransfo
     m.header.stamp = ros::Time::now();
     m.header.frame_id = "robot_map";
     m.ns = id2name(request_id_);
-    markers_.markers.push_back(m);
+    bool show = visible_ || was_visible_;
+    if(show && !visible_)
+    {
+      m.action = visualization_msgs::Marker::DELETE;
+    }
+    if(show)
+    {
+      markers_.markers.push_back(m);
+    }
 
     if(c.start_point_scale > 0)
     {
-      markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.start_point_scale));
+      if(show)
+      {
+        markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.start_point_scale));
+        markers_.markers.back().action = m.action;
+      }
     }
     if(c.end_point_scale > 0)
     {
-      markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.end_point_scale));
+      if(show)
+      {
+        markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.end_point_scale));
+        markers_.markers.back().action = m.action;
+      }
     }
+}
+
+void ForceMarkerWidget::toggled(bool hide)
+{
+  visible_ = !hide;
+  button_->setText(hide ? "Show" : "Hide");
+  visible(!hide);
 }
 
 }

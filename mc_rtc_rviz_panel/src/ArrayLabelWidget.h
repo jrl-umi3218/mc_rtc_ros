@@ -10,6 +10,8 @@ namespace mc_rtc_rviz
                      const std::vector<std::string> & labels);
 
     void update(const Eigen::VectorXd & in);
+
+    QPushButton * showHideButton() override;
   protected:
     std::vector<std::string> labels_;
   };

@@ -25,6 +25,12 @@ private:
   visualization_msgs::Marker path_;
   mc_rtc::gui::LineConfig config_;
   void configure();
+  void publish();
+  bool visible_;
+  bool was_visible_;
+  QPushButton * button_;
+private slots:
+  void toggled(bool);
 };
 
 }

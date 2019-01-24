@@ -20,14 +20,101 @@
 #include "NumberSliderWidget.h"
 #include "SchemaWidget.h"
 
+#include "ConnectionDialog.h"
+
+#include <boost/filesystem.hpp>
+namespace bfs = boost::filesystem;
+
 namespace mc_rtc_rviz
 {
 
+namespace
+{
+
+bfs::path getUserDirectory()
+{
+#ifndef WIN32
+  return bfs::path(std::getenv("HOME")) / ".config";
+#else
+  // Should work for Windows Vista and up
+  return bfs::path(std::getenv("APPDATA"));
+#endif
+}
+
+bfs::path getConfigDirectory()
+{
+  return getUserDirectory() / "mc_rtc/rviz_panel";
+}
+
+bfs::path getConfigPath()
+{
+  return getConfigDirectory() / "rviz_panel.conf";
+}
+
+mc_rtc::Configuration loadPanelConfiguration()
+{
+  mc_rtc::Configuration config;
+  auto config_path = getConfigPath();
+  if(bfs::exists(config_path) && bfs::is_regular(config_path))
+  {
+    config.load(config_path.string());
+  }
+  return config;
+}
+
+void savePanelConfiguration(const mc_rtc::Configuration & config)
+{
+  auto config_directory = getConfigDirectory();
+  if(!bfs::exists(config_directory))
+  {
+    bfs::create_directories(config_directory);
+  }
+  if(!bfs::is_directory(config_directory))
+  {
+    LOG_ERROR("Cannot save configuration to " << config_directory << ", " << config_directory << " is not a directory")
+    return;
+  }
+  auto config_path = getConfigPath();
+  if(bfs::exists(config_path) && !bfs::is_regular(config_path))
+  {
+    LOG_ERROR("Cannot save configuration to " << config_path << ", " << config_path << " is not a regular file")
+    return;
+  }
+  config.save(config_path.string());
+}
+
+std::string getSubURI(const mc_rtc::Configuration & config)
+{
+  return config("URI", mc_rtc::Configuration{})("sub", std::string("ipc:///tmp/mc_rtc_pub.ipc"));
+}
+
+std::string getSubURI()
+{
+  auto config = loadPanelConfiguration();
+  return getSubURI(config);
+}
+
+std::string getPushURI(const mc_rtc::Configuration & config)
+{
+  return config("URI", mc_rtc::Configuration{})("push", std::string("ipc:///tmp/mc_rtc_rep.ipc"));
+}
+
+std::string getPushURI()
+{
+  auto config = loadPanelConfiguration();
+  return getPushURI(config);
+}
+
+}
+
 Panel::Panel(QWidget * parent)
 : CategoryWidget(ClientWidgetParam{*this, parent, {{},"ROOT"}}),
-  mc_control::ControllerClient("ipc:///tmp/mc_rtc_pub.ipc", "ipc:///tmp/mc_rtc_rep.ipc", 2),
+  mc_control::ControllerClient(getSubURI(), getPushURI(), 2),
   nh_(),
-  int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
+  int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers")),
+  config_(loadPanelConfiguration()),
+  sub_uri_(getSubURI(config_)),
+  push_uri_(getPushURI(config_))
 {
 #ifndef DISABLE_ROS
   marker_array_pub_ = mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::MarkerArray>( "/mc_rtc_rviz", 0 );
@@ -48,6 +135,9 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   qRegisterMetaType<std::vector<std::vector<Eigen::Vector3d>>>("std::vector<std::vector<Eigen::Vector3d>>");
   tree_.parent = this;
+  setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+          this, SLOT(contextMenu(const QPoint&)));
   connect(this, SIGNAL(signal_start()),
           this, SLOT(got_start()));
   connect(this, SIGNAL(signal_stop()),
@@ -124,6 +214,7 @@ void Panel::started()
 
 void Panel::got_start()
 {
+  latestWidget_ = nullptr;
 }
 
 void Panel::stopped()
@@ -447,12 +538,14 @@ void Panel::got_point3d(const WidgetId & id,
 #ifndef DISABLE_ROS
   if(ro)
   {
-    auto & w = get_widget<PointMarkerWidget>(id, marker_array_);
+    auto label = latestWidget_;
+    auto & w = get_widget<PointMarkerWidget>(id, marker_array_, label);
     w.update(pos, config);
   }
   else
   {
-    auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, sva::PTransformd{pos}, false, !ro);
+    auto label = latestWidget_;
+    auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, sva::PTransformd{pos}, false, !ro, label);
     w.update(pos);
   }
 #endif
@@ -463,7 +556,8 @@ void Panel::got_rotation(const WidgetId & id,
                          bool ro, const sva::PTransformd & pos)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, false);
+  auto label = latestWidget_;
+  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, false, label);
   w.update(pos);
 #endif
 }
@@ -473,7 +567,8 @@ void Panel::got_transform(const WidgetId & id,
                           bool ro, const sva::PTransformd & pos)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, !ro);
+  auto label = latestWidget_;
+  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, !ro, label);
   w.update(pos);
 #endif
 }
@@ -536,7 +631,8 @@ void Panel::got_force(const WidgetId & id,
                       const mc_rtc::gui::ForceConfig & forceConfig)
 {
   #ifndef DISABLE_ROS
-  auto & w = get_widget<ForceMarkerWidget>(id, requestId, marker_array_);
+  auto label = latestWidget_;
+  auto & w = get_widget<ForceMarkerWidget>(id, requestId, marker_array_, label);
   w.update(force_, surface, forceConfig);
   #endif
 }
@@ -662,5 +758,87 @@ void Panel::WidgetTree::clean()
     }
   }
 }
+
+void Panel::contextMenu(const QPoint & pos)
+{
+  QMenu menu("Context menu", this);
+  QAction edit("Edit connection parameters", this);
+  connect(&edit, SIGNAL(triggered()),
+          this, SLOT(contextMenu_editConnection()));
+  menu.addAction(&edit);
+  QAction reconnect("Reconnect", this);
+  connect(&reconnect, SIGNAL(triggered()),
+          this, SLOT(contextMenu_reconnect()));
+  menu.addAction(&reconnect);
+  menu.exec(mapToGlobal(pos));
+}
+
+void Panel::contextMenu_editConnection()
+{
+  std::string sub_uri = sub_uri_;
+  std::string push_uri = push_uri_;
+  ConnectionDialog dialog(sub_uri, push_uri, this);
+  if(dialog.exec())
+  {
+    try
+    {
+      reconnect(sub_uri, push_uri);
+    }
+    catch(std::runtime_error & exc)
+    {
+      LOG_ERROR("Reconnection failed with provided URIs")
+      exc.what();
+      return;
+    }
+    sub_uri_ = sub_uri;
+    push_uri_ = push_uri;
+    if(!config_.has("URI"))
+    {
+      config_.add("URI");
+    }
+    config_("URI").add("sub", sub_uri_);
+    config_("URI").add("push", push_uri_);
+    savePanelConfiguration(config_);
+  }
+}
+
+void Panel::contextMenu_reconnect()
+{
+  reconnect(sub_uri_, push_uri_);
+}
+
+bool Panel::visible(const WidgetId & id) const
+{
+  return config(id)("visible", true);
+}
+
+void Panel::visible(const WidgetId & id, bool visibility)
+{
+  config(id).add("visible", visibility);
+  savePanelConfiguration(config_);
+}
+
+mc_rtc::Configuration Panel::config(const WidgetId & id) const
+{
+  if(!config_.has("widgets"))
+  {
+    config_.add("widgets");
+  }
+  auto ret = config_("widgets");
+  for(const auto & c : id.category)
+  {
+    if(!ret.has(c))
+    {
+      ret.add(c);
+    }
+    ret = ret(c);
+  }
+  if(!ret.has(id.name))
+  {
+    ret.add(id.name);
+  }
+  return ret(id.name);
+}
+
 
 } // namespace mc_rtc_rviz

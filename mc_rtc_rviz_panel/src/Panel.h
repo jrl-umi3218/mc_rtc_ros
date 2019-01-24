@@ -54,6 +54,16 @@ class Panel: public CategoryWidget, public mc_control::ControllerClient
 Q_OBJECT
 public:
   Panel(QWidget* parent = 0);
+
+  /** Returns true if the provided widget should be visible
+   *
+   * If the widget has never been seen, returns true
+   *
+   */
+  bool visible(const WidgetId & id) const;
+
+  /** Save visibility setting of a specific widget */
+  void visible(const WidgetId & id, bool visibility);
 protected:
   void started() override;
 
@@ -200,15 +210,28 @@ protected:
     }
     auto & w = static_cast<T&>(*w_ptr);
     w.seen(true);
+    latestWidget_ = w_ptr;
     return w;
   }
+
+  /** Returns the configuration of a given widget */
+  mc_rtc::Configuration config(const WidgetId & id) const;
 private:
   /** ROS stuff */
   ros::NodeHandle nh_;
   std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server_;
   visualization_msgs::MarkerArray marker_array_;
   ros::Publisher marker_array_pub_;
+  /** Latest widget added */
+  ClientWidget * latestWidget_ = nullptr;
+  /** Configuration */
+  mutable mc_rtc::Configuration config_;
+  std::string sub_uri_;
+  std::string push_uri_;
 private slots:
+  void contextMenu(const QPoint & pos);
+  void contextMenu_editConnection();
+  void contextMenu_reconnect();
   void got_start();
   void got_stop();
   void got_category(const std::vector<std::string> & parent, const std::string & category);
