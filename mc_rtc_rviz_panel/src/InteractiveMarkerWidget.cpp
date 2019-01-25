@@ -1,6 +1,7 @@
 #include "InteractiveMarkerWidget.h"
 
 #include <mc_rbdyn/configuration_io.h>
+#include <mc_rbdyn/rpy_utils.h>
 
 namespace mc_rtc_rviz
 {
@@ -99,6 +100,50 @@ void TransformInteractiveMarkerWidget::handleRequest(const visualization_msgs::I
           }.inverse();
     client().send_request(request_id_, sva::PTransformd{q, v});
   }
+}
+
+XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(const ClientWidgetParam & params,
+                        const WidgetId & requestId,
+                        interactive_markers::InteractiveMarkerServer & server,
+                        const sva::PTransformd & /*pos*/,
+                        bool control_orientation,
+                        bool control_position,
+                        ClientWidget * label)
+  : InteractiveMarkerWidget(params,
+                            requestId,
+                            server,
+                            makeXYThetaMarker(
+                                id2name(requestId),
+                                control_position,
+                                control_orientation),
+                            label),
+    control_orientation_(control_orientation),
+    control_position_(control_position)
+{
+}
+
+void XYThetaInteractiveMarkerWidget::update(const Eigen::Vector3d & vec)
+{
+  sva::PTransformd X(sva::RotZ(vec.z()), {vec.x(),vec.y(),0.});
+  marker_.update(X);
+}
+
+void XYThetaInteractiveMarkerWidget::handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+{
+  if(!control_position_ && !control_orientation_) { return; }
+  auto q =  Eigen::Quaterniond{
+    feedback->pose.orientation.w,
+    feedback->pose.orientation.x,
+    feedback->pose.orientation.y,
+    feedback->pose.orientation.z
+  }.inverse();
+  Eigen::Matrix3d R(q);
+  Eigen::Vector3d v{feedback->pose.position.x,
+                    feedback->pose.position.y,
+                    mc_rbdyn::rpyFromMat(R).z()};
+
+  LOG_INFO("client send request " << v.transpose());
+  client().send_request(request_id_, v);
 }
 
 }

@@ -47,10 +47,33 @@ public:
   void update(const Eigen::Vector3d & t) { marker_.update(t); }
   void update(const sva::PTransformd & pos) { marker_.update(pos); }
 
-private:
+protected:
   bool control_orientation_;
   bool control_position_;
 };
 
+
+
+struct XYThetaInteractiveMarkerWidget : public InteractiveMarkerWidget
+{
+  Q_OBJECT
+ public:
+  XYThetaInteractiveMarkerWidget(const ClientWidgetParam & params,
+                                 const WidgetId & requestId,
+                                 interactive_markers::InteractiveMarkerServer & server,
+                                 const sva::PTransformd & pos,
+                                 bool control_orientation,
+                                 bool control_position,
+                                 ClientWidget * label);
+
+  void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;
+
+  // update with X, Y, theta
+  void update(const Eigen::Vector3d & vec);
+
+protected:
+  bool control_orientation_;
+  bool control_position_;
+};
 
 }

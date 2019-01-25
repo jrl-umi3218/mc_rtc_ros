@@ -154,6 +154,27 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   return ret;
 }
 
+vm::InteractiveMarker makeXYThetaMarker(
+    const std::string & name,
+    bool control_position,
+    bool control_orientation)
+{
+  vm::InteractiveMarker int_marker;
+  int_marker.header.frame_id = "robot_map";
+  int_marker.scale = 0.3;
+  int_marker.name = name;
+  int_marker.description = "";
+  makeVisualControl(makeAxisMarker(0.15*0.9),int_marker);
+
+  vm::InteractiveMarkerControl control;
+  control.orientation.w = 1;
+  control.orientation.x = 0;
+  control.orientation.y = 1;
+  control.orientation.z = 0;
+  control.interaction_mode = vm::InteractiveMarkerControl::MOVE_ROTATE;
+  int_marker.controls.push_back(control);
+  return int_marker;
+}
 
 visualization_msgs::Marker getPointMarker(const std::string & ns, const Eigen::Vector3d & pos, const mc_rtc::gui::Color& color, double scale = 0.02)
 {

@@ -20,6 +20,9 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
                                    bool control_position,
                                    bool control_orientation,
                                    const std::vector<vm::Marker>& visual_markers);
+vm::InteractiveMarker makeXYThetaMarker(const std::string & name,
+                                        bool control_position,
+                                        bool control_orientation);
 
 struct SharedMarker
 {
