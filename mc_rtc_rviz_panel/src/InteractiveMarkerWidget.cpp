@@ -6,23 +6,19 @@ namespace mc_rtc_rviz
 {
 
 InteractiveMarkerWidget::InteractiveMarkerWidget(const ClientWidgetParam & params,
-                                                 interactive_markers::InteractiveMarkerServer & server,
                                                  const WidgetId & requestId,
-                                                 const sva::PTransformd & pos,
-                                                 bool control_orientation,
-                                                 bool control_position,
+                                                 interactive_markers::InteractiveMarkerServer & server,
+                                                 const vm::InteractiveMarker& marker,
                                                  ClientWidget * label)
 : ClientWidget(params),
+  request_id_(requestId),
   marker_(server,
           id2name(requestId),
-          make6DMarker(id2name(requestId), control_position, control_orientation, makeAxisMarker(0.15 * 0.9)),
+          marker,
           [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
           {
-            (*this)(feedback);
-          }),
-  request_id_(requestId),
-  control_orientation_(control_orientation),
-  control_position_(control_position)
+            handleRequest(feedback);
+          })
 {
   auto layout = new QVBoxLayout(this);
   button_ = label->showHideButton();
@@ -47,7 +43,26 @@ void InteractiveMarkerWidget::toggled(bool hide)
   visible(!hide);
 }
 
-void InteractiveMarkerWidget::operator()(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
+                        const WidgetId & requestId,
+                        interactive_markers::InteractiveMarkerServer & server,
+                        const sva::PTransformd & /*pos*/,
+                        bool control_orientation,
+                        bool control_position,
+                        ClientWidget * label)
+  : InteractiveMarkerWidget(params, requestId, server,
+                            make6DMarker(
+                                id2name(requestId),
+                                control_position,
+                                control_orientation,
+                                makeAxisMarker(0.15 * 0.9)),
+                            label),
+                            control_orientation_(control_orientation), control_position_(control_position)
+{
+}
+
+
+void TransformInteractiveMarkerWidget::handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
 {
   if(!control_position_ && !control_orientation_) { return; }
   if(control_position_ && !control_orientation_)

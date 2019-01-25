@@ -545,7 +545,7 @@ void Panel::got_point3d(const WidgetId & id,
   else
   {
     auto label = latestWidget_;
-    auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, sva::PTransformd{pos}, false, !ro, label);
+    auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, *int_server_, sva::PTransformd{pos}, false, !ro, label);
     w.update(pos);
   }
 #endif
@@ -557,7 +557,7 @@ void Panel::got_rotation(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, false, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, *int_server_, pos, !ro, false, label);
   w.update(pos);
 #endif
 }
@@ -568,7 +568,7 @@ void Panel::got_transform(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, !ro, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, *int_server_, pos, !ro, !ro, label);
   w.update(pos);
 #endif
 }
