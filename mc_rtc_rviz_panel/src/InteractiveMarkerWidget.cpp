@@ -13,7 +13,13 @@ InteractiveMarkerWidget::InteractiveMarkerWidget(const ClientWidgetParam & param
                                                  bool control_position,
                                                  ClientWidget * label)
 : ClientWidget(params),
-  marker_(server, id2name(requestId), control_position, control_orientation, vm::Marker::CUBE, [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback){ (*this)(feedback); }),
+  marker_(server,
+          id2name(requestId),
+          make6DMarker(id2name(requestId), control_position, control_orientation, makeAxisMarker(0.15 * 0.9)),
+          [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+          {
+            (*this)(feedback);
+          }),
   request_id_(requestId),
   control_orientation_(control_orientation),
   control_position_(control_position)

@@ -13,12 +13,19 @@ namespace mc_rtc_rviz
 {
 
 visualization_msgs::Marker getPointMarker(const std::string & ns, const Eigen::Vector3d & pos, const mc_rtc::gui::Color& color, double scale);
+geometry_msgs::Point rosPoint(const Eigen::Vector3d& vec);
+vm::Marker makeVisual(int t, double baseScale);
+std::vector<vm::Marker> makeAxisMarker(double baseScale);
+vm::InteractiveMarker make6DMarker(const std::string & name,
+                                   bool control_position,
+                                   bool control_orientation,
+                                   const std::vector<vm::Marker>& visual_markers);
 
 struct SharedMarker
 {
   SharedMarker(interactive_markers::InteractiveMarkerServer & server,
                const std::string & name,
-               bool control_position, bool control_orientation, int type,
+               const vm::InteractiveMarker &marker,
                interactive_markers::InteractiveMarkerServer::FeedbackCallback callback);
 
   ~SharedMarker();

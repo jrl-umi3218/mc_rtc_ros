@@ -3,16 +3,22 @@
 namespace mc_rtc_rviz
 {
 
-namespace
+geometry_msgs::Point rosPoint(const Eigen::Vector3d& vec)
 {
+  geometry_msgs::Point p;
+  p.x = vec.x();
+  p.y = vec.y();
+  p.z = vec.z();
+  return p;
+}
 
-vm::Marker makeVisual(int t, const vm::InteractiveMarker & marker)
+vm::Marker makeVisual(int t, double baseScale)
 {
   vm::Marker ret;
   ret.type = t;
-  ret.scale.x = marker.scale*0.45;
-  ret.scale.y = marker.scale*0.45;
-  ret.scale.z = marker.scale*0.45;
+  ret.scale.x = baseScale*0.45;
+  ret.scale.y = baseScale*0.45;
+  ret.scale.z = baseScale*0.45;
   ret.color.r = 1.0;
   ret.color.g = 0.0;
   ret.color.b = 0.0;
@@ -21,13 +27,62 @@ vm::Marker makeVisual(int t, const vm::InteractiveMarker & marker)
   return ret;
 }
 
-vm::InteractiveMarkerControl & makeVisualControl(int t,
+std::vector<vm::Marker> makeAxisMarker(double scale)
+{
+  const Eigen::Vector3d t0 = scale * Eigen::Vector3d{0., 0., 0.};
+  const Eigen::Vector3d tx = scale * Eigen::Vector3d{1., 0., 0.};
+  const Eigen::Vector3d ty = scale * Eigen::Vector3d{0., 1., 0.};
+  const Eigen::Vector3d tz = scale * Eigen::Vector3d{0., 0., 1.};
+
+  vm::Marker m;
+  m.type = vm::Marker::ARROW;
+  m.action = vm::Marker::ADD;
+  // Arrow shaft diameter
+  m.scale.x = scale * 0.15;
+  // arrow head diameter
+  m.scale.y = scale * 0.15;
+  // arrow head length
+  m.scale.z = scale * 0.5;
+  m.pose.orientation.w = 1.0;
+
+
+  std::vector<vm::Marker> ret(3);
+  // X axis
+  m.points.push_back(rosPoint(t0));
+  m.points.push_back(rosPoint(tx));
+  m.color.a = 1.;
+  m.color.r = 1.;
+  m.color.g = 0.;
+  m.color.b = 0.;
+  ret.push_back(m);
+  // Y axis
+  m.points.clear();
+  m.points.push_back(rosPoint(t0));
+  m.points.push_back(rosPoint(ty));
+  m.color.a = 1.;
+  m.color.r = 0.;
+  m.color.g = 1.;
+  m.color.b = 0.;
+  ret.push_back(m);
+  // Z axis
+  m.points.clear();
+  m.points.push_back(rosPoint(t0));
+  m.points.push_back(rosPoint(tz));
+  m.color.a = 1.;
+  m.color.r = 0.;
+  m.color.g = 0.;
+  m.color.b = 1.;
+  ret.push_back(m);
+  return ret;
+}
+
+vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker>& visual_makers,
     vm::InteractiveMarker & marker)
 {
   vm::InteractiveMarkerControl ret;
   ret.always_visible = true;
   ret.orientation.w = 1.0;
-  ret.markers.push_back(makeVisual(t, marker));
+  ret.markers = visual_makers;
   marker.controls.push_back(ret);
   return marker.controls.back();
 }
@@ -35,14 +90,14 @@ vm::InteractiveMarkerControl & makeVisualControl(int t,
 vm::InteractiveMarker make6DMarker(const std::string & name,
                                    bool control_position,
                                    bool control_orientation,
-                                   int type)
+                                   const std::vector<vm::Marker>& visual_markers)
 {
   vm::InteractiveMarker ret;
   ret.header.frame_id = "robot_map";
   ret.scale = 0.15;
   ret.name = name;
   ret.description = "";
-  makeVisualControl(type, ret);
+  makeVisualControl(visual_markers, ret);
 
   vm::InteractiveMarkerControl control;
   control.orientation.w = 0.707107;
@@ -100,9 +155,6 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
 }
 
 
-}
-
-
 visualization_msgs::Marker getPointMarker(const std::string & ns, const Eigen::Vector3d & pos, const mc_rtc::gui::Color& color, double scale = 0.02)
 {
   visualization_msgs::Marker m;
@@ -128,11 +180,10 @@ visualization_msgs::Marker getPointMarker(const std::string & ns, const Eigen::V
 
 
 SharedMarker::SharedMarker(interactive_markers::InteractiveMarkerServer & server,
-                           const std::string & name,
-                           bool control_position, bool control_orientation, int type,
+                           const std::string & name, const vm::InteractiveMarker& marker,
                            interactive_markers::InteractiveMarkerServer::FeedbackCallback callback)
 : server_(server),
-  marker_(make6DMarker(name, control_position, control_orientation, type)),
+  marker_(marker),
   callback_(callback)
 {
   server_.insert(marker_, callback_);
