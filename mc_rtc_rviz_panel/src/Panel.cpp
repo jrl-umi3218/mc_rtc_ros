@@ -589,8 +589,7 @@ void Panel::got_xytheta(const WidgetId & id,
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, *int_server_, sva::PTransformd::Identity(), !ro, !ro, label);
-  Eigen::Vector3d pos = {vec.x(), vec.y(), 0.};
-  w.update(pos);
+  w.update(vec);
 #endif
 }
 

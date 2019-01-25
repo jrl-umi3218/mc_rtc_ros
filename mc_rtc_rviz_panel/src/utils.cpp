@@ -154,14 +154,11 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   return ret;
 }
 
-vm::InteractiveMarker makeXYThetaMarker(
-    const std::string & name,
-    bool control_position,
-    bool control_orientation)
+vm::InteractiveMarker makeXYThetaMarker(const std::string & name)
 {
   vm::InteractiveMarker int_marker;
   int_marker.header.frame_id = "robot_map";
-  int_marker.scale = 0.3;
+  int_marker.scale = 0.25;
   int_marker.name = name;
   int_marker.description = "";
   makeVisualControl(makeAxisMarker(0.15*0.9),int_marker);

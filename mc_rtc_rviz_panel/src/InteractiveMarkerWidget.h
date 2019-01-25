@@ -24,6 +24,7 @@ protected:
   WidgetId request_id_;
   SharedMarker marker_;
   QPushButton * button_;
+  QVBoxLayout * layout_;
 
 private slots:
   void toggled(bool);
@@ -71,9 +72,16 @@ struct XYThetaInteractiveMarkerWidget : public InteractiveMarkerWidget
   // update with X, Y, theta
   void update(const Eigen::Vector3d & vec);
 
-protected:
-  bool control_orientation_;
-  bool control_position_;
+ private:
+   void update_controls();
+
+ private slots:
+   void control_state_changed(int);
+
+
+ protected:
+   QCheckBox * control_orientation_checkbox_;
+   QCheckBox * control_position_checkbox_;
 };
 
 }

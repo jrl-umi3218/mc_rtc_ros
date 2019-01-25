@@ -20,9 +20,7 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
                                    bool control_position,
                                    bool control_orientation,
                                    const std::vector<vm::Marker>& visual_markers);
-vm::InteractiveMarker makeXYThetaMarker(const std::string & name,
-                                        bool control_position,
-                                        bool control_orientation);
+vm::InteractiveMarker makeXYThetaMarker(const std::string & name);
 
 struct SharedMarker
 {
@@ -38,6 +36,29 @@ struct SharedMarker
   void update(const Eigen::Vector3d & t);
 
   void update(const sva::PTransformd & pos);
+
+
+  void marker(const vm::InteractiveMarker& marker)
+  {
+    server_.erase(marker_.name);
+    marker_ = marker;
+    server_.insert(marker_, callback_);
+  }
+
+  vm::InteractiveMarker& marker()
+  {
+    return marker_;
+  }
+
+  void applyChanges()
+  {
+    // XXX without erasing and re-inserting the marker, applyChanges does
+    // nothing when the marker controls have been modified.
+    server_.erase(marker_.name);
+    server_.insert(marker_, callback_);
+    server_.applyChanges();
+  }
+
 private:
   interactive_markers::InteractiveMarkerServer & server_;
   vm::InteractiveMarker marker_;

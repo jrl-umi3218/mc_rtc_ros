@@ -21,12 +21,12 @@ InteractiveMarkerWidget::InteractiveMarkerWidget(const ClientWidgetParam & param
             handleRequest(feedback);
           })
 {
-  auto layout = new QVBoxLayout(this);
+  layout_ = new QVBoxLayout(this);
   button_ = label->showHideButton();
   if(!button_)
   {
     button_ = new QPushButton("Hide");
-    layout->addWidget(button_);
+    layout_->addWidget(button_);
   }
   button_->setCheckable(true);
   button_->setChecked(!visible());
@@ -112,14 +112,17 @@ XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(const ClientWidge
   : InteractiveMarkerWidget(params,
                             requestId,
                             server,
-                            makeXYThetaMarker(
-                                id2name(requestId),
-                                control_position,
-                                control_orientation),
-                            label),
-    control_orientation_(control_orientation),
-    control_position_(control_position)
+                            makeXYThetaMarker(id2name(requestId)),
+                            label)
 {
+  control_position_checkbox_ = new QCheckBox("Control Position");
+  control_position_checkbox_->setChecked(control_position);
+  control_orientation_checkbox_ = new QCheckBox("Control Orientation");
+  control_orientation_checkbox_->setChecked(control_orientation);
+  layout_->addWidget(control_position_checkbox_);
+  layout_->addWidget(control_orientation_checkbox_);
+  connect(control_position_checkbox_, SIGNAL(stateChanged(int)), this, SLOT(control_state_changed(int)));
+  connect(control_orientation_checkbox_, SIGNAL(stateChanged(int)), this, SLOT(control_state_changed(int)));
 }
 
 void XYThetaInteractiveMarkerWidget::update(const Eigen::Vector3d & vec)
@@ -130,7 +133,7 @@ void XYThetaInteractiveMarkerWidget::update(const Eigen::Vector3d & vec)
 
 void XYThetaInteractiveMarkerWidget::handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
 {
-  if(!control_position_ && !control_orientation_) { return; }
+  if(!control_position_checkbox_->isChecked() && !control_orientation_checkbox_->isChecked()) { return; }
   auto q =  Eigen::Quaterniond{
     feedback->pose.orientation.w,
     feedback->pose.orientation.x,
@@ -142,8 +145,33 @@ void XYThetaInteractiveMarkerWidget::handleRequest(const visualization_msgs::Int
                     feedback->pose.position.y,
                     mc_rbdyn::rpyFromMat(R).z()};
 
-  LOG_INFO("client send request " << v.transpose());
   client().send_request(request_id_, v);
+}
+
+void XYThetaInteractiveMarkerWidget::update_controls()
+{
+  if(control_position_checkbox_->isChecked() && control_orientation_checkbox_->isChecked())
+  {
+    marker_.marker().controls.back().interaction_mode = vm::InteractiveMarkerControl::MOVE_ROTATE;
+  }
+  else if(control_position_checkbox_->isChecked())
+  {
+    marker_.marker().controls.back().interaction_mode = vm::InteractiveMarkerControl::MOVE_PLANE;
+  }
+  else if(control_orientation_checkbox_->isChecked())
+  {
+    marker_.marker().controls.back().interaction_mode = vm::InteractiveMarkerControl::ROTATE_AXIS;
+  }
+  else
+  {
+    marker_.marker().controls.back().interaction_mode = vm::InteractiveMarkerControl::NONE;
+  }
+  marker_.applyChanges();
+}
+
+void XYThetaInteractiveMarkerWidget::control_state_changed(int)
+{
+  update_controls();
 }
 
 }
