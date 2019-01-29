@@ -46,7 +46,7 @@ std::vector<vm::Marker> makeAxisMarker(double scale)
   m.pose.orientation.w = 1.0;
 
 
-  std::vector<vm::Marker> ret(3);
+  std::vector<vm::Marker> ret;
   // X axis
   m.points.push_back(rosPoint(t0));
   m.points.push_back(rosPoint(tx));
