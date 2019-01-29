@@ -9,27 +9,77 @@ namespace mc_rtc_rviz
 struct InteractiveMarkerWidget : public ClientWidget
 {
   Q_OBJECT
-public:
+
+ public:
   InteractiveMarkerWidget(const ClientWidgetParam & params,
-                          interactive_markers::InteractiveMarkerServer & server,
                           const WidgetId & requestId,
-                          const sva::PTransformd & pos,
-                          bool control_orientation,
-                          bool control_position,
+                          interactive_markers::InteractiveMarkerServer & server,
+                          const vm::InteractiveMarker & marker,
                           ClientWidget * label);
 
-  void operator()(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback);
+ protected:
+  virtual void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) = 0;
+
+protected:
+  WidgetId request_id_;
+  SharedMarker marker_;
+  QPushButton * button_;
+  QVBoxLayout * layout_;
+
+private slots:
+  void toggled(bool);
+};
+
+
+struct TransformInteractiveMarkerWidget : public InteractiveMarkerWidget
+{
+  Q_OBJECT
+public:
+  TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
+                                   const WidgetId & requestId,
+                                   interactive_markers::InteractiveMarkerServer & server,
+                                   const sva::PTransformd & pos,
+                                   bool control_orientation,
+                                   bool control_position,
+                                   ClientWidget * label);
+
+  void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;
 
   void update(const Eigen::Vector3d & t) { marker_.update(t); }
   void update(const sva::PTransformd & pos) { marker_.update(pos); }
-private:
-  SharedMarker marker_;
-  WidgetId request_id_;
+
+protected:
   bool control_orientation_;
   bool control_position_;
-  QPushButton * button_;
-private slots:
-  void toggled(bool);
+};
+
+
+
+struct XYThetaInteractiveMarkerWidget : public InteractiveMarkerWidget
+{
+  Q_OBJECT
+ public:
+  XYThetaInteractiveMarkerWidget(const ClientWidgetParam & params,
+                                 const WidgetId & requestId,
+                                 interactive_markers::InteractiveMarkerServer & server,
+                                 const sva::PTransformd & pos,
+                                 bool control_orientation,
+                                 bool control_position,
+                                 ClientWidget * label);
+
+  void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;
+
+  // update with X, Y, theta
+  void update(const Eigen::Vector3d & vec);
+
+ private slots:
+   void control_state_changed(int);
+
+ protected:
+   QCheckBox * coupled_checkbox_;
+   vm::InteractiveMarker coupled_marker_;
+   vm::InteractiveMarker decoupled_marker_;
+
 };
 
 }

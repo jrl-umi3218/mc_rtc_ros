@@ -1,29 +1,32 @@
 #include "InteractiveMarkerWidget.h"
 
 #include <mc_rbdyn/configuration_io.h>
+#include <mc_rbdyn/rpy_utils.h>
 
 namespace mc_rtc_rviz
 {
 
 InteractiveMarkerWidget::InteractiveMarkerWidget(const ClientWidgetParam & params,
-                                                 interactive_markers::InteractiveMarkerServer & server,
                                                  const WidgetId & requestId,
-                                                 const sva::PTransformd & pos,
-                                                 bool control_orientation,
-                                                 bool control_position,
+                                                 interactive_markers::InteractiveMarkerServer & server,
+                                                 const vm::InteractiveMarker& marker,
                                                  ClientWidget * label)
 : ClientWidget(params),
-  marker_(server, id2name(requestId), control_position, control_orientation, vm::Marker::CUBE, [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback){ (*this)(feedback); }),
   request_id_(requestId),
-  control_orientation_(control_orientation),
-  control_position_(control_position)
+  marker_(server,
+          id2name(requestId),
+          marker,
+          [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+          {
+            handleRequest(feedback);
+          })
 {
-  auto layout = new QVBoxLayout(this);
+  layout_ = new QVBoxLayout(this);
   button_ = label->showHideButton();
   if(!button_)
   {
     button_ = new QPushButton("Hide");
-    layout->addWidget(button_);
+    layout_->addWidget(button_);
   }
   button_->setCheckable(true);
   button_->setChecked(!visible());
@@ -41,7 +44,26 @@ void InteractiveMarkerWidget::toggled(bool hide)
   visible(!hide);
 }
 
-void InteractiveMarkerWidget::operator()(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
+                        const WidgetId & requestId,
+                        interactive_markers::InteractiveMarkerServer & server,
+                        const sva::PTransformd & /*pos*/,
+                        bool control_orientation,
+                        bool control_position,
+                        ClientWidget * label)
+  : InteractiveMarkerWidget(params, requestId, server,
+                            make6DMarker(
+                                id2name(requestId),
+                                control_position,
+                                control_orientation,
+                                makeAxisMarker(0.15 * 0.9)),
+                            label),
+                            control_orientation_(control_orientation), control_position_(control_position)
+{
+}
+
+
+void TransformInteractiveMarkerWidget::handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
 {
   if(!control_position_ && !control_orientation_) { return; }
   if(control_position_ && !control_orientation_)
@@ -78,6 +100,70 @@ void InteractiveMarkerWidget::operator()(const visualization_msgs::InteractiveMa
           }.inverse();
     client().send_request(request_id_, sva::PTransformd{q, v});
   }
+}
+
+XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(const ClientWidgetParam & params,
+                        const WidgetId & requestId,
+                        interactive_markers::InteractiveMarkerServer & server,
+                        const sva::PTransformd & /*pos*/,
+                        bool control_orientation,
+                        bool control_position,
+                        ClientWidget * label)
+  : InteractiveMarkerWidget(params,
+                            requestId,
+                            server,
+                            makeXYThetaMarker(id2name(requestId)),
+                            label)
+{
+  coupled_marker_ = marker_.marker();
+  decoupled_marker_ = make6DMarker(id2name(requestId),
+                                   control_position,
+                                   control_orientation,
+                                   makeAxisMarker(0.15 * 0.9),
+                                   true, true, false,
+                                   false, false, true);
+  if(control_position || control_orientation)
+  {
+    coupled_checkbox_ = new QCheckBox("Coupled position/orientation");
+    coupled_checkbox_->setChecked(true);
+    layout_->addWidget(coupled_checkbox_);
+    connect(coupled_checkbox_, SIGNAL(stateChanged(int)), this, SLOT(control_state_changed(int)));
+  }
+}
+
+void XYThetaInteractiveMarkerWidget::update(const Eigen::Vector3d & vec)
+{
+  sva::PTransformd X(sva::RotZ(vec.z()), {vec.x(),vec.y(),0.});
+  marker_.update(X);
+}
+
+void XYThetaInteractiveMarkerWidget::handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+{
+  auto q =  Eigen::Quaterniond{
+    feedback->pose.orientation.w,
+    feedback->pose.orientation.x,
+    feedback->pose.orientation.y,
+    feedback->pose.orientation.z
+  }.inverse();
+  Eigen::Matrix3d R(q);
+  Eigen::Vector3d v{feedback->pose.position.x,
+    feedback->pose.position.y,
+    mc_rbdyn::rpyFromMat(R).z()};
+
+  client().send_request(request_id_, v);
+}
+
+void XYThetaInteractiveMarkerWidget::control_state_changed(int)
+{
+  if(coupled_checkbox_->isChecked())
+  {
+    marker_.marker(coupled_marker_);
+  }
+  else
+  {
+    marker_.marker(decoupled_marker_);
+  }
+  marker_.applyChanges();
 }
 
 }

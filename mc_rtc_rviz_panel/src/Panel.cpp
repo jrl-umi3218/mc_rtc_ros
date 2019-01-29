@@ -186,6 +186,8 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_rotation(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)));
   connect(this, SIGNAL(signal_transform(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)),
           this, SLOT(got_transform(const WidgetId&, const WidgetId&, bool, const sva::PTransformd&)));
+  connect(this, SIGNAL(signal_xytheta(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&)),
+          this, SLOT(got_xytheta(const WidgetId&, const WidgetId&, bool, const Eigen::Vector3d&)));
   connect(this, SIGNAL(signal_schema(const WidgetId&, const std::string&)),
           this, SLOT(got_schema(const WidgetId&, const std::string&)));
   connect(this, SIGNAL(signal_form(const WidgetId&)),
@@ -376,6 +378,13 @@ void Panel::transform(const WidgetId & id,
   Q_EMIT signal_transform(id, requestId, ro, pos);
 }
 
+void Panel::xytheta(const WidgetId & id,
+                    const WidgetId & requestId,
+                    bool ro, const Eigen::Vector3d& vec)
+{
+  Q_EMIT signal_xytheta(id, requestId, ro, vec);
+}
+
 void Panel::schema(const WidgetId & id, const std::string & schema)
 {
   Q_EMIT signal_schema(id, schema);
@@ -545,7 +554,7 @@ void Panel::got_point3d(const WidgetId & id,
   else
   {
     auto label = latestWidget_;
-    auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, sva::PTransformd{pos}, false, !ro, label);
+    auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, *int_server_, sva::PTransformd{pos}, false, !ro, label);
     w.update(pos);
   }
 #endif
@@ -557,7 +566,7 @@ void Panel::got_rotation(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, false, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, *int_server_, pos, !ro, false, label);
   w.update(pos);
 #endif
 }
@@ -568,8 +577,19 @@ void Panel::got_transform(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<InteractiveMarkerWidget>(id, *int_server_, requestId, pos, !ro, !ro, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, *int_server_, pos, !ro, !ro, label);
   w.update(pos);
+#endif
+}
+
+void Panel::got_xytheta(const WidgetId & id,
+                        const WidgetId & requestId,
+                        bool ro, const Eigen::Vector3d& vec)
+{
+#ifndef DISABLE_ROS
+  auto label = latestWidget_;
+  auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, *int_server_, sva::PTransformd::Identity(), !ro, !ro, label);
+  w.update(vec);
 #endif
 }
 
