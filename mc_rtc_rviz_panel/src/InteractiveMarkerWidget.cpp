@@ -115,14 +115,20 @@ XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(const ClientWidge
                             makeXYThetaMarker(id2name(requestId)),
                             label)
 {
-  control_position_checkbox_ = new QCheckBox("Control Position");
-  control_position_checkbox_->setChecked(control_position);
-  control_orientation_checkbox_ = new QCheckBox("Control Orientation");
-  control_orientation_checkbox_->setChecked(control_orientation);
-  layout_->addWidget(control_position_checkbox_);
-  layout_->addWidget(control_orientation_checkbox_);
-  connect(control_position_checkbox_, SIGNAL(stateChanged(int)), this, SLOT(control_state_changed(int)));
-  connect(control_orientation_checkbox_, SIGNAL(stateChanged(int)), this, SLOT(control_state_changed(int)));
+  coupled_marker_ = marker_.marker();
+  decoupled_marker_ = make6DMarker(id2name(requestId),
+                                   control_position,
+                                   control_orientation,
+                                   makeAxisMarker(0.15 * 0.9),
+                                   true, true, false,
+                                   false, false, true);
+  if(control_position || control_orientation)
+  {
+    coupled_checkbox_ = new QCheckBox("Coupled position/orientation");
+    coupled_checkbox_->setChecked(true);
+    layout_->addWidget(coupled_checkbox_);
+    connect(coupled_checkbox_, SIGNAL(stateChanged(int)), this, SLOT(control_state_changed(int)));
+  }
 }
 
 void XYThetaInteractiveMarkerWidget::update(const Eigen::Vector3d & vec)
@@ -133,7 +139,6 @@ void XYThetaInteractiveMarkerWidget::update(const Eigen::Vector3d & vec)
 
 void XYThetaInteractiveMarkerWidget::handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
 {
-  if(!control_position_checkbox_->isChecked() && !control_orientation_checkbox_->isChecked()) { return; }
   auto q =  Eigen::Quaterniond{
     feedback->pose.orientation.w,
     feedback->pose.orientation.x,
@@ -142,36 +147,23 @@ void XYThetaInteractiveMarkerWidget::handleRequest(const visualization_msgs::Int
   }.inverse();
   Eigen::Matrix3d R(q);
   Eigen::Vector3d v{feedback->pose.position.x,
-                    feedback->pose.position.y,
-                    mc_rbdyn::rpyFromMat(R).z()};
+    feedback->pose.position.y,
+    mc_rbdyn::rpyFromMat(R).z()};
 
   client().send_request(request_id_, v);
 }
 
-void XYThetaInteractiveMarkerWidget::update_controls()
+void XYThetaInteractiveMarkerWidget::control_state_changed(int)
 {
-  if(control_position_checkbox_->isChecked() && control_orientation_checkbox_->isChecked())
+  if(coupled_checkbox_->isChecked())
   {
-    marker_.marker().controls.back().interaction_mode = vm::InteractiveMarkerControl::MOVE_ROTATE;
-  }
-  else if(control_position_checkbox_->isChecked())
-  {
-    marker_.marker().controls.back().interaction_mode = vm::InteractiveMarkerControl::MOVE_PLANE;
-  }
-  else if(control_orientation_checkbox_->isChecked())
-  {
-    marker_.marker().controls.back().interaction_mode = vm::InteractiveMarkerControl::ROTATE_AXIS;
+    marker_.marker(coupled_marker_);
   }
   else
   {
-    marker_.marker().controls.back().interaction_mode = vm::InteractiveMarkerControl::NONE;
+    marker_.marker(decoupled_marker_);
   }
   marker_.applyChanges();
-}
-
-void XYThetaInteractiveMarkerWidget::control_state_changed(int)
-{
-  update_controls();
 }
 
 }

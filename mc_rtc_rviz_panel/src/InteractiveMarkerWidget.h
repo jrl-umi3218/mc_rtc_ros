@@ -14,7 +14,7 @@ struct InteractiveMarkerWidget : public ClientWidget
   InteractiveMarkerWidget(const ClientWidgetParam & params,
                           const WidgetId & requestId,
                           interactive_markers::InteractiveMarkerServer & server,
-                          const vm::InteractiveMarker& marker,
+                          const vm::InteractiveMarker & marker,
                           ClientWidget * label);
 
  protected:
@@ -72,16 +72,14 @@ struct XYThetaInteractiveMarkerWidget : public InteractiveMarkerWidget
   // update with X, Y, theta
   void update(const Eigen::Vector3d & vec);
 
- private:
-   void update_controls();
-
  private slots:
    void control_state_changed(int);
 
-
  protected:
-   QCheckBox * control_orientation_checkbox_;
-   QCheckBox * control_position_checkbox_;
+   QCheckBox * coupled_checkbox_;
+   vm::InteractiveMarker coupled_marker_;
+   vm::InteractiveMarker decoupled_marker_;
+
 };
 
 }

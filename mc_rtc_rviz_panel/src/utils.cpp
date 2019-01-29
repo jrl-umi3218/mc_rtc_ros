@@ -90,7 +90,9 @@ vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker>& 
 vm::InteractiveMarker make6DMarker(const std::string & name,
                                    bool control_position,
                                    bool control_orientation,
-                                   const std::vector<vm::Marker>& visual_markers)
+                                   const std::vector<vm::Marker>& visual_markers,
+                                   bool move_x, bool move_y, bool move_z,
+                                   bool rotate_x, bool rotate_y, bool rotate_z)
 {
   vm::InteractiveMarker ret;
   ret.header.frame_id = "robot_map";
@@ -104,13 +106,13 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   control.orientation.x = 0.707107;
   control.orientation.y = 0;
   control.orientation.z = 0;
-  if(control_orientation)
+  if(control_orientation && rotate_x)
   {
     control.name = "rotate_x";
     control.interaction_mode = vm::InteractiveMarkerControl::ROTATE_AXIS;
     ret.controls.push_back(control);
   }
-  if(control_position)
+  if(control_position && move_x)
   {
     control.name = "move_x";
     control.interaction_mode = vm::InteractiveMarkerControl::MOVE_AXIS;
@@ -121,13 +123,13 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   control.orientation.x = 0;
   control.orientation.y = 0.707107;
   control.orientation.z = 0;
-  if(control_orientation)
+  if(control_orientation && rotate_z)
   {
     control.name = "rotate_z";
     control.interaction_mode = vm::InteractiveMarkerControl::ROTATE_AXIS;
     ret.controls.push_back(control);
   }
-  if(control_position)
+  if(control_position && move_z)
   {
     control.name = "move_z";
     control.interaction_mode = vm::InteractiveMarkerControl::MOVE_AXIS;
@@ -138,13 +140,13 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   control.orientation.x = 0;
   control.orientation.y = 0;
   control.orientation.z = 0.707107;
-  if(control_orientation)
+  if(control_orientation && rotate_y)
   {
     control.name = "rotate_y";
     control.interaction_mode = vm::InteractiveMarkerControl::ROTATE_AXIS;
     ret.controls.push_back(control);
   }
-  if(control_position)
+  if(control_position && move_y)
   {
     control.name = "move_y";
     control.interaction_mode = vm::InteractiveMarkerControl::MOVE_AXIS;

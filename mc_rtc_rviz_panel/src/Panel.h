@@ -157,7 +157,7 @@ protected:
 
   void xytheta(const WidgetId & id,
                const WidgetId & requestId,
-               bool ro, const Eigen::Vector3d& vec) override;
+               bool ro, const Eigen::Vector3d & vec) override;
 
   void schema(const WidgetId & id, const std::string & schema) override;
 
