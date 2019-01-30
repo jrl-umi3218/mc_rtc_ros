@@ -3,10 +3,8 @@
 namespace mc_rtc_rviz
 {
 
-ArrayLabelWidget::ArrayLabelWidget(const ClientWidgetParam & param,
-                                   const std::vector<std::string> & labels)
-: LabelWidget(param),
-  labels_(labels)
+ArrayLabelWidget::ArrayLabelWidget(const ClientWidgetParam & param, const std::vector<std::string> & labels)
+: LabelWidget(param), labels_(labels)
 {
 }
 
@@ -53,4 +51,4 @@ QPushButton * ArrayLabelWidget::showHideButton()
   return ret;
 }
 
-}
+} // namespace mc_rtc_rviz

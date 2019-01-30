@@ -5,12 +5,8 @@
 namespace mc_rtc_rviz
 {
 
-PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params,
-                                         visualization_msgs::MarkerArray & markers)
-: ClientWidget(params),
-  markers_(markers),
-  visible_(visible()),
-  was_visible_(visible_)
+PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params, visualization_msgs::MarkerArray & markers)
+: ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
   layout->addWidget(new QLabel(id().name.c_str()));
@@ -18,12 +14,12 @@ PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params,
   button_->setCheckable(true);
   button_->setChecked(!visible_);
   toggled(!visible_);
-  connect(button_, SIGNAL(toggled(bool)),
-          this, SLOT(toggled(bool)));
+  connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
   layout->addWidget(button_);
 }
 
-void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>>& polygons, const mc_rtc::gui::Color& c)
+void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>> & polygons,
+                                 const mc_rtc::gui::Color & c)
 {
   currPolygonNum_ = polygons.size();
   if(prevPolygonNum_ > currPolygonNum_)
@@ -31,21 +27,24 @@ void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>>
     clear();
   }
 
-  for (size_t i = 0; i < polygons.size(); ++i)
+  for(size_t i = 0; i < polygons.size(); ++i)
   {
-    const auto& polygon = polygons[i];
+    const auto & polygon = polygons[i];
     update(id2name(id()), i, polygon, c);
   }
   prevPolygonNum_ = polygons.size();
 }
 
-void PolygonMarkerWidget::update(const std::string& ns, const unsigned id, const std::vector<Eigen::Vector3d>& points, const mc_rtc::gui::Color& c)
+void PolygonMarkerWidget::update(const std::string & ns,
+                                 const unsigned id,
+                                 const std::vector<Eigen::Vector3d> & points,
+                                 const mc_rtc::gui::Color & c)
 {
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::LINE_STRIP;
   m.action = visualization_msgs::Marker::ADD;
   m.lifetime = ros::Duration(1);
-  for(const auto& point : points)
+  for(const auto & point : points)
   {
     geometry_msgs::Point p;
     p.x = point.x();
@@ -76,7 +75,7 @@ void PolygonMarkerWidget::update(const std::string& ns, const unsigned id, const
 
 void PolygonMarkerWidget::clear()
 {
-  for (unsigned i = currPolygonNum_; i < prevPolygonNum_; ++i)
+  for(unsigned i = currPolygonNum_; i < prevPolygonNum_; ++i)
   {
     visualization_msgs::Marker m;
     m.action = visualization_msgs::Marker::DELETE;
@@ -93,4 +92,4 @@ void PolygonMarkerWidget::toggled(bool hide)
   visible(!hide);
 }
 
-}
+} // namespace mc_rtc_rviz

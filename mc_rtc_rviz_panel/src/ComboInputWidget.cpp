@@ -3,8 +3,7 @@
 namespace
 {
 
-std::vector<std::string> ref2values(const mc_rtc::Configuration & data,
-                                    const std::vector<std::string> & ref)
+std::vector<std::string> ref2values(const mc_rtc::Configuration & data, const std::vector<std::string> & ref)
 {
   auto d = data;
   for(const auto & k : ref)
@@ -14,7 +13,7 @@ std::vector<std::string> ref2values(const mc_rtc::Configuration & data,
   return d.size() ? d : std::vector<std::string>{};
 }
 
-}
+} // namespace
 
 namespace mc_rtc_rviz
 {
@@ -27,10 +26,8 @@ ComboInputWidget::ComboInputWidget(const ClientWidgetParam & param,
   update(data, ref);
 }
 
-ComboInputWidget::ComboInputWidget(const ClientWidgetParam & param,
-                                   const std::vector<std::string> & values)
-: ClientWidget(param),
-  values_()
+ComboInputWidget::ComboInputWidget(const ClientWidgetParam & param, const std::vector<std::string> & values)
+: ClientWidget(param), values_()
 {
   auto layout = new QFormLayout(this);
   combo_ = new QComboBox(this);
@@ -51,17 +48,25 @@ void ComboInputWidget::update(const std::string & data, const std::vector<std::s
   combo_->blockSignals(true);
   update(values);
   auto idx = combo_->findText(data.c_str());
-  if(idx != -1) { combo_->setCurrentIndex(idx); }
+  if(idx != -1)
+  {
+    combo_->setCurrentIndex(idx);
+  }
   combo_->blockSignals(blocked);
 }
 
-void ComboInputWidget::update(const std::string & in, const mc_rtc::Configuration & data, const std::vector<std::string> & values)
+void ComboInputWidget::update(const std::string & in,
+                              const mc_rtc::Configuration & data,
+                              const std::vector<std::string> & values)
 {
   auto blocked = combo_->signalsBlocked();
   combo_->blockSignals(true);
   update(data, values);
   auto idx = combo_->findText(in.c_str());
-  if(idx != -1) { combo_->setCurrentIndex(idx); }
+  if(idx != -1)
+  {
+    combo_->setCurrentIndex(idx);
+  }
   combo_->blockSignals(blocked);
 }
 
@@ -80,7 +85,7 @@ void ComboInputWidget::update(const std::vector<std::string> & values)
 
 void ComboInputWidget::update(const mc_rtc::Configuration & data, const std::vector<std::string> & values)
 {
-  update(ref2values(data,values));
+  update(ref2values(data, values));
 }
 
-}
+} // namespace mc_rtc_rviz

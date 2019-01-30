@@ -3,8 +3,7 @@
 namespace mc_rtc_rviz
 {
 
-FormWidget::FormWidget(const ClientWidgetParam & param)
-: ClientWidget(param)
+FormWidget::FormWidget(const ClientWidgetParam & param) : ClientWidget(param)
 {
   layout_ = new QFormLayout(this);
   auto button = new QPushButton(name().c_str());
@@ -45,9 +44,15 @@ void FormWidget::add_element(FormElement * element)
     el->update_dependencies(element);
   }
   elements_.push_back(element);
-  if(element->isHidden()) { return; }
+  if(element->isHidden())
+  {
+    return;
+  }
   auto label_text = element->name();
-  if(element->required()) { label_text += "*"; }
+  if(element->required())
+  {
+    label_text += "*";
+  }
   if(!element->spanning())
   {
     layout_->insertRow(layout_->rowCount() - 1, label_text.c_str(), element);
@@ -62,4 +67,4 @@ void FormWidget::add_element(FormElement * element)
   }
 }
 
-}
+} // namespace mc_rtc_rviz

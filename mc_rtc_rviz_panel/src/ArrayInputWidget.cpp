@@ -3,8 +3,7 @@
 namespace mc_rtc_rviz
 {
 
-ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param,
-                                   const std::vector<std::string> & labels)
+ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param, const std::vector<std::string> & labels)
 : ClientWidget(param)
 {
   auto mainLayout = new QVBoxLayout(this);
@@ -15,8 +14,7 @@ ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param,
   lock_button_ = new QPushButton("EDIT");
   lock_button_->setCheckable(true);
   labels_layout_->addWidget(lock_button_);
-  connect(lock_button_, SIGNAL(toggled(bool)),
-          this, SLOT(lock_toggled(bool)));
+  connect(lock_button_, SIGNAL(toggled(bool)), this, SLOT(lock_toggled(bool)));
   edits_layout_ = new QGridLayout();
   mainLayout->addLayout(edits_layout_);
   if(labels.size())
@@ -32,7 +30,10 @@ ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param,
 
 void ArrayInputWidget::update(const Eigen::VectorXd & data)
 {
-  if(lock_button_->isChecked()) { return; }
+  if(lock_button_->isChecked())
+  {
+    return;
+  }
   if(data.size() != edits_.size())
   {
     auto old_size = edits_.size();
@@ -44,8 +45,7 @@ void ArrayInputWidget::update(const Eigen::VectorXd & data)
       auto validator = new QDoubleValidator(this);
       validator->setLocale(QLocale::C);
       edits_[i]->setValidator(validator);
-      connect(edits_[i], SIGNAL(returnPressed()),
-              this, SLOT(edit_return_pressed()));
+      connect(edits_[i], SIGNAL(returnPressed()), this, SLOT(edit_return_pressed()));
       edits_layout_->addWidget(edits_[i], edits_row_, i);
     }
   }
@@ -61,7 +61,10 @@ void ArrayInputWidget::lock_toggled(bool unlocked)
   if(unlocked)
   {
     lock_button_->setText("SEND");
-    for(auto e : edits_) { e->setReadOnly(false); }
+    for(auto e : edits_)
+    {
+      e->setReadOnly(false);
+    }
   }
   else
   {
@@ -79,7 +82,10 @@ void ArrayInputWidget::lock_toggled(bool unlocked)
 
 void ArrayInputWidget::edit_return_pressed()
 {
-  if(lock_button_->isChecked()) { lock_button_->toggle(); }
+  if(lock_button_->isChecked())
+  {
+    lock_button_->toggle();
+  }
 }
 
 QPushButton * ArrayInputWidget::showHideButton()
@@ -89,4 +95,4 @@ QPushButton * ArrayInputWidget::showHideButton()
   return ret;
 }
 
-}
+} // namespace mc_rtc_rviz

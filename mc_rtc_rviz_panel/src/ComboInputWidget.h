@@ -11,11 +11,14 @@ struct ComboInputWidget : public ClientWidget
 public:
   ComboInputWidget(const ClientWidgetParam & param, const std::vector<std::string> & values);
 
-  ComboInputWidget(const ClientWidgetParam & param, const mc_rtc::Configuration & data, const std::vector<std::string> & ref);
+  ComboInputWidget(const ClientWidgetParam & param,
+                   const mc_rtc::Configuration & data,
+                   const std::vector<std::string> & ref);
 
   void update(const std::string & data, const std::vector<std::string> & values);
 
   void update(const std::string & in, const mc_rtc::Configuration & data, const std::vector<std::string> & ref);
+
 private:
   QComboBox * combo_;
   std::vector<std::string> values_;
@@ -25,4 +28,4 @@ private slots:
   void currentIndexChanged(int);
 };
 
-}
+} // namespace mc_rtc_rviz

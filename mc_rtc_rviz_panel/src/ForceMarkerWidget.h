@@ -1,10 +1,12 @@
 #pragma once
 
+#include <mc_rtc/GUITypes.h>
 #include <mc_rtc/ros.h>
+
+#include <visualization_msgs/MarkerArray.h>
+
 #include "ClientWidget.h"
 #include "utils.h"
-#include <mc_rtc/GUITypes.h>
-#include <visualization_msgs/MarkerArray.h>
 
 namespace mc_rtc_rviz
 {
@@ -19,6 +21,7 @@ public:
                     ClientWidget * label);
 
   void update(const sva::ForceVecd & force, const sva::PTransformd & surface, const mc_rtc::gui::ForceConfig & c);
+
 private:
   WidgetId request_id_;
   visualization_msgs::MarkerArray & markers_;
@@ -29,4 +32,4 @@ private slots:
   void toggled(bool);
 };
 
-}
+} // namespace mc_rtc_rviz

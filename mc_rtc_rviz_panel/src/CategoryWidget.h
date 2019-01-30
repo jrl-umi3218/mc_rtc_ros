@@ -18,6 +18,7 @@ public:
   size_t clean() override;
 
   ClientWidget * widget(const std::string & name) override;
+
 private:
   int level = 0;
   QTabWidget * tabs_ = nullptr;
@@ -29,4 +30,4 @@ private slots:
   void toggled(bool);
 };
 
-}
+} // namespace mc_rtc_rviz

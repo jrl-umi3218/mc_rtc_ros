@@ -3,8 +3,7 @@
 namespace mc_rtc_rviz
 {
 
-LabelWidget::LabelWidget(const ClientWidgetParam & param)
-: ClientWidget(param)
+LabelWidget::LabelWidget(const ClientWidgetParam & param) : ClientWidget(param)
 {
   layout_ = new QHBoxLayout(this);
   layout_->addWidget(new QLabel(name().c_str(), this));
@@ -18,4 +17,4 @@ void LabelWidget::update(const std::string & in)
   label_->setText(in.c_str());
 }
 
-}
+} // namespace mc_rtc_rviz

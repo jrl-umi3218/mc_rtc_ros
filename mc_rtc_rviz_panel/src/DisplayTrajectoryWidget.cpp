@@ -8,11 +8,7 @@ namespace mc_rtc_rviz
 DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & params,
                                                  visualization_msgs::MarkerArray & markers,
                                                  const mc_rtc::gui::LineConfig & config)
-: ClientWidget(params),
-  markers_(markers),
-  config_(config),
-  visible_(visible()),
-  was_visible_(visible_)
+: ClientWidget(params), markers_(markers), config_(config), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
   layout->addWidget(new QLabel(id().name.c_str()));
@@ -23,7 +19,7 @@ DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & param
   layout->addWidget(button_);
 }
 
-void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d>& points)
+void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d> & points)
 {
   configure();
   path_.points.clear();
@@ -38,11 +34,11 @@ void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d>& points)
   publish();
 }
 
-void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd>& points)
+void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd> & points)
 {
   configure();
   path_.points.clear();
-  for(const auto&p : points)
+  for(const auto & p : points)
   {
     geometry_msgs::Point pose;
     pose.x = p.translation().x();
@@ -77,8 +73,9 @@ void DisplayTrajectoryWidget::update(const sva::PTransformd & point)
 
 void DisplayTrajectoryWidget::configure()
 {
-  path_.type = config_.style == mc_rtc::gui::LineStyle::Dotted ? visualization_msgs::Marker::POINTS : visualization_msgs::Marker::LINE_STRIP;
-  path_.header.frame_id="/robot_map";
+  path_.type = config_.style == mc_rtc::gui::LineStyle::Dotted ? visualization_msgs::Marker::POINTS
+                                                               : visualization_msgs::Marker::LINE_STRIP;
+  path_.header.frame_id = "/robot_map";
   path_.header.stamp = ros::Time::now();
   path_.scale.x = config_.width;
   path_.scale.y = config_.width;
@@ -111,5 +108,4 @@ void DisplayTrajectoryWidget::toggled(bool hide)
   visible(!hide);
 }
 
-
-}
+} // namespace mc_rtc_rviz

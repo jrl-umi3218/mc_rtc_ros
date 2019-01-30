@@ -1,9 +1,11 @@
 #pragma once
 
+#include <mc_rtc/ros.h>
+
+#include <visualization_msgs/MarkerArray.h>
+
 #include "ClientWidget.h"
 #include "utils.h"
-#include <mc_rtc/ros.h>
-#include <visualization_msgs/MarkerArray.h>
 
 namespace mc_rtc_rviz
 {
@@ -20,6 +22,7 @@ public:
   void update(const std::vector<sva::PTransformd> & points);
   void update(const Eigen::Vector3d & point);
   void update(const sva::PTransformd & points);
+
 private:
   visualization_msgs::MarkerArray & markers_;
   visualization_msgs::Marker path_;
@@ -33,4 +36,4 @@ private slots:
   void toggled(bool);
 };
 
-}
+} // namespace mc_rtc_rviz

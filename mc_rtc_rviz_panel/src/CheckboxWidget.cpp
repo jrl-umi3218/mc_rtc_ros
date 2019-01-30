@@ -3,8 +3,7 @@
 namespace mc_rtc_rviz
 {
 
-CheckboxWidget::CheckboxWidget(const ClientWidgetParam & param)
-: ClientWidget(param)
+CheckboxWidget::CheckboxWidget(const ClientWidgetParam & param) : ClientWidget(param)
 {
   auto layout = new QHBoxLayout(this);
   cbox_ = new QCheckBox(name().c_str(), this);
@@ -28,4 +27,4 @@ void CheckboxWidget::toggled(bool)
   this->client().send_request(id());
 }
 
-}
+} // namespace mc_rtc_rviz

@@ -3,7 +3,7 @@
 namespace mc_rtc_rviz
 {
 
-geometry_msgs::Point rosPoint(const Eigen::Vector3d& vec)
+geometry_msgs::Point rosPoint(const Eigen::Vector3d & vec)
 {
   geometry_msgs::Point p;
   p.x = vec.x();
@@ -16,9 +16,9 @@ vm::Marker makeVisual(int t, double baseScale)
 {
   vm::Marker ret;
   ret.type = t;
-  ret.scale.x = baseScale*0.45;
-  ret.scale.y = baseScale*0.45;
-  ret.scale.z = baseScale*0.45;
+  ret.scale.x = baseScale * 0.45;
+  ret.scale.y = baseScale * 0.45;
+  ret.scale.z = baseScale * 0.45;
   ret.color.r = 1.0;
   ret.color.g = 0.0;
   ret.color.b = 0.0;
@@ -44,7 +44,6 @@ std::vector<vm::Marker> makeAxisMarker(double scale)
   // arrow head length
   m.scale.z = scale * 0.5;
   m.pose.orientation.w = 1.0;
-
 
   std::vector<vm::Marker> ret;
   // X axis
@@ -76,8 +75,8 @@ std::vector<vm::Marker> makeAxisMarker(double scale)
   return ret;
 }
 
-vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker>& visual_makers,
-    vm::InteractiveMarker & marker)
+vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker> & visual_makers,
+                                                 vm::InteractiveMarker & marker)
 {
   vm::InteractiveMarkerControl ret;
   ret.always_visible = true;
@@ -90,9 +89,13 @@ vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker>& 
 vm::InteractiveMarker make6DMarker(const std::string & name,
                                    bool control_position,
                                    bool control_orientation,
-                                   const std::vector<vm::Marker>& visual_markers,
-                                   bool move_x, bool move_y, bool move_z,
-                                   bool rotate_x, bool rotate_y, bool rotate_z)
+                                   const std::vector<vm::Marker> & visual_markers,
+                                   bool move_x,
+                                   bool move_y,
+                                   bool move_z,
+                                   bool rotate_x,
+                                   bool rotate_y,
+                                   bool rotate_z)
 {
   vm::InteractiveMarker ret;
   ret.header.frame_id = "robot_map";
@@ -163,7 +166,7 @@ vm::InteractiveMarker makeXYThetaMarker(const std::string & name)
   int_marker.scale = 0.25;
   int_marker.name = name;
   int_marker.description = "";
-  makeVisualControl(makeAxisMarker(0.15*0.9),int_marker);
+  makeVisualControl(makeAxisMarker(0.15 * 0.9), int_marker);
 
   vm::InteractiveMarkerControl control;
   control.orientation.w = 1;
@@ -175,7 +178,10 @@ vm::InteractiveMarker makeXYThetaMarker(const std::string & name)
   return int_marker;
 }
 
-visualization_msgs::Marker getPointMarker(const std::string & ns, const Eigen::Vector3d & pos, const mc_rtc::gui::Color& color, double scale = 0.02)
+visualization_msgs::Marker getPointMarker(const std::string & ns,
+                                          const Eigen::Vector3d & pos,
+                                          const mc_rtc::gui::Color & color,
+                                          double scale = 0.02)
 {
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::SPHERE;
@@ -197,14 +203,11 @@ visualization_msgs::Marker getPointMarker(const std::string & ns, const Eigen::V
   return m;
 }
 
-
-
 SharedMarker::SharedMarker(interactive_markers::InteractiveMarkerServer & server,
-                           const std::string & name, const vm::InteractiveMarker& marker,
+                           const std::string & name,
+                           const vm::InteractiveMarker & marker,
                            interactive_markers::InteractiveMarkerServer::FeedbackCallback callback)
-: server_(server),
-  marker_(marker),
-  callback_(callback)
+: server_(server), marker_(marker), callback_(callback)
 {
   server_.insert(marker_, callback_);
 }
@@ -249,7 +252,7 @@ void SharedMarker::update(const sva::PTransformd & pos)
   if(!hidden_)
   {
     geometry_msgs::Pose pose;
-    Eigen::Quaterniond q {pos.rotation().transpose()};
+    Eigen::Quaterniond q{pos.rotation().transpose()};
     pose.orientation.w = q.w();
     pose.orientation.x = q.x();
     pose.orientation.y = q.y();
@@ -261,4 +264,4 @@ void SharedMarker::update(const sva::PTransformd & pos)
   }
 }
 
-}
+} // namespace mc_rtc_rviz

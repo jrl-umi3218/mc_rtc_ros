@@ -4,9 +4,7 @@ namespace mc_rtc_rviz
 {
 
 ConnectionDialog::ConnectionDialog(std::string & sub_uri, std::string & push_uri, QWidget * parent)
-: QDialog(parent),
-  sub_uri_(sub_uri),
-  push_uri_(push_uri)
+: QDialog(parent), sub_uri_(sub_uri), push_uri_(push_uri)
 {
   setModal(true);
   setWindowTitle("Edit connection parameters");
@@ -17,11 +15,9 @@ ConnectionDialog::ConnectionDialog(std::string & sub_uri, std::string & push_uri
   pushEdit_ = new QLineEdit(push_uri.c_str(), this);
   layout_->addRow("Push URI", pushEdit_);
   confirmButton_ = new QPushButton("OK", this);
-  connect(confirmButton_, SIGNAL(released()),
-          this, SLOT(accept()));
+  connect(confirmButton_, SIGNAL(released()), this, SLOT(accept()));
   cancelButton_ = new QPushButton("Cancel", this);
-  connect(cancelButton_, SIGNAL(released()),
-          this, SLOT(reject()));
+  connect(cancelButton_, SIGNAL(released()), this, SLOT(reject()));
   auto hlayout = new QHBoxLayout();
   hlayout->addWidget(confirmButton_);
   hlayout->addWidget(cancelButton_);
@@ -35,4 +31,4 @@ void ConnectionDialog::accept()
   QDialog::accept();
 }
 
-}
+} // namespace mc_rtc_rviz
