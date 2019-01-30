@@ -14,15 +14,16 @@ public:
   void update(const Eigen::VectorXd & data);
 
   QPushButton * showHideButton() override;
+
 private:
   QPushButton * lock_button_;
   QHBoxLayout * labels_layout_;
   QGridLayout * edits_layout_;
   int edits_row_ = 0;
-  std::vector<QLineEdit*> edits_;
+  std::vector<QLineEdit *> edits_;
 private slots:
   void lock_toggled(bool);
   void edit_return_pressed();
 };
 
-}
+} // namespace mc_rtc_rviz

@@ -1,17 +1,14 @@
 #include "ArrowMarkerWidget.h"
 
 #include <mc_rbdyn/configuration_io.h>
+
 #include "utils.h"
 
 namespace mc_rtc_rviz
 {
 
-ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params,
-                                         visualization_msgs::MarkerArray & markers)
-: ClientWidget(params),
-  markers_(markers),
-  visible_(visible()),
-  was_visible_(visible_)
+ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params, visualization_msgs::MarkerArray & markers)
+: ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
   layout->addWidget(new QLabel(id().name.c_str()));
@@ -19,12 +16,13 @@ ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params,
   button_->setCheckable(true);
   button_->setChecked(!visible_);
   toggled(!visible_);
-  connect(button_, SIGNAL(toggled(bool)),
-          this, SLOT(toggled(bool)));
+  connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
   layout->addWidget(button_);
 }
 
-void ArrowMarkerWidget::update(const Eigen::Vector3d & start, const Eigen::Vector3d & end, const mc_rtc::gui::ArrowConfig & c)
+void ArrowMarkerWidget::update(const Eigen::Vector3d & start,
+                               const Eigen::Vector3d & end,
+                               const mc_rtc::gui::ArrowConfig & c)
 {
   bool show = visible_ || was_visible_;
   visualization_msgs::Marker m;
@@ -35,8 +33,7 @@ void ArrowMarkerWidget::update(const Eigen::Vector3d & start, const Eigen::Vecto
     m.action = visualization_msgs::Marker::DELETE;
   }
   m.lifetime = ros::Duration(1);
-  auto rosPoint = [](const Eigen::Vector3d & vec)
-  {
+  auto rosPoint = [](const Eigen::Vector3d & vec) {
     geometry_msgs::Point p;
     p.x = vec.x();
     p.y = vec.y();
@@ -88,4 +85,4 @@ void ArrowMarkerWidget::toggled(bool hide)
   visible(!hide);
 }
 
-}
+} // namespace mc_rtc_rviz

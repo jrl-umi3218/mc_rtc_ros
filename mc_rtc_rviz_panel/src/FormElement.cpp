@@ -14,7 +14,7 @@ bool FormElement::eventFilter(QObject * o, QEvent * e)
 {
   if(e->type() == QEvent::Wheel)
   {
-    if(qobject_cast<QComboBox*>(o) != nullptr)
+    if(qobject_cast<QComboBox *>(o) != nullptr)
     {
       e->ignore();
       return true;
@@ -37,7 +37,7 @@ bool FormElement::fill(mc_rtc::Configuration & out, std::string & msg)
   return true;
 }
 
-void FormElement::update_dependencies(const std::vector<FormElement*> & others)
+void FormElement::update_dependencies(const std::vector<FormElement *> & others)
 {
   for(const auto & el : others)
   {
@@ -58,7 +58,10 @@ Checkbox::Checkbox(QWidget * parent, const std::string & name, bool required, bo
   layout->addWidget(cbox_);
 }
 
-void Checkbox::toggled(bool) { ready_ = true; }
+void Checkbox::toggled(bool)
+{
+  ready_ = true;
+}
 
 void Checkbox::fill_(mc_rtc::Configuration & out)
 {
@@ -73,7 +76,10 @@ CommonInput::CommonInput(QWidget * parent, const std::string & name, bool requir
   layout->addWidget(edit_);
 }
 
-void CommonInput::textChanged(const QString&) { ready_ = true; }
+void CommonInput::textChanged(const QString &)
+{
+  ready_ = true;
+}
 
 IntegerInput::IntegerInput(QWidget * parent, const std::string & name, bool required, int def)
 : CommonInput(parent, name, required)
@@ -82,8 +88,7 @@ IntegerInput::IntegerInput(QWidget * parent, const std::string & name, bool requ
   validator->setLocale(QLocale::C);
   edit_->setValidator(validator);
   edit_->setText(QString::number(def));
-  connect(edit_, SIGNAL(textChanged(const QString&)),
-          this, SLOT(textChanged(const QString&)));
+  connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
 void IntegerInput::fill_(mc_rtc::Configuration & out)
@@ -98,8 +103,7 @@ NumberInput::NumberInput(QWidget * parent, const std::string & name, bool requir
   validator->setLocale(QLocale::C);
   edit_->setValidator(validator);
   edit_->setText(QString::number(def));
-  connect(edit_, SIGNAL(textChanged(const QString&)),
-          this, SLOT(textChanged(const QString&)));
+  connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
 void NumberInput::fill_(mc_rtc::Configuration & out)
@@ -111,8 +115,7 @@ StringInput::StringInput(QWidget * parent, const std::string & name, bool requir
 : CommonInput(parent, name, required)
 {
   edit_->setText(def.c_str());
-  connect(edit_, SIGNAL(textChanged(const QString&)),
-          this, SLOT(textChanged(const QString&)));
+  connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
 void StringInput::fill_(mc_rtc::Configuration & out)
@@ -125,7 +128,7 @@ CommonArrayInput::CommonArrayInput(QWidget * parent, const std::string & name, b
 {
 }
 
-void CommonArrayInput::textChanged(const QString&)
+void CommonArrayInput::textChanged(const QString &)
 {
   ready_ = true;
 }
@@ -175,7 +178,11 @@ std::string ArrayInput<std::string>::edit2data(QLineEdit * edit)
   return edit->text().toStdString();
 }
 
-NumberArrayInput::NumberArrayInput(QWidget * parent, const std::string & name, bool required, const Eigen::VectorXd & def, bool fixed_size)
+NumberArrayInput::NumberArrayInput(QWidget * parent,
+                                   const std::string & name,
+                                   bool required,
+                                   const Eigen::VectorXd & def,
+                                   bool fixed_size)
 : ArrayInput<double>(parent, name, required, fixed_size)
 {
   for(int i = 0; i < def.size(); ++i)
@@ -184,19 +191,27 @@ NumberArrayInput::NumberArrayInput(QWidget * parent, const std::string & name, b
   }
 }
 
-NumberArrayInput::NumberArrayInput(QWidget * parent, const std::string & name, bool required, bool fixed_size, int min_size, int max_size)
+NumberArrayInput::NumberArrayInput(QWidget * parent,
+                                   const std::string & name,
+                                   bool required,
+                                   bool fixed_size,
+                                   int min_size,
+                                   int max_size)
 : ArrayInput<double>(parent, name, required, fixed_size, min_size, max_size)
 {
 }
 
-ComboInput::ComboInput(QWidget * parent, const std::string & name, bool required, const std::vector<std::string> & values, bool send_index)
-: FormElement(parent, name, required),
-  send_index_(send_index)
+ComboInput::ComboInput(QWidget * parent,
+                       const std::string & name,
+                       bool required,
+                       const std::vector<std::string> & values,
+                       bool send_index)
+: FormElement(parent, name, required), send_index_(send_index)
 {
   auto layout = new QVBoxLayout(this);
   combo_ = new QComboBox(this);
   combo_->installEventFilter(this);
-  combo_->setFocusPolicy( Qt::StrongFocus );
+  combo_->setFocusPolicy(Qt::StrongFocus);
   layout->addWidget(combo_);
   for(const auto & v : values)
   {
@@ -208,8 +223,7 @@ ComboInput::ComboInput(QWidget * parent, const std::string & name, bool required
     combo_->setCurrentIndex(0);
     ready_ = true;
   }
-  connect(combo_, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(currentIndexChanged(int)));
+  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
 }
 
 void ComboInput::currentIndexChanged(int idx)
@@ -229,25 +243,26 @@ void ComboInput::fill_(mc_rtc::Configuration & out)
   }
 }
 
-DataComboInput::DataComboInput(QWidget * parent, const std::string & name, bool required, const mc_rtc::Configuration & data, const std::vector<std::string> & ref, bool send_index, const std::string & rename)
-: FormElement(parent, name, required),
-  send_index_(send_index),
-  data_(data),
-  ref_(ref),
-  resolved_ref_(ref),
+DataComboInput::DataComboInput(QWidget * parent,
+                               const std::string & name,
+                               bool required,
+                               const mc_rtc::Configuration & data,
+                               const std::vector<std::string> & ref,
+                               bool send_index,
+                               const std::string & rename)
+: FormElement(parent, name, required), send_index_(send_index), data_(data), ref_(ref), resolved_ref_(ref),
   rename_(rename.size() ? rename : name)
 {
   auto layout = new QVBoxLayout(this);
   combo_ = new QComboBox(this);
   combo_->installEventFilter(this);
-  combo_->setFocusPolicy( Qt::StrongFocus );
+  combo_->setFocusPolicy(Qt::StrongFocus);
   layout->addWidget(combo_);
   if(resolve_ref())
   {
     update_values();
   }
-  connect(combo_, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(currentIndexChanged(int)));
+  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
 }
 
 void DataComboInput::currentIndexChanged(int idx)
@@ -264,9 +279,8 @@ void DataComboInput::update_dependencies(FormElement * other)
       auto need = k.substr(1, k.size() - 1);
       if(other->name() == need && !connected_.count(need))
       {
-        auto combo = static_cast<QComboBox*>(other->layout()->itemAt(0)->widget());
-        connect(combo, SIGNAL(currentIndexChanged(const QString&)),
-                this, SLOT(currentIndexChanged(const QString&)));
+        auto combo = static_cast<QComboBox *>(other->layout()->itemAt(0)->widget());
+        connect(combo, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(currentIndexChanged(const QString &)));
         connected_.insert(need);
       }
     }
@@ -275,7 +289,7 @@ void DataComboInput::update_dependencies(FormElement * other)
 
 void DataComboInput::currentIndexChanged(const QString & text)
 {
-  auto source = qobject_cast<FormElement*>(sender()->parent());
+  auto source = qobject_cast<FormElement *>(sender()->parent());
   assert(source);
   update_field(source->name(), text.toStdString());
 }
@@ -296,7 +310,10 @@ bool DataComboInput::resolve_ref()
 {
   for(const auto & k : resolved_ref_)
   {
-    if(k.size() == 0 || k[0] == '$') { return false; }
+    if(k.size() == 0 || k[0] == '$')
+    {
+      return false;
+    }
   }
   return true;
 }
@@ -314,7 +331,10 @@ void DataComboInput::update_field(const std::string & name, const std::string & 
       }
     }
   }
-  if(resolve_ref()) { update_values(); }
+  if(resolve_ref())
+  {
+    update_values();
+  }
 }
 
 void DataComboInput::update_values()
@@ -333,16 +353,16 @@ void DataComboInput::update_values()
   combo_->setCurrentIndex(-1);
 }
 
-Form::Form(QWidget * parent, const std::string & name, bool required, const std::vector<FormElement*> elements)
-: FormElement(parent, name, required),
-  elements_(elements)
+Form::Form(QWidget * parent, const std::string & name, bool required, const std::vector<FormElement *> elements)
+: FormElement(parent, name, required), elements_(elements)
 {
   spanning_ = true;
   show_name_ = false;
   auto title = required ? name + "*" : name;
   auto m_layout = new QVBoxLayout(this);
   auto group = new QGroupBox(title.c_str(), parent);
-  group->setStyleSheet("QGroupBox {border: 1px solid gray;border-radius: 9px;margin-top: 0.5em;} QGroupBox::title { subcontrol-origin: margin; left: 10px; margin-bottom: 2em; padding: 0 3px 0 3px;}");
+  group->setStyleSheet("QGroupBox {border: 1px solid gray;border-radius: 9px;margin-top: 0.5em;} QGroupBox::title { "
+                       "subcontrol-origin: margin; left: 10px; margin-bottom: 2em; padding: 0 3px 0 3px;}");
   auto layout = new QFormLayout(group);
   for(auto & el : elements_)
   {
@@ -369,8 +389,14 @@ bool Form::ready() const
   bool ok = false;
   for(const auto & el : elements_)
   {
-    if(el->ready()) { ok = true; }
-    if(el->required() && !el->ready()) { return false; }
+    if(el->ready())
+    {
+      ok = true;
+    }
+    if(el->required() && !el->ready())
+    {
+      return false;
+    }
   }
   return ok;
 }

@@ -1,11 +1,11 @@
 #include "SchemaWidget.h"
 
-#include "FormElement.h"
-#include "FormWidget.h"
-
 #include <mc_rtc/logging.h>
 
 #include <boost/filesystem.hpp>
+
+#include "FormElement.h"
+#include "FormWidget.h"
 namespace bfs = boost::filesystem;
 
 namespace mc_rtc_rviz
@@ -17,19 +17,26 @@ namespace
 struct Schema;
 
 using SchemaStore = std::map<std::string, Schema>;
-using Form = std::vector<FormElement*>;
-using FormMaker = std::function<Form(QWidget *, const mc_rtc::Configuration&)>;
+using Form = std::vector<FormElement *>;
+using FormMaker = std::function<Form(QWidget *, const mc_rtc::Configuration &)>;
 
 struct Schema
 {
   Schema() = default;
   Schema(const std::string & file);
 
-  const std::string & title() const { return title_; }
+  const std::string & title() const
+  {
+    return title_;
+  }
 
-  bool is_object() const { return is_object_; }
+  bool is_object() const
+  {
+    return is_object_;
+  }
 
-  FormMaker create_form = [](QWidget*, const mc_rtc::Configuration&) -> Form { return {}; };
+  FormMaker create_form = [](QWidget *, const mc_rtc::Configuration &) -> Form { return {}; };
+
 private:
   std::string title_;
   bool is_object_ = false;
@@ -43,30 +50,28 @@ Schema::Schema(const std::string & file)
   mc_rtc::Configuration s{file};
   title_ = s("title", "No title property in " + file);
   auto required = s("required", std::vector<std::string>{});
-  auto is_required = [&required](const std::string & label)
-  {
+  auto is_required = [&required](const std::string & label) {
     return std::find(required.begin(), required.end(), label) != required.end();
   };
   /** Handle enum entries */
-  auto handle_enum = [this](const std::string & k, bool required, const std::vector<std::string> & values)
-  {
+  auto handle_enum = [this](const std::string & k, bool required, const std::vector<std::string> & values) {
     auto cf = create_form;
-    create_form = [cf,k,required,values](QWidget * parent, const mc_rtc::Configuration & data)
-    {
+    create_form = [cf, k, required, values](QWidget * parent, const mc_rtc::Configuration & data) {
       auto v = cf(parent, data);
       v.emplace_back(new form::ComboInput(parent, k, required, values, false));
-      if(values.size() == 1 && required) { v.back()->hide(); }
+      if(values.size() == 1 && required)
+      {
+        v.back()->hide();
+      }
       return v;
     };
   };
   /** Handle: boolean/integer/number/string */
-  auto handle_type = [this,&file](const std::string & k, bool required, const std::string & type)
-  {
+  auto handle_type = [this, &file](const std::string & k, bool required, const std::string & type) {
     auto cf = create_form;
     if(type == "boolean")
     {
-      create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
-      {
+      create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
         v.emplace_back(new form::Checkbox(parent, k, required, true));
         return v;
@@ -76,16 +81,14 @@ Schema::Schema(const std::string & file)
     {
       if(k == "robotIndex")
       {
-        create_form = [cf,required](QWidget * parent, const mc_rtc::Configuration & data)
-        {
+        create_form = [cf, required](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
           v.emplace_back(new form::DataComboInput(parent, "robot", required, data, {"robots"}, true, "robotIndex"));
           return v;
         };
         return;
       }
-      create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
-      {
+      create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
         v.emplace_back(new form::IntegerInput(parent, k, required, 0));
         return v;
@@ -93,8 +96,7 @@ Schema::Schema(const std::string & file)
     }
     else if(type == "number")
     {
-      create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
-      {
+      create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
         v.emplace_back(new form::NumberInput(parent, k, required, 0));
         return v;
@@ -104,12 +106,12 @@ Schema::Schema(const std::string & file)
     {
       if(type != "string")
       {
-        LOG_WARNING("Property " << k << " in " << file << " has unknown or missing type (value: " << type << "), treating as string")
+        LOG_WARNING("Property " << k << " in " << file << " has unknown or missing type (value: " << type
+                                << "), treating as string")
       }
       if(k == "body")
       {
-        create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
-        {
+        create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
           v.emplace_back(new form::DataComboInput(parent, "body", required, data, {"bodies", "$robot"}, false));
           return v;
@@ -117,8 +119,7 @@ Schema::Schema(const std::string & file)
       }
       else if(k == "surface")
       {
-        create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
-        {
+        create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
           v.emplace_back(new form::DataComboInput(parent, "surface", required, data, {"surfaces", "$robot"}, false));
           return v;
@@ -126,8 +127,7 @@ Schema::Schema(const std::string & file)
       }
       else
       {
-        create_form = [cf,k,required](QWidget * parent, const mc_rtc::Configuration & data)
-        {
+        create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
           v.emplace_back(new form::StringInput(parent, k, required, ""));
           return v;
@@ -136,24 +136,22 @@ Schema::Schema(const std::string & file)
     }
   };
   /** Handle an array */
-  auto handle_array = [this,&file](const std::string & k, bool required, const std::string & type, size_t min, size_t max)
-  {
+  auto handle_array = [this, &file](const std::string & k, bool required, const std::string & type, size_t min,
+                                    size_t max) {
     auto cf = create_form;
     if(type == "integer")
     {
-      create_form = [cf,k,required,min,max](QWidget * parent, const mc_rtc::Configuration & data)
-      {
+      create_form = [cf, k, required, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::IntegerArrayInput(parent, k, required, min==max, min, max));
+        v.emplace_back(new form::IntegerArrayInput(parent, k, required, min == max, min, max));
         return v;
       };
     }
     else if(type == "number")
     {
-      create_form = [cf,k,required,min,max](QWidget * parent, const mc_rtc::Configuration & data)
-      {
+      create_form = [cf, k, required, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::NumberArrayInput(parent, k, required, min==max, min, max));
+        v.emplace_back(new form::NumberArrayInput(parent, k, required, min == max, min, max));
         return v;
       };
     }
@@ -165,12 +163,12 @@ Schema::Schema(const std::string & file)
     {
       if(type != "string")
       {
-        LOG_WARNING("Property " << k << " in " << file << " has unknonw or missing array items' type (value: " << type << "), treating as string")
+        LOG_WARNING("Property " << k << " in " << file << " has unknonw or missing array items' type (value: " << type
+                                << "), treating as string")
       }
-      create_form = [cf,k,required,min,max](QWidget * parent, const mc_rtc::Configuration & data)
-      {
+      create_form = [cf, k, required, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::StringArrayInput(parent, k, required, min==max, min, max));
+        v.emplace_back(new form::StringArrayInput(parent, k, required, min == max, min, max));
         return v;
       };
     }
@@ -178,7 +176,8 @@ Schema::Schema(const std::string & file)
   std::string type = s("type");
   if(type == "array")
   {
-    handle_array(title_, false, s("items", mc_rtc::Configuration{})("type", std::string{""}), s("minItems", 0), s("maxItems", 256));
+    handle_array(title_, false, s("items", mc_rtc::Configuration{})("type", std::string{""}), s("minItems", 0),
+                 s("maxItems", 256));
     return;
   }
   if(type != "object")
@@ -200,7 +199,8 @@ Schema::Schema(const std::string & file)
       std::string type = prop("type");
       if(type == "array")
       {
-        handle_array(k, is_required(k), prop("items", mc_rtc::Configuration{})("type", std::string{""}), prop("minItems", 0), prop("maxItems", 256));
+        handle_array(k, is_required(k), prop("items", mc_rtc::Configuration{})("type", std::string{""}),
+                     prop("minItems", 0), prop("maxItems", 256));
       }
       else
       {
@@ -220,8 +220,7 @@ Schema::Schema(const std::string & file)
       auto cf = create_form;
       bool required = is_required(k);
       std::string ref_schema_str = ref_schema.string();
-      create_form = [cf,k,required,ref_schema_str](QWidget * parent, const mc_rtc::Configuration & data)
-      {
+      create_form = [cf, k, required, ref_schema_str](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
         const auto & schema = store.at(ref_schema_str);
         if(schema.is_object())
@@ -244,10 +243,10 @@ Schema::Schema(const std::string & file)
   }
 }
 
-}
+} // namespace
 
-
-SchemaWidget::SchemaWidget(const ClientWidgetParam & params, const std::string & schema,
+SchemaWidget::SchemaWidget(const ClientWidgetParam & params,
+                           const std::string & schema,
                            const mc_rtc::Configuration & data)
 : ClientWidget(params)
 {
@@ -283,8 +282,7 @@ SchemaWidget::SchemaWidget(const ClientWidgetParam & params, const std::string &
   }
   combo->setCurrentIndex(-1);
   stack_->setCurrentIndex(-1);
-  connect(combo, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(currentIndexChanged(int)));
+  connect(combo, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
   layout->addWidget(combo);
   layout->addWidget(stack_);
 }
@@ -292,10 +290,10 @@ SchemaWidget::SchemaWidget(const ClientWidgetParam & params, const std::string &
 void SchemaWidget::currentIndexChanged(int idx)
 {
   stack_->currentWidget()->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-  stack_->setCurrentIndex(idx+1);
+  stack_->setCurrentIndex(idx + 1);
   stack_->currentWidget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   stack_->currentWidget()->adjustSize();
   stack_->adjustSize();
 }
 
-}
+} // namespace mc_rtc_rviz

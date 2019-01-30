@@ -21,6 +21,7 @@ struct GenericInputWidget : public CommonInputWidget
   GenericInputWidget(const ClientWidgetParam & param);
 
   void update(const T & data);
+
 private:
   void set_validator();
 
@@ -30,6 +31,7 @@ private:
 
   QPushButton * lock_button_;
   QLineEdit * edit_;
+
 protected: // Override slots
   void toggled(bool unlocked) override;
   void returnPressed() override;
@@ -40,8 +42,7 @@ using IntegerInputWidget = GenericInputWidget<int>;
 using NumberInputWidget = GenericInputWidget<double>;
 
 template<typename T>
-GenericInputWidget<T>::GenericInputWidget(const ClientWidgetParam & param)
-: CommonInputWidget(param)
+GenericInputWidget<T>::GenericInputWidget(const ClientWidgetParam & param) : CommonInputWidget(param)
 {
   setLayout(new QHBoxLayout());
   layout()->addWidget(new QLabel(name().c_str()));
@@ -75,7 +76,10 @@ void GenericInputWidget<T>::toggled(bool unlocked)
 template<typename T>
 void GenericInputWidget<T>::returnPressed()
 {
-  if(lock_button_->isChecked()) { lock_button_->toggle(); }
+  if(lock_button_->isChecked())
+  {
+    lock_button_->toggle();
+  }
 }
 
 template<typename T>
@@ -97,7 +101,9 @@ template<>
 void GenericInputWidget<std::string>::to_edit(const std::string & data);
 
 template<typename T>
-void GenericInputWidget<T>::set_validator() {}
+void GenericInputWidget<T>::set_validator()
+{
+}
 
 template<>
 void GenericInputWidget<double>::set_validator();
@@ -111,5 +117,4 @@ int GenericInputWidget<int>::from_edit();
 template<>
 double GenericInputWidget<double>::from_edit();
 
-
-}
+} // namespace mc_rtc_rviz

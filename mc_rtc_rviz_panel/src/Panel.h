@@ -2,58 +2,69 @@
 
 #ifndef Q_MOC_RUN
 
-#include <memory>
-#include <unordered_map>
-
-#include "CategoryWidget.h"
+#  include "CategoryWidget.h"
+#  include <memory>
+#  include <unordered_map>
 
 #endif
 
 #ifndef DISABLE_ROS
 
-  #include <interactive_markers/interactive_marker_server.h>
-  #include <visualization_msgs/MarkerArray.h>
-  #include <ros/ros.h>
-  #include <rviz/panel.h>
-  #include <tf/tfMessage.h>
-  #include <tf/transform_listener.h>
+#  include <ros/ros.h>
+#  include <visualization_msgs/MarkerArray.h>
+
+#  include <interactive_markers/interactive_marker_server.h>
+#  include <rviz/panel.h>
+#  include <tf/tfMessage.h>
+#  include <tf/transform_listener.h>
 
 #else
 
 namespace ros
 {
-  struct NodeHandle {};
-  struct Publisher {};
-  inline void spinOnce() {}
-  inline bool ok() { return true; }
-  inline void init(int argc, char * argv[], const std::string &) {}
+struct NodeHandle
+{
+};
+struct Publisher
+{
+};
+inline void spinOnce() {}
+inline bool ok()
+{
+  return true;
 }
+inline void init(int argc, char * argv[], const std::string &) {}
+} // namespace ros
 
 namespace interactive_markers
 {
-  struct InteractiveMarkerServer
+struct InteractiveMarkerServer
+{
+  struct FeedbackCallback
   {
-    struct FeedbackCallback {};
-    InteractiveMarkerServer(const std::string &) {}
-    void applyChanges() {}
   };
-}
+  InteractiveMarkerServer(const std::string &) {}
+  void applyChanges() {}
+};
+} // namespace interactive_markers
 
 namespace visualization_msgs
 {
-  struct MarkerArray {};
-}
+struct MarkerArray
+{
+};
+} // namespace visualization_msgs
 
 #endif
 
 namespace mc_rtc_rviz
 {
 
-class Panel: public CategoryWidget, public mc_control::ControllerClient
+class Panel : public CategoryWidget, public mc_control::ControllerClient
 {
-Q_OBJECT
+  Q_OBJECT
 public:
-  Panel(QWidget* parent = 0);
+  Panel(QWidget * parent = 0);
 
   /** Returns true if the provided widget should be visible
    *
@@ -64,6 +75,7 @@ public:
 
   /** Save visibility setting of a specific widget */
   void visible(const WidgetId & id, bool visibility);
+
 protected:
   void started() override;
 
@@ -83,9 +95,7 @@ protected:
 
   void label(const WidgetId & id, const std::string & data) override;
 
-  void array_label(const WidgetId & id,
-                   const std::vector<std::string> & labels,
-                   const Eigen::VectorXd & data) override;
+  void array_label(const WidgetId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data) override;
 
   void button(const WidgetId & id) override;
 
@@ -99,21 +109,16 @@ protected:
 
   void number_slider(const WidgetId & id, double data, double min, double max) override;
 
-  void array_input(const WidgetId & id,
-                   const std::vector<std::string> & labels,
-                   const Eigen::VectorXd & data) override;
+  void array_input(const WidgetId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data) override;
 
-  void combo_input(const WidgetId & id,
-                   const std::vector<std::string> & values,
-                   const std::string & data) override;
+  void combo_input(const WidgetId & id, const std::vector<std::string> & values, const std::string & data) override;
 
-  void data_combo_input(const WidgetId & id,
-                        const std::vector<std::string> & ref,
-                        const std::string & data) override;
+  void data_combo_input(const WidgetId & id, const std::vector<std::string> & ref, const std::string & data) override;
 
   void point3d(const WidgetId & id,
                const WidgetId & requestId,
-               bool ro, const Eigen::Vector3d & pos,
+               bool ro,
+               const Eigen::Vector3d & pos,
                const mc_rtc::gui::PointConfig & config) override;
 
   void trajectory(const WidgetId & id,
@@ -124,17 +129,13 @@ protected:
                   const std::vector<sva::PTransformd> & pos,
                   const mc_rtc::gui::LineConfig & config) override;
 
-  void trajectory(const WidgetId & id,
-                  const Eigen::Vector3d & point,
-                  const mc_rtc::gui::LineConfig & config) override;
+  void trajectory(const WidgetId & id, const Eigen::Vector3d & point, const mc_rtc::gui::LineConfig & config) override;
 
-  void trajectory(const WidgetId & id,
-                  const sva::PTransformd & point,
-                  const mc_rtc::gui::LineConfig & config) override;
+  void trajectory(const WidgetId & id, const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config) override;
 
   void polygon(const WidgetId & id,
                const std::vector<std::vector<Eigen::Vector3d>> & pos,
-               const mc_rtc::gui::Color& color) override;
+               const mc_rtc::gui::Color & color) override;
 
   void force(const WidgetId & id,
              const WidgetId & requestId,
@@ -143,40 +144,25 @@ protected:
              const mc_rtc::gui::ForceConfig & forceConfig) override;
 
   void arrow(const WidgetId & id,
-             const Eigen::Vector3d& start,
-             const Eigen::Vector3d& end,
+             const Eigen::Vector3d & start,
+             const Eigen::Vector3d & end,
              const mc_rtc::gui::ArrowConfig & config) override;
 
-  void rotation(const WidgetId & id,
-                const WidgetId & requestId,
-                bool ro, const sva::PTransformd & pos) override;
+  void rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos) override;
 
-  void transform(const WidgetId & id,
-                 const WidgetId & requestId,
-                 bool ro, const sva::PTransformd & pos) override;
+  void transform(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos) override;
 
-  void xytheta(const WidgetId & id,
-               const WidgetId & requestId,
-               bool ro, const Eigen::Vector3d & vec) override;
+  void xytheta(const WidgetId & id, const WidgetId & requestId, bool ro, const Eigen::Vector3d & vec) override;
 
   void schema(const WidgetId & id, const std::string & schema) override;
 
   void form(const WidgetId & id) override;
 
-  void form_checkbox(const WidgetId & formId,
-                     const std::string & name,
-                     bool required,
-                     bool def) override;
+  void form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def) override;
 
-  void form_integer_input(const WidgetId & formId,
-                          const std::string & name,
-                          bool required,
-                          int def) override;
+  void form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def) override;
 
-  void form_number_input(const WidgetId & formId,
-                         const std::string & name,
-                         bool required,
-                         double def) override;
+  void form_number_input(const WidgetId & formId, const std::string & name, bool required, double def) override;
 
   void form_string_input(const WidgetId & formId,
                          const std::string & name,
@@ -201,8 +187,8 @@ protected:
                              const std::vector<std::string> & ref,
                              bool send_index) override;
 
-  template<typename T, typename ... Args>
-  T & get_widget(const WidgetId & id, Args && ... args)
+  template<typename T, typename... Args>
+  T & get_widget(const WidgetId & id, Args &&... args)
   {
     auto parent = get_category(id.category).parent;
     assert(parent);
@@ -212,7 +198,7 @@ protected:
       w_ptr = new T(ClientWidgetParam{*this, parent, id}, std::forward<Args>(args)...);
       parent->addWidget(w_ptr);
     }
-    auto & w = static_cast<T&>(*w_ptr);
+    auto & w = static_cast<T &>(*w_ptr);
     w.seen(true);
     latestWidget_ = w_ptr;
     return w;
@@ -220,6 +206,7 @@ protected:
 
   /** Returns the configuration of a given widget */
   mc_rtc::Configuration config(const WidgetId & id) const;
+
 private:
   /** ROS stuff */
   ros::NodeHandle nh_;
@@ -240,50 +227,32 @@ private slots:
   void got_stop();
   void got_category(const std::vector<std::string> & parent, const std::string & category);
   void got_label(const WidgetId & id, const std::string & data);
-  void got_array_label(const WidgetId & id,
-                       const std::vector<std::string> & labels,
-                       const Eigen::VectorXd & data);
+  void got_array_label(const WidgetId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data);
   void got_button(const WidgetId & id);
   void got_checkbox(const WidgetId & id, bool state);
   void got_string_input(const WidgetId & id, const std::string & data);
   void got_integer_input(const WidgetId & id, int data);
   void got_number_input(const WidgetId & id, double data);
   void got_number_slider(const WidgetId & id, double data, double min, double max);
-  void got_array_input(const WidgetId & id,
-                       const std::vector<std::string> & labels,
-                       const Eigen::VectorXd & data);
-  void got_combo_input(const WidgetId & id,
-                       const std::vector<std::string> & values,
-                       const std::string & data);
-  void got_data_combo_input(const WidgetId & id,
-                            const std::vector<std::string> & values,
-                            const std::string & data);
+  void got_array_input(const WidgetId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data);
+  void got_combo_input(const WidgetId & id, const std::vector<std::string> & values, const std::string & data);
+  void got_data_combo_input(const WidgetId & id, const std::vector<std::string> & values, const std::string & data);
   void got_point3d(const WidgetId & id,
                    const WidgetId & requestId,
-                   bool ro, const Eigen::Vector3d & pos,
-                   const mc_rtc::gui::PointConfig&);
-  void got_rotation(const WidgetId & id,
-                    const WidgetId & requestId,
-                    bool ro, const sva::PTransformd & pos);
-  void got_transform(const WidgetId & id,
-                     const WidgetId & requestId,
-                     bool ro, const sva::PTransformd & pos);
-  void got_xytheta(const WidgetId & id,
-                   const WidgetId & requestId,
                    bool ro,
-                   const Eigen::Vector3d& vec);
+                   const Eigen::Vector3d & pos,
+                   const mc_rtc::gui::PointConfig &);
+  void got_rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos);
+  void got_transform(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos);
+  void got_xytheta(const WidgetId & id, const WidgetId & requestId, bool ro, const Eigen::Vector3d & vec);
   void got_trajectory(const WidgetId & id,
                       const std::vector<Eigen::Vector3d> & points,
                       const mc_rtc::gui::LineConfig & config);
   void got_trajectory(const WidgetId & id,
                       const std::vector<sva::PTransformd> & points,
                       const mc_rtc::gui::LineConfig & config);
-  void got_trajectory(const WidgetId & id,
-                      const Eigen::Vector3d & point,
-                      const mc_rtc::gui::LineConfig & config);
-  void got_trajectory(const WidgetId & id,
-                      const sva::PTransformd & point,
-                      const mc_rtc::gui::LineConfig & config);
+  void got_trajectory(const WidgetId & id, const Eigen::Vector3d & point, const mc_rtc::gui::LineConfig & config);
+  void got_trajectory(const WidgetId & id, const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config);
   void got_polygon(const WidgetId & id,
                    const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                    const mc_rtc::gui::Color & c);
@@ -298,22 +267,10 @@ private slots:
                  const mc_rtc::gui::ArrowConfig & config);
   void got_schema(const WidgetId & id, const std::string & schema);
   void got_form(const WidgetId & id);
-  void got_form_checkbox(const WidgetId & formId,
-                         const std::string & name,
-                         bool required,
-                         bool def);
-  void got_form_integer_input(const WidgetId & formId,
-                              const std::string & name,
-                              bool required,
-                              int def);
-  void got_form_number_input(const WidgetId & formId,
-                             const std::string & name,
-                             bool required,
-                             double def);
-  void got_form_string_input(const WidgetId & formId,
-                             const std::string & name,
-                             bool required,
-                             const std::string & def);
+  void got_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
+  void got_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def);
+  void got_form_number_input(const WidgetId & formId, const std::string & name, bool required, double def);
+  void got_form_string_input(const WidgetId & formId, const std::string & name, bool required, const std::string & def);
   void got_form_array_input(const WidgetId & formId,
                             const std::string & name,
                             bool required,
@@ -334,76 +291,49 @@ signals:
   void signal_stop();
   void signal_category(const std::vector<std::string> & parent, const std::string & category);
   void signal_label(const WidgetId & id, const std::string & data);
-  void signal_array_label(const WidgetId & id,
-                          const std::vector<std::string> & labels,
-                          const Eigen::VectorXd & data);
+  void signal_array_label(const WidgetId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data);
   void signal_button(const WidgetId & id);
   void signal_checkbox(const WidgetId & id, bool state);
   void signal_string_input(const WidgetId & id, const std::string & data);
   void signal_integer_input(const WidgetId & id, int data);
   void signal_number_input(const WidgetId & id, double data);
   void signal_number_slider(const WidgetId & id, double data, double min, double max);
-  void signal_array_input(const WidgetId & id,
-                          const std::vector<std::string> & labels,
-                          const Eigen::VectorXd & data);
-  void signal_combo_input(const WidgetId & id,
-                          const std::vector<std::string> & values,
-                          const std::string & data);
-  void signal_data_combo_input(const WidgetId & id,
-                               const std::vector<std::string> & values,
-                               const std::string & data);
+  void signal_array_input(const WidgetId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & data);
+  void signal_combo_input(const WidgetId & id, const std::vector<std::string> & values, const std::string & data);
+  void signal_data_combo_input(const WidgetId & id, const std::vector<std::string> & values, const std::string & data);
   void signal_point3d(const WidgetId & id,
                       const WidgetId & requestId,
-                      bool ro, const Eigen::Vector3d & pos,
-                      const mc_rtc::gui::PointConfig&);
+                      bool ro,
+                      const Eigen::Vector3d & pos,
+                      const mc_rtc::gui::PointConfig &);
   void signal_trajectory(const WidgetId & id,
                          const std::vector<Eigen::Vector3d> & pos,
                          const mc_rtc::gui::LineConfig & config);
   void signal_trajectory(const WidgetId & id,
                          const std::vector<sva::PTransformd> & pos,
                          const mc_rtc::gui::LineConfig & config);
-  void signal_trajectory(const WidgetId & id,
-                         const Eigen::Vector3d & point,
-                         const mc_rtc::gui::LineConfig & config);
-  void signal_trajectory(const WidgetId & id,
-                         const sva::PTransformd & point,
-                         const mc_rtc::gui::LineConfig & config);
+  void signal_trajectory(const WidgetId & id, const Eigen::Vector3d & point, const mc_rtc::gui::LineConfig & config);
+  void signal_trajectory(const WidgetId & id, const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config);
   void signal_polygon(const WidgetId & id,
                       const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                       const mc_rtc::gui::Color & c);
- void signal_force(const WidgetId & id,
-                   const WidgetId & requestId,
-                   const sva::ForceVecd & force,
-                   const sva::PTransformd & surface,
-                   const mc_rtc::gui::ForceConfig & forceConfig);
+  void signal_force(const WidgetId & id,
+                    const WidgetId & requestId,
+                    const sva::ForceVecd & force,
+                    const sva::PTransformd & surface,
+                    const mc_rtc::gui::ForceConfig & forceConfig);
   void signal_arrow(const WidgetId & id,
                     const Eigen::Vector3d & force,
                     const Eigen::Vector3d & surface,
                     const mc_rtc::gui::ArrowConfig & config);
-  void signal_rotation(const WidgetId & id,
-                       const WidgetId & requestId,
-                       bool ro, const sva::PTransformd & pos);
-  void signal_transform(const WidgetId & id,
-                        const WidgetId & requestId,
-                        bool ro, const sva::PTransformd & pos);
-  void signal_xytheta(const WidgetId & id,
-                      const WidgetId & requestId,
-                      bool ro,
-                      const Eigen::Vector3d& vec);
+  void signal_rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos);
+  void signal_transform(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos);
+  void signal_xytheta(const WidgetId & id, const WidgetId & requestId, bool ro, const Eigen::Vector3d & vec);
   void signal_schema(const WidgetId & id, const std::string & schema);
   void signal_form(const WidgetId & id);
-  void signal_form_checkbox(const WidgetId & formId,
-                            const std::string & name,
-                            bool required,
-                            bool def);
-  void signal_form_integer_input(const WidgetId & formId,
-                                 const std::string & name,
-                                 bool required,
-                                 int def);
-  void signal_form_number_input(const WidgetId & formId,
-                                const std::string & name,
-                                bool required,
-                                double def);
+  void signal_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
+  void signal_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def);
+  void signal_form_number_input(const WidgetId & formId, const std::string & name, bool required, double def);
   void signal_form_string_input(const WidgetId & formId,
                                 const std::string & name,
                                 bool required,
@@ -412,7 +342,7 @@ signals:
                                const std::string & name,
                                bool required,
                                const Eigen::VectorXd & def,
-                            bool fixed_size);
+                               bool fixed_size);
   void signal_form_combo_input(const WidgetId & formId,
                                const std::string & name,
                                bool required,
@@ -425,4 +355,4 @@ signals:
                                     bool send_index);
 };
 
-}
+} // namespace mc_rtc_rviz

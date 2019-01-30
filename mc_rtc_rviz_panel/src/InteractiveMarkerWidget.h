@@ -10,14 +10,14 @@ struct InteractiveMarkerWidget : public ClientWidget
 {
   Q_OBJECT
 
- public:
+public:
   InteractiveMarkerWidget(const ClientWidgetParam & params,
                           const WidgetId & requestId,
                           interactive_markers::InteractiveMarkerServer & server,
                           const vm::InteractiveMarker & marker,
                           ClientWidget * label);
 
- protected:
+protected:
   virtual void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) = 0;
 
 protected:
@@ -29,7 +29,6 @@ protected:
 private slots:
   void toggled(bool);
 };
-
 
 struct TransformInteractiveMarkerWidget : public InteractiveMarkerWidget
 {
@@ -45,20 +44,24 @@ public:
 
   void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;
 
-  void update(const Eigen::Vector3d & t) { marker_.update(t); }
-  void update(const sva::PTransformd & pos) { marker_.update(pos); }
+  void update(const Eigen::Vector3d & t)
+  {
+    marker_.update(t);
+  }
+  void update(const sva::PTransformd & pos)
+  {
+    marker_.update(pos);
+  }
 
 protected:
   bool control_orientation_;
   bool control_position_;
 };
 
-
-
 struct XYThetaInteractiveMarkerWidget : public InteractiveMarkerWidget
 {
   Q_OBJECT
- public:
+public:
   XYThetaInteractiveMarkerWidget(const ClientWidgetParam & params,
                                  const WidgetId & requestId,
                                  interactive_markers::InteractiveMarkerServer & server,
@@ -72,14 +75,13 @@ struct XYThetaInteractiveMarkerWidget : public InteractiveMarkerWidget
   // update with X, Y, theta
   void update(const Eigen::Vector3d & vec);
 
- private slots:
-   void control_state_changed(int);
+private slots:
+  void control_state_changed(int);
 
- protected:
-   QCheckBox * coupled_checkbox_;
-   vm::InteractiveMarker coupled_marker_;
-   vm::InteractiveMarker decoupled_marker_;
-
+protected:
+  QCheckBox * coupled_checkbox_;
+  vm::InteractiveMarker coupled_marker_;
+  vm::InteractiveMarker decoupled_marker_;
 };
 
-}
+} // namespace mc_rtc_rviz

@@ -12,6 +12,7 @@ public:
   NumberSliderWidget(const ClientWidgetParam & param, double min, double max);
 
   void update(double data);
+
 private:
   QLabel * valueLabel_;
   QSlider * slider_;
@@ -25,4 +26,4 @@ private slots:
   void sliderReleased();
 };
 
-}
+} // namespace mc_rtc_rviz

@@ -1,25 +1,25 @@
-#include <iostream>
-#include <sch/S_Polyhedron/S_Polyhedron.h>
-
 #include <mc_rbdyn/RobotLoader.h>
 #include <mc_rbdyn/SCHAddon.h>
 
+#include <sch/S_Polyhedron/S_Polyhedron.h>
+
+#include "geometry_msgs/Point.h"
 #include "ros/ros.h"
 #include "visualization_msgs/MarkerArray.h"
-#include "geometry_msgs/Point.h"
+#include <iostream>
 
 namespace
 {
-  template<typename T>
-  void getParam(ros::NodeHandle & n, const std::string & param, T & out)
-  {
-    std::string true_param;
-    n.searchParam(param, true_param);
-    n.getParam(true_param, out);
-  }
+template<typename T>
+void getParam(ros::NodeHandle & n, const std::string & param, T & out)
+{
+  std::string true_param;
+  n.searchParam(param, true_param);
+  n.getParam(true_param, out);
 }
+} // namespace
 
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
   ros::init(argc, argv, "mc_convex_visualization");
 
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
     marker.lifetime = ros::Duration(0.5);
     const auto triangles = pa.triangles_;
     const auto vertexes = pa.vertexes_;
-    for(unsigned int i=0; i < triangles.size(); i++)
+    for(unsigned int i = 0; i < triangles.size(); i++)
     {
       const auto a = vertexes[triangles[i].a]->getCordinates();
       const auto b = vertexes[triangles[i].b]->getCordinates();
@@ -105,9 +105,9 @@ int main(int argc, char **argv)
       sva::PTransformd va(Eigen::Vector3d(a[0], a[1], a[2]));
       sva::PTransformd vb(Eigen::Vector3d(b[0], b[1], b[2]));
       sva::PTransformd vc(Eigen::Vector3d(c[0], c[1], c[2]));
-      va = va*colTrans;
-      vb = vb*colTrans;
-      vc = vc*colTrans;
+      va = va * colTrans;
+      vb = vb * colTrans;
+      vc = vc * colTrans;
       geometry_msgs::Point p;
       p.x = va.translation().x();
       p.y = va.translation().y();

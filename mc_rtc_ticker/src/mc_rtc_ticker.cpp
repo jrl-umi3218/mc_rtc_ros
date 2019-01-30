@@ -1,38 +1,36 @@
+#include <mc_control/mc_global_controller.h>
 #include <mc_rtc/config.h>
 #include <mc_rtc/logging.h>
 #include <mc_rtc/ros.h>
 
-#include <mc_control/mc_global_controller.h>
-
 #include <ros/ros.h>
 
+#include "ContactForcePublisher.h"
 #include <chrono>
 #include <iostream>
 
-#include "ContactForcePublisher.h"
-
 namespace
 {
-  template<typename T>
-  T getParam(ros::NodeHandle & n, const std::string & param)
-  {
-    T out;
-    std::string true_param;
-    n.searchParam(param, true_param);
-    n.getParam(true_param, out);
-    return out;
-  }
-
-  template<typename T>
-  T getParam(ros::NodeHandle & n, const std::string & param, const T & def)
-  {
-    if(n.hasParam(param))
-    {
-      return getParam<T>(n, param);
-    }
-    return def;
-  }
+template<typename T>
+T getParam(ros::NodeHandle & n, const std::string & param)
+{
+  T out;
+  std::string true_param;
+  n.searchParam(param, true_param);
+  n.getParam(true_param, out);
+  return out;
 }
+
+template<typename T>
+T getParam(ros::NodeHandle & n, const std::string & param, const T & def)
+{
+  if(n.hasParam(param))
+  {
+    return getParam<T>(n, param);
+  }
+  return def;
+}
+} // namespace
 
 #ifdef MC_RTC_HAS_ROS
 int main()
@@ -43,7 +41,6 @@ int main()
     return 1;
   }
   auto nh = *nh_p;
-
 
   std::string conf = "";
   if(nh.hasParam("mc_rtc_ticker/conf"))
@@ -75,7 +72,8 @@ int main()
       }
       else
       {
-        //FIXME This assumes that a joint that is in ref_joint_order but missing from the robot is of size 1 (very likely to be true)
+        // FIXME This assumes that a joint that is in ref_joint_order but missing from the robot is of size 1 (very
+        // likely to be true)
         q.push_back(0);
       }
     }
@@ -108,8 +106,7 @@ int main()
     /* Reserve a million entry */
     solve_dt.reserve(1000000);
   }
-  auto report_dt = [&solve_dt](bool partial)
-  {
+  auto report_dt = [&solve_dt](bool partial) {
     std::cout << "Ran for " << solve_dt.size() << " iterations: ";
     size_t start_i = partial ? solve_dt.size() - 1000 : 0;
     auto min_t = solve_dt[start_i];
@@ -130,31 +127,36 @@ int main()
       }
       average_t += t;
     }
-    if(partial) { average_t = average_t / 1000; }
-    else { average_t = average_t / solve_dt.size(); }
-    std::cout << " avg: " << average_t.count()*1000 << "ms, min: " << min_t.count()*1000 << "ms, max: " << max_t.count()*1000 << "ms, second max: " << second_max_t.count()*1000 << std::endl;
+    if(partial)
+    {
+      average_t = average_t / 1000;
+    }
+    else
+    {
+      average_t = average_t / solve_dt.size();
+    }
+    std::cout << " avg: " << average_t.count() * 1000 << "ms, min: " << min_t.count() * 1000
+              << "ms, max: " << max_t.count() * 1000 << "ms, second max: " << second_max_t.count() * 1000 << std::endl;
   };
 
   const bool publish_contact_forces = getParam(nh, "mc_rtc_ticker/publish_contact_forces", true);
   std::unique_ptr<mc_rtc_ros::ContactForcePublisher> cfp_ptr = nullptr;
   if(publish_contact_forces)
   {
-    cfp_ptr.reset(new mc_rtc_ros::ContactForcePublisher(nh,
-                                                        controller));
+    cfp_ptr.reset(new mc_rtc_ros::ContactForcePublisher(nh, controller));
   }
 
-  ros::Rate rt(1/dt);
+  ros::Rate rt(1 / dt);
   std::thread spin_th;
   if(bench)
   {
-    spin_th = std::thread([&rt]()
-                          {
-                            while(ros::ok())
-                            {
-                            ros::spinOnce();
-                            rt.sleep();
-                            }
-                          });
+    spin_th = std::thread([&rt]() {
+      while(ros::ok())
+      {
+        ros::spinOnce();
+        rt.sleep();
+      }
+    });
   }
   while(ros::ok())
   {
@@ -210,7 +212,7 @@ int main()
     if(bench)
     {
       end = std::chrono::system_clock::now();
-      solve_dt.push_back(end-begin);
+      solve_dt.push_back(end - begin);
       if(solve_dt.size() % 1000 == 0)
       {
         report_dt(true);

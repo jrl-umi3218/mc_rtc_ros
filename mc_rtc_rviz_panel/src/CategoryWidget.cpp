@@ -5,11 +5,10 @@ static constexpr int MAX_TAB_LEVEL = 2;
 namespace mc_rtc_rviz
 {
 
-CategoryWidget::CategoryWidget(const ClientWidgetParam & param)
-: ClientWidget(param)
+CategoryWidget::CategoryWidget(const ClientWidgetParam & param) : ClientWidget(param)
 {
   auto l = new QVBoxLayout(this);
-  auto parentCategory = dynamic_cast<CategoryWidget*>(param.parent);
+  auto parentCategory = dynamic_cast<CategoryWidget *>(param.parent);
   if(parentCategory)
   {
     level = parentCategory->level + 1;
@@ -38,7 +37,6 @@ CategoryWidget::CategoryWidget(const ClientWidgetParam & param)
     toggle_->setCheckable(true);
     l->addWidget(toggle_);
     connect(toggle_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
-
   }
 }
 
@@ -47,7 +45,7 @@ void CategoryWidget::addWidget(ClientWidget * w)
   widgets_.push_back(w);
   if(tabs_)
   {
-    if(dynamic_cast<CategoryWidget*>(w) == nullptr)
+    if(dynamic_cast<CategoryWidget *>(w) == nullptr)
     {
       /** Create a scroll-area to welcome the widget */
       if(!page_layout_)
@@ -82,8 +80,14 @@ void CategoryWidget::addWidget(ClientWidget * w)
   {
     assert(toggle_);
     layout()->addWidget(w);
-    if(toggle_->isChecked()) { w->show(); }
-    else { w->hide(); }
+    if(toggle_->isChecked())
+    {
+      w->show();
+    }
+    else
+    {
+      w->hide();
+    }
   }
 }
 
@@ -117,11 +121,16 @@ void CategoryWidget::removeWidget(ClientWidget * w)
 size_t CategoryWidget::clean()
 {
   widgets_.erase(std::remove_if(widgets_.begin(), widgets_.end(),
-                 [this](ClientWidget * w)
-                 {
-                  if(!w->seen()) { removeWidget(w); delete w; return true; }
-                  return false;
-                 }), widgets_.end());
+                                [this](ClientWidget * w) {
+                                  if(!w->seen())
+                                  {
+                                    removeWidget(w);
+                                    delete w;
+                                    return true;
+                                  }
+                                  return false;
+                                }),
+                 widgets_.end());
   return widgets_.size();
 }
 
@@ -129,7 +138,11 @@ ClientWidget * CategoryWidget::widget(const std::string & name)
 {
   for(auto & w : widgets_)
   {
-    if(w->name() == name) { w->seen(true); return w; }
+    if(w->name() == name)
+    {
+      w->seen(true);
+      return w;
+    }
   }
   return nullptr;
 }
@@ -149,4 +162,4 @@ void CategoryWidget::toggled(bool c)
   }
 }
 
-}
+} // namespace mc_rtc_rviz

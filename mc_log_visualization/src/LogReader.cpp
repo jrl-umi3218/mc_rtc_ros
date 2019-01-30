@@ -1,13 +1,11 @@
 #include "LogReader.h"
 
+#include <mc_rtc/logging.h>
+
 #include <fstream>
 #include <sstream>
 
-#include <mc_rtc/logging.h>
-
-LogReader::LogReader()
-{
-}
+LogReader::LogReader() {}
 
 void LogReader::read(const std::string & filename)
 {
@@ -24,7 +22,8 @@ void LogReader::read(const std::string & filename)
   std::vector<std::vector<double>> fdata;
   for(std::string line; std::getline(ifs, line);)
   {
-    std::stringstream liness; liness << line;
+    std::stringstream liness;
+    liness << line;
     unsigned int i = 0;
     for(std::string data; std::getline(liness, data, ';'); ++i)
     {
@@ -50,7 +49,10 @@ void LogReader::read(const std::string & filename)
         }
       }
     }
-    if(first_line) { fdata.resize(entries.size()); }
+    if(first_line)
+    {
+      fdata.resize(entries.size());
+    }
     first_line = false;
   }
   for(size_t i = 0; i < entries.size(); ++i)

@@ -1,31 +1,27 @@
 #pragma once
 
+#include <geometry_msgs/PolygonStamped.h>
+#include <geos/geom/CoordinateSequence.h>
+#include <geos/geom/LinearRing.h>
+#include <geos/geom/Polygon.h>
+#include <ros/ros.h>
+#include <visualization_msgs/Marker.h>
+
+#include <Eigen/Core>
 #include <chrono>
 #include <iostream>
 
-#include <Eigen/Core>
-
-#include <geos/geom/Polygon.h>
-#include <geos/geom/LinearRing.h>
-#include <geos/geom/CoordinateSequence.h>
-
-#include <ros/ros.h>
-#include <geometry_msgs/PolygonStamped.h>
-#include <visualization_msgs/Marker.h>
-
-#define MEASURE_TIME(expr)\
-{\
-  auto start = std::chrono::system_clock::now();\
-  expr\
-  auto end = std::chrono::system_clock::now();\
-  std::chrono::duration<double> dt = end - start;\
-  std::cout << "Time to call "#expr << std::endl << dt.count() << "s" << std::endl;\
-}
+#define MEASURE_TIME(expr)                                                             \
+  {                                                                                    \
+    auto start = std::chrono::system_clock::now();                                     \
+    expr auto end = std::chrono::system_clock::now();                                  \
+    std::chrono::duration<double> dt = end - start;                                    \
+    std::cout << "Time to call " #expr << std::endl << dt.count() << "s" << std::endl; \
+  }
 
 struct CoMPublisher
 {
-  CoMPublisher(ros::NodeHandle & nh, const std::string & name = "com_marker")
-    : nh(nh)
+  CoMPublisher(ros::NodeHandle & nh, const std::string & name = "com_marker") : nh(nh)
   {
     com_pub = nh.advertise<visualization_msgs::Marker>(name, 1);
     msg.ns = "robot";
@@ -66,11 +62,12 @@ private:
     msg.header.stamp = ros::Time::now();
     msg.pose.position.x = com.x();
     msg.pose.position.y = com.y();
-    msg.pose.position.z = 0;//com.z();
+    msg.pose.position.z = 0; // com.z();
     msg2.header = msg.header;
     msg2.pose.position = msg.pose.position;
     msg2.pose.position.z = com.z();
   }
+
 private:
   ros::NodeHandle & nh;
   ros::Publisher com_pub;
@@ -81,8 +78,7 @@ private:
 
 struct PolygonPublisher
 {
-  PolygonPublisher(ros::NodeHandle & nh)
-    : nh(nh)
+  PolygonPublisher(ros::NodeHandle & nh) : nh(nh)
   {
     poly_pub = nh.advertise<geometry_msgs::PolygonStamped>("stability_polygon", 10);
   }

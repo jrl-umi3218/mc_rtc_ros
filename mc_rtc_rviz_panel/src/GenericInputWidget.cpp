@@ -3,10 +3,7 @@
 namespace mc_rtc_rviz
 {
 
-CommonInputWidget::CommonInputWidget(const ClientWidgetParam & param)
-: ClientWidget(param)
-{
-}
+CommonInputWidget::CommonInputWidget(const ClientWidgetParam & param) : ClientWidget(param) {}
 
 template<>
 void GenericInputWidget<double>::set_validator()
@@ -48,5 +45,4 @@ double GenericInputWidget<double>::from_edit()
   return edit_->text().toDouble();
 }
 
-
-}
+} // namespace mc_rtc_rviz

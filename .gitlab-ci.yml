@@ -8,24 +8,31 @@ variables:
   ALLOW_CATKINLINT_FAILURE: "true"
   CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF"
 
-before_script:
-  - git submodule update --quiet --init --recursive
-  - ./.jrl-ci/dependencies/eigen-3.2
-  - ./.jrl-ci/dependencies/catkin
-  - ./.jrl-ci/run before_install
-  - export APT_DEPENDENCIES=""
-  - export GIT_DEPENDENCIES="git@gite.lirmm.fr:multi-contact/mc_rtc"
-  - export ROS_GIT_DEPENDENCIES=""
-  - . /tmp/_ci/catkin_dep_ws/devel/setup.sh
-  - ./.jrl-ci/run before_install
+clang-format:
+  stage: clang-format
+  before_script: []
+  script:
+    - ./.clang-format-check.sh
+  tags:
+    - clang-format
 
 build_gcc:
   stage: build
   script:
+    - git submodule update --quiet --init --recursive
+    - ./.jrl-ci/dependencies/eigen-3.2
+    - ./.jrl-ci/dependencies/catkin
+    - ./.jrl-ci/run before_install
+    - export APT_DEPENDENCIES=""
+    - export GIT_DEPENDENCIES="git@gite.lirmm.fr:multi-contact/mc_rtc"
+    - export ROS_GIT_DEPENDENCIES=""
+    - . /tmp/_ci/catkin_dep_ws/devel/setup.sh
+    - ./.jrl-ci/run before_install
     - ./.jrl-ci/run build
     - ./.jrl-ci/run after_success
   tags:
     - GCC
 
 stages:
+  - clang-format
   - build

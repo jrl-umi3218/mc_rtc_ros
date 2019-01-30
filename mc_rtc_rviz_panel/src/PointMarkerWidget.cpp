@@ -1,6 +1,7 @@
 #include "PointMarkerWidget.h"
 
 #include <mc_rbdyn/configuration_io.h>
+
 #include "utils.h"
 
 namespace mc_rtc_rviz
@@ -9,10 +10,7 @@ namespace mc_rtc_rviz
 PointMarkerWidget::PointMarkerWidget(const ClientWidgetParam & params,
                                      visualization_msgs::MarkerArray & markers,
                                      ClientWidget * label)
-: ClientWidget(params),
-  markers_(markers),
-  visible_(visible()),
-  was_visible_(visible_)
+: ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   button_ = label->showHideButton();
   if(button_)
@@ -47,4 +45,4 @@ void PointMarkerWidget::toggled(bool hide)
   visible(!hide);
 }
 
-}
+} // namespace mc_rtc_rviz

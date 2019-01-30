@@ -1,18 +1,18 @@
 #include "Panel.h"
-
 #include <QApplication>
 #include <QMainWindow>
-#include <QVBoxLayout>
-
 #include <QPushButton>
-
+#include <QVBoxLayout>
 #include <csignal>
 
 QApplication * app_ = nullptr;
 
 void signal_handler(int sig)
 {
-  if(app_) { app_->exit(); }
+  if(app_)
+  {
+    app_->exit();
+  }
 }
 
 int main(int argc, char * argv[])

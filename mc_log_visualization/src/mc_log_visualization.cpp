@@ -1,21 +1,8 @@
-#include <thread>
-
-#include "IconsFontAwesome.h"
-#include "LogReader.h"
-#include "util.h"
-
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-
-#include <GLFW/glfw3.h>
-
 #include <mc_control/generic_gripper.h>
-
 #include <mc_rbdyn/PolygonInterpolator.h>
-#include <mc_rbdyn/Robots.h>
 #include <mc_rbdyn/RobotLoader.h>
+#include <mc_rbdyn/Robots.h>
 #include <mc_rbdyn/rpy_utils.h>
-
 #include <mc_rtc/logging.h>
 #include <mc_rtc/ros.h>
 
@@ -24,69 +11,76 @@
 
 #include <ros/ros.h>
 
+#include "IconsFontAwesome.h"
+#include "LogReader.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "util.h"
+#include <GLFW/glfw3.h>
 #include <fstream>
+#include <thread>
 
 namespace
 {
-  static const std::string FAWESOME_TTF = _DATA_PATH"/fontawesome-webfont.ttf";
+static const std::string FAWESOME_TTF = _DATA_PATH "/fontawesome-webfont.ttf";
 
-  static void error_callback(int error, const char* description)
-  {
-    std::cerr << "Error " << error << ": " << description << std::endl;
-  }
-
-  void setStyle()
-  {
-    ImGuiStyle& style = ImGui::GetStyle();
-
-    // light style from Pacôme Danhiez (user itamago) https://github.com/ocornut/imgui/pull/511#issuecomment-175719267
-    style.WindowRounding = 0.f;
-    style.FrameRounding = 0.f;
-    style.ItemSpacing = {10, 10};
-    style.Colors[ImGuiCol_Text]                  = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_TextDisabled]          = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-    style.Colors[ImGuiCol_WindowBg]              = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);
-    style.Colors[ImGuiCol_ChildWindowBg]         = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    style.Colors[ImGuiCol_Border]                = ImVec4(0.00f, 0.00f, 0.00f, 0.39f);
-    style.Colors[ImGuiCol_BorderShadow]          = ImVec4(1.00f, 1.00f, 1.00f, 0.10f);
-    style.Colors[ImGuiCol_FrameBg]               = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-    style.Colors[ImGuiCol_FrameBgHovered]        = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-    style.Colors[ImGuiCol_FrameBgActive]         = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-    style.Colors[ImGuiCol_TitleBg]               = ImVec4(0.96f, 0.96f, 0.96f, 1.00f);
-    style.Colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(1.00f, 1.00f, 1.00f, 0.51f);
-    style.Colors[ImGuiCol_TitleBgActive]         = ImVec4(0.82f, 0.82f, 0.82f, 1.00f);
-    style.Colors[ImGuiCol_MenuBarBg]             = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
-    style.Colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.98f, 0.98f, 0.98f, 0.53f);
-    style.Colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.69f, 0.69f, 0.69f, 0.80f);
-    style.Colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.49f, 0.49f, 0.49f, 0.80f);
-    style.Colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
-    style.Colors[ImGuiCol_ComboBg]               = ImVec4(0.86f, 0.86f, 0.86f, 0.99f);
-    style.Colors[ImGuiCol_CheckMark]             = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-    style.Colors[ImGuiCol_SliderGrab]            = ImVec4(0.26f, 0.59f, 0.98f, 0.78f);
-    style.Colors[ImGuiCol_SliderGrabActive]      = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-    style.Colors[ImGuiCol_Button]                = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-    style.Colors[ImGuiCol_ButtonHovered]         = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-    style.Colors[ImGuiCol_ButtonActive]          = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
-    style.Colors[ImGuiCol_Header]                = ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
-    style.Colors[ImGuiCol_HeaderHovered]         = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
-    style.Colors[ImGuiCol_HeaderActive]          = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-    style.Colors[ImGuiCol_Column]                = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-    style.Colors[ImGuiCol_ColumnHovered]         = ImVec4(0.26f, 0.59f, 0.98f, 0.78f);
-    style.Colors[ImGuiCol_ColumnActive]          = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-    style.Colors[ImGuiCol_ResizeGrip]            = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
-    style.Colors[ImGuiCol_ResizeGripHovered]     = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-    style.Colors[ImGuiCol_ResizeGripActive]      = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
-    style.Colors[ImGuiCol_CloseButton]           = ImVec4(0.59f, 0.59f, 0.59f, 0.50f);
-    style.Colors[ImGuiCol_CloseButtonHovered]    = ImVec4(0.98f, 0.39f, 0.36f, 1.00f);
-    style.Colors[ImGuiCol_CloseButtonActive]     = ImVec4(0.98f, 0.39f, 0.36f, 1.00f);
-    style.Colors[ImGuiCol_PlotLines]             = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-    style.Colors[ImGuiCol_PlotLinesHovered]      = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
-    style.Colors[ImGuiCol_PlotHistogram]         = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-    style.Colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
-    style.Colors[ImGuiCol_ModalWindowDarkening]  = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
-  }
+static void error_callback(int error, const char * description)
+{
+  std::cerr << "Error " << error << ": " << description << std::endl;
 }
+
+void setStyle()
+{
+  ImGuiStyle & style = ImGui::GetStyle();
+
+  // light style from Pacôme Danhiez (user itamago) https://github.com/ocornut/imgui/pull/511#issuecomment-175719267
+  style.WindowRounding = 0.f;
+  style.FrameRounding = 0.f;
+  style.ItemSpacing = {10, 10};
+  style.Colors[ImGuiCol_Text] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+  style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+  style.Colors[ImGuiCol_WindowBg] = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);
+  style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+  style.Colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.39f);
+  style.Colors[ImGuiCol_BorderShadow] = ImVec4(1.00f, 1.00f, 1.00f, 0.10f);
+  style.Colors[ImGuiCol_FrameBg] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+  style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
+  style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+  style.Colors[ImGuiCol_TitleBg] = ImVec4(0.96f, 0.96f, 0.96f, 1.00f);
+  style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(1.00f, 1.00f, 1.00f, 0.51f);
+  style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.82f, 0.82f, 0.82f, 1.00f);
+  style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
+  style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.98f, 0.98f, 0.98f, 0.53f);
+  style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.69f, 0.69f, 0.69f, 0.80f);
+  style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.49f, 0.49f, 0.49f, 0.80f);
+  style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
+  style.Colors[ImGuiCol_ComboBg] = ImVec4(0.86f, 0.86f, 0.86f, 0.99f);
+  style.Colors[ImGuiCol_CheckMark] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+  style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.26f, 0.59f, 0.98f, 0.78f);
+  style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+  style.Colors[ImGuiCol_Button] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
+  style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+  style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
+  style.Colors[ImGuiCol_Header] = ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
+  style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
+  style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+  style.Colors[ImGuiCol_Column] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
+  style.Colors[ImGuiCol_ColumnHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.78f);
+  style.Colors[ImGuiCol_ColumnActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+  style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
+  style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+  style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
+  style.Colors[ImGuiCol_CloseButton] = ImVec4(0.59f, 0.59f, 0.59f, 0.50f);
+  style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.98f, 0.39f, 0.36f, 1.00f);
+  style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.98f, 0.39f, 0.36f, 1.00f);
+  style.Colors[ImGuiCol_PlotLines] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
+  style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+  style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+  style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+  style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+  style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
+}
+} // namespace
 
 struct LogPublisher
 {
@@ -115,8 +109,9 @@ public:
     while(running)
     {
       /* Publication */
-      robot.mbc().q[0] = { log.at("ff_qw")[cur_i], -log.at("ff_qx")[cur_i], -log.at("ff_qy")[cur_i], -log.at("ff_qz")[cur_i],
-                           log.at("ff_tx")[cur_i], log.at("ff_ty")[cur_i], log.at("ff_tz")[cur_i] };
+      robot.mbc().q[0] = {log.at("ff_qw")[cur_i],  -log.at("ff_qx")[cur_i], -log.at("ff_qy")[cur_i],
+                          -log.at("ff_qz")[cur_i], log.at("ff_tx")[cur_i],  log.at("ff_ty")[cur_i],
+                          log.at("ff_tz")[cur_i]};
       real_robot.mbc().q[0] = {1, 0, 0, 0, 0, 0, 0};
       for(size_t j = 0; j < ref_joint_order.size(); ++j)
       {
@@ -151,22 +146,18 @@ public:
       }
 
       rbd::forwardKinematics(real_robot.mb(), real_robot.mbc());
-      auto rot_imu = sva::PTransformd(Eigen::Quaterniond(log.at("rpyIn_w")[cur_i],
-                                                         log.at("rpyIn_x")[cur_i],
-                                                         log.at("rpyIn_y")[cur_i],
-                                                         log.at("rpyIn_z")[cur_i])
-                                                        .normalized());
-      auto rot_imu0 = sva::PTransformd(Eigen::Quaterniond(log.at("rpyIn_w")[0],
-                                                          log.at("rpyIn_x")[0],
-                                                          log.at("rpyIn_y")[0],
-                                                          log.at("rpyIn_z")[0])
-                                                        .normalized());
+      auto rot_imu = sva::PTransformd(Eigen::Quaterniond(log.at("rpyIn_w")[cur_i], log.at("rpyIn_x")[cur_i],
+                                                         log.at("rpyIn_y")[cur_i], log.at("rpyIn_z")[cur_i])
+                                          .normalized());
+      auto rot_imu0 = sva::PTransformd(
+          Eigen::Quaterniond(log.at("rpyIn_w")[0], log.at("rpyIn_x")[0], log.at("rpyIn_y")[0], log.at("rpyIn_z")[0])
+              .normalized());
       rot_imu = rot_imu * rot_imu0.inv();
       auto rootPos = real_robot.mbc().bodyPosW[0];
       auto imuPos = real_robot.mbc().bodyPosW[robot.bodyIndexByName(robot.bodySensor().parentBody())];
-      auto quat = Eigen::Quaterniond((rootPos*imuPos.inv()*rot_imu).rotation()).inverse();
-      real_robot.mbc().q[0] = {quat.w(), quat.x(), quat.y(), quat.z(),
-                               robot.mbc().q[0][4], robot.mbc().q[0][5], robot.mbc().q[0][6]};
+      auto quat = Eigen::Quaterniond((rootPos * imuPos.inv() * rot_imu).rotation()).inverse();
+      real_robot.mbc().q[0] = {
+          quat.w(), quat.x(), quat.y(), quat.z(), robot.mbc().q[0][4], robot.mbc().q[0][5], robot.mbc().q[0][6]};
       rbd::forwardKinematics(real_robot.mb(), real_robot.mbc());
 
       publisher.update(dt, robot, grippers);
@@ -174,7 +165,8 @@ public:
 
       if(log.count("stance_index") && log.count("polygonInterpolatorPercent"))
       {
-        auto poly = interpolators[log.at("stance_index")[cur_i]].fast_interpolate(log.at("polygonInterpolatorPercent")[cur_i]);
+        auto poly =
+            interpolators[log.at("stance_index")[cur_i]].fast_interpolate(log.at("polygonInterpolatorPercent")[cur_i]);
         poly_pub.publish_poly(poly);
       }
 
@@ -207,7 +199,8 @@ public:
 
     /*FIXME Should be a parameter */
     mod = mc_rbdyn::RobotLoader::get_robot_module("HRP2DRC");
-    env_mod = mc_rbdyn::RobotLoader::get_robot_module("env", std::string(mc_rtc::HRP2_DRC_DESCRIPTION_PATH), std::string("drc_stairs2"));
+    env_mod = mc_rbdyn::RobotLoader::get_robot_module("env", std::string(mc_rtc::HRP2_DRC_DESCRIPTION_PATH),
+                                                      std::string("drc_stairs2"));
     robots = mc_rbdyn::loadRobotAndEnv(*mod, *env_mod);
     real_robots = mc_rbdyn::loadRobot(*mod);
 
@@ -220,7 +213,8 @@ public:
     }
     for(auto & g : mod->grippers())
     {
-      auto g_ptr = std::make_shared<mc_control::Gripper>(robots->robot(), g.joints, urdf.str(), std::vector<double>(g.joints.size(), 0), dt, g.reverse_limits);
+      auto g_ptr = std::make_shared<mc_control::Gripper>(robots->robot(), g.joints, urdf.str(),
+                                                         std::vector<double>(g.joints.size(), 0), dt, g.reverse_limits);
       grippers[g.name] = g_ptr;
     }
 
@@ -240,10 +234,12 @@ public:
     ImGui_ImplGlfw_Init(window, true);
     ImGuiIO & io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
-    //merge in icons from Font Awesome
-    static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
-    io.Fonts->AddFontFromFileTTF( FAWESOME_TTF.c_str(), 13.0f, &icons_config, icons_ranges);
+    // merge in icons from Font Awesome
+    static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+    ImFontConfig icons_config;
+    icons_config.MergeMode = true;
+    icons_config.PixelSnapH = true;
+    io.Fonts->AddFontFromFileTTF(FAWESOME_TTF.c_str(), 13.0f, &icons_config, icons_ranges);
 
     io.IniFilename = nullptr;
     // Setup style
@@ -254,7 +250,9 @@ public:
       glfwPollEvents();
       ImGui_ImplGlfw_NewFrame();
       bool open = true;
-      ImGui::Begin("mc_rtc log player", &open, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings|ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::Begin("mc_rtc log player", &open,
+                   ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings
+                       | ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SetWindowPos({10, 10});
       /* Time control */
       {
@@ -290,8 +288,8 @@ public:
           ss << "/" << playback_den;
         }
         auto ts = ImGui::CalcTextSize(ss.str().c_str());
-        auto bs = ImVec2(ImGui::GetTextLineHeightWithSpacing(),ImGui::GetTextLineHeightWithSpacing());
-        auto offset = ( size.x - ts.x - 2*bs.x - 20 )/2;
+        auto bs = ImVec2(ImGui::GetTextLineHeightWithSpacing(), ImGui::GetTextLineHeightWithSpacing());
+        auto offset = (size.x - ts.x - 2 * bs.x - 20) / 2;
         ImGui::AlignFirstTextHeightToWidgets();
         ImGui::SetCursorPosX(offset);
         if(ImGui::Button(ICON_FA_MINUS, bs))
@@ -325,7 +323,7 @@ public:
         ImGui::Separator();
         const char * btext = "Stop publisher";
         auto bsize = ImVec2(100, 25);
-        ImGui::SetCursorPosX((size.x - bsize.x)/2);
+        ImGui::SetCursorPosX((size.x - bsize.x) / 2);
         if(ImGui::Button(btext, bsize))
         {
           glfwSetWindowShouldClose(window, GL_TRUE);
@@ -357,6 +355,7 @@ public:
     running = false;
     pub_th.join();
   }
+
 private:
   bool running = true;
   std::thread pub_th;
@@ -364,7 +363,7 @@ private:
   LogReader log;
 
   double dt = 0.005;
-  double rate = 1/dt;
+  double rate = 1 / dt;
   ros::Rate rt = ros::Rate(rate);
 
   /* Play/pause playback */
@@ -373,9 +372,12 @@ private:
   unsigned int playback_num = 1;
   unsigned int playback_den = 1;
   /* Current and min/max playback time */
-  double min_t = 0; size_t min_i = 0;
-  double max_t = 0; size_t max_i = 0;
-  double cur_t = 0; size_t cur_i = 0;
+  double min_t = 0;
+  size_t min_i = 0;
+  double max_t = 0;
+  size_t max_i = 0;
+  double cur_t = 0;
+  size_t cur_i = 0;
 
   std::shared_ptr<mc_rbdyn::RobotModule> mod;
   std::shared_ptr<mc_rbdyn::RobotModule> env_mod;
