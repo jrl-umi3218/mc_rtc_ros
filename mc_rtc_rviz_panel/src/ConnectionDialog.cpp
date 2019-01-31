@@ -18,9 +18,12 @@ ConnectionDialog::ConnectionDialog(std::string & sub_uri, std::string & push_uri
   connect(confirmButton_, SIGNAL(released()), this, SLOT(accept()));
   cancelButton_ = new QPushButton("Cancel", this);
   connect(cancelButton_, SIGNAL(released()), this, SLOT(reject()));
+  defaultButton_ = new QPushButton("Default", this);
+  connect(defaultButton_, SIGNAL(released()), this ,SLOT(default_()));
   auto hlayout = new QHBoxLayout();
   hlayout->addWidget(confirmButton_);
   hlayout->addWidget(cancelButton_);
+  hlayout->addWidget(defaultButton_);
   layout_->addRow(hlayout);
 }
 
@@ -29,6 +32,12 @@ void ConnectionDialog::accept()
   sub_uri_ = subEdit_->text().toStdString();
   push_uri_ = pushEdit_->text().toStdString();
   QDialog::accept();
+}
+
+void ConnectionDialog::default_()
+{
+  subEdit_->setText("ipc:///tmp/mc_rtc_pub.ipc");
+  pushEdit_->setText("ipc:///tmp/mc_rtc_rep.ipc");
 }
 
 } // namespace mc_rtc_rviz

@@ -5,6 +5,7 @@ set(MOC_HEADERS
   CategoryWidget.h
   CheckboxWidget.h
   ComboInputWidget.h
+  ConnectionDialog.h
   FormElement.h
   FormWidget.h
   GenericInputWidget.h
@@ -45,7 +46,6 @@ endif()
 set(HEADER_FILES
   ArrayLabelWidget.h
   ClientWidget.h
-  ConnectionDialog.h
   LabelWidget.h
   utils.h
 )
