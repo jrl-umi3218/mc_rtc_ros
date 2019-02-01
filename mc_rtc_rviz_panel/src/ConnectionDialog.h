@@ -12,6 +12,7 @@ public:
   ConnectionDialog(std::string & sub_uri, std::string & push_uri, QWidget * parent = nullptr);
 
   void accept() override;
+
 private:
   std::string & sub_uri_;
   std::string & push_uri_;

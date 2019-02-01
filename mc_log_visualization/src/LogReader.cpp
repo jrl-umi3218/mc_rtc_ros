@@ -45,6 +45,10 @@ void LogReader::read(const std::string & filename)
             {
               fdata[i].push_back(0);
             }
+            catch(std::invalid_argument & e)
+            {
+              fdata[i].push_back(0);
+            }
           }
         }
       }

@@ -19,7 +19,7 @@ ConnectionDialog::ConnectionDialog(std::string & sub_uri, std::string & push_uri
   cancelButton_ = new QPushButton("Cancel", this);
   connect(cancelButton_, SIGNAL(released()), this, SLOT(reject()));
   defaultButton_ = new QPushButton("Default", this);
-  connect(defaultButton_, SIGNAL(released()), this ,SLOT(default_()));
+  connect(defaultButton_, SIGNAL(released()), this, SLOT(default_()));
   auto hlayout = new QHBoxLayout();
   hlayout->addWidget(confirmButton_);
   hlayout->addWidget(cancelButton_);
