@@ -204,8 +204,8 @@ Panel::Panel(QWidget * parent)
           SLOT(got_rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)));
   connect(this, SIGNAL(signal_transform(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)), this,
           SLOT(got_transform(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)));
-  connect(this, SIGNAL(signal_xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &)), this,
-          SLOT(got_xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &)));
+  connect(this, SIGNAL(signal_xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, double)), this,
+          SLOT(got_xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, double)));
   connect(this, SIGNAL(signal_schema(const WidgetId &, const std::string &)), this,
           SLOT(got_schema(const WidgetId &, const std::string &)));
   connect(this, SIGNAL(signal_form(const WidgetId &)), this, SLOT(got_form(const WidgetId &)));
@@ -391,9 +391,13 @@ void Panel::transform(const WidgetId & id, const WidgetId & requestId, bool ro, 
   Q_EMIT signal_transform(id, requestId, ro, pos);
 }
 
-void Panel::xytheta(const WidgetId & id, const WidgetId & requestId, bool ro, const Eigen::Vector3d & vec)
+void Panel::xytheta(const WidgetId & id,
+                    const WidgetId & requestId,
+                    bool ro,
+                    const Eigen::Vector3d & vec,
+                    double altitude)
 {
-  Q_EMIT signal_xytheta(id, requestId, ro, vec);
+  Q_EMIT signal_xytheta(id, requestId, ro, vec, altitude);
 }
 
 void Panel::schema(const WidgetId & id, const std::string & schema)
@@ -571,13 +575,17 @@ void Panel::got_transform(const WidgetId & id, const WidgetId & requestId, bool 
 #endif
 }
 
-void Panel::got_xytheta(const WidgetId & id, const WidgetId & requestId, bool ro, const Eigen::Vector3d & vec)
+void Panel::got_xytheta(const WidgetId & id,
+                        const WidgetId & requestId,
+                        bool ro,
+                        const Eigen::Vector3d & vec,
+                        double altitude)
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, *int_server_, sva::PTransformd::Identity(), !ro,
                                                         !ro, label);
-  w.update(vec);
+  w.update(vec, altitude);
 #endif
 }
 
