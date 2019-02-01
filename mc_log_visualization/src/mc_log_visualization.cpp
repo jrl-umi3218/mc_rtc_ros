@@ -145,19 +145,33 @@ public:
         target_com_pub.publish_com(comt);
       }
 
-      rbd::forwardKinematics(real_robot.mb(), real_robot.mbc());
-      auto rot_imu = sva::PTransformd(Eigen::Quaterniond(log.at("rpyIn_w")[cur_i], log.at("rpyIn_x")[cur_i],
-                                                         log.at("rpyIn_y")[cur_i], log.at("rpyIn_z")[cur_i])
-                                          .normalized());
-      auto rot_imu0 = sva::PTransformd(
-          Eigen::Quaterniond(log.at("rpyIn_w")[0], log.at("rpyIn_x")[0], log.at("rpyIn_y")[0], log.at("rpyIn_z")[0])
-              .normalized());
-      rot_imu = rot_imu * rot_imu0.inv();
-      auto rootPos = real_robot.mbc().bodyPosW[0];
-      auto imuPos = real_robot.mbc().bodyPosW[robot.bodyIndexByName(robot.bodySensor().parentBody())];
-      auto quat = Eigen::Quaterniond((rootPos * imuPos.inv() * rot_imu).rotation()).inverse();
+      Eigen::Quaterniond quat;
+      Eigen::Vector3d trans;
+      if(log.count("realRobot_posW_qw"))
+      {
+        auto X_0_real = sva::PTransformd(
+            Eigen::Quaterniond(log.at("realRobot_posW_qw")[cur_i], log.at("realRobot_posW_qx")[cur_i], log.at("realRobot_posW_qy")[cur_i], log.at("realRobot_posW_qz")[cur_i]).normalized(),
+            Eigen::Vector3d(log.at("realRobot_posW_tx")[cur_i], log.at("realRobot_posW_ty")[cur_i], log.at("realRobot_posW_tz")[cur_i]));
+        quat = Eigen::Quaterniond(X_0_real.rotation()).inverse();
+        trans = X_0_real.translation();
+      }
+      else
+      {
+        rbd::forwardKinematics(real_robot.mb(), real_robot.mbc());
+        auto rot_imu = sva::PTransformd(Eigen::Quaterniond(log.at("rpyIn_w")[cur_i], log.at("rpyIn_x")[cur_i],
+                                                           log.at("rpyIn_y")[cur_i], log.at("rpyIn_z")[cur_i])
+                                            .normalized());
+        auto rot_imu0 = sva::PTransformd(
+            Eigen::Quaterniond(log.at("rpyIn_w")[0], log.at("rpyIn_x")[0], log.at("rpyIn_y")[0], log.at("rpyIn_z")[0])
+                .normalized());
+        rot_imu = rot_imu * rot_imu0.inv();
+        auto rootPos = real_robot.mbc().bodyPosW[0];
+        auto imuPos = real_robot.mbc().bodyPosW[robot.bodyIndexByName(robot.bodySensor().parentBody())];
+        quat = Eigen::Quaterniond((rootPos * imuPos.inv() * rot_imu).rotation()).inverse();
+        trans = Eigen::Vector3d(robot.mbc().q[0][4], robot.mbc().q[0][5], robot.mbc().q[0][6]);
+      }
       real_robot.mbc().q[0] = {
-          quat.w(), quat.x(), quat.y(), quat.z(), robot.mbc().q[0][4], robot.mbc().q[0][5], robot.mbc().q[0][6]};
+          quat.w(), quat.x(), quat.y(), quat.z(), trans.x(), trans.y(), trans.z()};
       rbd::forwardKinematics(real_robot.mb(), real_robot.mbc());
 
       publisher.update(dt, robot, grippers);
