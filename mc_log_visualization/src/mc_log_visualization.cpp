@@ -149,9 +149,12 @@ public:
       Eigen::Vector3d trans;
       if(log.count("realRobot_posW_qw"))
       {
-        auto X_0_real = sva::PTransformd(
-            Eigen::Quaterniond(log.at("realRobot_posW_qw")[cur_i], log.at("realRobot_posW_qx")[cur_i], log.at("realRobot_posW_qy")[cur_i], log.at("realRobot_posW_qz")[cur_i]).normalized(),
-            Eigen::Vector3d(log.at("realRobot_posW_tx")[cur_i], log.at("realRobot_posW_ty")[cur_i], log.at("realRobot_posW_tz")[cur_i]));
+        auto X_0_real =
+            sva::PTransformd(Eigen::Quaterniond(log.at("realRobot_posW_qw")[cur_i], log.at("realRobot_posW_qx")[cur_i],
+                                                log.at("realRobot_posW_qy")[cur_i], log.at("realRobot_posW_qz")[cur_i])
+                                 .normalized(),
+                             Eigen::Vector3d(log.at("realRobot_posW_tx")[cur_i], log.at("realRobot_posW_ty")[cur_i],
+                                             log.at("realRobot_posW_tz")[cur_i]));
         quat = Eigen::Quaterniond(X_0_real.rotation()).inverse();
         trans = X_0_real.translation();
       }
@@ -170,8 +173,7 @@ public:
         quat = Eigen::Quaterniond((rootPos * imuPos.inv() * rot_imu).rotation()).inverse();
         trans = Eigen::Vector3d(robot.mbc().q[0][4], robot.mbc().q[0][5], robot.mbc().q[0][6]);
       }
-      real_robot.mbc().q[0] = {
-          quat.w(), quat.x(), quat.y(), quat.z(), trans.x(), trans.y(), trans.z()};
+      real_robot.mbc().q[0] = {quat.w(), quat.x(), quat.y(), quat.z(), trans.x(), trans.y(), trans.z()};
       rbd::forwardKinematics(real_robot.mb(), real_robot.mbc());
 
       publisher.update(dt, robot, grippers);
