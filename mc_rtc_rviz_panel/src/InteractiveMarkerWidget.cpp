@@ -107,9 +107,9 @@ XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(const ClientWidge
   }
 }
 
-void XYThetaInteractiveMarkerWidget::update(const Eigen::Vector3d & vec)
+void XYThetaInteractiveMarkerWidget::update(const Eigen::Vector3d & vec, double altitude)
 {
-  sva::PTransformd X(sva::RotZ(vec.z()), {vec.x(), vec.y(), 0.});
+  sva::PTransformd X(sva::RotZ(vec.z()), {vec.x(), vec.y(), altitude});
   marker_.update(X);
 }
 
@@ -120,8 +120,8 @@ void XYThetaInteractiveMarkerWidget::handleRequest(
                               feedback->pose.orientation.z}
                .inverse();
   Eigen::Matrix3d R(q);
-  Eigen::Vector3d v{feedback->pose.position.x, feedback->pose.position.y, mc_rbdyn::rpyFromMat(R).z()};
-
+  Eigen::VectorXd v(4);
+  v << feedback->pose.position.x, feedback->pose.position.y, mc_rbdyn::rpyFromMat(R).z(), feedback->pose.position.z;
   client().send_request(request_id_, v);
 }
 

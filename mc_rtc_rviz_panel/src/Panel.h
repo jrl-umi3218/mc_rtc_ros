@@ -152,7 +152,11 @@ protected:
 
   void transform(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos) override;
 
-  void xytheta(const WidgetId & id, const WidgetId & requestId, bool ro, const Eigen::Vector3d & vec) override;
+  void xytheta(const WidgetId & id,
+               const WidgetId & requestId,
+               bool ro,
+               const Eigen::Vector3d & vec,
+               double altitude) override;
 
   void schema(const WidgetId & id, const std::string & schema) override;
 
@@ -244,7 +248,11 @@ private slots:
                    const mc_rtc::gui::PointConfig &);
   void got_rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos);
   void got_transform(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos);
-  void got_xytheta(const WidgetId & id, const WidgetId & requestId, bool ro, const Eigen::Vector3d & vec);
+  void got_xytheta(const WidgetId & id,
+                   const WidgetId & requestId,
+                   bool ro,
+                   const Eigen::Vector3d & vec,
+                   double altitude);
   void got_trajectory(const WidgetId & id,
                       const std::vector<Eigen::Vector3d> & points,
                       const mc_rtc::gui::LineConfig & config);
@@ -328,7 +336,11 @@ signals:
                     const mc_rtc::gui::ArrowConfig & config);
   void signal_rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos);
   void signal_transform(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos);
-  void signal_xytheta(const WidgetId & id, const WidgetId & requestId, bool ro, const Eigen::Vector3d & vec);
+  void signal_xytheta(const WidgetId & id,
+                      const WidgetId & requestId,
+                      bool ro,
+                      const Eigen::Vector3d & vec,
+                      double altitude);
   void signal_schema(const WidgetId & id, const std::string & schema);
   void signal_form(const WidgetId & id);
   void signal_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);

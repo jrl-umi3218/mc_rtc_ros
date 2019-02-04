@@ -73,7 +73,7 @@ public:
   void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;
 
   // update with X, Y, theta
-  void update(const Eigen::Vector3d & vec);
+  void update(const Eigen::Vector3d & vec, double altitude);
 
 private slots:
   void control_state_changed(int);
