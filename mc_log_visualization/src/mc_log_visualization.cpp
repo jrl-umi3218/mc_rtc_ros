@@ -173,44 +173,38 @@ public:
                        rebuildGUI();
                      }));
     }
-    std::vector<std::string> speeds;
-    for(int p = 5; p > 0; --p)
-    {
-      std::stringstream ss;
-      ss << "1/" << std::pow(2, p);
-      speeds.push_back(ss.str());
-    }
-    for(int p = 0; p < 6; ++p)
-    {
-      std::stringstream ss;
-      ss << std::pow(2, p);
-      speeds.push_back(ss.str());
-    }
-    gui.addElement(category, mc_rtc::gui::ComboInput("Playback speed", speeds,
-                                                     [this]() {
-                                                       std::stringstream ss;
-                                                       ss << playback_num;
-                                                       if(playback_den != 1)
-                                                       {
-                                                         ss << "/" << playback_den;
-                                                       }
-                                                       return ss.str();
-                                                     },
-                                                     [this](const std::string & data) {
-                                                       std::stringstream ss;
-                                                       ss << data;
-                                                       ss >> playback_num;
-                                                       if(data.size() > 1)
-                                                       {
-                                                         char tmp;
-                                                         ss >> tmp;
-                                                         ss >> playback_den;
-                                                       }
-                                                       else
-                                                       {
-                                                         playback_den = 1;
-                                                       }
-                                                     }));
+    gui.addElement(category, mc_rtc::gui::ElementsStacking::Horizontal,
+                   mc_rtc::gui::Button("-",
+                                       [this]() {
+                                         if(playback_num == 1)
+                                         {
+                                           playback_den *= 2;
+                                         }
+                                         else
+                                         {
+                                           playback_num /= 2;
+                                         }
+                                       }),
+                   mc_rtc::gui::Label("Playback speed:",
+                                      [this]() {
+                                        std::stringstream ss;
+                                        ss << playback_num;
+                                        if(playback_den != 1)
+                                        {
+                                          ss << "/" << playback_den;
+                                        }
+                                        return ss.str();
+                                      }),
+                   mc_rtc::gui::Button("+", [this]() {
+                     if(playback_den == 1)
+                     {
+                       playback_num *= 2;
+                     }
+                     else
+                     {
+                       playback_den /= 2;
+                     }
+                   }));
     std::vector<std::string> keys;
     for(const auto & p : log)
     {
