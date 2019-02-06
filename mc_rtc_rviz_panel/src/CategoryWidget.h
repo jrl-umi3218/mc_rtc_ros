@@ -26,6 +26,8 @@ private:
   QVBoxLayout * page_layout_ = nullptr;
   QPushButton * toggle_ = nullptr;
   std::vector<ClientWidget *> widgets_;
+  QVBoxLayout * layout_ = nullptr;
+  std::map<int, QHBoxLayout*> stack_layouts_;
 private slots:
   void toggled(bool);
 };

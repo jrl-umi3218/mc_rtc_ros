@@ -38,9 +38,15 @@ public:
   }
 
   /** Id of the widget */
-  const WidgetId & id()
+  const WidgetId & id() const
   {
     return id_;
+  }
+
+  /** Stack id of the widget */
+  int sid() const
+  {
+    return id().sid;
   }
 
   /** Return the value of seen and set it back to false */
