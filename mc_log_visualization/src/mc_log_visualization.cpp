@@ -85,7 +85,8 @@ void setStyle()
 struct LogPublisher
 {
 public:
-  LogPublisher(const std::string & logfile)
+  LogPublisher(ros::NodeHandle & nh, const std::string & logfile)
+  : nh(nh)
   {
     log.read(logfile);
   }
@@ -211,13 +212,28 @@ public:
     cur_i = 0;
     max_i = log.at("t").size() - 1;
 
-    auto nh = mc_rtc::ROSBridge::get_node_handle();
+    std::vector<std::string> robot_params;
+    std::string param = "";
+    nh.searchParam("robot_module", param);
+    nh.getParam(param, robot_params);
+    if(robot_params.size() == 1)
+    {
+      mod = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]);
+    }
+    else if(robot_params.size() == 2)
+    {
+      mod = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1]);
+    }
+    else if(robot_params.size() == 3)
+    {
+      mod = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1], robot_params[2]);
+    }
+    else
+    {
+      LOG_ERROR_AND_THROW(std::runtime_error, "log_visualization cannot handle the robot_params it was given")
+    }
 
-    /*FIXME Should be a parameter */
-    mod = mc_rbdyn::RobotLoader::get_robot_module("HRP2DRC");
-    env_mod = mc_rbdyn::RobotLoader::get_robot_module("env", std::string(mc_rtc::HRP2_DRC_DESCRIPTION_PATH),
-                                                      std::string("drc_stairs2"));
-    robots = mc_rbdyn::loadRobotAndEnv(*mod, *env_mod);
+    robots = mc_rbdyn::loadRobot(*mod);
     real_robots = mc_rbdyn::loadRobot(*mod);
 
     std::string urdfPath = mod->urdf_path;
@@ -373,6 +389,9 @@ public:
   }
 
 private:
+  /* ROS */
+  ros::NodeHandle & nh;
+
   bool running = true;
   std::thread pub_th;
 
@@ -396,7 +415,6 @@ private:
   size_t cur_i = 0;
 
   std::shared_ptr<mc_rbdyn::RobotModule> mod;
-  std::shared_ptr<mc_rbdyn::RobotModule> env_mod;
   std::shared_ptr<mc_rbdyn::Robots> robots;
   std::shared_ptr<mc_rbdyn::Robots> real_robots;
   std::map<std::string, std::shared_ptr<mc_control::Gripper>> grippers;
@@ -410,21 +428,22 @@ private:
   ImVec4 clear_color = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);
 };
 
-void usage(const char * name)
-{
-  LOG_ERROR(name << " [log-file]")
-}
-
 int main(int argc, char * argv[])
 {
-  if(argc < 2)
-  {
-    usage(argv[0]);
-    return 1;
-  }
-
+  ros::init(argc, argv, "log_visualizer");
   auto nh = mc_rtc::ROSBridge::get_node_handle();
-  LogPublisher appli(argv[1]);
+  if(!nh)
+  {
+    LOG_ERROR_AND_THROW(std::runtime_error, "Failed to initialized node handle")
+  }
+  std::string log = "";
+  {
+    std::string param;
+    nh->searchParam("log", param);
+    nh->getParam(param, log);
+  }
+  LOG_INFO("Replaying log: " << log)
+  LogPublisher appli(*nh, log);
   appli.run();
 
   return 0;
