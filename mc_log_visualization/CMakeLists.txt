@@ -11,9 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package()
 
-find_package(OpenGL REQUIRED)
-ADD_REQUIRED_DEPENDENCY("mc_rtc" "mc_rtc_d")
-ADD_REQUIRED_DEPENDENCY("glfw3")
+add_required_dependency("mc_rtc" "mc_rtc_d")
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
@@ -26,13 +24,8 @@ set(src_files
   src/LogReader.cpp
 )
 
-file(GLOB imgui_SRC src/imgui/*)
-
 add_definitions(-std=c++0x)
 
-add_definitions("-D_DATA_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}/data\"")
-
 add_executable(mc_log_visualization ${src_files} ${imgui_SRC})
-PKG_CONFIG_USE_DEPENDENCY(mc_log_visualization mc_rtc)
-PKG_CONFIG_USE_DEPENDENCY(mc_log_visualization glfw3)
-target_link_libraries(mc_log_visualization ${OPENGL_gl_LIBRARY} ${catkin_LIBRARIES})
+pkg_config_use_dependency(mc_log_visualization mc_rtc)
+target_link_libraries(mc_log_visualization ${catkin_LIBRARIES})

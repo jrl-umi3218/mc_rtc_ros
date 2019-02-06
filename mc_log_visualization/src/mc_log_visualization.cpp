@@ -1,8 +1,10 @@
+#include <mc_control/ControllerServer.h>
 #include <mc_control/generic_gripper.h>
 #include <mc_rbdyn/PolygonInterpolator.h>
 #include <mc_rbdyn/RobotLoader.h>
 #include <mc_rbdyn/Robots.h>
 #include <mc_rbdyn/rpy_utils.h>
+#include <mc_rtc/GUIState.h>
 #include <mc_rtc/logging.h>
 #include <mc_rtc/ros.h>
 
@@ -11,76 +13,11 @@
 
 #include <ros/ros.h>
 
-#include "IconsFontAwesome.h"
 #include "LogReader.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
 #include "util.h"
-#include <GLFW/glfw3.h>
 #include <fstream>
+#include <memory>
 #include <thread>
-
-namespace
-{
-static const std::string FAWESOME_TTF = _DATA_PATH "/fontawesome-webfont.ttf";
-
-static void error_callback(int error, const char * description)
-{
-  std::cerr << "Error " << error << ": " << description << std::endl;
-}
-
-void setStyle()
-{
-  ImGuiStyle & style = ImGui::GetStyle();
-
-  // light style from Pacôme Danhiez (user itamago) https://github.com/ocornut/imgui/pull/511#issuecomment-175719267
-  style.WindowRounding = 0.f;
-  style.FrameRounding = 0.f;
-  style.ItemSpacing = {10, 10};
-  style.Colors[ImGuiCol_Text] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-  style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-  style.Colors[ImGuiCol_WindowBg] = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);
-  style.Colors[ImGuiCol_ChildWindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-  style.Colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.39f);
-  style.Colors[ImGuiCol_BorderShadow] = ImVec4(1.00f, 1.00f, 1.00f, 0.10f);
-  style.Colors[ImGuiCol_FrameBg] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-  style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-  style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-  style.Colors[ImGuiCol_TitleBg] = ImVec4(0.96f, 0.96f, 0.96f, 1.00f);
-  style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(1.00f, 1.00f, 1.00f, 0.51f);
-  style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.82f, 0.82f, 0.82f, 1.00f);
-  style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
-  style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.98f, 0.98f, 0.98f, 0.53f);
-  style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.69f, 0.69f, 0.69f, 0.80f);
-  style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.49f, 0.49f, 0.49f, 0.80f);
-  style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
-  style.Colors[ImGuiCol_ComboBg] = ImVec4(0.86f, 0.86f, 0.86f, 0.99f);
-  style.Colors[ImGuiCol_CheckMark] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-  style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.26f, 0.59f, 0.98f, 0.78f);
-  style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-  style.Colors[ImGuiCol_Button] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-  style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-  style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
-  style.Colors[ImGuiCol_Header] = ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
-  style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
-  style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-  style.Colors[ImGuiCol_Column] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-  style.Colors[ImGuiCol_ColumnHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.78f);
-  style.Colors[ImGuiCol_ColumnActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-  style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
-  style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-  style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
-  style.Colors[ImGuiCol_CloseButton] = ImVec4(0.59f, 0.59f, 0.59f, 0.50f);
-  style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.98f, 0.39f, 0.36f, 1.00f);
-  style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.98f, 0.39f, 0.36f, 1.00f);
-  style.Colors[ImGuiCol_PlotLines] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-  style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
-  style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-  style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-  style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
-  style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
-}
-} // namespace
 
 struct LogPublisher
 {
@@ -196,9 +133,96 @@ public:
       {
         cur_i = min_i;
       }
-
+      cur_t = log.at("t")[cur_i];
+      server->handle_requests(gui);
+      server->publish(gui);
       rt.sleep();
     }
+  }
+
+  void rebuildGUI()
+  {
+    std::vector<std::string> category = {"Log visualizer"};
+    gui.removeCategory(category);
+    gui.addElement(category, mc_rtc::gui::NumberSlider("Time", [this]() { return cur_t; },
+                                                       [this](double time) {
+                                                         const auto & t = log.at("t");
+                                                         size_t i = min_i;
+                                                         for(; i < max_i - 1; ++i)
+                                                         {
+                                                           if(t[i] <= time && t[i + 1] > time)
+                                                           {
+                                                             break;
+                                                           }
+                                                         }
+                                                         cur_i = i;
+                                                         cur_t = t[i];
+                                                       },
+                                                       min_t, max_t));
+    if(paused)
+    {
+      gui.addElement(category, mc_rtc::gui::Button("Play", [this]() {
+                       paused = false;
+                       rebuildGUI();
+                     }));
+    }
+    else
+    {
+      gui.addElement(category, mc_rtc::gui::Button("Pause", [this]() {
+                       paused = true;
+                       rebuildGUI();
+                     }));
+    }
+    std::vector<std::string> speeds;
+    for(int p = 5; p > 0; --p)
+    {
+      std::stringstream ss;
+      ss << "1/" << std::pow(2, p);
+      speeds.push_back(ss.str());
+    }
+    for(int p = 0; p < 6; ++p)
+    {
+      std::stringstream ss;
+      ss << std::pow(2, p);
+      speeds.push_back(ss.str());
+    }
+    gui.addElement(category, mc_rtc::gui::ComboInput("Playback speed", speeds,
+                                                     [this]() {
+                                                       std::stringstream ss;
+                                                       ss << playback_num;
+                                                       if(playback_den != 1)
+                                                       {
+                                                         ss << "/" << playback_den;
+                                                       }
+                                                       return ss.str();
+                                                     },
+                                                     [this](const std::string & data) {
+                                                       std::stringstream ss;
+                                                       ss << data;
+                                                       ss >> playback_num;
+                                                       if(data.size() > 1)
+                                                       {
+                                                         char tmp;
+                                                         ss >> tmp;
+                                                         ss >> playback_den;
+                                                       }
+                                                       else
+                                                       {
+                                                         playback_den = 1;
+                                                       }
+                                                     }));
+    std::vector<std::string> keys;
+    for(const auto & p : log)
+    {
+      const auto & k = p.first;
+      if(k == "t" || (k.size() > 1 && k[0] == 't' && k[1] == '_'))
+      {
+        keys.push_back(k);
+      }
+    }
+    gui.addElement(category, mc_rtc::gui::ComboInput("Time range", keys, [this]() { return t_data; },
+                                                     [this](const std::string & t) { selectTime(t); }));
+    gui.addElement(category, mc_rtc::gui::Button("Stop log replay", [this]() { running = false; }));
   }
 
   bool selectTime(const std::string & t)
@@ -232,6 +256,8 @@ public:
     min_t = data[min_i];
     cur_t = min_t;
     max_t = data[max_i];
+    t_data = t;
+    rebuildGUI();
     return true;
   }
 
@@ -261,6 +287,9 @@ public:
       LOG_ERROR_AND_THROW(std::runtime_error, "log_visualization cannot handle the robot_params it was given")
     }
 
+    server.reset(
+        new mc_control::ControllerServer(dt, 10 * dt, {"ipc:///tmp/mc_rtc_pub.ipc"}, {"ipc:///tmp/mc_rtc_rep.ipc"}));
+
     robots = mc_rbdyn::loadRobot(*mod);
     real_robots = mc_rbdyn::loadRobot(*mod);
 
@@ -279,182 +308,7 @@ public:
     }
 
     pub_th = std::thread(std::bind(&LogPublisher::pubThread, this));
-
-    /* Start the UI */
-    glfwSetErrorCallback(&error_callback);
-    if(!glfwInit())
-    {
-      std::cerr << "Failed to init glfw" << std::endl;
-      throw("Failed to init glfw");
-    }
-    auto window = glfwCreateWindow(300, 300, "Broadcaster UI", NULL, NULL);
-    glfwMakeContextCurrent(window);
-
-    // Setup ImGui binding
-    ImGui_ImplGlfw_Init(window, true);
-    ImGuiIO & io = ImGui::GetIO();
-    io.Fonts->AddFontDefault();
-    // merge in icons from Font Awesome
-    static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-    ImFontConfig icons_config;
-    icons_config.MergeMode = true;
-    icons_config.PixelSnapH = true;
-    io.Fonts->AddFontFromFileTTF(FAWESOME_TTF.c_str(), 13.0f, &icons_config, icons_ranges);
-
-    io.IniFilename = nullptr;
-    // Setup style
-    setStyle();
-
-    while(!glfwWindowShouldClose(window))
-    {
-      glfwPollEvents();
-      ImGui_ImplGlfw_NewFrame();
-      bool open = true;
-      ImGui::Begin("mc_rtc log player", &open,
-                   ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings
-                       | ImGuiWindowFlags_AlwaysAutoResize);
-      ImGui::SetWindowPos({10, 10});
-      /* Time control */
-      {
-        if(paused)
-        {
-          if(ImGui::Button(ICON_FA_PLAY))
-          {
-            paused = false;
-          }
-        }
-        else
-        {
-          if(ImGui::Button((ICON_FA_PAUSE)))
-          {
-            paused = true;
-          }
-        }
-        ImGui::SameLine();
-        int i = static_cast<int>(cur_i);
-        char fmt[100];
-        std::snprintf(fmt, 100, "%.3f/%.3f", log.at("t")[cur_i], max_t);
-        if(ImGui::SliderInt("##timeslider", &i, min_i, max_i, fmt))
-        {
-          cur_i = static_cast<unsigned int>(i);
-        }
-      }
-      /* Playback speed setter */
-      {
-        std::stringstream ss;
-        ss << "Playback speed: x" << playback_num;
-        if(playback_den != 1)
-        {
-          ss << "/" << playback_den;
-        }
-        auto ts = ImGui::CalcTextSize(ss.str().c_str());
-        auto bs = ImVec2(ImGui::GetTextLineHeightWithSpacing(), ImGui::GetTextLineHeightWithSpacing());
-        auto offset = (size.x - ts.x - 2 * bs.x - 20) / 2;
-        ImGui::AlignFirstTextHeightToWidgets();
-        ImGui::SetCursorPosX(offset);
-        if(ImGui::Button(ICON_FA_MINUS, bs))
-        {
-          if(playback_num == 1)
-          {
-            playback_den *= 2;
-          }
-          else
-          {
-            playback_num /= 2;
-          }
-        }
-        ImGui::SameLine();
-        ImGui::TextUnformatted(ss.str().c_str());
-        ImGui::SameLine();
-        if(ImGui::Button(ICON_FA_PLUS, bs))
-        {
-          if(playback_den == 1)
-          {
-            playback_num *= 2;
-          }
-          else
-          {
-            playback_den /= 2;
-          }
-        }
-      }
-      /* Time select combo box */
-      {
-        auto getKeys = [](const LogReader & log) {
-          std::vector<std::string> ret;
-          for(const auto & e : log)
-          {
-            ret.push_back(e.first);
-          }
-          return ret;
-        };
-        static std::vector<std::string> comboKeys = getKeys(log);
-        auto defaultIdx = [](const std::vector<std::string> & keys) {
-          for(int i = 0; i < static_cast<int>(keys.size()); ++i)
-          {
-            if(keys[i] == "t")
-            {
-              return i;
-            }
-          }
-          return -1;
-        };
-        static int comboIdx = defaultIdx(comboKeys);
-        auto packKeys = [](const std::vector<std::string> & keys) {
-          std::vector<char> out(0);
-          for(const auto & k : keys)
-          {
-            size_t start = out.size();
-            out.resize(out.size() + k.size() + 1);
-            memcpy(out.data() + start, k.c_str(), k.size() + 1);
-          }
-          return out;
-        };
-        static std::vector<char> comboData = packKeys(comboKeys);
-        int prevItem = comboIdx;
-        if(ImGui::Combo("Time range", &comboIdx, comboData.data()))
-        {
-          if(!selectTime(comboKeys[comboIdx]))
-          {
-            comboIdx = prevItem;
-          }
-        }
-      }
-      /* Exit button */
-      {
-        ImGui::Separator();
-        const char * btext = "Stop publisher";
-        auto bsize = ImVec2(100, 25);
-        ImGui::SetCursorPosX((size.x - bsize.x) / 2);
-        if(ImGui::Button(btext, bsize))
-        {
-          glfwSetWindowShouldClose(window, GL_TRUE);
-        }
-      }
-      prev_size = size;
-      size = ImGui::GetWindowSize();
-      ImGui::End();
-      if(ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Escape)))
-      {
-        glfwSetWindowShouldClose(window, GL_TRUE);
-      }
-      int display_w, display_h;
-      glfwGetFramebufferSize(window, &display_w, &display_h);
-      if(prev_size.x == size.x && prev_size.y == size.y)
-      {
-        glfwSetWindowSize(window, static_cast<int>(size.x + 20), static_cast<int>(size.y + 20));
-      }
-      glViewport(0, 0, display_w, display_h);
-      glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-      glClear(GL_COLOR_BUFFER_BIT);
-      ImGui::Render();
-      glfwSwapBuffers(window);
-    }
-
-    ImGui_ImplGlfw_Shutdown();
-    glfwTerminate();
-
-    running = false;
+    rebuildGUI();
     pub_th.join();
   }
 
@@ -483,6 +337,8 @@ private:
   size_t max_i = 0;
   double cur_t = 0;
   size_t cur_i = 0;
+  /* Current time data */
+  std::string t_data;
 
   std::shared_ptr<mc_rbdyn::RobotModule> mod;
   std::shared_ptr<mc_rbdyn::Robots> robots;
@@ -493,9 +349,8 @@ private:
   std::vector<mc_rbdyn::PolygonInterpolator> interpolators;
 
   /* UI related */
-  ImVec2 size;
-  ImVec2 prev_size;
-  ImVec4 clear_color = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);
+  mc_rtc::gui::StateBuilder gui;
+  std::unique_ptr<mc_control::ControllerServer> server;
 };
 
 int main(int argc, char * argv[])
