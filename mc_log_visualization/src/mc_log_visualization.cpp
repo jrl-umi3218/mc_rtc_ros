@@ -85,8 +85,7 @@ void setStyle()
 struct LogPublisher
 {
 public:
-  LogPublisher(ros::NodeHandle & nh, const std::string & logfile)
-  : nh(nh)
+  LogPublisher(ros::NodeHandle & nh, const std::string & logfile) : nh(nh)
   {
     log.read(logfile);
   }
@@ -95,7 +94,6 @@ public:
   {
     auto & robot = robots->robot();
     auto & real_robot = real_robots->robot();
-    unsigned int data_size = log.at("t").size();
     unsigned int pub_i = 0;
     auto ref_joint_order = mod->ref_joint_order();
 
@@ -194,28 +192,58 @@ public:
         cur_i += playback_num;
         pub_i = 0;
       }
-      if(cur_i >= data_size)
+      if(cur_i >= max_i)
       {
-        cur_i = 0;
+        cur_i = min_i;
       }
 
       rt.sleep();
     }
   }
 
+  bool selectTime(const std::string & t)
+  {
+    const auto & data = log.at(t);
+    size_t i = 0;
+    while(i + 1 < data.size() && data[i] == data[i + 1])
+    {
+      i++;
+    }
+    if(i + 1 == data.size())
+    {
+      return false;
+    }
+    if(fabs(data[i + 1] - data[i] - dt) > 1e-6)
+    {
+      i = i + 1;
+    }
+    size_t start_i = i;
+    while(i + 1 < data.size() && fabs(data[i + 1] - data[i] - dt) < 1e-6)
+    {
+      i++;
+    }
+    if(i == start_i)
+    {
+      return false;
+    }
+    min_i = start_i;
+    cur_i = min_i;
+    max_i = i;
+    min_t = data[min_i];
+    cur_t = min_t;
+    max_t = data[max_i];
+    return true;
+  }
+
   void run()
   {
-    min_t = log.at("t")[0];
-    cur_t = min_t;
-    max_t = log.at("t").back();
-    min_i = 0;
-    cur_i = 0;
-    max_i = log.at("t").size() - 1;
-
+    selectTime("t");
     std::vector<std::string> robot_params;
     std::string param = "";
     nh.searchParam("robot_module", param);
     nh.getParam(param, robot_params);
+    nh.searchParam("dt", param);
+    nh.getParam(param, dt);
     if(robot_params.size() == 1)
     {
       mod = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]);
@@ -347,6 +375,48 @@ public:
           else
           {
             playback_den /= 2;
+          }
+        }
+      }
+      /* Time select combo box */
+      {
+        auto getKeys = [](const LogReader & log) {
+          std::vector<std::string> ret;
+          for(const auto & e : log)
+          {
+            ret.push_back(e.first);
+          }
+          return ret;
+        };
+        static std::vector<std::string> comboKeys = getKeys(log);
+        auto defaultIdx = [](const std::vector<std::string> & keys) {
+          for(int i = 0; i < static_cast<int>(keys.size()); ++i)
+          {
+            if(keys[i] == "t")
+            {
+              return i;
+            }
+          }
+          return -1;
+        };
+        static int comboIdx = defaultIdx(comboKeys);
+        auto packKeys = [](const std::vector<std::string> & keys) {
+          std::vector<char> out(0);
+          for(const auto & k : keys)
+          {
+            size_t start = out.size();
+            out.resize(out.size() + k.size() + 1);
+            memcpy(out.data() + start, k.c_str(), k.size() + 1);
+          }
+          return out;
+        };
+        static std::vector<char> comboData = packKeys(comboKeys);
+        int prevItem = comboIdx;
+        if(ImGui::Combo("Time range", &comboIdx, comboData.data()))
+        {
+          if(!selectTime(comboKeys[comboIdx]))
+          {
+            comboIdx = prevItem;
           }
         }
       }

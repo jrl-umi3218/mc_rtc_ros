@@ -27,28 +27,29 @@ void LogReader::read(const std::string & filename)
     unsigned int i = 0;
     for(std::string data; std::getline(liness, data, ';'); ++i)
     {
-      if(data.size() != 0)
+      if(first_line)
       {
-        if(first_line)
+        entries.push_back(data);
+      }
+      else
+      {
+        if(data.size() == 0)
         {
-          entries.push_back(data);
+          fdata[i].push_back(0);
         }
         else
         {
-          if(i < fdata.size())
+          try
           {
-            try
-            {
-              fdata[i].push_back(std::stod(data));
-            }
-            catch(std::out_of_range & e)
-            {
-              fdata[i].push_back(0);
-            }
-            catch(std::invalid_argument & e)
-            {
-              fdata[i].push_back(0);
-            }
+            fdata[i].push_back(std::stod(data));
+          }
+          catch(std::out_of_range & e)
+          {
+            fdata[i].push_back(0);
+          }
+          catch(std::invalid_argument & e)
+          {
+            fdata[i].push_back(0);
           }
         }
       }
@@ -56,6 +57,11 @@ void LogReader::read(const std::string & filename)
     if(first_line)
     {
       fdata.resize(entries.size());
+    }
+    while(i < fdata.size())
+    {
+      fdata[i].push_back(0);
+      i++;
     }
     first_line = false;
   }
