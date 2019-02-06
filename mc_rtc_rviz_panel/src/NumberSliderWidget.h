@@ -11,7 +11,7 @@ struct NumberSliderWidget : public ClientWidget
 public:
   NumberSliderWidget(const ClientWidgetParam & param, double min, double max);
 
-  void update(double data);
+  void update(double data, double min, double max);
 
 private:
   QLabel * valueLabel_;

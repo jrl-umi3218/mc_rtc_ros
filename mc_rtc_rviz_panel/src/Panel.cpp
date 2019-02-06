@@ -513,7 +513,7 @@ void Panel::got_number_input(const WidgetId & id, double data)
 void Panel::got_number_slider(const WidgetId & id, double data, double min, double max)
 {
   auto & w = get_widget<NumberSliderWidget>(id, min, max);
-  w.update(data);
+  w.update(data, min, max);
 }
 
 void Panel::got_array_input(const WidgetId & id, const std::vector<std::string> & inputs, const Eigen::VectorXd & data)
