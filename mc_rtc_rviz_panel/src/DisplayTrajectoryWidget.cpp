@@ -17,6 +17,7 @@ DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & param
   button_->setChecked(!visible_);
   toggled(!visible_);
   layout->addWidget(button_);
+  connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
 }
 
 void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d> & points)
