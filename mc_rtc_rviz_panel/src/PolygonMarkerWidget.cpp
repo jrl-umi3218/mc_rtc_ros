@@ -9,7 +9,10 @@ PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params, visua
 : ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
-  layout->addWidget(new QLabel(id().name.c_str()));
+  if(!secret())
+  {
+    layout->addWidget(new QLabel(id().name.c_str()));
+  }
   button_ = new QPushButton(this);
   button_->setCheckable(true);
   button_->setChecked(!visible_);

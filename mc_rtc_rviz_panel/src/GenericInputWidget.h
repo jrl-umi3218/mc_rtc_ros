@@ -45,7 +45,10 @@ template<typename T>
 GenericInputWidget<T>::GenericInputWidget(const ClientWidgetParam & param) : CommonInputWidget(param)
 {
   setLayout(new QHBoxLayout());
-  layout()->addWidget(new QLabel(name().c_str()));
+  if(!secret())
+  {
+    layout()->addWidget(new QLabel(name().c_str()));
+  }
   lock_button_ = new QPushButton("EDIT");
   lock_button_->setCheckable(true);
   connect(lock_button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));

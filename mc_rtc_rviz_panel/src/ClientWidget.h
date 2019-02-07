@@ -37,6 +37,12 @@ public:
     return id_.name;
   }
 
+  /** If a widget name starts with # then it should be displayed discreetly */
+  bool secret() const
+  {
+    return name().size() == 0 || name()[0] == '#';
+  }
+
   /** Id of the widget */
   const WidgetId & id() const
   {

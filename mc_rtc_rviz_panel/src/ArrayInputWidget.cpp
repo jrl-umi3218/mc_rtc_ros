@@ -10,7 +10,10 @@ ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param, const std::v
 
   labels_layout_ = new QHBoxLayout();
   mainLayout->addLayout(labels_layout_);
-  labels_layout_->addWidget(new QLabel(name().c_str()));
+  if(!secret())
+  {
+    labels_layout_->addWidget(new QLabel(name().c_str()));
+  }
   lock_button_ = new QPushButton("EDIT");
   lock_button_->setCheckable(true);
   labels_layout_->addWidget(lock_button_);
