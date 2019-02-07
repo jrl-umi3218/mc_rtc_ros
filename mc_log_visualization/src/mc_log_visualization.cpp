@@ -126,12 +126,30 @@ public:
       pub_i++;
       if(!paused && pub_i % playback_den == 0)
       {
-        cur_i += playback_num;
+        if(!reversed)
+        {
+          cur_i += playback_num;
+        }
+        else
+        {
+          cur_i -= playback_num;
+        }
         pub_i = 0;
       }
       if(cur_i >= max_i)
       {
-        cur_i = min_i;
+        if(reversed)
+        {
+          cur_i = max_i - 1;
+        }
+        else
+        {
+          cur_i = min_i;
+        }
+      }
+      if(cur_i < min_i)
+      {
+        cur_i = max_i;
       }
       cur_t = log.at("t")[cur_i];
       server->handle_requests(gui);
@@ -144,35 +162,29 @@ public:
   {
     std::vector<std::string> category = {"Log visualizer"};
     gui.removeCategory(category);
-    gui.addElement(category, mc_rtc::gui::NumberSlider("Time", [this]() { return cur_t; },
-                                                       [this](double time) {
-                                                         const auto & t = log.at("t");
-                                                         size_t i = min_i;
-                                                         for(; i < max_i - 1; ++i)
-                                                         {
-                                                           if(t[i] <= time && t[i + 1] > time)
-                                                           {
-                                                             break;
-                                                           }
-                                                         }
-                                                         cur_i = i;
-                                                         cur_t = t[i];
-                                                       },
-                                                       min_t, max_t));
-    if(paused)
-    {
-      gui.addElement(category, mc_rtc::gui::Button("Play", [this]() {
-                       paused = false;
-                       rebuildGUI();
-                     }));
-    }
-    else
-    {
-      gui.addElement(category, mc_rtc::gui::Button("Pause", [this]() {
-                       paused = true;
-                       rebuildGUI();
-                     }));
-    }
+
+    auto makeTimeElement = [this]() {
+      return mc_rtc::gui::NumberSlider("#Time", [this]() { return cur_t; },
+                                       [this](double time) {
+                                         const auto & t = log.at("t");
+                                         size_t i = min_i;
+                                         for(; i < max_i - 1; ++i)
+                                         {
+                                           if(t[i] <= time && t[i + 1] > time)
+                                           {
+                                             break;
+                                           }
+                                         }
+                                         cur_i = i;
+                                         cur_t = t[i];
+                                       },
+                                       min_t, max_t);
+    };
+    gui.addElement(category, mc_rtc::gui::ElementsStacking::Horizontal,
+                   mc_rtc::gui::Checkbox("Paused", [this]() { return paused; }, [this]() { paused = !paused; }),
+                   makeTimeElement(),
+                   mc_rtc::gui::Checkbox("Reverse", [this]() { return reversed; }, [this]() { reversed = !reversed; }));
+
     gui.addElement(category, mc_rtc::gui::ElementsStacking::Horizontal,
                    mc_rtc::gui::Button("-",
                                        [this]() {
@@ -205,6 +217,23 @@ public:
                        playback_den /= 2;
                      }
                    }));
+
+    auto makeStepButton = [this](int mul) {
+      int dt_ms = mul * 1000 * dt;
+      std::stringstream ss;
+      if(dt_ms > 0)
+      {
+        ss << "+";
+      }
+      ss << dt_ms << " ms";
+      return mc_rtc::gui::Button(ss.str(), [this, mul]() {
+        paused = true;
+        cur_i = std::max(min_i, std::min(max_i, cur_i + mul));
+      });
+    };
+    gui.addElement(category, mc_rtc::gui::ElementsStacking::Horizontal, makeStepButton(-100), makeStepButton(-10),
+                   makeStepButton(-1), makeStepButton(1), makeStepButton(10), makeStepButton(100));
+
     std::vector<std::string> keys;
     for(const auto & p : log)
     {
@@ -321,6 +350,8 @@ private:
 
   /* Play/pause playback */
   bool paused = false;
+  /* Play in reverse */
+  bool reversed = false;
   /* Playback speed is playback_num/playback_den */
   unsigned int playback_num = 1;
   unsigned int playback_den = 1;
@@ -349,7 +380,7 @@ private:
 
 int main(int argc, char * argv[])
 {
-  ros::init(argc, argv, "log_visualizer");
+  ros::init(argc, argv, "log_visualizer", ros::init_options::NoSigintHandler);
   auto nh = mc_rtc::ROSBridge::get_node_handle();
   if(!nh)
   {
