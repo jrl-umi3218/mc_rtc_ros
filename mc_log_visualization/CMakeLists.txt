@@ -20,12 +20,12 @@ include_directories(
 
 set(src_files
   src/mc_log_visualization.cpp
-  src/LogReader.h
-  src/LogReader.cpp
+  src/LogRobot.h
+  src/LogRobot.cpp
 )
 
 add_definitions(-std=c++0x)
 
-add_executable(mc_log_visualization ${src_files} ${imgui_SRC})
+add_executable(mc_log_visualization ${src_files})
 pkg_config_use_dependency(mc_log_visualization mc_rtc)
 target_link_libraries(mc_log_visualization ${catkin_LIBRARIES})
