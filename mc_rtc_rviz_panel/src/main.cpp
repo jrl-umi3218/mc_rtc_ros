@@ -1,4 +1,5 @@
 #include "Panel.h"
+
 #include <QApplication>
 #include <QMainWindow>
 #include <QPushButton>

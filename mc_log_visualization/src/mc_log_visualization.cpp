@@ -1,3 +1,5 @@
+#include "LogRobot.h"
+
 #include <mc_control/ControllerServer.h>
 #include <mc_rbdyn/RobotLoader.h>
 #include <mc_rtc/GUIState.h>
@@ -7,7 +9,6 @@
 
 #include <ros/ros.h>
 
-#include "LogRobot.h"
 #include <fstream>
 #include <memory>
 #include <thread>

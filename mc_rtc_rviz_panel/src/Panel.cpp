@@ -16,12 +16,12 @@
 #  include "PointMarkerWidget.h"
 #  include "PolygonMarkerWidget.h"
 #endif
-#include <boost/filesystem.hpp>
-
 #include "ConnectionDialog.h"
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
 #include "SchemaWidget.h"
+
+#include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
 namespace mc_rtc_rviz

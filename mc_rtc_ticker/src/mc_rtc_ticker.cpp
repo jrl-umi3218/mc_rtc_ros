@@ -1,3 +1,5 @@
+#include "ContactForcePublisher.h"
+
 #include <mc_control/mc_global_controller.h>
 #include <mc_rtc/config.h>
 #include <mc_rtc/logging.h>
@@ -5,7 +7,6 @@
 
 #include <ros/ros.h>
 
-#include "ContactForcePublisher.h"
 #include <chrono>
 #include <iostream>
 

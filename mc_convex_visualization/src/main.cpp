@@ -3,9 +3,10 @@
 
 #include <sch/S_Polyhedron/S_Polyhedron.h>
 
-#include "geometry_msgs/Point.h"
-#include "ros/ros.h"
-#include "visualization_msgs/MarkerArray.h"
+#include <geometry_msgs/Point.h>
+#include <ros/ros.h>
+#include <visualization_msgs/MarkerArray.h>
+
 #include <iostream>
 
 namespace

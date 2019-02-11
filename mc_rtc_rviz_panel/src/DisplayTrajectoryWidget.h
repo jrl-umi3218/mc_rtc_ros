@@ -1,11 +1,11 @@
 #pragma once
 
+#include "ClientWidget.h"
+#include "utils.h"
+
 #include <mc_rtc/ros.h>
 
 #include <visualization_msgs/MarkerArray.h>
-
-#include "ClientWidget.h"
-#include "utils.h"
 
 namespace mc_rtc_rviz
 {

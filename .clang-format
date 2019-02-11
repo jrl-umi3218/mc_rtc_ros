@@ -44,24 +44,26 @@ ForEachMacros:
   - BOOST_FOREACH
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex:           '^(<mc_[a-z]*/)'
+  - Regex:           '^(".*")'
     Priority:        1
-  - Regex:           '^(<Tasks/)'
+  - Regex:           '^(<mc_[a-z]*/)'
     Priority:        2
-  - Regex:           '^(<mc_rbdyn_urdf/)'
+  - Regex:           '^(<Tasks/)'
     Priority:        3
-  - Regex:           '^(<RBDyn/)'
+  - Regex:           '^(<mc_rbdyn_urdf/)'
     Priority:        4
-  - Regex:           '^(<SpaceVecAlg/)'
+  - Regex:           '^(<RBDyn/)'
     Priority:        5
-  - Regex:           '^(<(sch-core|sch)/)'
+  - Regex:           '^(<SpaceVecAlg/)'
     Priority:        6
-  - Regex:           '^(<boost/)'
+  - Regex:           '^(<(sch-core|sch)/)'
     Priority:        7
-  - Regex:           '^(<(nanomsg|geos|.*_msgs|ros|tf2.*)/)'
+  - Regex:           '^(<boost/)'
     Priority:        8
-  - Regex:           '.*'
+  - Regex:           '^(<(nanomsg|geos|.*_msgs|ros|tf2.*)/)'
     Priority:        9
+  - Regex:           '.*'
+    Priority:        10
 IncludeIsMainRegex: '(Test)?$'
 IndentCaseLabels: true
 IndentPPDirectives: AfterHash

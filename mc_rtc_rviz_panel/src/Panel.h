@@ -3,6 +3,7 @@
 #ifndef Q_MOC_RUN
 
 #  include "CategoryWidget.h"
+
 #  include <memory>
 #  include <unordered_map>
 
