@@ -20,6 +20,8 @@ include_directories(
 
 set(src_files
   src/mc_log_visualization.cpp
+  src/LogPublisher.h
+  src/LogPublisher.cpp
   src/LogRobot.h
   src/LogRobot.cpp
 )
