@@ -92,6 +92,30 @@ public:
     }
   }
 
+  void addRemoveExtraDataButton(const std::string & entry)
+  {
+    gui.addElement({"Log visualizer - Extra data", "Remove"}, mc_rtc::gui::Button("Remove " + entry, [this, entry]() {
+                     gui.removeElement({"Log visualizer - Extra data"}, entry);
+                     gui.removeElement({"Log visualizer - Extra data", "Remove"}, "Remove " + entry);
+                   }));
+  }
+
+  template<typename GetT>
+  void addPoint3D(const std::string & entry, GetT cb)
+  {
+    std::vector<std::string> category = {"Log visualizer - Extra data"};
+    gui.addElement(category, mc_rtc::gui::Point3D(entry, cb));
+    addRemoveExtraDataButton(entry);
+  }
+
+  template<typename GetForce, typename GetSurface>
+  void addForce(const std::string & entry, GetForce fCb, GetSurface sCb)
+  {
+    std::vector<std::string> category = {"Log visualizer - Extra data"};
+    gui.addElement(category, mc_rtc::gui::Force(entry, fCb, sCb));
+    addRemoveExtraDataButton(entry);
+  }
+
   void rebuildGUI()
   {
     std::vector<std::string> category = {"Log visualizer"};
@@ -179,6 +203,57 @@ public:
     gui.addElement(category, mc_rtc::gui::ComboInput("Time range", keys, [this]() { return t_data; },
                                                      [this](const std::string & t) { selectTime(t); }));
     gui.addElement(category, mc_rtc::gui::Button("Stop log replay", [this]() { running = false; }));
+
+    category.push_back("Add extra information");
+    const auto & log_entries = log.entries();
+    std::vector<std::string> entries{log_entries.begin(), log_entries.end()};
+    if(!log.has(extra_selected))
+    {
+      extra_selected = entries[0];
+    }
+    gui.addElement(category, mc_rtc::gui::ComboInput("Entry", entries, [this]() { return extra_selected; },
+                                                     [this](const std::string & selected) {
+                                                       extra_selected = selected;
+                                                       rebuildGUI();
+                                                     }));
+    std::string entry = extra_selected;
+    auto types = log.types(entry);
+    bool added_something = false;
+    for(const auto & t : types)
+    {
+      switch(t)
+      {
+        case mc_rtc::log::LogData_Vector3d:
+          added_something = true;
+          gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Point3D", [this, entry]() {
+                           addPoint3D(entry, [this, entry]() {
+                             return log.get<Eigen::Vector3d>(entry, cur_i, Eigen::Vector3d::Zero());
+                           });
+                         }));
+          break;
+        case mc_rtc::log::LogData_ForceVecd:
+          added_something = true;
+          gui.addElement(category,
+                         mc_rtc::gui::Form("Add " + entry + " as Force",
+                                           [this, entry](const mc_rtc::Configuration & form) {
+                                             std::string surface = form("Surface");
+                                             addForce(
+                                                 entry,
+                                                 [this, entry]() {
+                                                   return log.get<sva::ForceVecd>(entry, cur_i, sva::ForceVecd::Zero());
+                                                 },
+                                                 [this, surface]() { return robot->robot().surfacePose(surface); });
+                                           },
+                                           mc_rtc::gui::FormComboInput("Surface", true, robot->surfaces())));
+        default:
+          break;
+      };
+#undef LOG_ENTRY_GUI
+    }
+    if(!added_something)
+    {
+      gui.addElement(category, mc_rtc::gui::Label("Cannot display " + entry, []() { return ""; }));
+    }
   }
 
   bool selectTime(const std::string & t)
@@ -265,6 +340,8 @@ private:
   size_t cur_i = 0;
   /* Current time data */
   std::string t_data;
+  /* Current extra entry menu currently selected */
+  std::string extra_selected = "";
 
   std::unique_ptr<LogRobot> robot;
   std::unique_ptr<LogRobot> real_robot;
