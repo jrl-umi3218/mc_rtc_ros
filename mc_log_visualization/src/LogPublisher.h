@@ -32,8 +32,7 @@ public:
   template<typename GetT>
   void addPoint3D(const std::string & entry, GetT cb)
   {
-    std::vector<std::string> category = {"Log visualizer - Extra data"};
-    gui.addElement(category, mc_rtc::gui::Point3D(entry, cb));
+    gui.addElement(extraDataCategory, mc_rtc::gui::Point3D(entry, cb));
     addRemoveExtraDataButton(entry);
   }
 
@@ -41,8 +40,7 @@ public:
   template<typename GetForce, typename GetSurface>
   void addForce(const std::string & entry, GetForce fCb, GetSurface sCb)
   {
-    std::vector<std::string> category = {"Log visualizer - Extra data"};
-    gui.addElement(category, mc_rtc::gui::Force(entry, fCb, sCb));
+    gui.addElement(extraDataCategory, mc_rtc::gui::Force(entry, fCb, sCb));
     addRemoveExtraDataButton(entry);
   }
 
@@ -97,4 +95,6 @@ private:
   /* UI related */
   mc_rtc::gui::StateBuilder gui;
   std::unique_ptr<mc_control::ControllerServer> server;
+  const std::vector<std::string> extraDataCategory = {"Log visualizer - Extra data"};
+  const std::vector<std::string> extraDataRemoveCategory = {"Log visualizer - Extra data", "Remove"};
 };

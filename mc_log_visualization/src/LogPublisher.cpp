@@ -79,9 +79,9 @@ void LogPublisher::pubThread()
 
 void LogPublisher::addRemoveExtraDataButton(const std::string & entry)
 {
-  gui.addElement({"Log visualizer - Extra data", "Remove"}, mc_rtc::gui::Button("Remove " + entry, [this, entry]() {
-                   gui.removeElement({"Log visualizer - Extra data"}, entry);
-                   gui.removeElement({"Log visualizer - Extra data", "Remove"}, "Remove " + entry);
+  gui.addElement(extraDataRemoveCategory, mc_rtc::gui::Button("Remove " + entry, [this, entry]() {
+                   gui.removeElement(extraDataCategory, entry);
+                   gui.removeElement(extraDataRemoveCategory, "Remove " + entry);
                  }));
 }
 
