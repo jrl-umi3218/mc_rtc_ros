@@ -82,3 +82,13 @@ void LogRobot::update(const mc_rtc::log::FlatLog & log, size_t i)
   robot.posW(base);
   publisher_.update(config_.dt, robot, {});
 }
+
+std::vector<std::string> LogRobot::surfaces() const
+{
+  std::vector<std::string> ret;
+  for(const auto & p : robot().surfaces())
+  {
+    ret.push_back(p.first);
+  }
+  return ret;
+}

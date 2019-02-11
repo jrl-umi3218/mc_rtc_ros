@@ -33,7 +33,17 @@ struct LogRobot
   /** Create a LogRobot with the provided configuration */
   LogRobot(const Configuration & config);
 
+  /** Update the published robot state */
   void update(const mc_rtc::log::FlatLog & log, size_t i);
+
+  /** Access underlying robot */
+  inline const mc_rbdyn::Robot & robot() const
+  {
+    return robots_->robot();
+  }
+
+  /** Access all surfaces in the robot */
+  std::vector<std::string> surfaces() const;
 
 private:
   Configuration config_;
