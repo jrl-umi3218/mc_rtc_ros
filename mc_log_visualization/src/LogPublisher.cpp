@@ -195,6 +195,8 @@ void LogPublisher::rebuildGUI()
       case mc_rtc::log::LogData_Vector3d:
         added_something = true;
         gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Point3D", [this, entry]() {
+                         config("points").add(entry, "point");
+                         saveConfig();
                          addPoint3D(entry, [this, entry]() {
                            return log.get<Eigen::Vector3d>(entry, cur_i, Eigen::Vector3d::Zero());
                          });
@@ -206,6 +208,9 @@ void LogPublisher::rebuildGUI()
                                      "Add " + entry + " as Force",
                                      [this, entry](const mc_rtc::Configuration & form) {
                                        std::string surface = form("Surface");
+                                       auto c = config("forces").add(entry);
+                                       c.add("surface", surface);
+                                       saveConfig();
                                        addForce(entry,
                                                 [this, entry]() {
                                                   return log.get<sva::ForceVecd>(entry, cur_i, sva::ForceVecd::Zero());
@@ -271,5 +276,58 @@ void LogPublisher::run()
 
   pub_th = std::thread(std::bind(&LogPublisher::pubThread, this));
   rebuildGUI();
+  loadConfig();
   pub_th.join();
+}
+
+bfs::path LogPublisher::configPath() const
+{
+#ifndef WIN32
+  return bfs::path(std::getenv("HOME")) / ".config/mc_rtc/log_visualizer.conf";
+#else
+  // Should work for Windows Vista and up
+  retrn config_path = bfs::path(std::getenv("APPDATA")) / "mc_rtc/log_visualizer.conf";
+#endif
+}
+
+void LogPublisher::loadConfig()
+{
+  auto p = configPath();
+  if(bfs::exists(p))
+  {
+    config.load(p.string());
+  }
+  std::vector<std::string> requiredKeys = {"forces", "points"};
+  for(const auto & k : requiredKeys)
+  {
+    if(!config.has(k))
+    {
+      config.add(k);
+    }
+  }
+  for(const auto & p : config("points").keys())
+  {
+    if(log.has(p))
+    {
+      std::string type = config("points")(p);
+      if(type == "point")
+      {
+        addPoint3D(p, [this, p]() { return log.get<Eigen::Vector3d>(p, cur_i, Eigen::Vector3d::Zero()); });
+      }
+    }
+  }
+  for(const auto & f : config("forces").keys())
+  {
+    if(log.has(f))
+    {
+      std::string surface = config("forces")(f)("surface");
+      addForce(f, [this, f]() { return log.get<sva::ForceVecd>(f, cur_i, sva::ForceVecd::Zero()); },
+               [this, surface]() { return robot->robot().surfacePose(surface); });
+    }
+  }
+}
+
+void LogPublisher::saveConfig() const
+{
+  config.save(configPath().string());
 }

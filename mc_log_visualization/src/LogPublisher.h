@@ -44,6 +44,15 @@ public:
     addRemoveExtraDataButton(entry);
   }
 
+  /** Get the filesystem path to the configuration */
+  bfs::path configPath() const;
+
+  /** Load the configuration and restore GUI elements */
+  void loadConfig();
+
+  /** Save the configuration to disk */
+  void saveConfig() const;
+
   /** Update the GUI */
   void rebuildGUI();
 
@@ -54,6 +63,8 @@ public:
   void run();
 
 private:
+  /** Used to store/load the extra data provided by the log */
+  mc_rtc::Configuration config;
   /* ROS */
   ros::NodeHandle & nh;
   std::shared_ptr<mc_rbdyn::RobotModule> mod;
