@@ -197,27 +197,20 @@ void LogPublisher::rebuildGUI()
         gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Point3D", [this, entry]() {
                          config("points").add(entry, "point");
                          saveConfig();
-                         addPoint3D(entry, [this, entry]() {
-                           return log.get<Eigen::Vector3d>(entry, cur_i, Eigen::Vector3d::Zero());
-                         });
+                         addVector3dAsPoint3D(entry);
                        }));
         break;
       case mc_rtc::log::LogData_ForceVecd:
         added_something = true;
-        gui.addElement(category, mc_rtc::gui::Form(
-                                     "Add " + entry + " as Force",
-                                     [this, entry](const mc_rtc::Configuration & form) {
-                                       std::string surface = form("Surface");
-                                       auto c = config("forces").add(entry);
-                                       c.add("surface", surface);
-                                       saveConfig();
-                                       addForce(entry,
-                                                [this, entry]() {
-                                                  return log.get<sva::ForceVecd>(entry, cur_i, sva::ForceVecd::Zero());
-                                                },
-                                                [this, surface]() { return robot->robot().surfacePose(surface); });
-                                     },
-                                     mc_rtc::gui::FormComboInput("Surface", true, robot->surfaces())));
+        gui.addElement(category, mc_rtc::gui::Form("Add " + entry + " as Force",
+                                                   [this, entry](const mc_rtc::Configuration & form) {
+                                                     std::string surface = form("Surface");
+                                                     auto c = config("forces").add(entry);
+                                                     c.add("surface", surface);
+                                                     saveConfig();
+                                                     addForce(entry, surface);
+                                                   },
+                                                   mc_rtc::gui::FormComboInput("Surface", true, robot->surfaces())));
       default:
         break;
     };
@@ -280,6 +273,22 @@ void LogPublisher::run()
   pub_th.join();
 }
 
+void LogPublisher::addVector3dAsPoint3D(const std::string & entry)
+{
+  gui.addElement(extraDataCategory, mc_rtc::gui::Point3D(entry, [this, entry]() {
+                   return log.get<Eigen::Vector3d>(entry, cur_i, Eigen::Vector3d::Zero());
+                 }));
+  addRemoveExtraDataButton(entry);
+}
+
+void LogPublisher::addForce(const std::string & entry, const std::string & surface)
+{
+  gui.addElement(extraDataCategory,
+                 mc_rtc::gui::Force(
+                     entry, [this, entry]() { return log.get<sva::ForceVecd>(entry, cur_i, sva::ForceVecd::Zero()); },
+                     [this, surface]() { return robot->robot().surfacePose(surface); }));
+}
+
 bfs::path LogPublisher::configPath() const
 {
 #ifndef WIN32
@@ -312,7 +321,7 @@ void LogPublisher::loadConfig()
       std::string type = config("points")(p);
       if(type == "point")
       {
-        addPoint3D(p, [this, p]() { return log.get<Eigen::Vector3d>(p, cur_i, Eigen::Vector3d::Zero()); });
+        addVector3dAsPoint3D(p);
       }
     }
   }
@@ -321,8 +330,7 @@ void LogPublisher::loadConfig()
     if(log.has(f))
     {
       std::string surface = config("forces")(f)("surface");
-      addForce(f, [this, f]() { return log.get<sva::ForceVecd>(f, cur_i, sva::ForceVecd::Zero()); },
-               [this, surface]() { return robot->robot().surfacePose(surface); });
+      addForce(f, surface);
     }
   }
 }

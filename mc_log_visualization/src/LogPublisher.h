@@ -28,21 +28,11 @@ public:
   /** Add a button to the GUI to remove a log entry that has been added to the GUI */
   void addRemoveExtraDataButton(const std::string & entry);
 
-  /** Add a 3D point from the log to the GUI */
-  template<typename GetT>
-  void addPoint3D(const std::string & entry, GetT cb)
-  {
-    gui.addElement(extraDataCategory, mc_rtc::gui::Point3D(entry, cb));
-    addRemoveExtraDataButton(entry);
-  }
+  /** Add a 3D point from a Vector3d log entry to the GUI */
+  void addVector3dAsPoint3D(const std::string & entry);
 
   /** Add a force recording from the log to the GUI */
-  template<typename GetForce, typename GetSurface>
-  void addForce(const std::string & entry, GetForce fCb, GetSurface sCb)
-  {
-    gui.addElement(extraDataCategory, mc_rtc::gui::Force(entry, fCb, sCb));
-    addRemoveExtraDataButton(entry);
-  }
+  void addForce(const std::string & entry, const std::string & surface);
 
   /** Get the filesystem path to the configuration */
   bfs::path configPath() const;
