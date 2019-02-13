@@ -25,8 +25,13 @@ public:
   /** Start the publication thread */
   void pubThread();
 
-  /** Add a button to the GUI to remove a log entry that has been added to the GUI */
-  void addRemoveExtraDataButton(const std::string & entry);
+  /** Add a button to the GUI to remove a log entry that has been added to the GUI
+   *
+   * \param section Section of the configuration where the data is stored
+   *
+   * \param entry Entry in the log
+   */
+  void addRemoveExtraDataButton(const std::string & section, const std::string & entry);
 
   /** Add a 3D point from a Vector3d log entry to the GUI */
   void addVector3dAsPoint3D(const std::string & entry);

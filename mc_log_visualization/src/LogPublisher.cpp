@@ -77,11 +77,13 @@ void LogPublisher::pubThread()
   }
 }
 
-void LogPublisher::addRemoveExtraDataButton(const std::string & entry)
+void LogPublisher::addRemoveExtraDataButton(const std::string & section, const std::string & entry)
 {
-  gui.addElement(extraDataRemoveCategory, mc_rtc::gui::Button("Remove " + entry, [this, entry]() {
+  gui.addElement(extraDataRemoveCategory, mc_rtc::gui::Button("Remove " + entry, [this, section, entry]() {
                    gui.removeElement(extraDataCategory, entry);
                    gui.removeElement(extraDataRemoveCategory, "Remove " + entry);
+                   config(section).remove(entry);
+                   saveConfig();
                  }));
 }
 
@@ -278,7 +280,7 @@ void LogPublisher::addVector3dAsPoint3D(const std::string & entry)
   gui.addElement(extraDataCategory, mc_rtc::gui::Point3D(entry, [this, entry]() {
                    return log.get<Eigen::Vector3d>(entry, cur_i, Eigen::Vector3d::Zero());
                  }));
-  addRemoveExtraDataButton(entry);
+  addRemoveExtraDataButton("points", entry);
 }
 
 void LogPublisher::addForce(const std::string & entry, const std::string & surface)
@@ -287,6 +289,7 @@ void LogPublisher::addForce(const std::string & entry, const std::string & surfa
                  mc_rtc::gui::Force(
                      entry, [this, entry]() { return log.get<sva::ForceVecd>(entry, cur_i, sva::ForceVecd::Zero()); },
                      [this, surface]() { return robot->robot().surfacePose(surface); }));
+  addRemoveExtraDataButton("forces", entry);
 }
 
 bfs::path LogPublisher::configPath() const
