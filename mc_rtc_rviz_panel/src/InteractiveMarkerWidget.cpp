@@ -101,10 +101,11 @@ XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(const ClientWidge
   if(control_position || control_orientation)
   {
     coupled_checkbox_ = new QCheckBox("Coupled position/orientation");
-    coupled_checkbox_->setChecked(true);
+    coupled_checkbox_->setChecked(false);
     layout_->addWidget(coupled_checkbox_);
     connect(coupled_checkbox_, SIGNAL(stateChanged(int)), this, SLOT(control_state_changed(int)));
   }
+  control_state_changed(/* anything = */ 42); // start with desired coupled/decoupled marker
 }
 
 void XYThetaInteractiveMarkerWidget::update(const Eigen::Vector3d & vec, double altitude)
