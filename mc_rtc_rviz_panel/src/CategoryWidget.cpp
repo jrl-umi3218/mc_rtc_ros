@@ -135,6 +135,7 @@ void CategoryWidget::addWidget(ClientWidget * w)
 
 void CategoryWidget::removeWidget(ClientWidget * w)
 {
+  w->seen(false);
   if(w->sid() && stack_layouts_.count(w->sid()))
   {
     int sid = w->sid();
@@ -156,8 +157,13 @@ void CategoryWidget::removeWidget(ClientWidget * w)
       if(tabs_->tabText(i).toStdString() == w->name())
       {
         tabs_->removeTab(i);
-        return;
+        break;
       }
+    }
+    if(tabs_->count() == 0)
+    {
+      delete page_layout_;
+      page_layout_ = nullptr;
     }
   }
   else if(page_layout_)
@@ -168,21 +174,24 @@ void CategoryWidget::removeWidget(ClientWidget * w)
   {
     layout()->removeWidget(w);
   }
+  widgets_.erase(std::find(widgets_.begin(), widgets_.end(), w));
+  delete w;
 }
 
 size_t CategoryWidget::clean()
 {
-  widgets_.erase(std::remove_if(widgets_.begin(), widgets_.end(),
-                                [this](ClientWidget * w) {
-                                  if(!w->seen())
-                                  {
-                                    removeWidget(w);
-                                    delete w;
-                                    return true;
-                                  }
-                                  return false;
-                                }),
-                 widgets_.end());
+  for(auto it = widgets_.begin(); it != widgets_.end();)
+  {
+    ClientWidget * w = *it;
+    if(!w->seen())
+    {
+      removeWidget(w);
+    }
+    else
+    {
+      ++it;
+    }
+  }
   return widgets_.size();
 }
 
