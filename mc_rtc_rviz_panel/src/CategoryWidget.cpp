@@ -7,151 +7,64 @@ namespace mc_rtc_rviz
 
 CategoryWidget::CategoryWidget(const ClientWidgetParam & param) : ClientWidget(param)
 {
+  parent_ = dynamic_cast<CategoryWidget *>(param.parent);
+  bool isRoot = parent_ == nullptr;
   auto l = new QVBoxLayout(this);
-  auto parentCategory = dynamic_cast<CategoryWidget *>(param.parent);
-  if(parentCategory)
+  // left, top, right, bottom
+  l->setContentsMargins(5, 5, 0, 0);
+  main_layout_ = new QVBoxLayout();
+  main_layout_->setAlignment(Qt::AlignTop);
+  tabs_ = new QTabWidget(this);
+  if(isRoot)
   {
-    level = parentCategory->level + 1;
-  }
-  if(level < MAX_TAB_LEVEL)
-  {
-    tabs_ = new QTabWidget(this);
-    l->addWidget(tabs_);
-  }
-  else if(level == MAX_TAB_LEVEL)
-  {
-    /** Create a scroll-area to welcome the widget */
     auto scroll = new QScrollArea(this);
+    scroll->setFrameShape(QFrame::NoFrame);
     auto page = new QWidget(this);
-    page_layout_ = new QVBoxLayout(page);
-    page_layout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    page_layout_->addStretch();
-    page->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    auto page_layout_ = new QVBoxLayout(page);
+    page_layout_->addLayout(main_layout_);
+    page_layout_->addWidget(tabs_);
     scroll->setWidgetResizable(true);
     scroll->setWidget(page);
     l->addWidget(scroll);
   }
   else
   {
-    layout_ = l;
-    toggle_ = new QPushButton(name().c_str(), this);
-    toggle_->setCheckable(true);
-    l->addWidget(toggle_);
-    connect(toggle_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
+    l->addLayout(main_layout_);
+    l->addWidget(tabs_);
   }
+  connect(tabs_, SIGNAL(currentChanged(int)), this, SLOT(updateSize(int)));
+  tabs_->hide();
 }
 
 void CategoryWidget::addWidget(ClientWidget * w)
 {
-  QHBoxLayout * stackLayout = nullptr;
   widgets_.push_back(w);
+  if(dynamic_cast<CategoryWidget *>(w))
+  {
+    /** w is a CategoryWidget */
+    tabs_->addTab(w, w->name().c_str());
+    tabs_->show();
+    return;
+  }
   if(w->sid() != -1)
   {
-    if(stack_layouts_.count(w->sid()))
+    /** w is part of a stack */
+    if(!stack_layouts_.count(w->sid()))
     {
-      stack_layouts_[w->sid()]->addWidget(w);
-      return;
+      stack_layouts_[w->sid()] = new QHBoxLayout();
+      main_layout_->addLayout(stack_layouts_[w->sid()]);
     }
-    stackLayout = new QHBoxLayout();
-    stackLayout->addWidget(w);
-    stack_layouts_[w->sid()] = stackLayout;
+    stack_layouts_[w->sid()]->addWidget(w);
+    return;
   }
-  if(tabs_)
-  {
-    if(dynamic_cast<CategoryWidget *>(w) == nullptr)
-    {
-      /** Create a scroll-area to welcome the widget */
-      if(!page_layout_)
-      {
-        auto scroll = new QScrollArea(this);
-        auto page = new QWidget(this);
-        page_layout_ = new QVBoxLayout(page);
-        page_layout_->setSizeConstraint(QLayout::SetMinAndMaxSize);
-        if(stackLayout)
-        {
-          page_layout_->addLayout(stackLayout);
-        }
-        else
-        {
-          page_layout_->addWidget(w);
-        }
-        page_layout_->addStretch();
-        page->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-        scroll->setWidgetResizable(true);
-        scroll->setWidget(page);
-        tab_idx_ = tabs_->addTab(scroll, w->name().c_str());
-      }
-      else
-      {
-        tabs_->setTabText(tab_idx_, id().name.c_str());
-        if(stackLayout)
-        {
-          page_layout_->insertLayout(page_layout_->count() - 1, stackLayout);
-        }
-        else
-        {
-          page_layout_->insertWidget(page_layout_->count() - 1, w);
-        }
-      }
-    }
-    else
-    {
-      tabs_->addTab(w, w->name().c_str());
-    }
-  }
-  else if(page_layout_)
-  {
-    if(stackLayout)
-    {
-      page_layout_->insertLayout(page_layout_->count() - 1, stackLayout);
-    }
-    else
-    {
-      page_layout_->insertWidget(page_layout_->count() - 1, w);
-    }
-  }
-  else
-  {
-    assert(toggle_);
-    assert(layout_);
-    if(stackLayout)
-    {
-      layout_->addLayout(stackLayout);
-    }
-    else
-    {
-      layout_->addWidget(w);
-    }
-    if(toggle_->isChecked())
-    {
-      w->show();
-    }
-    else
-    {
-      w->hide();
-    }
-  }
+  main_layout_->addWidget(w);
 }
 
 void CategoryWidget::removeWidget(ClientWidget * w)
 {
   w->seen(false);
-  if(w->sid() && stack_layouts_.count(w->sid()))
+  if(dynamic_cast<CategoryWidget *>(w))
   {
-    int sid = w->sid();
-    stack_layouts_[sid]->removeWidget(w);
-    if(stack_layouts_[sid]->count() == 0)
-    {
-      delete stack_layouts_[sid];
-      stack_layouts_.erase(sid);
-    }
-  }
-  if(tabs_)
-  {
-    if(page_layout_)
-    {
-      page_layout_->removeWidget(w);
-    }
     for(int i = 0; i < tabs_->count(); ++i)
     {
       if(tabs_->tabText(i).toStdString() == w->name())
@@ -162,17 +75,22 @@ void CategoryWidget::removeWidget(ClientWidget * w)
     }
     if(tabs_->count() == 0)
     {
-      delete page_layout_;
-      page_layout_ = nullptr;
+      tabs_->hide();
     }
   }
-  else if(page_layout_)
+  else if(w->sid() && stack_layouts_.count(w->sid()))
   {
-    page_layout_->removeWidget(w);
+    int sid = w->sid();
+    stack_layouts_[sid]->removeWidget(w);
+    if(stack_layouts_[sid]->count() == 0)
+    {
+      delete stack_layouts_[sid];
+      stack_layouts_.erase(sid);
+    }
   }
   else
   {
-    layout()->removeWidget(w);
+    main_layout_->removeWidget(w);
   }
   widgets_.erase(std::find(widgets_.begin(), widgets_.end(), w));
   delete w;
@@ -208,19 +126,36 @@ ClientWidget * CategoryWidget::widget(const std::string & name)
   return nullptr;
 }
 
-void CategoryWidget::toggled(bool c)
+void CategoryWidget::updateSizeImpl(bool active)
 {
-  for(const auto & w : widgets_)
+  for(int i = 0; i < tabs_->count(); ++i)
   {
-    if(c)
-    {
-      w->show();
-    }
-    else
-    {
-      w->hide();
-    }
+    static_cast<CategoryWidget *>(tabs_->widget(i))->updateSizeImpl(active && tabs_->currentIndex() == i);
   }
+  auto prevHint = minimumSizeHint();
+  if(active)
+  {
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  }
+  else
+  {
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+  }
+  if(minimumSizeHint() != prevHint)
+  {
+    resize(minimumSizeHint());
+    adjustSize();
+  }
+}
+
+void CategoryWidget::updateSize(int)
+{
+  auto parent = parent_ ? parent_ : this;
+  while(parent->parent_ != nullptr)
+  {
+    parent = parent->parent_;
+  }
+  parent->updateSizeImpl(true);
 }
 
 } // namespace mc_rtc_rviz
