@@ -550,7 +550,7 @@ void Panel::got_point3d(const WidgetId & id,
   else
   {
     auto label = latestWidget_;
-    auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, *int_server_, sva::PTransformd{pos}, false,
+    auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, sva::PTransformd{pos}, false,
                                                             !ro, label);
     w.update(pos);
   }
@@ -561,7 +561,7 @@ void Panel::got_rotation(const WidgetId & id, const WidgetId & requestId, bool r
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, *int_server_, pos, !ro, false, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, pos, !ro, false, label);
   w.update(pos);
 #endif
 }
@@ -570,7 +570,7 @@ void Panel::got_transform(const WidgetId & id, const WidgetId & requestId, bool 
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, *int_server_, pos, !ro, !ro, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, pos, !ro, !ro, label);
   w.update(pos);
 #endif
 }
@@ -583,7 +583,7 @@ void Panel::got_xytheta(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, *int_server_, sva::PTransformd::Identity(), !ro,
+  auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, int_server_, sva::PTransformd::Identity(), !ro,
                                                         !ro, label);
   w.update(vec, altitude);
 #endif

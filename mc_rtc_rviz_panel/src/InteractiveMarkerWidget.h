@@ -13,7 +13,7 @@ struct InteractiveMarkerWidget : public ClientWidget
 public:
   InteractiveMarkerWidget(const ClientWidgetParam & params,
                           const WidgetId & requestId,
-                          interactive_markers::InteractiveMarkerServer & server,
+                          std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
                           const vm::InteractiveMarker & marker,
                           ClientWidget * label);
 
@@ -36,7 +36,7 @@ struct TransformInteractiveMarkerWidget : public InteractiveMarkerWidget
 public:
   TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
                                    const WidgetId & requestId,
-                                   interactive_markers::InteractiveMarkerServer & server,
+                                   std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
                                    const sva::PTransformd & pos,
                                    bool control_orientation,
                                    bool control_position,
@@ -64,7 +64,7 @@ struct XYThetaInteractiveMarkerWidget : public InteractiveMarkerWidget
 public:
   XYThetaInteractiveMarkerWidget(const ClientWidgetParam & params,
                                  const WidgetId & requestId,
-                                 interactive_markers::InteractiveMarkerServer & server,
+                                 std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
                                  const sva::PTransformd & pos,
                                  bool control_orientation,
                                  bool control_position,

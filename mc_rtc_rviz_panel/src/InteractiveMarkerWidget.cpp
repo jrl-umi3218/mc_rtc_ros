@@ -8,7 +8,7 @@ namespace mc_rtc_rviz
 
 InteractiveMarkerWidget::InteractiveMarkerWidget(const ClientWidgetParam & params,
                                                  const WidgetId & requestId,
-                                                 interactive_markers::InteractiveMarkerServer & server,
+                                                 std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
                                                  const vm::InteractiveMarker & marker,
                                                  ClientWidget * label)
 : ClientWidget(params), request_id_(requestId),
@@ -40,13 +40,14 @@ void InteractiveMarkerWidget::toggled(bool hide)
   visible(!hide);
 }
 
-TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
-                                                                   const WidgetId & requestId,
-                                                                   interactive_markers::InteractiveMarkerServer & server,
-                                                                   const sva::PTransformd & /*pos*/,
-                                                                   bool control_orientation,
-                                                                   bool control_position,
-                                                                   ClientWidget * label)
+TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(
+    const ClientWidgetParam & params,
+    const WidgetId & requestId,
+    std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
+    const sva::PTransformd & /*pos*/,
+    bool control_orientation,
+    bool control_position,
+    ClientWidget * label)
 : InteractiveMarkerWidget(
       params,
       requestId,
@@ -86,13 +87,14 @@ void TransformInteractiveMarkerWidget::handleRequest(
   }
 }
 
-XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(const ClientWidgetParam & params,
-                                                               const WidgetId & requestId,
-                                                               interactive_markers::InteractiveMarkerServer & server,
-                                                               const sva::PTransformd & /*pos*/,
-                                                               bool control_orientation,
-                                                               bool control_position,
-                                                               ClientWidget * label)
+XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(
+    const ClientWidgetParam & params,
+    const WidgetId & requestId,
+    std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
+    const sva::PTransformd & /*pos*/,
+    bool control_orientation,
+    bool control_position,
+    ClientWidget * label)
 : InteractiveMarkerWidget(params, requestId, server, makeXYThetaMarker(id2name(requestId)), label)
 {
   coupled_marker_ = marker_.marker();

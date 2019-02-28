@@ -203,20 +203,20 @@ visualization_msgs::Marker getPointMarker(const std::string & ns,
   return m;
 }
 
-SharedMarker::SharedMarker(interactive_markers::InteractiveMarkerServer & server,
+SharedMarker::SharedMarker(std::shared_ptr<interactive_markers::InteractiveMarkerServer> server,
                            const std::string & name,
                            const vm::InteractiveMarker & marker,
                            interactive_markers::InteractiveMarkerServer::FeedbackCallback callback)
 : server_(server), marker_(marker), callback_(callback)
 {
-  server_.insert(marker_, callback_);
+  server_->insert(marker_, callback_);
 }
 
 SharedMarker::~SharedMarker()
 {
   if(!hidden_)
   {
-    server_.erase(marker_.name);
+    server_->erase(marker_.name);
   }
 }
 
@@ -225,12 +225,12 @@ void SharedMarker::toggle()
   if(hidden_)
   {
     hidden_ = false;
-    server_.insert(marker_, callback_);
+    server_->insert(marker_, callback_);
   }
   else
   {
     hidden_ = true;
-    server_.erase(marker_.name);
+    server_->erase(marker_.name);
   }
 }
 
@@ -243,7 +243,7 @@ void SharedMarker::update(const Eigen::Vector3d & t)
     pose.position.x = t.x();
     pose.position.y = t.y();
     pose.position.z = t.z();
-    server_.setPose(marker_.name, pose);
+    server_->setPose(marker_.name, pose);
   }
 }
 
@@ -260,7 +260,7 @@ void SharedMarker::update(const sva::PTransformd & pos)
     pose.position.x = pos.translation().x();
     pose.position.y = pos.translation().y();
     pose.position.z = pos.translation().z();
-    server_.setPose(marker_.name, pose);
+    server_->setPose(marker_.name, pose);
   }
 }
 
