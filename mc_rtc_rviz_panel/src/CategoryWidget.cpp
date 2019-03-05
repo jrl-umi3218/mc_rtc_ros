@@ -132,19 +132,13 @@ void CategoryWidget::updateSizeImpl(bool active)
   {
     static_cast<CategoryWidget *>(tabs_->widget(i))->updateSizeImpl(active && tabs_->currentIndex() == i);
   }
-  auto prevHint = minimumSizeHint();
   if(active)
   {
-    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
   }
   else
   {
     setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-  }
-  if(minimumSizeHint() != prevHint)
-  {
-    resize(minimumSizeHint());
-    adjustSize();
   }
 }
 
