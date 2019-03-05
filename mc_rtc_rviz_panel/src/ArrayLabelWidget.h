@@ -1,18 +1,17 @@
 #pragma once
 
-#include "LabelWidget.h"
+#include "ArrayInputWidget.h"
 
 namespace mc_rtc_rviz
 {
-struct ArrayLabelWidget : public LabelWidget
+struct ArrayLabelWidget : public ArrayInputWidget
 {
   ArrayLabelWidget(const ClientWidgetParam & param, const std::vector<std::string> & labels);
 
-  void update(const Eigen::VectorXd & in);
-
-  QPushButton * showHideButton() override;
+  void update(const Eigen::VectorXd & data);
 
 protected:
-  std::vector<std::string> labels_;
+  QLabel * normLabel_ = nullptr;
 };
+
 } // namespace mc_rtc_rviz

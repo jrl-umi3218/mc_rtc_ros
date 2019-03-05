@@ -33,7 +33,7 @@ ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param, const std::v
 
 void ArrayInputWidget::update(const Eigen::VectorXd & data)
 {
-  if(lock_button_->isChecked())
+  if(lock_button_ && lock_button_->isChecked())
   {
     return;
   }
@@ -85,7 +85,7 @@ void ArrayInputWidget::lock_toggled(bool unlocked)
 
 void ArrayInputWidget::edit_return_pressed()
 {
-  if(lock_button_->isChecked())
+  if(lock_button_ && lock_button_->isChecked())
   {
     lock_button_->toggle();
   }
