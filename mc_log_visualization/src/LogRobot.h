@@ -45,6 +45,9 @@ struct LogRobot
   /** Access all surfaces in the robot */
   std::vector<std::string> surfaces() const;
 
+  /** Access all bodies in the robot */
+  std::vector<std::string> bodies() const;
+
 private:
   Configuration config_;
   mc_rtc::RobotPublisher publisher_;

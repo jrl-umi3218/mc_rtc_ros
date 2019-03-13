@@ -194,6 +194,22 @@ void LogPublisher::rebuildGUI()
   {
     switch(t)
     {
+      case mc_rtc::log::LogData_Bool:
+      case mc_rtc::log::LogData_Double:
+      case mc_rtc::log::LogData_UnsignedInt:
+      case mc_rtc::log::LogData_UInt64:
+      case mc_rtc::log::LogData_String:
+      case mc_rtc::log::LogData_Vector2d:
+      case mc_rtc::log::LogData_DoubleVector:
+      case mc_rtc::log::LogData_MotionVecd:
+      case mc_rtc::log::LogData_Quaterniond:
+        added_something = true;
+        gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Label", [this, entry, t]() {
+                         config("labels").add(entry, static_cast<unsigned int>(t));
+                         saveConfig();
+                         addLabel(entry, t);
+                       }));
+        break;
       case mc_rtc::log::LogData_Vector3d:
         added_something = true;
         gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Point3D", [this, entry]() {
@@ -213,6 +229,15 @@ void LogPublisher::rebuildGUI()
                                                      addForce(entry, surface);
                                                    },
                                                    mc_rtc::gui::FormComboInput("Surface", true, robot->surfaces())));
+        break;
+      case mc_rtc::log::LogData_PTransformd:
+        added_something = true;
+        gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Transform", [this, entry]() {
+                         config("transforms").add(entry, "ptransformd");
+                         saveConfig();
+                         addPTransformdAsTransform(entry);
+                       }));
+        break;
       default:
         break;
     };
@@ -275,6 +300,64 @@ void LogPublisher::run()
   pub_th.join();
 }
 
+namespace details
+{
+
+template<typename T, typename RetT = T>
+void addLabel(LogPublisher & log, const std::string & entry, const T & def)
+{
+  log.gui.addElement(log.extraDataCategory, mc_rtc::gui::Label(entry, [&log, entry, def]() -> RetT {
+                       return log.log.get<T>(entry, log.cur_i, def);
+                     }));
+  log.addRemoveExtraDataButton("labels", entry);
+}
+
+template<typename T>
+void addLabel(LogPublisher & log, const std::string & entry, const T & def, const std::vector<std::string> & labels)
+{
+  log.gui.addElement(log.extraDataCategory, mc_rtc::gui::ArrayLabel(entry, labels, [&log, entry, def]() {
+                       return log.log.get<T>(entry, log.cur_i, def);
+                     }));
+  log.addRemoveExtraDataButton("labels", entry);
+}
+} // namespace details
+
+void LogPublisher::addLabel(const std::string & entry, mc_rtc::log::LogData t)
+{
+  switch(t)
+  {
+    case mc_rtc::log::LogData_Bool:
+      details::addLabel<bool>(*this, entry, true);
+      break;
+    case mc_rtc::log::LogData_Double:
+      details::addLabel<double>(*this, entry, 0);
+      break;
+    case mc_rtc::log::LogData_UnsignedInt:
+      details::addLabel<int32_t>(*this, entry, 0);
+      break;
+    case mc_rtc::log::LogData_UInt64:
+      details::addLabel<uint64_t, unsigned int>(*this, entry, 0);
+      break;
+    case mc_rtc::log::LogData_String:
+      details::addLabel<std::string>(*this, entry, "");
+      break;
+    case mc_rtc::log::LogData_Vector2d:
+      details::addLabel<Eigen::Vector2d>(*this, entry, Eigen::Vector2d::Zero(), {"x", "y"});
+      break;
+    case mc_rtc::log::LogData_DoubleVector:
+      details::addLabel<Eigen::Vector2d>(*this, entry, {}, {});
+      break;
+    case mc_rtc::log::LogData_MotionVecd:
+      details::addLabel<sva::MotionVecd>(*this, entry, sva::MotionVecd::Zero(), {"wx", "wy", "wz", "vx", "vy", "vz"});
+      break;
+    case mc_rtc::log::LogData_Quaterniond:
+      details::addLabel<Eigen::Quaterniond>(*this, entry, Eigen::Quaterniond::Identity(), {"w", "x", "y", "z"});
+      break;
+    default:
+      break;
+  }
+}
+
 void LogPublisher::addVector3dAsPoint3D(const std::string & entry)
 {
   gui.addElement(extraDataCategory, mc_rtc::gui::Point3D(entry, [this, entry]() {
@@ -290,6 +373,14 @@ void LogPublisher::addForce(const std::string & entry, const std::string & surfa
                      entry, [this, entry]() { return log.get<sva::ForceVecd>(entry, cur_i, sva::ForceVecd::Zero()); },
                      [this, surface]() { return robot->robot().surfacePose(surface); }));
   addRemoveExtraDataButton("forces", entry);
+}
+
+void LogPublisher::addPTransformdAsTransform(const std::string & entry)
+{
+  gui.addElement(extraDataCategory, mc_rtc::gui::Transform(entry, [this, entry]() {
+                   return log.get<sva::PTransformd>(entry, cur_i, sva::PTransformd::Identity());
+                 }));
+  addRemoveExtraDataButton("transforms", entry);
 }
 
 bfs::path LogPublisher::configPath() const
@@ -309,7 +400,7 @@ void LogPublisher::loadConfig()
   {
     config.load(p.string());
   }
-  std::vector<std::string> requiredKeys = {"forces", "points"};
+  std::vector<std::string> requiredKeys = {"labels", "forces", "points", "transforms"};
   for(const auto & k : requiredKeys)
   {
     if(!config.has(k))
@@ -317,15 +408,19 @@ void LogPublisher::loadConfig()
       config.add(k);
     }
   }
+  for(const auto & e : config("labels").keys())
+  {
+    if(log.has(e))
+    {
+      int type = config("labels")(e);
+      addLabel(e, mc_rtc::log::LogData(type));
+    }
+  }
   for(const auto & p : config("points").keys())
   {
     if(log.has(p))
     {
-      std::string type = config("points")(p);
-      if(type == "point")
-      {
-        addVector3dAsPoint3D(p);
-      }
+      addVector3dAsPoint3D(p);
     }
   }
   for(const auto & f : config("forces").keys())
@@ -334,6 +429,13 @@ void LogPublisher::loadConfig()
     {
       std::string surface = config("forces")(f)("surface");
       addForce(f, surface);
+    }
+  }
+  for(const auto & p : config("transforms").keys())
+  {
+    if(log.has(p))
+    {
+      addPTransformdAsTransform(p);
     }
   }
 }

@@ -92,3 +92,13 @@ std::vector<std::string> LogRobot::surfaces() const
   }
   return ret;
 }
+
+std::vector<std::string> LogRobot::bodies() const
+{
+  std::vector<std::string> ret;
+  for(const auto & b : robot().mb().bodies())
+  {
+    ret.push_back(b.name());
+  }
+  return ret;
+}

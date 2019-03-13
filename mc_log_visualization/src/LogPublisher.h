@@ -33,8 +33,14 @@ public:
    */
   void addRemoveExtraDataButton(const std::string & section, const std::string & entry);
 
+  /** Add a given entry as a label */
+  void addLabel(const std::string & entry, mc_rtc::log::LogData t);
+
   /** Add a 3D point from a Vector3d log entry to the GUI */
   void addVector3dAsPoint3D(const std::string & entry);
+
+  /** Add a Transform from a PTransformd entry to the GUI */
+  void addPTransformdAsTransform(const std::string & entry);
 
   /** Add a force recording from the log to the GUI */
   void addForce(const std::string & entry, const std::string & surface);
@@ -57,7 +63,7 @@ public:
   /** Run the main application */
   void run();
 
-private:
+public:
   /** Used to store/load the extra data provided by the log */
   mc_rtc::Configuration config;
   /* ROS */
