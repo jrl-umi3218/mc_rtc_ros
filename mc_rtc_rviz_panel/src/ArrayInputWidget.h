@@ -15,7 +15,7 @@ public:
 
   QPushButton * showHideButton() override;
 
-private:
+protected:
   QPushButton * lock_button_;
   QHBoxLayout * labels_layout_;
   QGridLayout * edits_layout_;

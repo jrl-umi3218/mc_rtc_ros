@@ -1,11 +1,11 @@
 #include "SchemaWidget.h"
 
+#include "FormElement.h"
+#include "FormWidget.h"
+
 #include <mc_rtc/logging.h>
 
 #include <boost/filesystem.hpp>
-
-#include "FormElement.h"
-#include "FormWidget.h"
 namespace bfs = boost::filesystem;
 
 namespace mc_rtc_rviz

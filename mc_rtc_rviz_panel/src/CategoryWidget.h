@@ -20,16 +20,14 @@ public:
   ClientWidget * widget(const std::string & name) override;
 
 private:
-  int level = 0;
-  QTabWidget * tabs_ = nullptr;
-  int tab_idx_ = 0;
-  QVBoxLayout * page_layout_ = nullptr;
-  QPushButton * toggle_ = nullptr;
-  std::vector<ClientWidget *> widgets_;
-  QVBoxLayout * layout_ = nullptr;
+  QVBoxLayout * main_layout_ = nullptr;
   std::map<int, QHBoxLayout *> stack_layouts_;
+  QTabWidget * tabs_ = nullptr;
+  std::vector<ClientWidget *> widgets_;
+  CategoryWidget * parent_ = nullptr;
+  void updateSizeImpl(bool active);
 private slots:
-  void toggled(bool);
+  void updateSize(int index);
 };
 
 } // namespace mc_rtc_rviz

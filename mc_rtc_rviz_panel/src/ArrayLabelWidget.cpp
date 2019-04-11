@@ -4,51 +4,41 @@ namespace mc_rtc_rviz
 {
 
 ArrayLabelWidget::ArrayLabelWidget(const ClientWidgetParam & param, const std::vector<std::string> & labels)
-: LabelWidget(param), labels_(labels)
+: ArrayInputWidget(param, labels)
 {
+  labels_layout_->removeWidget(lock_button_);
+  delete lock_button_;
+  lock_button_ = nullptr;
+  if(!labels.size())
+  {
+    normLabel_ = new QLabel();
+    normLabel_->setWordWrap(true);
+    labels_layout_->addWidget(normLabel_);
+  }
 }
 
-void ArrayLabelWidget::update(const Eigen::VectorXd & v)
+void ArrayLabelWidget::update(const Eigen::VectorXd & data)
 {
-  if(labels_.size() == 0)
+  if(normLabel_)
   {
-    label_->setText(QString::number(v.norm()));
-    std::stringstream tooltip;
-    for(size_t i = 0; i < v.size(); ++i)
+    std::stringstream ss;
+    ss << "<font>";
+    for(size_t i = 0; i < data.size(); ++i)
     {
-      tooltip << v(i);
-      if(i < v.size() - 1)
+      ss << data(i);
+      if(i < data.size() - 1)
       {
-        tooltip << ", ";
+        ss << ", ";
       }
     }
-    label_->setToolTip(tooltip.str().c_str());
+    ss << "</font>";
+    normLabel_->setToolTip(ss.str().c_str());
+    normLabel_->setText(QString::number(data.norm()));
   }
   else
   {
-    std::stringstream text;
-    for(size_t i = 0; i < v.size(); ++i)
-    {
-      if(i < labels_.size())
-      {
-        text << labels_[i] << ": ";
-      }
-      text << v(i);
-      if(i < v.size() - 1)
-      {
-        text << ", ";
-      }
-    }
-    label_->setText(text.str().c_str());
-    label_->setToolTip(QString::number(v.norm()));
+    ArrayInputWidget::update(data);
   }
-}
-
-QPushButton * ArrayLabelWidget::showHideButton()
-{
-  auto ret = new QPushButton("Hide");
-  layout_->addWidget(ret);
-  return ret;
 }
 
 } // namespace mc_rtc_rviz

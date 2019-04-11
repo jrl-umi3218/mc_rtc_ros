@@ -3,6 +3,7 @@
 #ifndef Q_MOC_RUN
 
 #  include "CategoryWidget.h"
+
 #  include <memory>
 #  include <unordered_map>
 
@@ -197,6 +198,12 @@ protected:
     auto parent = get_category(id.category).parent;
     assert(parent);
     auto w_ptr = parent->widget(id.name);
+    auto actual_ptr = dynamic_cast<T *>(w_ptr);
+    if(w_ptr && !actual_ptr)
+    {
+      parent->removeWidget(w_ptr);
+      w_ptr = nullptr;
+    }
     if(!w_ptr)
     {
       w_ptr = new T(ClientWidgetParam{*this, parent, id}, std::forward<Args>(args)...);

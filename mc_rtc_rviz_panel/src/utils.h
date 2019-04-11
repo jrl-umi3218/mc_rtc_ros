@@ -35,7 +35,7 @@ vm::InteractiveMarker makeXYThetaMarker(const std::string & name);
 
 struct SharedMarker
 {
-  SharedMarker(interactive_markers::InteractiveMarkerServer & server,
+  SharedMarker(std::shared_ptr<interactive_markers::InteractiveMarkerServer> server,
                const std::string & name,
                const vm::InteractiveMarker & marker,
                interactive_markers::InteractiveMarkerServer::FeedbackCallback callback);
@@ -50,9 +50,9 @@ struct SharedMarker
 
   void marker(const vm::InteractiveMarker & marker)
   {
-    server_.erase(marker_.name);
+    server_->erase(marker_.name);
     marker_ = marker;
-    server_.insert(marker_, callback_);
+    server_->insert(marker_, callback_);
   }
 
   vm::InteractiveMarker & marker()
@@ -64,13 +64,13 @@ struct SharedMarker
   {
     // XXX without erasing and re-inserting the marker, applyChanges does
     // nothing when the marker controls have been modified.
-    server_.erase(marker_.name);
-    server_.insert(marker_, callback_);
-    server_.applyChanges();
+    server_->erase(marker_.name);
+    server_->insert(marker_, callback_);
+    server_->applyChanges();
   }
 
 private:
-  interactive_markers::InteractiveMarkerServer & server_;
+  std::shared_ptr<interactive_markers::InteractiveMarkerServer> server_;
   vm::InteractiveMarker marker_;
   interactive_markers::InteractiveMarkerServer::FeedbackCallback callback_;
   bool hidden_ = false;

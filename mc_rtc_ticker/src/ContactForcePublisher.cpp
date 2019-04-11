@@ -81,6 +81,7 @@ namespace mc_rtc_ros
 ContactForcePublisher::ContactForcePublisher(ros::NodeHandle & nh, mc_control::MCGlobalController & gc) : nh(nh), gc(gc)
 {
   rate = floor(1 / this->gc.configuration().publish_timestep);
+  skip = floor(1 / (rate * this->gc.configuration().timestep));
   update_th = std::thread([this]() {
     ros::Rate rt(2 * rate);
     while(running)
@@ -111,7 +112,7 @@ void ContactForcePublisher::stop()
 
 void ContactForcePublisher::update()
 {
-  if(iter++ % rate != 0)
+  if(iter++ % skip != 0)
   {
     return;
   }

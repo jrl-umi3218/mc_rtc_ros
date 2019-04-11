@@ -32,5 +32,6 @@ private:
   bool update_ready = false;
   unsigned int rate = 0;
   unsigned int iter = 0;
+  unsigned int skip = 0;
 };
 } // namespace mc_rtc_ros
