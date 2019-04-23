@@ -253,6 +253,7 @@ void Panel::stopped()
 void Panel::got_stop()
 {
   tree_.clean();
+  this->clean();
   int_server_->applyChanges();
 #ifndef DISABLE_ROS
   marker_array_pub_.publish(marker_array_);
