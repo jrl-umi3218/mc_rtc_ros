@@ -11,18 +11,27 @@
 namespace mc_rtc_rviz
 {
 
-ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params, visualization_msgs::MarkerArray & markers)
-: ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
+ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params,
+                                     visualization_msgs::MarkerArray & markers
+                                     )
+: ClientWidget(params),
+  markers_(markers),
+  visible_(visible()),
+  was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
   if(!secret())
   {
     layout->addWidget(new QLabel(id().name.c_str()));
   }
-  button_ = new QPushButton(this);
+  button_ = new QPushButton("Hide");
+  layout->addWidget(button_);
   button_->setCheckable(true);
-  button_->setChecked(!visible_);
-  toggled(!visible_);
+  button_->setChecked(!visible());
+  if(!visible())
+  {
+    toggled(!visible());
+  }
   connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
   layout->addWidget(button_);
 }
