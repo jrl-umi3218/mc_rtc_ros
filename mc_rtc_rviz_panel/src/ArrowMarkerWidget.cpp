@@ -36,6 +36,12 @@ ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params,
   layout->addWidget(button_);
 }
 
+void ArrowMarkerWidget::update(const Eigen::Vector3d & start, const sva::ForceVecd& force, const mc_rtc::gui::ForceConfig & c)
+{
+  const auto & end = start + c.force_scale * force.force();
+  ArrowMarkerWidget::update(start, end, c);
+}
+
 void ArrowMarkerWidget::update(const Eigen::Vector3d & start,
                                const Eigen::Vector3d & end,
                                const mc_rtc::gui::ArrowConfig & c)

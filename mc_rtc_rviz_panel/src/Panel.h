@@ -145,7 +145,7 @@ protected:
   void force(const WidgetId & id,
              const WidgetId & requestId,
              const sva::ForceVecd & force,
-             const sva::PTransformd & surface,
+             const Eigen::Vector3d & start,
              const mc_rtc::gui::ForceConfig & forceConfig) override;
 
   void arrow(const WidgetId & id,
@@ -278,7 +278,7 @@ private slots:
   void got_force(const WidgetId & id,
                  const WidgetId & requestId,
                  const sva::ForceVecd & force,
-                 const sva::PTransformd & surface,
+                 const Eigen::Vector3d & start,
                  const mc_rtc::gui::ForceConfig & forceConfig);
   void got_arrow(const WidgetId & id,
                  const Eigen::Vector3d & force,
@@ -339,7 +339,7 @@ signals:
   void signal_force(const WidgetId & id,
                     const WidgetId & requestId,
                     const sva::ForceVecd & force,
-                    const sva::PTransformd & surface,
+                    const Eigen::Vector3d & start,
                     const mc_rtc::gui::ForceConfig & forceConfig);
   void signal_arrow(const WidgetId & id,
                     const Eigen::Vector3d & force,
