@@ -16,13 +16,14 @@ geometry_msgs::Point rosPoint(const Eigen::Vector3d & vec)
   return p;
 }
 
-vm::Marker makeVisual(int t, double baseScale)
+vm::Marker makeVisual(int t, double scale)
 {
   vm::Marker ret;
+  ret.action = vm::Marker::ADD;
   ret.type = t;
-  ret.scale.x = baseScale * 0.45;
-  ret.scale.y = baseScale * 0.45;
-  ret.scale.z = baseScale * 0.45;
+  ret.scale.x = scale;
+  ret.scale.y = scale;
+  ret.scale.z = scale;
   ret.color.r = 1.0;
   ret.color.g = 0.0;
   ret.color.b = 0.0;
@@ -91,9 +92,9 @@ vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker> &
 }
 
 vm::InteractiveMarker make6DMarker(const std::string & name,
+                                   const std::vector<vm::Marker> & visual_markers,
                                    bool control_position,
                                    bool control_orientation,
-                                   const std::vector<vm::Marker> & visual_markers,
                                    bool move_x,
                                    bool move_y,
                                    bool move_z,
@@ -163,6 +164,16 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   return ret;
 }
 
+vm::InteractiveMarker make3DMarker(const std::string & name,
+                                   const std::vector<vm::Marker> & visual_markers,
+                                   bool control_position,
+                                   bool move_x,
+                                   bool move_y,
+                                   bool move_z)
+{
+  return make6DMarker(name, visual_markers, control_position, false);
+}
+
 vm::InteractiveMarker makeXYThetaMarker(const std::string & name)
 {
   vm::InteractiveMarker int_marker;
@@ -190,9 +201,6 @@ visualization_msgs::Marker getPointMarker(const std::string & ns,
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::SPHERE;
   m.action = visualization_msgs::Marker::ADD;
-  m.pose.position.x = pos(0);
-  m.pose.position.y = pos(1);
-  m.pose.position.z = pos(2);
   m.scale.x = scale;
   m.scale.y = scale;
   m.scale.z = scale;
@@ -200,10 +208,6 @@ visualization_msgs::Marker getPointMarker(const std::string & ns,
   m.color.r = color.r;
   m.color.g = color.g;
   m.color.b = color.b;
-  m.header.stamp = ros::Time();
-  m.header.frame_id = "robot_map";
-  m.ns = ns;
-  m.lifetime = ros::Duration(1.);
   return m;
 }
 

@@ -553,19 +553,9 @@ void Panel::got_point3d(const WidgetId & id,
                         const mc_rtc::gui::PointConfig & config)
 {
 #ifndef DISABLE_ROS
-  if(ro)
-  {
     auto label = latestWidget_;
-    auto & w = get_widget<PointMarkerWidget>(id, marker_array_, label);
-    w.update(pos, config);
-  }
-  else
-  {
-    auto label = latestWidget_;
-    auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, sva::PTransformd{pos}, false,
-                                                            !ro, label);
+    auto & w = get_widget<Point3DInteractiveMarkerWidget>(id, requestId, int_server_, config, !ro, label);
     w.update(pos);
-  }
 #endif
 }
 
@@ -573,7 +563,7 @@ void Panel::got_rotation(const WidgetId & id, const WidgetId & requestId, bool r
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, pos, !ro, false, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, !ro, false, label);
   w.update(pos);
 #endif
 }
@@ -582,7 +572,7 @@ void Panel::got_transform(const WidgetId & id, const WidgetId & requestId, bool 
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, pos, !ro, !ro, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, !ro, !ro, label);
   w.update(pos);
 #endif
 }

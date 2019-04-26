@@ -41,7 +41,14 @@ public:
   TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
                                    const WidgetId & requestId,
                                    std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-                                   const sva::PTransformd & pos,
+                                   bool control_orientation,
+                                   bool control_position,
+                                   ClientWidget * label);
+
+  TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
+                                   const WidgetId & requestId,
+                                   std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
+                                   const vm::InteractiveMarker & marker,
                                    bool control_orientation,
                                    bool control_position,
                                    ClientWidget * label);
@@ -60,6 +67,17 @@ public:
 protected:
   bool control_orientation_;
   bool control_position_;
+};
+
+struct Point3DInteractiveMarkerWidget : public TransformInteractiveMarkerWidget
+{
+  Point3DInteractiveMarkerWidget(
+      const ClientWidgetParam & params,
+      const WidgetId & requestId,
+      std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
+      const mc_rtc::gui::PointConfig & config,
+      bool control_position,
+      ClientWidget * label);
 };
 
 struct XYThetaInteractiveMarkerWidget : public InteractiveMarkerWidget

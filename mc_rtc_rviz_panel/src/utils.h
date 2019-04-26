@@ -26,15 +26,21 @@ geometry_msgs::Point rosPoint(const Eigen::Vector3d & vec);
 vm::Marker makeVisual(int t, double baseScale);
 std::vector<vm::Marker> makeAxisMarker(double baseScale);
 vm::InteractiveMarker make6DMarker(const std::string & name,
+                                   const std::vector<vm::Marker> & visual_markers,
                                    bool control_position,
                                    bool control_orientation,
-                                   const std::vector<vm::Marker> & visual_markers,
                                    bool move_x = true,
                                    bool move_y = true,
                                    bool move_z = true,
                                    bool rotate_x = true,
                                    bool rotate_y = true,
                                    bool rotate_z = true);
+vm::InteractiveMarker make3DMarker(const std::string & name,
+                                   const std::vector<vm::Marker> & visual_markers,
+                                   bool control_position,
+                                   bool move_x = true,
+                                   bool move_y = true,
+                                   bool move_z = true);
 vm::InteractiveMarker makeXYThetaMarker(const std::string & name);
 
 struct SharedMarker

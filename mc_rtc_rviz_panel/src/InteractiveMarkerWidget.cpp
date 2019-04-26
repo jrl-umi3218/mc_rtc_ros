@@ -44,11 +44,31 @@ void InteractiveMarkerWidget::toggled(bool hide)
   visible(!hide);
 }
 
+
+Point3DInteractiveMarkerWidget::Point3DInteractiveMarkerWidget(
+      const ClientWidgetParam & params,
+      const WidgetId & requestId,
+      std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
+      const mc_rtc::gui::PointConfig & config,
+      bool control_position,
+      ClientWidget * label)
+  : TransformInteractiveMarkerWidget(
+      params,
+      requestId,
+      server,
+      make3DMarker(id2name(params.id), {getPointMarker("", Eigen::Vector3d::Zero(), config.color, config.scale)}, control_position),
+      false,
+      control_position,
+      label)
+
+{
+}
+
+
 TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(
     const ClientWidgetParam & params,
     const WidgetId & requestId,
     std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-    const sva::PTransformd & /*pos*/,
     bool control_orientation,
     bool control_position,
     ClientWidget * label)
@@ -56,7 +76,25 @@ TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(
       params,
       requestId,
       server,
-      make6DMarker(id2name(requestId), control_position, control_orientation, makeAxisMarker(0.15 * 0.9)),
+      make6DMarker(id2name(params.id), makeAxisMarker(0.15 * 0.9), control_position, control_orientation),
+      label),
+  control_orientation_(control_orientation), control_position_(control_position)
+{
+}
+
+TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(
+    const ClientWidgetParam & params,
+    const WidgetId & requestId,
+    std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
+    const vm::InteractiveMarker & marker,
+    bool control_orientation,
+    bool control_position,
+    ClientWidget * label)
+: InteractiveMarkerWidget(
+      params,
+      requestId,
+      server,
+      marker,
       label),
   control_orientation_(control_orientation), control_position_(control_position)
 {
@@ -102,8 +140,10 @@ XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(
 : InteractiveMarkerWidget(params, requestId, server, makeXYThetaMarker(id2name(requestId)), label)
 {
   coupled_marker_ = marker_.marker();
-  decoupled_marker_ = make6DMarker(id2name(requestId), control_position, control_orientation,
-                                   makeAxisMarker(0.15 * 0.9), true, true, false, false, false, true);
+  decoupled_marker_ = make6DMarker(id2name(requestId),
+                                   makeAxisMarker(0.15 * 0.9),
+                                   control_position, control_orientation,
+                                   true, true, false, false, false, true);
   if(control_position || control_orientation)
   {
     coupled_checkbox_ = new QCheckBox("Coupled position/orientation");
