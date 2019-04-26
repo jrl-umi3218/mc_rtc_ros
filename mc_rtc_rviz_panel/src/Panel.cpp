@@ -15,7 +15,6 @@
 #ifndef DISABLE_ROS
 #  include "ArrowMarkerWidget.h"
 #  include "DisplayTrajectoryWidget.h"
-#  include "ForceMarkerWidget.h"
 #  include "InteractiveMarkerWidget.h"
 #  include "PointMarkerWidget.h"
 #  include "PolygonMarkerWidget.h"
