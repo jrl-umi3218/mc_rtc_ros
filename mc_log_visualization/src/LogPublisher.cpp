@@ -198,15 +198,24 @@ void LogPublisher::rebuildGUI()
   {
     switch(t)
     {
-      case mc_rtc::log::LogData_Bool:
-      case mc_rtc::log::LogData_Double:
-      case mc_rtc::log::LogData_UnsignedInt:
-      case mc_rtc::log::LogData_UInt64:
-      case mc_rtc::log::LogData_String:
-      case mc_rtc::log::LogData_Vector2d:
-      case mc_rtc::log::LogData_DoubleVector:
-      case mc_rtc::log::LogData_MotionVecd:
-      case mc_rtc::log::LogData_Quaterniond:
+      case mc_rtc::log::LogType::Bool:
+      case mc_rtc::log::LogType::Int8_t:
+      case mc_rtc::log::LogType::Int16_t:
+      case mc_rtc::log::LogType::Int32_t:
+      case mc_rtc::log::LogType::Int64_t:
+      case mc_rtc::log::LogType::Uint8_t:
+      case mc_rtc::log::LogType::Uint16_t:
+      case mc_rtc::log::LogType::Uint32_t:
+      case mc_rtc::log::LogType::Uint64_t:
+      case mc_rtc::log::LogType::Float:
+      case mc_rtc::log::LogType::Double:
+      case mc_rtc::log::LogType::String:
+      case mc_rtc::log::LogType::Quaterniond:
+      case mc_rtc::log::LogType::Vector2d:
+      case mc_rtc::log::LogType::Vector6d:
+      case mc_rtc::log::LogType::VectorXd:
+      case mc_rtc::log::LogType::MotionVecd:
+      case mc_rtc::log::LogType::VectorDouble:
         added_something = true;
         gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Label", [this, entry, t]() {
                          config("labels").add(entry, static_cast<unsigned int>(t));
@@ -214,7 +223,7 @@ void LogPublisher::rebuildGUI()
                          addLabel(entry, t);
                        }));
         break;
-      case mc_rtc::log::LogData_Vector3d:
+      case mc_rtc::log::LogType::Vector3d:
         added_something = true;
         gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Point3D", [this, entry]() {
                          config("points").add(entry, "point");
@@ -222,7 +231,7 @@ void LogPublisher::rebuildGUI()
                          addVector3dAsPoint3D(entry);
                        }));
         break;
-      case mc_rtc::log::LogData_ForceVecd:
+      case mc_rtc::log::LogType::ForceVecd:
         added_something = true;
         gui.addElement(category, mc_rtc::gui::Form("Add " + entry + " as Force",
                                                    [this, entry](const mc_rtc::Configuration & form) {
@@ -234,7 +243,7 @@ void LogPublisher::rebuildGUI()
                                                    },
                                                    mc_rtc::gui::FormComboInput("Surface", true, robot->surfaces())));
         break;
-      case mc_rtc::log::LogData_PTransformd:
+      case mc_rtc::log::LogType::PTransformd:
         added_something = true;
         gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Transform", [this, entry]() {
                          config("transforms").add(entry, "ptransformd");
@@ -242,8 +251,8 @@ void LogPublisher::rebuildGUI()
                          addPTransformdAsTransform(entry);
                        }));
         break;
-      default:
-        break;
+      case mc_rtc::log::LogType::None:
+        continue;
     };
   }
   if(!added_something)
@@ -319,43 +328,70 @@ void addLabel(LogPublisher & log, const std::string & entry, const T & def)
 template<typename T>
 void addLabel(LogPublisher & log, const std::string & entry, const T & def, const std::vector<std::string> & labels)
 {
-  log.gui.addElement(log.extraDataCategory, mc_rtc::gui::ArrayLabel(entry, labels, [&log, entry, def]() {
+  log.gui.addElement(log.extraDataCategory, mc_rtc::gui::ArrayLabel(entry, labels, [&log, entry, def]() -> const T & {
                        return log.log.get<T>(entry, log.cur_i, def);
                      }));
   log.addRemoveExtraDataButton("labels", entry);
 }
 } // namespace details
 
-void LogPublisher::addLabel(const std::string & entry, mc_rtc::log::LogData t)
+void LogPublisher::addLabel(const std::string & entry, mc_rtc::log::LogType t)
 {
   switch(t)
   {
-    case mc_rtc::log::LogData_Bool:
+    case mc_rtc::log::LogType::Bool:
       details::addLabel<bool>(*this, entry, true);
       break;
-    case mc_rtc::log::LogData_Double:
-      details::addLabel<double>(*this, entry, 0);
+    case mc_rtc::log::LogType::Int8_t:
+      details::addLabel<uint8_t>(*this, entry, 0);
       break;
-    case mc_rtc::log::LogData_UnsignedInt:
+    case mc_rtc::log::LogType::Int16_t:
+      details::addLabel<int16_t>(*this, entry, 0);
+      break;
+    case mc_rtc::log::LogType::Int32_t:
       details::addLabel<int32_t>(*this, entry, 0);
       break;
-    case mc_rtc::log::LogData_UInt64:
-      details::addLabel<uint64_t, unsigned int>(*this, entry, 0);
+    case mc_rtc::log::LogType::Int64_t:
+      details::addLabel<int64_t>(*this, entry, 0);
       break;
-    case mc_rtc::log::LogData_String:
+    case mc_rtc::log::LogType::Uint8_t:
+      details::addLabel<uint8_t>(*this, entry, 0);
+      break;
+    case mc_rtc::log::LogType::Uint16_t:
+      details::addLabel<uint16_t>(*this, entry, 0);
+      break;
+    case mc_rtc::log::LogType::Uint32_t:
+      details::addLabel<uint32_t>(*this, entry, 0);
+      break;
+    case mc_rtc::log::LogType::Uint64_t:
+      details::addLabel<uint64_t>(*this, entry, 0);
+      break;
+    case mc_rtc::log::LogType::Float:
+      details::addLabel<float>(*this, entry, 0);
+      break;
+    case mc_rtc::log::LogType::Double:
+      details::addLabel<double>(*this, entry, 0);
+      break;
+    case mc_rtc::log::LogType::String:
       details::addLabel<std::string>(*this, entry, "");
       break;
-    case mc_rtc::log::LogData_Vector2d:
+    case mc_rtc::log::LogType::Quaterniond:
+      details::addLabel<Eigen::Quaterniond>(*this, entry, Eigen::Quaterniond::Identity(), {"w", "x", "y", "z"});
+      break;
+    case mc_rtc::log::LogType::Vector2d:
       details::addLabel<Eigen::Vector2d>(*this, entry, Eigen::Vector2d::Zero(), {"x", "y"});
       break;
-    case mc_rtc::log::LogData_DoubleVector:
-      details::addLabel<Eigen::Vector2d>(*this, entry, {}, {});
+    case mc_rtc::log::LogType::Vector6d:
+      details::addLabel<Eigen::Vector6d>(*this, entry, {}, {});
       break;
-    case mc_rtc::log::LogData_MotionVecd:
+    case mc_rtc::log::LogType::VectorXd:
+      details::addLabel<Eigen::VectorXd>(*this, entry, {}, {});
+      break;
+    case mc_rtc::log::LogType::MotionVecd:
       details::addLabel<sva::MotionVecd>(*this, entry, sva::MotionVecd::Zero(), {"wx", "wy", "wz", "vx", "vy", "vz"});
       break;
-    case mc_rtc::log::LogData_Quaterniond:
-      details::addLabel<Eigen::Quaterniond>(*this, entry, Eigen::Quaterniond::Identity(), {"w", "x", "y", "z"});
+    case mc_rtc::log::LogType::VectorDouble:
+      details::addLabel<std::vector<double>>(*this, entry, {}, {});
       break;
     default:
       break;
@@ -417,7 +453,7 @@ void LogPublisher::loadConfig()
     if(log.has(e))
     {
       int type = config("labels")(e);
-      addLabel(e, mc_rtc::log::LogData(type));
+      addLabel(e, mc_rtc::log::LogType(type));
     }
   }
   for(const auto & p : config("points").keys())
