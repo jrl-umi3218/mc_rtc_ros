@@ -16,7 +16,6 @@
 #  include "ArrowMarkerWidget.h"
 #  include "DisplayTrajectoryWidget.h"
 #  include "InteractiveMarkerWidget.h"
-#  include "PointMarkerWidget.h"
 #  include "PolygonMarkerWidget.h"
 #endif
 #include "ConnectionDialog.h"
