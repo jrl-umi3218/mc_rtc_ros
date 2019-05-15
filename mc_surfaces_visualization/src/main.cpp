@@ -147,6 +147,26 @@ int main(int argc, char ** argv)
       marker.scale.x = 0.01;
 
       markers.markers.push_back(marker);
+
+      auto normal = marker;
+      normal.id = ++id;
+      normal.ns += "_normal";
+      normal.type = visualization_msgs::Marker::ARROW;
+      normal.scale.x = 0.01;
+      normal.scale.y = 0.02;
+      normal.scale.z = 0.1;
+      normal.color.g = 0.0;
+      normal.color.b = 1.0;
+      normal.points.clear();
+      p.x = 0;
+      p.y = 0;
+      p.z = 0;
+      normal.points.push_back(p);
+      p.x = 0;
+      p.y = 0;
+      p.z = 0.2;
+      normal.points.push_back(p);
+      markers.markers.push_back(normal);
     }
     else if(surf->type() == "gripper")
     {
