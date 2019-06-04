@@ -664,10 +664,8 @@ void Panel::got_arrow(const WidgetId & id,
                       bool ro)
 {
 #ifndef DISABLE_ROS
-  // auto & w = get_widget<ArrowMarkerWidget>(id, marker_array_);
-  // w.update(start, end, config);
   auto label = latestWidget_;
-  auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, int_server_, marker_array_, config, !ro, label);
+  auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, int_server_, start, end, config, !ro, label);
   w.update(start, end, config);
 #endif
 }

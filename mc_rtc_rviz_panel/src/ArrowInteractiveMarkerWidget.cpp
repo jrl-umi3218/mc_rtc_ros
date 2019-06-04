@@ -7,11 +7,12 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(
     const ClientWidgetParam & params,
     const WidgetId & requestId,
     std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-    visualization_msgs::MarkerArray & markers,
+    const Eigen::Vector3d & start,
+    const Eigen::Vector3d & end,
     const mc_rtc::gui::ArrowConfig & config,
     bool ro,
     ClientWidget * label)
-: ClientWidget(params), request_id_(requestId), markers_(markers),
+: ClientWidget(params), request_id_(requestId), start_(start), end_(end),
   start_marker_(
       server,
       id2name(requestId),
@@ -25,8 +26,31 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(
       make3DMarker(id2name(params.id) + "_end",
                    {getPointMarker(Eigen::Vector3d::Zero(), config.color, config.end_point_scale)},
                    ro),
-      [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) { handleEndRequest(feedback); })
+      [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) { handleEndRequest(feedback); }),
+  arrow_marker_(server,
+                id2name(requestId),
+                makeInteractiveMarker(id2name(requestId) + "_arrow", makeArrowMarker(start, end, config)),
+                [](const visualization_msgs::InteractiveMarkerFeedbackConstPtr &) {})
+
 {
+  layout_ = new QVBoxLayout(this);
+  if(!secret())
+  {
+    layout_->addWidget(new QLabel(id().name.c_str()));
+  }
+  button_ = label->showHideButton();
+  if(!button_)
+  {
+    button_ = new QPushButton("Hide");
+    layout_->addWidget(button_);
+  }
+  button_->setCheckable(true);
+  button_->setChecked(!visible());
+  if(!visible())
+  {
+    toggled(!visible());
+  }
+  connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
 }
 
 void ArrowInteractiveMarkerWidget::update(const Eigen::Vector3d & start,
@@ -43,36 +67,13 @@ void ArrowInteractiveMarkerWidget::update(const Eigen::Vector3d & start,
 {
   start_ = start;
   end_ = end_;
-  start_marker_.update(start);
-  end_marker_.update(end);
-
-  // bool show = visible_ || was_visible_;
-  visualization_msgs::Marker m;
-  m.type = visualization_msgs::Marker::ARROW;
-  m.action = visualization_msgs::Marker::ADD;
-  // if(!visible_ && was_visible_)
-  //{
-  //  m.action = visualization_msgs::Marker::DELETE;
-  //}
-  m.lifetime = ros::Duration(1);
-  m.points.push_back(rosPoint(start));
-  m.points.push_back(rosPoint(end));
-  m.scale.x = c.shaft_diam;
-  m.scale.y = c.head_diam;
-  m.scale.z = c.head_len;
-  m.color.a = c.color.a;
-  m.color.r = c.color.r;
-  m.color.g = c.color.g;
-  m.color.b = c.color.b;
-  m.header.stamp = ros::Time::now();
-  m.header.frame_id = "robot_map";
-  m.ns = id2name(id());
-  // if(show)
-  //{
-  markers_.markers.push_back(m);
-  //}
-
-  // was_visible_ = visible_;
+  if(visible())
+  {
+    start_marker_.update(start);
+    end_marker_.update(end);
+    arrow_marker_.marker(makeInteractiveMarker(id2name(request_id_) + "_arrow", makeArrowMarker(start, end, c)));
+    arrow_marker_.applyChanges();
+  }
 }
 
 void ArrowInteractiveMarkerWidget::handleStartRequest(
@@ -93,6 +94,15 @@ void ArrowInteractiveMarkerWidget::handleEndRequest(
   data.add("start", start_);
   data.add("end", end_);
   client().send_request(request_id_, data);
+}
+
+void ArrowInteractiveMarkerWidget::toggled(bool hide)
+{
+  start_marker_.toggle();
+  end_marker_.toggle();
+  arrow_marker_.toggle();
+  button_->setText(hide ? "Show" : "Hide");
+  visible(!hide);
 }
 
 } // namespace mc_rtc_rviz

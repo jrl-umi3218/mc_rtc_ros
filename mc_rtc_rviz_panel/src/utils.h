@@ -21,6 +21,7 @@ namespace mc_rtc_rviz
 visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos, const mc_rtc::gui::Color & color, double scale);
 geometry_msgs::Point rosPoint(const Eigen::Vector3d & vec);
 vm::Marker makeVisual(int t, double baseScale);
+vm::InteractiveMarker makeInteractiveMarker(const std::string & name, const std::vector<vm::Marker> & visual_markers);
 std::vector<vm::Marker> makeAxisMarker(double baseScale);
 vm::InteractiveMarker make6DMarker(const std::string & name,
                                    const std::vector<vm::Marker> & visual_markers,

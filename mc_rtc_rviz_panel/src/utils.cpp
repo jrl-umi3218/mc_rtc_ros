@@ -124,6 +124,19 @@ vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker> &
   return marker.controls.back();
 }
 
+vm::InteractiveMarker makeInteractiveMarker(const std::string & name, const std::vector<vm::Marker> & visual_markers)
+{
+  vm::InteractiveMarker marker;
+  marker.header.frame_id = "robot_map";
+  marker.name = name;
+  vm::InteractiveMarkerControl ret;
+  ret.always_visible = true;
+  ret.orientation.w = 1.0;
+  ret.markers = visual_markers;
+  marker.controls.push_back(ret);
+  return marker;
+}
+
 vm::InteractiveMarker make6DMarker(const std::string & name,
                                    const std::vector<vm::Marker> & visual_markers,
                                    bool control_position,

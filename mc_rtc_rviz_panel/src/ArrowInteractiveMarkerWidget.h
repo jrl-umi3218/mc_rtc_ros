@@ -10,10 +10,14 @@ namespace mc_rtc_rviz
 
 struct ArrowInteractiveMarkerWidget : public ClientWidget
 {
+  Q_OBJECT
+
+public:
   ArrowInteractiveMarkerWidget(const ClientWidgetParam & params,
                                const WidgetId & requestId,
                                std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-                               visualization_msgs::MarkerArray & markers,
+                               const Eigen::Vector3d & start,
+                               const Eigen::Vector3d & end,
                                const mc_rtc::gui::ArrowConfig & config,
                                bool ro,
                                ClientWidget * label);
@@ -27,10 +31,15 @@ protected:
 
 protected:
   WidgetId request_id_;
-  visualization_msgs::MarkerArray & markers_;
+  Eigen::Vector3d start_, end_;
   SharedMarker start_marker_;
   SharedMarker end_marker_;
-  Eigen::Vector3d start_, end_;
+  SharedMarker arrow_marker_;
+  QPushButton * button_;
+  QVBoxLayout * layout_;
+
+private slots:
+  void toggled(bool);
 };
 
 } // namespace mc_rtc_rviz
