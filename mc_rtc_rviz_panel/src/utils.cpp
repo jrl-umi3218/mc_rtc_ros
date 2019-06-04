@@ -80,6 +80,39 @@ std::vector<vm::Marker> makeAxisMarker(double scale)
   return ret;
 }
 
+std::vector<vm::Marker> makeArrowMarker(const Eigen::Vector3d & start,
+                                        const Eigen::Vector3d & end,
+                                        const mc_rtc::gui::ArrowConfig & c)
+{
+  std::vector<vm::Marker> markers;
+  visualization_msgs::Marker m;
+  m.type = visualization_msgs::Marker::ARROW;
+  m.action = visualization_msgs::Marker::ADD;
+  m.points.push_back(rosPoint(start));
+  m.points.push_back(rosPoint(end));
+  m.scale.x = c.shaft_diam;
+  m.scale.y = c.head_diam;
+  m.scale.z = c.head_len;
+  m.color.a = c.color.a;
+  m.color.r = c.color.r;
+  m.color.g = c.color.g;
+  m.color.b = c.color.b;
+  markers.push_back(m);
+
+  if(c.start_point_scale > 0)
+  {
+    markers.push_back(getPointMarker(start, c.color, c.start_point_scale));
+    markers.back().action = m.action;
+  }
+
+  if(c.end_point_scale > 0)
+  {
+    markers.push_back(getPointMarker(end, c.color, c.end_point_scale));
+    markers.back().action = m.action;
+  }
+  return markers;
+}
+
 vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker> & visual_makers,
                                                  vm::InteractiveMarker & marker)
 {
@@ -193,8 +226,7 @@ vm::InteractiveMarker makeXYThetaMarker(const std::string & name)
   return int_marker;
 }
 
-visualization_msgs::Marker getPointMarker(const std::string & ns,
-                                          const Eigen::Vector3d & pos,
+visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos,
                                           const mc_rtc::gui::Color & color,
                                           double scale = 0.02)
 {

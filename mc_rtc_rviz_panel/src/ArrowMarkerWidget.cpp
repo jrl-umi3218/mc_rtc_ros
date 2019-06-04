@@ -11,13 +11,8 @@
 namespace mc_rtc_rviz
 {
 
-ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params,
-                                     visualization_msgs::MarkerArray & markers
-                                     )
-: ClientWidget(params),
-  markers_(markers),
-  visible_(visible()),
-  was_visible_(visible_)
+ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params, visualization_msgs::MarkerArray & markers)
+: ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
   if(!secret())
@@ -36,7 +31,9 @@ ArrowMarkerWidget::ArrowMarkerWidget(const ClientWidgetParam & params,
   layout->addWidget(button_);
 }
 
-void ArrowMarkerWidget::update(const Eigen::Vector3d & start, const sva::ForceVecd& force, const mc_rtc::gui::ForceConfig & c)
+void ArrowMarkerWidget::update(const Eigen::Vector3d & start,
+                               const sva::ForceVecd & force,
+                               const mc_rtc::gui::ForceConfig & c)
 {
   const auto & end = start + c.force_scale * force.force();
   ArrowMarkerWidget::update(start, end, c);
@@ -83,7 +80,7 @@ void ArrowMarkerWidget::update(const Eigen::Vector3d & start,
   {
     if(show)
     {
-      markers_.markers.push_back(getPointMarker(id2name(id()) + "_start_point", start, c.color, c.start_point_scale));
+      markers_.markers.push_back(getPointMarker(start, c.color, c.start_point_scale));
       markers_.markers.back().action = m.action;
     }
   }
@@ -92,7 +89,7 @@ void ArrowMarkerWidget::update(const Eigen::Vector3d & start,
   {
     if(show)
     {
-      markers_.markers.push_back(getPointMarker(id2name(id()) + "_end_point", end, c.color, c.end_point_scale));
+      markers_.markers.push_back(getPointMarker(end, c.color, c.end_point_scale));
       markers_.markers.back().action = m.action;
     }
   }

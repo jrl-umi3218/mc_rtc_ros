@@ -201,15 +201,17 @@ Panel::Panel(QWidget * parent)
           SLOT(got_polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &,
                            const mc_rtc::gui::Color &)));
   connect(this,
-          SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const Eigen::Vector3d&, const mc_rtc::gui::ForceConfig &)),
+          SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const Eigen::Vector3d &,
+                              const mc_rtc::gui::ForceConfig &)),
           this,
-          SLOT(got_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const Eigen::Vector3d &, const mc_rtc::gui::ForceConfig &)));
+          SLOT(got_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const Eigen::Vector3d &,
+                         const mc_rtc::gui::ForceConfig &)));
   connect(this,
-          SIGNAL(signal_arrow(const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
-                              const mc_rtc::gui::ArrowConfig &)),
+          SIGNAL(signal_arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
+                              const mc_rtc::gui::ArrowConfig &, bool)),
           this,
-          SLOT(got_arrow(const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
-                         const mc_rtc::gui::ArrowConfig &)));
+          SLOT(got_arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
+                         const mc_rtc::gui::ArrowConfig &, bool)));
   connect(this, SIGNAL(signal_rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)), this,
           SLOT(got_rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)));
   connect(this, SIGNAL(signal_transform(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)), this,
@@ -385,11 +387,13 @@ void Panel::force(const WidgetId & id,
 }
 
 void Panel::arrow(const WidgetId & id,
+                  const WidgetId & requestId,
                   const Eigen::Vector3d & start,
                   const Eigen::Vector3d & end,
-                  const mc_rtc::gui::ArrowConfig & config)
+                  const mc_rtc::gui::ArrowConfig & config,
+                  bool ro)
 {
-  Q_EMIT signal_arrow(id, start, end, config);
+  Q_EMIT signal_arrow(id, requestId, start, end, config, ro);
 }
 
 void Panel::rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos)
@@ -552,9 +556,9 @@ void Panel::got_point3d(const WidgetId & id,
                         const mc_rtc::gui::PointConfig & config)
 {
 #ifndef DISABLE_ROS
-    auto label = latestWidget_;
-    auto & w = get_widget<Point3DInteractiveMarkerWidget>(id, requestId, int_server_, config, !ro, label);
-    w.update(pos);
+  auto label = latestWidget_;
+  auto & w = get_widget<Point3DInteractiveMarkerWidget>(id, requestId, int_server_, config, !ro, label);
+  w.update(pos);
 #endif
 }
 
@@ -649,12 +653,15 @@ void Panel::got_force(const WidgetId & id,
 }
 
 void Panel::got_arrow(const WidgetId & id,
+                      const WidgetId & requestId,
                       const Eigen::Vector3d & start,
                       const Eigen::Vector3d & end,
-                      const mc_rtc::gui::ArrowConfig & config)
+                      const mc_rtc::gui::ArrowConfig & config,
+                      bool ro)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<ArrowMarkerWidget>(id, marker_array_);
+  auto label = latestWidget_;
+  auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, int_server_, marker_array_, config, !ro, label);
   w.update(start, end, config);
 #endif
 }
