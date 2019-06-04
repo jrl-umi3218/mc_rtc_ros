@@ -13,10 +13,14 @@
 #include "FormWidget.h"
 #include "GenericInputWidget.h"
 #ifndef DISABLE_ROS
+#  include "ArrowInteractiveMarkerWidget.h"
 #  include "ArrowMarkerWidget.h"
 #  include "DisplayTrajectoryWidget.h"
 #  include "InteractiveMarkerWidget.h"
+#  include "Point3DInteractiveMarkerWidget.h"
 #  include "PolygonMarkerWidget.h"
+#  include "TransformInteractiveMarkerWidget.h"
+#  include "XYThetaInteractiveMarkerWidget.h"
 #endif
 #include "ConnectionDialog.h"
 #include "LabelWidget.h"
@@ -660,6 +664,8 @@ void Panel::got_arrow(const WidgetId & id,
                       bool ro)
 {
 #ifndef DISABLE_ROS
+  // auto & w = get_widget<ArrowMarkerWidget>(id, marker_array_);
+  // w.update(start, end, config);
   auto label = latestWidget_;
   auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, int_server_, marker_array_, config, !ro, label);
   w.update(start, end, config);

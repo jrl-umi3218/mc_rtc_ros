@@ -18,7 +18,16 @@ set(MOC_HEADERS
 )
 
 if(NOT ${DISABLE_ROS})
-  list(APPEND MOC_HEADERS InteractiveMarkerWidget.h DisplayTrajectoryWidget.h PolygonMarkerWidget.h ArrowMarkerWidget.h plugin.h)
+  list(APPEND MOC_HEADERS
+    InteractiveMarkerWidget.h
+    ArrowInteractiveMarkerWidget.h
+    Point3DInteractiveMarkerWidget.h
+    TransformInteractiveMarkerWidget.h
+    XYThetaInteractiveMarkerWidget.h
+    DisplayTrajectoryWidget.h
+    PolygonMarkerWidget.h
+    ArrowMarkerWidget.h
+    plugin.h)
 endif()
 
 if(NOT DEFINED ENV{ROS_DISTRO})
@@ -78,7 +87,17 @@ set(SOURCE_FILES
 )
 
 if(NOT ${DISABLE_ROS})
-  list(APPEND SOURCE_FILES InteractiveMarkerWidget.cpp DisplayTrajectoryWidget.cpp PolygonMarkerWidget.cpp ArrowMarkerWidget.cpp utils.cpp plugin.cpp)
+  list(APPEND SOURCE_FILES
+    InteractiveMarkerWidget.cpp
+    ArrowInteractiveMarkerWidget.cpp
+    Point3DInteractiveMarkerWidget.cpp
+    TransformInteractiveMarkerWidget.cpp
+    XYThetaInteractiveMarkerWidget.cpp
+    DisplayTrajectoryWidget.cpp
+    PolygonMarkerWidget.cpp
+    ArrowMarkerWidget.cpp
+    utils.cpp
+    plugin.cpp)
 endif()
 
 find_package(mc_rtc REQUIRED)
