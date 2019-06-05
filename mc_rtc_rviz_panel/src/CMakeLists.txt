@@ -27,7 +27,6 @@ if(NOT ${DISABLE_ROS})
     XYThetaInteractiveMarkerWidget.h
     DisplayTrajectoryWidget.h
     PolygonMarkerWidget.h
-    ArrowMarkerWidget.h
     plugin.h)
 endif()
 
@@ -97,7 +96,6 @@ if(NOT ${DISABLE_ROS})
     XYThetaInteractiveMarkerWidget.cpp
     DisplayTrajectoryWidget.cpp
     PolygonMarkerWidget.cpp
-    ArrowMarkerWidget.cpp
     utils.cpp
     plugin.cpp)
 endif()
