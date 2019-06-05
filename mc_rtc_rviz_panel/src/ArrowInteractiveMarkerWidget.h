@@ -31,7 +31,7 @@ protected:
 
 protected:
   WidgetId request_id_;
-  Eigen::Vector3d start_, end_;
+  Eigen::Vector6d arrow_points_;
   SharedMarker start_marker_;
   SharedMarker end_marker_;
   SharedMarker arrow_marker_;

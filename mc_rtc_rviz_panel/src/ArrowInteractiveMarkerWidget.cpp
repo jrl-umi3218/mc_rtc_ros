@@ -12,7 +12,7 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(
     const mc_rtc::gui::ArrowConfig & config,
     bool ro,
     ClientWidget * label)
-: ClientWidget(params), request_id_(requestId), start_(start), end_(end),
+: ClientWidget(params), request_id_(requestId),
   start_marker_(
       server,
       id2name(requestId),
@@ -33,17 +33,8 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(
                 [](const visualization_msgs::InteractiveMarkerFeedbackConstPtr &) {})
 
 {
-  layout_ = new QVBoxLayout(this);
-  if(!secret())
-  {
-    layout_->addWidget(new QLabel(id().name.c_str()));
-  }
+  arrow_points_ << start, end;
   button_ = label->showHideButton();
-  if(!button_)
-  {
-    button_ = new QPushButton("Hide");
-    layout_->addWidget(button_);
-  }
   button_->setCheckable(true);
   button_->setChecked(!visible());
   if(!visible())
@@ -65,8 +56,8 @@ void ArrowInteractiveMarkerWidget::update(const Eigen::Vector3d & start,
                                           const Eigen::Vector3d & end,
                                           const mc_rtc::gui::ArrowConfig & c)
 {
-  start_ = start;
-  end_ = end_;
+  arrow_points_.head<3>() = start;
+  arrow_points_.tail<3>() = end;
   if(visible())
   {
     start_marker_.update(start);
@@ -79,21 +70,17 @@ void ArrowInteractiveMarkerWidget::update(const Eigen::Vector3d & start,
 void ArrowInteractiveMarkerWidget::handleStartRequest(
     const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
 {
-  start_ = Eigen::Vector3d{feedback->pose.position.x, feedback->pose.position.y, feedback->pose.position.z};
-  mc_rtc::Configuration data;
-  data.add("start", start_);
-  data.add("end", end_);
-  client().send_request(request_id_, data);
+  arrow_points_.head<3>() =
+      Eigen::Vector3d{feedback->pose.position.x, feedback->pose.position.y, feedback->pose.position.z};
+  client().send_request(request_id_, arrow_points_);
 }
 
 void ArrowInteractiveMarkerWidget::handleEndRequest(
     const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
 {
-  end_ = Eigen::Vector3d{feedback->pose.position.x, feedback->pose.position.y, feedback->pose.position.z};
-  mc_rtc::Configuration data;
-  data.add("start", start_);
-  data.add("end", end_);
-  client().send_request(request_id_, data);
+  arrow_points_.tail<3>() =
+      Eigen::Vector3d{feedback->pose.position.x, feedback->pose.position.y, feedback->pose.position.z};
+  client().send_request(request_id_, arrow_points_);
 }
 
 void ArrowInteractiveMarkerWidget::toggled(bool hide)
