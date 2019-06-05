@@ -14,8 +14,8 @@
 #include "GenericInputWidget.h"
 #ifndef DISABLE_ROS
 #  include "ArrowInteractiveMarkerWidget.h"
-#  include "ForceInteractiveMarkerWidget.h"
 #  include "DisplayTrajectoryWidget.h"
+#  include "ForceInteractiveMarkerWidget.h"
 #  include "InteractiveMarkerWidget.h"
 #  include "Point3DInteractiveMarkerWidget.h"
 #  include "PolygonMarkerWidget.h"
@@ -654,7 +654,8 @@ void Panel::got_force(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<ForceInteractiveMarkerWidget>(id, requestId, int_server_, start, forcep, forceConfig, ro, label);
+  auto & w =
+      get_widget<ForceInteractiveMarkerWidget>(id, requestId, int_server_, start, forcep, forceConfig, ro, label);
   w.update(start, forcep, forceConfig);
 #endif
 }

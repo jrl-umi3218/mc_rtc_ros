@@ -14,7 +14,7 @@ public:
                                const WidgetId & requestId,
                                std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
                                const Eigen::Vector3d & start,
-                               const sva::ForceVecd& force,
+                               const sva::ForceVecd & force,
                                const mc_rtc::gui::ForceConfig & config,
                                bool ro,
                                ClientWidget * label);
