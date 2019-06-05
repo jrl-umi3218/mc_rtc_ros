@@ -7,8 +7,6 @@
 #include "ClientWidget.h"
 #include "utils.h"
 
-#include <visualization_msgs/MarkerArray.h>
-
 namespace mc_rtc_rviz
 {
 
