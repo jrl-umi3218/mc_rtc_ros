@@ -21,6 +21,7 @@ if(NOT ${DISABLE_ROS})
   list(APPEND MOC_HEADERS
     InteractiveMarkerWidget.h
     ArrowInteractiveMarkerWidget.h
+    ForceInteractiveMarkerWidget.h
     Point3DInteractiveMarkerWidget.h
     TransformInteractiveMarkerWidget.h
     XYThetaInteractiveMarkerWidget.h
@@ -90,6 +91,7 @@ if(NOT ${DISABLE_ROS})
   list(APPEND SOURCE_FILES
     InteractiveMarkerWidget.cpp
     ArrowInteractiveMarkerWidget.cpp
+    ForceInteractiveMarkerWidget.cpp
     Point3DInteractiveMarkerWidget.cpp
     TransformInteractiveMarkerWidget.cpp
     XYThetaInteractiveMarkerWidget.cpp

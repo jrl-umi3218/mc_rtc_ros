@@ -14,6 +14,7 @@
 #include "GenericInputWidget.h"
 #ifndef DISABLE_ROS
 #  include "ArrowInteractiveMarkerWidget.h"
+#  include "ForceInteractiveMarkerWidget.h"
 #  include "ArrowMarkerWidget.h"
 #  include "DisplayTrajectoryWidget.h"
 #  include "InteractiveMarkerWidget.h"
@@ -206,10 +207,10 @@ Panel::Panel(QWidget * parent)
                            const mc_rtc::gui::Color &)));
   connect(this,
           SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const Eigen::Vector3d &,
-                              const mc_rtc::gui::ForceConfig &)),
+                              const mc_rtc::gui::ForceConfig &, bool)),
           this,
           SLOT(got_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const Eigen::Vector3d &,
-                         const mc_rtc::gui::ForceConfig &)));
+                         const mc_rtc::gui::ForceConfig &, bool)));
   connect(this,
           SIGNAL(signal_arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
                               const mc_rtc::gui::ArrowConfig &, bool)),
@@ -385,9 +386,10 @@ void Panel::force(const WidgetId & id,
                   const WidgetId & requestId,
                   const sva::ForceVecd & force_,
                   const Eigen::Vector3d & start,
-                  const mc_rtc::gui::ForceConfig & forceConfig)
+                  const mc_rtc::gui::ForceConfig & forceConfig,
+                  bool ro)
 {
-  Q_EMIT signal_force(id, requestId, force_, start, forceConfig);
+  Q_EMIT signal_force(id, requestId, force_, start, forceConfig, ro);
 }
 
 void Panel::arrow(const WidgetId & id,
@@ -646,13 +648,15 @@ void Panel::got_polygon(const WidgetId & id,
 
 void Panel::got_force(const WidgetId & id,
                       const WidgetId & requestId,
-                      const sva::ForceVecd & force_,
+                      const sva::ForceVecd & forcep,
                       const Eigen::Vector3d & start,
-                      const mc_rtc::gui::ForceConfig & forceConfig)
+                      const mc_rtc::gui::ForceConfig & forceConfig,
+                      bool ro)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<ArrowMarkerWidget>(id, marker_array_);
-  w.update(start, force_, forceConfig);
+  auto label = latestWidget_;
+  auto & w = get_widget<ForceInteractiveMarkerWidget>(id, requestId, int_server_, start, forcep, forceConfig, ro, label);
+  w.update(start, forcep, forceConfig);
 #endif
 }
 
@@ -665,7 +669,7 @@ void Panel::got_arrow(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, int_server_, start, end, config, !ro, label);
+  auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, int_server_, start, end, config, !ro, !ro, label);
   w.update(start, end, config);
 #endif
 }

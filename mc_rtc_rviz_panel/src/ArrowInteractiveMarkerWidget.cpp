@@ -10,22 +10,19 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(
     const Eigen::Vector3d & start,
     const Eigen::Vector3d & end,
     const mc_rtc::gui::ArrowConfig & config,
-    bool ro,
+    bool control_start,
+    bool control_end,
     ClientWidget * label)
 : ClientWidget(params), request_id_(requestId),
   start_marker_(
       server,
       id2name(requestId),
-      make3DMarker(id2name(params.id) + "_start",
-                   {getPointMarker(Eigen::Vector3d::Zero(), config.color, config.start_point_scale)},
-                   ro),
+      vm::InteractiveMarker{},
       [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) { handleStartRequest(feedback); }),
   end_marker_(
       server,
       id2name(requestId),
-      make3DMarker(id2name(params.id) + "_end",
-                   {getPointMarker(Eigen::Vector3d::Zero(), config.color, config.end_point_scale)},
-                   ro),
+      vm::InteractiveMarker{},
       [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) { handleEndRequest(feedback); }),
   arrow_marker_(server,
                 id2name(requestId),
@@ -33,6 +30,44 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(
                 [](const visualization_msgs::InteractiveMarkerFeedbackConstPtr &) {})
 
 {
+
+
+  if(config.start_point_scale > 0)
+  {
+    start_marker_.marker(
+        make3DMarker(id2name(params.id) + "_start",
+                     {getPointMarker(Eigen::Vector3d::Zero(), config.color, config.start_point_scale)},
+                     control_start)
+        );
+  }
+  else
+  {
+    start_marker_.marker(
+        make3DMarker(id2name(params.id) + "_start",
+                     {vm::Marker{}},
+                     control_start)
+        );
+  }
+
+  if(config.end_point_scale > 0)
+  {
+    end_marker_.marker(
+        make3DMarker(id2name(params.id) + "_end",
+                     {getPointMarker(Eigen::Vector3d::Zero(), config.color, config.end_point_scale)},
+                     control_end)
+        );
+  }
+  else
+  {
+    end_marker_.marker(
+        make3DMarker(id2name(params.id) + "_end",
+                     {vm::Marker{}},
+                     control_end)
+        );
+  }
+  start_marker_.applyChanges();
+  end_marker_.applyChanges();
+
   arrow_points_ << start, end;
   button_ = label->showHideButton();
   button_->setCheckable(true);
