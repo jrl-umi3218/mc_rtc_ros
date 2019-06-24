@@ -1,7 +1,6 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.1)
 project(mc_log_visualization)
-
-include(cmake/base.cmake)
+set(CMAKE_CXX_STANDARD 11)
 
 find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
@@ -11,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package()
 
-add_required_dependency("mc_rtc" "mc_rtc_d")
+find_package(mc_rtc REQUIRED)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
@@ -26,8 +25,5 @@ set(src_files
   src/LogRobot.cpp
 )
 
-add_definitions(-std=c++0x)
-
 add_executable(mc_log_visualization ${src_files})
-pkg_config_use_dependency(mc_log_visualization mc_rtc)
-target_link_libraries(mc_log_visualization ${catkin_LIBRARIES})
+target_link_libraries(mc_log_visualization PUBLIC ${catkin_LIBRARIES} mc_rtc::mc_control)

@@ -1,16 +1,13 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.1)
 project(mc_rtc_ticker)
-
-include(cmake/base.cmake)
+set(CMAKE_CXX_STANDARD 11)
 
 find_package(catkin REQUIRED)
 catkin_package()
 
-add_required_dependency("mc_rtc")
+find_package(mc_rtc REQUIRED)
 
 include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
-
-add_definitions(-std=c++11)
 
 set(MC_RTC_TICKER_SRC
       src/mc_rtc_ticker.cpp
@@ -22,7 +19,7 @@ set(MC_RTC_TICKER_HDR
 )
 
 add_executable(mc_rtc_ticker ${MC_RTC_TICKER_SRC} ${MC_RTC_TICKER_HDR})
-pkg_config_use_dependency(mc_rtc_ticker mc_rtc)
+target_link_libraries(mc_rtc_ticker mc_rtc::mc_control)
 
 install(TARGETS mc_rtc_ticker
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
