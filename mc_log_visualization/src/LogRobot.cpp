@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+ */
+
 #include "LogRobot.h"
 
 #include <mc_rbdyn/rpy_utils.h>

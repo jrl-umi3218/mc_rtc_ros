@@ -1,3 +1,7 @@
+#
+# Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+#
+
 cmake_minimum_required(VERSION 3.1)
 
 set(PROJECT_NAME mc_rtc_rviz_panel)

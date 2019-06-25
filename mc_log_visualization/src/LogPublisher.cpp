@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+ */
+
 #include "LogPublisher.h"
 
 LogPublisher::LogPublisher(ros::NodeHandle & nh, const std::string & logfile, mc_rbdyn::RobotModulePtr mod, double dt)

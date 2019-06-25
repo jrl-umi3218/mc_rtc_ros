@@ -1,3 +1,7 @@
+#
+# Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+#
+
 set(MOC_HEADERS
   Panel.h
   ArrayInputWidget.h
