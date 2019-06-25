@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+ */
+
 #include <mc_rbdyn/RobotLoader.h>
 #include <mc_rbdyn/SCHAddon.h>
 
@@ -100,9 +104,9 @@ int main(int argc, char ** argv)
     const auto vertexes = pa.vertexes_;
     for(unsigned int i = 0; i < triangles.size(); i++)
     {
-      const auto a = vertexes[triangles[i].a]->getCordinates();
-      const auto b = vertexes[triangles[i].b]->getCordinates();
-      const auto c = vertexes[triangles[i].c]->getCordinates();
+      const auto a = vertexes[triangles[i].a]->getCoordinates();
+      const auto b = vertexes[triangles[i].b]->getCoordinates();
+      const auto c = vertexes[triangles[i].c]->getCoordinates();
       sva::PTransformd va(Eigen::Vector3d(a[0], a[1], a[2]));
       sva::PTransformd vb(Eigen::Vector3d(b[0], b[1], b[2]));
       sva::PTransformd vc(Eigen::Vector3d(c[0], c[1], c[2]));

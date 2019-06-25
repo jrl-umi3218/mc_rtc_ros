@@ -1,12 +1,12 @@
 variables:
   CI_TOOL: gitlab-ci
-  APT_DEPENDENCIES: "libtinyxml2-dev libboost-all-dev libjsoncpp-dev libgeos++-dev libgeos-dev qhull-bin libqhull-dev libltdl-dev libspacevecalg-dev libeigen-qld-dev librbdyn-dev libsch-core-dev ros-indigo-common-msgs ros-indigo-tf2-ros ros-indigo-xacro ros-indigo-rviz-animated-view-controller"
-  GIT_DEPENDENCIES: "git@gite.lirmm.fr:multi-contact/eigen-lssol.git jrl-umi3218/Tasks git@gite.lirmm.fr:multi-contact/mc_rbdyn_urdf_cpp.git nanomsg/nanomsg"
-  ROS_GIT_DEPENDENCIES: "git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data git@gite.lirmm.fr:mc-hrp2/hrp2_drc#master git@gite.lirmm.fr:mc-hrp4/hrp4#master"
-  MASTER_PPA: "v-launchpad-jochen-sprickerhof-de/pcl pierre-gergondet+ppa/multi-contact-unstable hrg/daily"
+  APT_DEPENDENCIES: "ros-indigo-common-msgs ros-indigo-tf2-ros ros-indigo-xacro ros-indigo-rviz-animated-view-controller libtasks-qld-dev libmc-rbdyn-urdf-dev libltdl-dev libgeos++-dev libgeos-dev"
+  GIT_DEPENDENCIES: "nanomsg/nanomsg"
+  ROS_GIT_DEPENDENCIES: "git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data"
+  MASTER_PPA: "pierre-gergondet+ppa/multi-contact-unstable"
   ROS_DISTRO: "indigo"
   ALLOW_CATKINLINT_FAILURE: "true"
-  CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF"
+  CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo"
 
 clang-format:
   stage: clang-format
@@ -16,13 +16,15 @@ clang-format:
   tags:
     - clang-format
 
+before_script:
+  - git submodule update --quiet --init --recursive
+  - add-apt-repository ppa:pierre-gergondet+ppa/multi-contact-unstable && apt-get update && apt-get upgrade cmake libeigen3-dev -qq
+  - ./.jrl-ci/dependencies/catkin
+  - ./.jrl-ci/run before_install
+
 build_gcc:
   stage: build
   script:
-    - git submodule update --quiet --init --recursive
-    - ./.jrl-ci/dependencies/eigen-3.2
-    - ./.jrl-ci/dependencies/catkin
-    - ./.jrl-ci/run before_install
     - export APT_DEPENDENCIES=""
     - export GIT_DEPENDENCIES="git@gite.lirmm.fr:multi-contact/mc_rtc"
     - export ROS_GIT_DEPENDENCIES=""

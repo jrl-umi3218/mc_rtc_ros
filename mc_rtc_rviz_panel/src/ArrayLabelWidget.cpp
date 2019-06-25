@@ -1,3 +1,7 @@
+/*
+ * Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+ */
+
 #include "ArrayLabelWidget.h"
 
 namespace mc_rtc_rviz

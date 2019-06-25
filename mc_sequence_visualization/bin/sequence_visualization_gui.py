@@ -1,4 +1,9 @@
 #! /usr/bin/env python
+
+#
+# Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+#
+
 from sensor_msgs.msg import JointState
 import rospy
 import rosbag
