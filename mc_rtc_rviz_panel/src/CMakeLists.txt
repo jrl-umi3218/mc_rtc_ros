@@ -83,7 +83,7 @@ endif()
 
 find_package(mc_rtc REQUIRED)
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${MOC_HEADERS})
 target_link_libraries(${PROJECT_NAME} PUBLIC mc_rtc::mc_control_client)
 if(NOT ${DISABLE_ROS})
   add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
