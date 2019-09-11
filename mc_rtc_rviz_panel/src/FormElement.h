@@ -160,7 +160,7 @@ protected:
   void add_edit(const T & def);
 
 private:
-  void add_validator(QLineEdit * edit) {}
+  void add_validator(QLineEdit * edit);
   void data2edit(const T & value, QLineEdit * edit);
   T edit2data(QLineEdit * edit);
   bool fixed_size_;
@@ -190,6 +190,8 @@ template<>
 void ArrayInput<double>::data2edit(const double & value, QLineEdit * edit);
 template<>
 double ArrayInput<double>::edit2data(QLineEdit * edit);
+template<>
+void ArrayInput<std::string>::add_validator(QLineEdit *);
 template<>
 void ArrayInput<std::string>::data2edit(const std::string & value, QLineEdit * edit);
 template<>

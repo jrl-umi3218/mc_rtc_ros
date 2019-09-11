@@ -86,9 +86,14 @@ void savePanelConfiguration(const mc_rtc::Configuration & config)
   config.save(config_path.string());
 }
 
+std::string defaultSubURI()
+{
+  return "ipc://" + (bfs::temp_directory_path() / "mc_rtc_pub.ipc").string();
+}
+
 std::string getSubURI(const mc_rtc::Configuration & config)
 {
-  return config("URI", mc_rtc::Configuration{})("sub", std::string("ipc:///tmp/mc_rtc_pub.ipc"));
+  return config("URI", mc_rtc::Configuration{})("sub", defaultSubURI());
 }
 
 std::string getSubURI()
@@ -97,9 +102,14 @@ std::string getSubURI()
   return getSubURI(config);
 }
 
+std::string defaultPushURI()
+{
+  return "ipc://" + (bfs::temp_directory_path() / "mc_rtc_rep.ipc").string();
+}
+
 std::string getPushURI(const mc_rtc::Configuration & config)
 {
-  return config("URI", mc_rtc::Configuration{})("push", std::string("ipc:///tmp/mc_rtc_rep.ipc"));
+  return config("URI", mc_rtc::Configuration{})("push", defaultPushURI());
 }
 
 std::string getPushURI()
