@@ -172,6 +172,10 @@ double ArrayInput<double>::edit2data(QLineEdit * edit)
   return edit->text().toDouble();
 }
 template<>
+void ArrayInput<std::string>::add_validator(QLineEdit *)
+{
+}
+template<>
 void ArrayInput<std::string>::data2edit(const std::string & value, QLineEdit * edit)
 {
   edit->setText(value.c_str());
