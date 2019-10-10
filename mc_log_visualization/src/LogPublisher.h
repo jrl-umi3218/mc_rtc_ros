@@ -38,7 +38,7 @@ public:
   void addRemoveExtraDataButton(const std::string & section, const std::string & entry);
 
   /** Add a given entry as a label */
-  void addLabel(const std::string & entry, mc_rtc::log::LogData t);
+  void addLabel(const std::string & entry, mc_rtc::log::LogType t);
 
   /** Add a 3D point from a Vector3d log entry to the GUI */
   void addVector3dAsPoint3D(const std::string & entry);
