@@ -13,12 +13,14 @@
 #include "FormWidget.h"
 #include "GenericInputWidget.h"
 #ifndef DISABLE_ROS
-#  include "ArrowMarkerWidget.h"
+#  include "ArrowInteractiveMarkerWidget.h"
 #  include "DisplayTrajectoryWidget.h"
-#  include "ForceMarkerWidget.h"
+#  include "ForceInteractiveMarkerWidget.h"
 #  include "InteractiveMarkerWidget.h"
-#  include "PointMarkerWidget.h"
+#  include "Point3DInteractiveMarkerWidget.h"
 #  include "PolygonMarkerWidget.h"
+#  include "TransformInteractiveMarkerWidget.h"
+#  include "XYThetaInteractiveMarkerWidget.h"
 #endif
 #include "ConnectionDialog.h"
 #include "LabelWidget.h"
@@ -204,16 +206,16 @@ Panel::Panel(QWidget * parent)
                            const mc_rtc::gui::Color &)));
   connect(this,
           SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
-                              const mc_rtc::gui::ForceConfig &)),
+                              const mc_rtc::gui::ForceConfig &, bool)),
           this,
           SLOT(got_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
-                         const mc_rtc::gui::ForceConfig &)));
+                         const mc_rtc::gui::ForceConfig &, bool)));
   connect(this,
-          SIGNAL(signal_arrow(const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
-                              const mc_rtc::gui::ArrowConfig &)),
+          SIGNAL(signal_arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
+                              const mc_rtc::gui::ArrowConfig &, bool)),
           this,
-          SLOT(got_arrow(const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
-                         const mc_rtc::gui::ArrowConfig &)));
+          SLOT(got_arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
+                         const mc_rtc::gui::ArrowConfig &, bool)));
   connect(this, SIGNAL(signal_rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)), this,
           SLOT(got_rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)));
   connect(this, SIGNAL(signal_transform(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)), this,
@@ -382,18 +384,21 @@ void Panel::polygon(const WidgetId & id,
 void Panel::force(const WidgetId & id,
                   const WidgetId & requestId,
                   const sva::ForceVecd & force_,
-                  const sva::PTransformd & surface,
-                  const mc_rtc::gui::ForceConfig & forceConfig)
+                  const sva::PTransformd & start,
+                  const mc_rtc::gui::ForceConfig & forceConfig,
+                  bool ro)
 {
-  Q_EMIT signal_force(id, requestId, force_, surface, forceConfig);
+  Q_EMIT signal_force(id, requestId, force_, start, forceConfig, ro);
 }
 
 void Panel::arrow(const WidgetId & id,
+                  const WidgetId & requestId,
                   const Eigen::Vector3d & start,
                   const Eigen::Vector3d & end,
-                  const mc_rtc::gui::ArrowConfig & config)
+                  const mc_rtc::gui::ArrowConfig & config,
+                  bool ro)
 {
-  Q_EMIT signal_arrow(id, start, end, config);
+  Q_EMIT signal_arrow(id, requestId, start, end, config, ro);
 }
 
 void Panel::rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos)
@@ -556,19 +561,9 @@ void Panel::got_point3d(const WidgetId & id,
                         const mc_rtc::gui::PointConfig & config)
 {
 #ifndef DISABLE_ROS
-  if(ro)
-  {
-    auto label = latestWidget_;
-    auto & w = get_widget<PointMarkerWidget>(id, marker_array_, label);
-    w.update(pos, config);
-  }
-  else
-  {
-    auto label = latestWidget_;
-    auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, sva::PTransformd{pos}, false,
-                                                            !ro, label);
-    w.update(pos);
-  }
+  auto label = latestWidget_;
+  auto & w = get_widget<Point3DInteractiveMarkerWidget>(id, requestId, int_server_, config, !ro, label);
+  w.update(pos);
 #endif
 }
 
@@ -576,7 +571,7 @@ void Panel::got_rotation(const WidgetId & id, const WidgetId & requestId, bool r
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, pos, !ro, false, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, !ro, false, label);
   w.update(pos);
 #endif
 }
@@ -585,7 +580,7 @@ void Panel::got_transform(const WidgetId & id, const WidgetId & requestId, bool 
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, pos, !ro, !ro, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, !ro, !ro, label);
   w.update(pos);
 #endif
 }
@@ -652,24 +647,29 @@ void Panel::got_polygon(const WidgetId & id,
 
 void Panel::got_force(const WidgetId & id,
                       const WidgetId & requestId,
-                      const sva::ForceVecd & force_,
+                      const sva::ForceVecd & forcep,
                       const sva::PTransformd & surface,
-                      const mc_rtc::gui::ForceConfig & forceConfig)
+                      const mc_rtc::gui::ForceConfig & forceConfig,
+                      bool ro)
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<ForceMarkerWidget>(id, requestId, marker_array_, label);
-  w.update(force_, surface, forceConfig);
+  auto & w =
+      get_widget<ForceInteractiveMarkerWidget>(id, requestId, int_server_, surface, forcep, forceConfig, ro, label);
+  w.update(surface, forcep, forceConfig);
 #endif
 }
 
 void Panel::got_arrow(const WidgetId & id,
+                      const WidgetId & requestId,
                       const Eigen::Vector3d & start,
                       const Eigen::Vector3d & end,
-                      const mc_rtc::gui::ArrowConfig & config)
+                      const mc_rtc::gui::ArrowConfig & config,
+                      bool ro)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<ArrowMarkerWidget>(id, marker_array_);
+  auto label = latestWidget_;
+  auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, int_server_, start, end, config, !ro, !ro, label);
   w.update(start, end, config);
 #endif
 }

@@ -16,13 +16,14 @@ geometry_msgs::Point rosPoint(const Eigen::Vector3d & vec)
   return p;
 }
 
-vm::Marker makeVisual(int t, double baseScale)
+vm::Marker makeVisual(int t, double scale)
 {
   vm::Marker ret;
+  ret.action = vm::Marker::ADD;
   ret.type = t;
-  ret.scale.x = baseScale * 0.45;
-  ret.scale.y = baseScale * 0.45;
-  ret.scale.z = baseScale * 0.45;
+  ret.scale.x = scale;
+  ret.scale.y = scale;
+  ret.scale.z = scale;
   ret.color.r = 1.0;
   ret.color.g = 0.0;
   ret.color.b = 0.0;
@@ -79,6 +80,39 @@ std::vector<vm::Marker> makeAxisMarker(double scale)
   return ret;
 }
 
+std::vector<vm::Marker> makeArrowMarker(const Eigen::Vector3d & start,
+                                        const Eigen::Vector3d & end,
+                                        const mc_rtc::gui::ArrowConfig & c)
+{
+  std::vector<vm::Marker> markers;
+  visualization_msgs::Marker m;
+  m.type = visualization_msgs::Marker::ARROW;
+  m.action = visualization_msgs::Marker::ADD;
+  m.points.push_back(rosPoint(start));
+  m.points.push_back(rosPoint(end));
+  m.scale.x = c.shaft_diam;
+  m.scale.y = c.head_diam;
+  m.scale.z = c.head_len;
+  m.color.a = c.color.a;
+  m.color.r = c.color.r;
+  m.color.g = c.color.g;
+  m.color.b = c.color.b;
+  markers.push_back(m);
+
+  if(c.start_point_scale > 0)
+  {
+    markers.push_back(getPointMarker(start, c.color, c.start_point_scale));
+    markers.back().action = m.action;
+  }
+
+  if(c.end_point_scale > 0)
+  {
+    markers.push_back(getPointMarker(end, c.color, c.end_point_scale));
+    markers.back().action = m.action;
+  }
+  return markers;
+}
+
 vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker> & visual_makers,
                                                  vm::InteractiveMarker & marker)
 {
@@ -90,10 +124,23 @@ vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker> &
   return marker.controls.back();
 }
 
+vm::InteractiveMarker makeInteractiveMarker(const std::string & name, const std::vector<vm::Marker> & visual_markers)
+{
+  vm::InteractiveMarker marker;
+  marker.header.frame_id = "robot_map";
+  marker.name = name;
+  vm::InteractiveMarkerControl ret;
+  ret.always_visible = true;
+  ret.orientation.w = 1.0;
+  ret.markers = visual_markers;
+  marker.controls.push_back(ret);
+  return marker;
+}
+
 vm::InteractiveMarker make6DMarker(const std::string & name,
+                                   const std::vector<vm::Marker> & visual_markers,
                                    bool control_position,
                                    bool control_orientation,
-                                   const std::vector<vm::Marker> & visual_markers,
                                    bool move_x,
                                    bool move_y,
                                    bool move_z,
@@ -163,6 +210,16 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   return ret;
 }
 
+vm::InteractiveMarker make3DMarker(const std::string & name,
+                                   const std::vector<vm::Marker> & visual_markers,
+                                   bool control_position,
+                                   bool move_x,
+                                   bool move_y,
+                                   bool move_z)
+{
+  return make6DMarker(name, visual_markers, control_position, false);
+}
+
 vm::InteractiveMarker makeXYThetaMarker(const std::string & name)
 {
   vm::InteractiveMarker int_marker;
@@ -182,28 +239,20 @@ vm::InteractiveMarker makeXYThetaMarker(const std::string & name)
   return int_marker;
 }
 
-visualization_msgs::Marker getPointMarker(const std::string & ns,
-                                          const Eigen::Vector3d & pos,
+visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos,
                                           const mc_rtc::gui::Color & color,
                                           double scale = 0.02)
 {
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::SPHERE;
   m.action = visualization_msgs::Marker::ADD;
-  m.pose.position.x = pos(0);
-  m.pose.position.y = pos(1);
-  m.pose.position.z = pos(2);
   m.scale.x = scale;
   m.scale.y = scale;
   m.scale.z = scale;
-  m.color.a = 1.0;
+  m.color.a = color.a;
   m.color.r = color.r;
   m.color.g = color.g;
   m.color.b = color.b;
-  m.header.stamp = ros::Time();
-  m.header.frame_id = "robot_map";
-  m.ns = ns;
-  m.lifetime = ros::Duration(1.);
   return m;
 }
 

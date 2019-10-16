@@ -146,12 +146,15 @@ protected:
              const WidgetId & requestId,
              const sva::ForceVecd & force,
              const sva::PTransformd & surface,
-             const mc_rtc::gui::ForceConfig & forceConfig) override;
+             const mc_rtc::gui::ForceConfig & forceConfig,
+             bool ro) override;
 
   void arrow(const WidgetId & id,
+             const WidgetId & requestId,
              const Eigen::Vector3d & start,
              const Eigen::Vector3d & end,
-             const mc_rtc::gui::ArrowConfig & config) override;
+             const mc_rtc::gui::ArrowConfig & config,
+             bool ro) override;
 
   void rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos) override;
 
@@ -279,11 +282,14 @@ private slots:
                  const WidgetId & requestId,
                  const sva::ForceVecd & force,
                  const sva::PTransformd & surface,
-                 const mc_rtc::gui::ForceConfig & forceConfig);
+                 const mc_rtc::gui::ForceConfig & forceConfig,
+                 bool ro);
   void got_arrow(const WidgetId & id,
+                 const WidgetId & requestId,
                  const Eigen::Vector3d & force,
                  const Eigen::Vector3d & surface,
-                 const mc_rtc::gui::ArrowConfig & config);
+                 const mc_rtc::gui::ArrowConfig & config,
+                 bool ro);
   void got_schema(const WidgetId & id, const std::string & schema);
   void got_form(const WidgetId & id);
   void got_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
@@ -340,11 +346,14 @@ signals:
                     const WidgetId & requestId,
                     const sva::ForceVecd & force,
                     const sva::PTransformd & surface,
-                    const mc_rtc::gui::ForceConfig & forceConfig);
+                    const mc_rtc::gui::ForceConfig & forceConfig,
+                    bool ro);
   void signal_arrow(const WidgetId & id,
+                    const WidgetId & requestId,
                     const Eigen::Vector3d & force,
                     const Eigen::Vector3d & surface,
-                    const mc_rtc::gui::ArrowConfig & config);
+                    const mc_rtc::gui::ArrowConfig & config,
+                    bool ro);
   void signal_rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos);
   void signal_transform(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos);
   void signal_xytheta(const WidgetId & id,

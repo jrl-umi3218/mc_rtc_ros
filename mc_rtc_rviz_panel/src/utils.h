@@ -18,24 +18,31 @@ namespace vm = visualization_msgs;
 namespace mc_rtc_rviz
 {
 
-visualization_msgs::Marker getPointMarker(const std::string & ns,
-                                          const Eigen::Vector3d & pos,
-                                          const mc_rtc::gui::Color & color,
-                                          double scale);
+visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos, const mc_rtc::gui::Color & color, double scale);
 geometry_msgs::Point rosPoint(const Eigen::Vector3d & vec);
 vm::Marker makeVisual(int t, double baseScale);
+vm::InteractiveMarker makeInteractiveMarker(const std::string & name, const std::vector<vm::Marker> & visual_markers);
 std::vector<vm::Marker> makeAxisMarker(double baseScale);
 vm::InteractiveMarker make6DMarker(const std::string & name,
+                                   const std::vector<vm::Marker> & visual_markers,
                                    bool control_position,
                                    bool control_orientation,
-                                   const std::vector<vm::Marker> & visual_markers,
                                    bool move_x = true,
                                    bool move_y = true,
                                    bool move_z = true,
                                    bool rotate_x = true,
                                    bool rotate_y = true,
                                    bool rotate_z = true);
+vm::InteractiveMarker make3DMarker(const std::string & name,
+                                   const std::vector<vm::Marker> & visual_markers,
+                                   bool control_position,
+                                   bool move_x = true,
+                                   bool move_y = true,
+                                   bool move_z = true);
 vm::InteractiveMarker makeXYThetaMarker(const std::string & name);
+std::vector<vm::Marker> makeArrowMarker(const Eigen::Vector3d & start,
+                                        const Eigen::Vector3d & end,
+                                        const mc_rtc::gui::ArrowConfig & c);
 
 struct SharedMarker
 {
