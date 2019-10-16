@@ -30,7 +30,6 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(
                 [](const visualization_msgs::InteractiveMarkerFeedbackConstPtr &) {})
 
 {
-
   if(config.start_point_scale > 0)
   {
     start_marker_.marker(make3DMarker(id2name(params.id) + "_start",
@@ -39,7 +38,7 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(
   }
   else
   {
-    start_marker_.marker(make3DMarker(id2name(params.id) + "_start", {vm::Marker{}}, control_start));
+    start_marker_.marker(make3DMarker(id2name(params.id) + "_start", {}, control_start));
   }
 
   if(config.end_point_scale > 0)
@@ -50,7 +49,7 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(
   }
   else
   {
-    end_marker_.marker(make3DMarker(id2name(params.id) + "_end", {vm::Marker{}}, control_end));
+    end_marker_.marker(make3DMarker(id2name(params.id) + "_end", {}, control_end));
   }
   start_marker_.applyChanges();
   end_marker_.applyChanges();
