@@ -96,7 +96,7 @@ public:
   }
 
   /** To be implemented in container, return a widget by its name or a nullptr if the widget does not exist */
-  virtual ClientWidget * widget(const std::string & name)
+  virtual ClientWidget * widget(const std::string &)
   {
     return nullptr;
   }

@@ -7,23 +7,32 @@ ForceInteractiveMarkerWidget::ForceInteractiveMarkerWidget(
     const ClientWidgetParam & params,
     const WidgetId & requestId,
     std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-    const Eigen::Vector3d & start,
+    const sva::PTransformd & surface,
     const sva::ForceVecd & force,
     const mc_rtc::gui::ForceConfig & config,
     bool ro,
     ClientWidget * label)
-: ArrowInteractiveMarkerWidget(params, requestId, server, start, start, config, false, !ro, label), config_(config),
-  force_(force)
+: ArrowInteractiveMarkerWidget(params,
+                               requestId,
+                               server,
+                               surface.translation(),
+                               surface.translation(),
+                               config,
+                               false,
+                               !ro,
+                               label),
+  config_(config), force_(force)
 {
 }
 
-void ForceInteractiveMarkerWidget::update(const Eigen::Vector3d & start,
+void ForceInteractiveMarkerWidget::update(const sva::PTransformd & surface,
                                           const sva::ForceVecd & force,
                                           const mc_rtc::gui::ForceConfig & c)
 {
   config_ = c;
   force_ = force;
-  const auto & end = start + c.force_scale * force.force();
+  const auto & start = surface.translation();
+  const auto & end = (sva::PTransformd{Eigen::Vector3d{config_.force_scale * force.force()}} * surface).translation();
   ArrowInteractiveMarkerWidget::update(start, end, c);
 }
 

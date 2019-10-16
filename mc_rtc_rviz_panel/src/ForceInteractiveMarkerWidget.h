@@ -13,13 +13,13 @@ public:
   ForceInteractiveMarkerWidget(const ClientWidgetParam & params,
                                const WidgetId & requestId,
                                std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-                               const Eigen::Vector3d & start,
+                               const sva::PTransformd & surface,
                                const sva::ForceVecd & force,
                                const mc_rtc::gui::ForceConfig & config,
                                bool ro,
                                ClientWidget * label);
 
-  void update(const Eigen::Vector3d & start, const sva::ForceVecd & force, const mc_rtc::gui::ForceConfig & c);
+  void update(const sva::PTransformd & surface, const sva::ForceVecd & force, const mc_rtc::gui::ForceConfig & c);
 
 protected:
   void handleEndRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;

@@ -22,7 +22,6 @@ public:
                                ClientWidget * label);
 
   void update(const Eigen::Vector3d & start, const Eigen::Vector3d & end, const mc_rtc::gui::ArrowConfig & c);
-  void update(const Eigen::Vector3d & start, const sva::ForceVecd & force, const mc_rtc::gui::ForceConfig & c);
 
 protected:
   virtual void handleStartRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback);

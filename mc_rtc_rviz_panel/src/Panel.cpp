@@ -205,10 +205,10 @@ Panel::Panel(QWidget * parent)
           SLOT(got_polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &,
                            const mc_rtc::gui::Color &)));
   connect(this,
-          SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const Eigen::Vector3d &,
+          SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
                               const mc_rtc::gui::ForceConfig &, bool)),
           this,
-          SLOT(got_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const Eigen::Vector3d &,
+          SLOT(got_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
                          const mc_rtc::gui::ForceConfig &, bool)));
   connect(this,
           SIGNAL(signal_arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
@@ -384,7 +384,7 @@ void Panel::polygon(const WidgetId & id,
 void Panel::force(const WidgetId & id,
                   const WidgetId & requestId,
                   const sva::ForceVecd & force_,
-                  const Eigen::Vector3d & start,
+                  const sva::PTransformd & start,
                   const mc_rtc::gui::ForceConfig & forceConfig,
                   bool ro)
 {
@@ -648,15 +648,15 @@ void Panel::got_polygon(const WidgetId & id,
 void Panel::got_force(const WidgetId & id,
                       const WidgetId & requestId,
                       const sva::ForceVecd & forcep,
-                      const Eigen::Vector3d & start,
+                      const sva::PTransformd & surface,
                       const mc_rtc::gui::ForceConfig & forceConfig,
                       bool ro)
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w =
-      get_widget<ForceInteractiveMarkerWidget>(id, requestId, int_server_, start, forcep, forceConfig, ro, label);
-  w.update(start, forcep, forceConfig);
+      get_widget<ForceInteractiveMarkerWidget>(id, requestId, int_server_, surface, forcep, forceConfig, ro, label);
+  w.update(surface, forcep, forceConfig);
 #endif
 }
 

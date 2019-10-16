@@ -249,7 +249,7 @@ visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos,
   m.scale.x = scale;
   m.scale.y = scale;
   m.scale.z = scale;
-  m.color.a = 1.0;
+  m.color.a = color.a;
   m.color.r = color.r;
   m.color.g = color.g;
   m.color.b = color.b;
