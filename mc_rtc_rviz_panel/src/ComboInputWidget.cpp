@@ -52,10 +52,7 @@ void ComboInputWidget::update(const std::string & data, const std::vector<std::s
   combo_->blockSignals(true);
   update(values);
   auto idx = combo_->findText(data.c_str());
-  if(idx != -1)
-  {
-    combo_->setCurrentIndex(idx);
-  }
+  combo_->setCurrentIndex(idx);
   combo_->blockSignals(blocked);
 }
 
@@ -67,10 +64,7 @@ void ComboInputWidget::update(const std::string & in,
   combo_->blockSignals(true);
   update(data, values);
   auto idx = combo_->findText(in.c_str());
-  if(idx != -1)
-  {
-    combo_->setCurrentIndex(idx);
-  }
+  combo_->setCurrentIndex(idx);
   combo_->blockSignals(blocked);
 }
 
