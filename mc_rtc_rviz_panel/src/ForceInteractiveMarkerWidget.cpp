@@ -32,7 +32,8 @@ void ForceInteractiveMarkerWidget::update(const sva::PTransformd & surface,
   config_ = c;
   force_ = force;
   const auto & start = surface.translation();
-  const auto & end = (sva::PTransformd{Eigen::Vector3d{config_.force_scale * force.force()}} * surface).translation();
+  sva::PTransformd X_surface_end = Eigen::Vector3d{config_.force_scale * force.force()};
+  Eigen::Vector3d end = (X_surface_end * surface).translation();
   ArrowInteractiveMarkerWidget::update(start, end, c);
 }
 
