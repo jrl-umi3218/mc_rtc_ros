@@ -1,12 +1,12 @@
 variables:
   CI_TOOL: gitlab-ci
   APT_DEPENDENCIES: "ros-indigo-common-msgs ros-indigo-tf2-ros ros-indigo-xacro ros-indigo-rviz-animated-view-controller libtasks-qld-dev libmc-rbdyn-urdf-dev libltdl-dev libgeos++-dev libgeos-dev"
-  GIT_DEPENDENCIES: "nanomsg/nanomsg humanoid-path-planner/hpp-spline"
+  GIT_DEPENDENCIES: "nanomsg/nanomsg humanoid-path-planner/hpp-spline jbeder/yaml-cpp"
   ROS_GIT_DEPENDENCIES: "git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data"
   MASTER_PPA: "pierre-gergondet+ppa/multi-contact-unstable"
   ROS_DISTRO: "indigo"
   ALLOW_CATKINLINT_FAILURE: "true"
-  CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_PYTHON_INTERFACE:BOOL=OFF"
+  CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_PYTHON_INTERFACE:BOOL=OFF -DYAML_BUILD_SHARED_LIBS:BOOL=ON"
 
 clang-format:
   stage: clang-format
