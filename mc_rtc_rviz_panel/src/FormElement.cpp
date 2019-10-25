@@ -393,25 +393,19 @@ void DataComboInput::update_values()
   if(values_ != values)
   {
     auto selected = combo_->currentText().toStdString();
-    bool ok = false;
+    int idx = -1;
     values_ = values;
     combo_->clear();
-    for(const auto & v : values)
+    for(size_t i = 0; i < values.size(); ++i)
     {
+      const auto & v = values[i];
       if(v == selected)
       {
-        ok = true;
+        idx = static_cast<int>(i);
       }
       combo_->addItem(v.c_str());
     }
-    if(ok)
-    {
-      combo_->setCurrentText(selected.c_str());
-    }
-    else
-    {
-      combo_->setCurrentIndex(-1);
-    }
+    combo_->setCurrentIndex(idx);
   }
 }
 
