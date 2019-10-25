@@ -55,6 +55,16 @@ public:
     return spanning_;
   }
 
+  bool hidden() const
+  {
+    return hidden_;
+  }
+
+  void hidden(bool h)
+  {
+    hidden_ = h;
+  }
+
   const std::string & name() const
   {
     return name_;
@@ -65,20 +75,37 @@ public:
     name_ = name;
   }
 
-  void update_dependencies(const std::vector<FormElement *> & others);
+  size_t type()
+  {
+    return type_;
+  }
 
-  virtual void update_dependencies(FormElement * other) {}
+  void type(size_t t)
+  {
+    type_ = t;
+  }
+
+  virtual void update_dependencies(FormElement *) {}
 
 protected:
   virtual void fill_(mc_rtc::Configuration & out) = 0;
 
+  bool changed_(bool required)
+  {
+    return required_ != required;
+  }
+
   bool ready_ = false;
   bool spanning_ = false;
   bool show_name_ = true;
+  bool hidden_ = false;
+
+  bool seen_ = true;
+  bool required_;
 
 private:
   std::string name_;
-  bool required_;
+  size_t type_;
 };
 
 namespace form
@@ -90,11 +117,14 @@ struct Checkbox : public FormElement
 public:
   Checkbox(QWidget * parent, const std::string & name, bool required, bool def);
 
+  bool changed(bool required, bool def);
+
 protected:
   void fill_(mc_rtc::Configuration & out) override;
 
 private:
   QCheckBox * cbox_;
+  bool def_;
 private slots:
   void toggled(bool);
 };
@@ -114,24 +144,39 @@ struct IntegerInput : public CommonInput
 {
   IntegerInput(QWidget * parent, const std::string & name, bool required, int def);
 
+  bool changed(bool required, int def);
+
 protected:
   void fill_(mc_rtc::Configuration & out) override;
+
+private:
+  int def_;
 };
 
 struct NumberInput : public CommonInput
 {
   NumberInput(QWidget * parent, const std::string & name, bool required, double def);
 
+  bool changed(bool required, double def);
+
 protected:
   void fill_(mc_rtc::Configuration & out) override;
+
+private:
+  double def_;
 };
 
 struct StringInput : public CommonInput
 {
   StringInput(QWidget * parent, const std::string & name, bool required, const std::string & def);
 
+  bool changed(bool required, const std::string & def);
+
 protected:
   void fill_(mc_rtc::Configuration & out) override;
+
+private:
+  std::string def_;
 };
 
 struct CommonArrayInput : public FormElement
@@ -163,7 +208,11 @@ private:
   void add_validator(QLineEdit * edit);
   void data2edit(const T & value, QLineEdit * edit);
   T edit2data(QLineEdit * edit);
+
+protected:
   bool fixed_size_;
+
+private:
   int min_size_;
   int max_size_;
   int stride_ = 1;
@@ -328,6 +377,11 @@ struct NumberArrayInput : public ArrayInput<double>
                    bool fixed_size,
                    int min_size,
                    int max_size);
+
+  bool changed(bool required, const Eigen::VectorXd & def, bool fixed_size);
+
+private:
+  Eigen::VectorXd def_;
 };
 
 struct ComboInput : public FormElement
@@ -340,10 +394,13 @@ public:
              const std::vector<std::string> & values,
              bool send_index);
 
+  bool changed(bool required, const std::vector<std::string> & values, bool send_index);
+
 protected:
   void fill_(mc_rtc::Configuration & out) override;
 
 private:
+  std::vector<std::string> values_;
   bool send_index_;
   QComboBox * combo_;
 private slots:
@@ -362,6 +419,11 @@ public:
                  bool send_index,
                  const std::string & rename = "");
 
+  bool changed(bool required,
+               const mc_rtc::Configuration & data,
+               const std::vector<std::string> & ref,
+               bool send_index);
+
   void update_dependencies(FormElement * other) override;
 
 protected:
@@ -369,10 +431,11 @@ protected:
 
 private:
   bool send_index_;
-  std::string rename_;
   const mc_rtc::Configuration & data_;
   std::vector<std::string> ref_;
   std::vector<std::string> resolved_ref_;
+  std::vector<std::string> values_;
+  std::string rename_;
 
   QComboBox * combo_;
 
