@@ -4,8 +4,6 @@
 
 #include "NumberSliderWidget.h"
 
-#include <iostream>
-
 namespace mc_rtc_rviz
 {
 

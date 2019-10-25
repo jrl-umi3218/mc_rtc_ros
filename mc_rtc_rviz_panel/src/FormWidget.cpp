@@ -9,10 +9,32 @@ namespace mc_rtc_rviz
 
 FormWidget::FormWidget(const ClientWidgetParam & param) : ClientWidget(param)
 {
-  layout_ = new QFormLayout(this);
+  vlayout_ = new QVBoxLayout(this);
+  form_ = new QWidget();
+  layout_ = new QFormLayout(form_);
   auto button = new QPushButton(name().c_str());
   connect(button, SIGNAL(released()), this, SLOT(released()));
-  layout_->addRow(button);
+  vlayout_->addWidget(form_);
+  vlayout_->addWidget(button);
+}
+
+void FormWidget::update()
+{
+  idx_ = 0;
+  if(changed_)
+  {
+    auto item = vlayout_->takeAt(0);
+    form_ = new QWidget();
+    layout_ = new QFormLayout(form_);
+    vlayout_->insertWidget(0, form_);
+    for(auto el : elements_)
+    {
+      el->setParent(form_);
+      add_element_to_layout(el);
+    }
+    changed_ = false;
+    item->widget()->deleteLater();
+  }
 }
 
 void FormWidget::released()
@@ -20,7 +42,7 @@ void FormWidget::released()
   mc_rtc::Configuration out;
   std::string msg;
   bool ok = true;
-  for(auto el : elements_)
+  for(auto & el : elements_)
   {
     bool ret = el->fill(out, msg);
     if(!ret)
@@ -42,13 +64,18 @@ void FormWidget::released()
 
 void FormWidget::add_element(FormElement * element)
 {
-  element->update_dependencies(elements_);
-  for(auto el : elements_)
+  elements_.push_back(element);
+  add_element_to_layout(element);
+}
+
+void FormWidget::add_element_to_layout(FormElement * element)
+{
+  for(const auto & el : elements_)
   {
+    element->update_dependencies(el);
     el->update_dependencies(element);
   }
-  elements_.push_back(element);
-  if(element->isHidden())
+  if(element->hidden())
   {
     return;
   }
@@ -59,15 +86,15 @@ void FormWidget::add_element(FormElement * element)
   }
   if(!element->spanning())
   {
-    layout_->insertRow(layout_->rowCount() - 1, label_text.c_str(), element);
+    layout_->addRow(label_text.c_str(), element);
   }
   else
   {
     if(element->show_name())
     {
-      layout_->insertRow(layout_->rowCount() - 1, new QLabel(label_text.c_str(), this));
+      layout_->addRow(new QLabel(label_text.c_str(), form_));
     }
-    layout_->insertRow(layout_->rowCount() - 1, element);
+    layout_->addRow(element);
   }
 }
 

@@ -65,7 +65,7 @@ Schema::Schema(const std::string & file)
       v.emplace_back(new form::ComboInput(parent, k, required, values, false));
       if(values.size() == 1 && required)
       {
-        v.back()->hide();
+        v.back()->hidden(true);
       }
       return v;
     };

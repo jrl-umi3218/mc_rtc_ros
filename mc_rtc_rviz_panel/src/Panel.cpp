@@ -681,7 +681,8 @@ void Panel::got_schema(const WidgetId & id, const std::string & schema)
 
 void Panel::got_form(const WidgetId & id)
 {
-  get_widget<FormWidget>(id);
+  auto & form = get_widget<FormWidget>(id);
+  form.update();
 }
 
 void Panel::got_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def)
