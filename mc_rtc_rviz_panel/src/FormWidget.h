@@ -34,6 +34,8 @@ public:
 private:
   void add_element_to_layout(FormElement * element);
 
+  QVBoxLayout * vlayout_;
+  QWidget * form_;
   QFormLayout * layout_;
   bool changed_ = true;
   size_t idx_;
@@ -71,7 +73,7 @@ void FormWidget::element(const std::string & name, Args &&... args)
       return;
     }
   }
-  elements_.push_back(new T(this, name, std::forward<Args>(args)...));
+  elements_.push_back(new T(form_, name, std::forward<Args>(args)...));
   elements_.back()->type(typeid(T).hash_code());
   idx_ += 1;
 }
