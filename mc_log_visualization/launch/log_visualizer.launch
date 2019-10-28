@@ -1,5 +1,5 @@
 <launch>
-  <arg name="robot" default="robot/jvrc-1" />
+  <arg name="robot" default="robot/jvrc1" />
   <include file="$(find mc_scenario)/$(arg robot).xml" />
 
   <arg name="log" />
