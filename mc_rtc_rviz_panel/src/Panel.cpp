@@ -25,6 +25,7 @@
 #include "ConnectionDialog.h"
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
+#include "PlotWidget.h"
 #include "SchemaWidget.h"
 
 #include <boost/filesystem.hpp>
@@ -133,6 +134,7 @@ Panel::Panel(QWidget * parent)
   marker_array_pub_ =
       mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::MarkerArray>("/mc_rtc_rviz", 0);
 #endif
+  qRegisterMetaType<uint64_t>("uint64_t");
   qRegisterMetaType<std::string>("std::string");
   qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
   qRegisterMetaType<WidgetId>("WidgetId");
@@ -145,6 +147,9 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<mc_rtc::gui::ForceConfig>("mc_rtc::gui::ForceConfig");
   qRegisterMetaType<mc_rtc::gui::LineConfig>("mc_rtc::gui::LineConfig");
   qRegisterMetaType<mc_rtc::gui::PointConfig>("mc_rtc::gui::PointConfig");
+  qRegisterMetaType<mc_rtc::gui::plot::Range>("mc_rtc::gui::plot::Range");
+  qRegisterMetaType<mc_rtc::gui::plot::Side>("mc_rtc::gui::plot::Side");
+  qRegisterMetaType<mc_rtc::gui::plot::Style>("mc_rtc::gui::plot::Style");
   qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   qRegisterMetaType<std::vector<std::vector<Eigen::Vector3d>>>("std::vector<std::vector<Eigen::Vector3d>>");
@@ -248,6 +253,21 @@ Panel::Panel(QWidget * parent)
           this,
           SLOT(got_form_data_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &,
                                          bool)));
+  connect(this, SIGNAL(signal_start_plot(uint64_t, const std::string &)), this,
+          SLOT(got_start_plot(uint64_t, const std::string &)));
+  connect(this, SIGNAL(signal_plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)), this,
+          SLOT(got_plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
+  connect(this, SIGNAL(signal_plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)),
+          this, SLOT(got_plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
+  connect(this, SIGNAL(signal_plot_setup_yaxis_right(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)),
+          this, SLOT(got_plot_setup_yaxis_right(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
+  connect(this,
+          SIGNAL(signal_plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
+                                   mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side)),
+          this,
+          SLOT(got_plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
+                              mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side)));
+  connect(this, SIGNAL(signal_end_plot(uint64_t)), this, SLOT(got_end_plot(uint64_t)));
   mc_control::ControllerClient::start();
 }
 
@@ -275,6 +295,38 @@ void Panel::got_stop()
   marker_array_pub_.publish(marker_array_);
   marker_array_.markers.clear();
 #endif
+  for(auto it = std::begin(plots_); it != std::end(plots_);)
+  {
+    if(!it->second->isVisible())
+    {
+      it = plots_.erase(it);
+    }
+    else
+    {
+      if(!it->second->seen())
+      {
+        it->second->mark_done();
+        inactive_plots_.push_back(it->second);
+        it = plots_.erase(it);
+      }
+      else
+      {
+        ++it;
+      }
+    }
+  }
+  for(auto it = std::begin(inactive_plots_); it != std::end(inactive_plots_);)
+  {
+    auto plot = *it;
+    if(!plot->isVisible())
+    {
+      it = inactive_plots_.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
   if(ros::ok())
   {
     ros::spinOnce();
@@ -475,6 +527,43 @@ void Panel::form_data_combo_input(const WidgetId & formId,
                                   bool send_index)
 {
   Q_EMIT signal_form_data_combo_input(formId, name, required, ref, send_index);
+}
+
+void Panel::start_plot(uint64_t id, const std::string & title)
+{
+  Q_EMIT signal_start_plot(id, title);
+}
+
+void Panel::plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  Q_EMIT signal_plot_setup_xaxis(id, legend, range);
+}
+
+void Panel::plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  Q_EMIT signal_plot_setup_yaxis_left(id, legend, range);
+}
+
+void Panel::plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  Q_EMIT signal_plot_setup_yaxis_right(id, legend, range);
+}
+
+void Panel::plot_point(uint64_t id,
+                       uint64_t did,
+                       const std::string & legend,
+                       double x,
+                       double y,
+                       mc_rtc::gui::Color color,
+                       mc_rtc::gui::plot::Style style,
+                       mc_rtc::gui::plot::Side side)
+{
+  Q_EMIT signal_plot_point(id, did, legend, x, y, color, style, side);
+}
+
+void Panel::end_plot(uint64_t id)
+{
+  Q_EMIT signal_end_plot(id);
 }
 
 void Panel::got_category(const std::vector<std::string> & parent, const std::string & category)
@@ -740,6 +829,61 @@ void Panel::got_form_data_combo_input(const WidgetId & formId,
 {
   auto & form = get_widget<FormWidget>(formId);
   form.element<form::DataComboInput>(name, required, data_, ref, send_index);
+}
+
+void Panel::got_start_plot(uint64_t id, const std::string & title)
+{
+  if(!plots_.count(id))
+  {
+    size_t i = 0;
+    for(const auto & p : plots_)
+    {
+      if(p.second->title() == title)
+      {
+        i += 1;
+      }
+    }
+    if(i == 0)
+    {
+      plots_[id] = new PlotWidget(title, title, this);
+    }
+    else
+    {
+      plots_[id] = new PlotWidget(title + " (" + std::to_string(i) + ")", title, this);
+    }
+  }
+}
+
+void Panel::got_plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  plots_[id]->setup_xaxis(legend, range);
+}
+
+void Panel::got_plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  plots_[id]->setup_yaxis_left(legend, range);
+}
+
+void Panel::got_plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  plots_[id]->setup_yaxis_right(legend, range);
+}
+
+void Panel::got_plot_point(uint64_t id,
+                           uint64_t did,
+                           const std::string & legend,
+                           double x,
+                           double y,
+                           mc_rtc::gui::Color color,
+                           mc_rtc::gui::plot::Style style,
+                           mc_rtc::gui::plot::Side side)
+{
+  plots_[id]->plot(did, legend, x, y, color, style, side);
+}
+
+void Panel::got_end_plot(uint64_t id)
+{
+  plots_[id]->refresh();
 }
 
 Panel::WidgetTree & Panel::get_category(const std::vector<std::string> & category)

@@ -60,6 +60,7 @@ set(HEADER_FILES
   ArrayLabelWidget.h
   ClientWidget.h
   LabelWidget.h
+  PlotWidget.h
   utils.h
 )
 
@@ -82,6 +83,7 @@ set(SOURCE_FILES
   LabelWidget.cpp
   NumberSliderWidget.cpp
   Panel.cpp
+  PlotWidget.cpp
   SchemaWidget.cpp
   ${MOC_FILES}
 )
@@ -115,9 +117,9 @@ if(NOT EXISTS "${MC_RTC_DOCDIR}")
 endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DMC_RTC_DOCDIR="${MC_RTC_DOCDIR}")
 if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
-  target_link_libraries(${PROJECT_NAME} PUBLIC Qt4::QtCore Qt4::QtGui)
+  target_link_libraries(${PROJECT_NAME} PUBLIC Qt4::QtCore Qt4::QtGui qwt)
 else()
-  target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
+  target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets qwt-qt5)
 endif()
 
 add_executable(mc_rtc_gui main.cpp)
