@@ -7,7 +7,7 @@
 #include "ClientWidget.h"
 #include "utils.h"
 
-#include <mc_rtc/GUITypes.h>
+#include <mc_rtc/gui/types.h>
 #include <mc_rtc/ros.h>
 
 #include <visualization_msgs/MarkerArray.h>

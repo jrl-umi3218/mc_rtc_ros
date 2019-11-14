@@ -8,12 +8,15 @@
 
 #include <mc_control/ControllerServer.h>
 #include <mc_rbdyn/RobotLoader.h>
-#include <mc_rtc/GUIState.h>
+#include <mc_rtc/gui.h>
 #include <mc_rtc/log/FlatLog.h>
 #include <mc_rtc/logging.h>
 #include <mc_rtc/ros.h>
 
 #include <ros/ros.h>
+
+#include <boost/filesystem.hpp>
+namespace bfs = boost::filesystem;
 
 #include <fstream>
 #include <memory>

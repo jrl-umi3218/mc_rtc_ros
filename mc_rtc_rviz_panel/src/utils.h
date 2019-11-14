@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <mc_rtc/GUITypes.h>
+#include <mc_rtc/gui/types.h>
 
 #include <SpaceVecAlg/SpaceVecAlg>
 
