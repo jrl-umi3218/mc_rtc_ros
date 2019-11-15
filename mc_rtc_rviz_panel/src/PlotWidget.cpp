@@ -53,6 +53,11 @@ PlotWidget::Curve::Curve(QwtPlot * plot, const std::string & legend, mc_rtc::gui
 
 PlotWidget::Curve::Curve(Curve && rhs)
 {
+  if(curve_)
+  {
+    curve_->detach();
+    delete curve_;
+  }
   curve_ = rhs.curve_;
   samples_ = rhs.samples_;
   rect_ = rhs.rect_;
@@ -64,6 +69,11 @@ PlotWidget::Curve & PlotWidget::Curve::operator=(Curve && rhs)
   if(&rhs == this)
   {
     return *this;
+  }
+  if(curve_)
+  {
+    curve_->detach();
+    delete curve_;
   }
   curve_ = rhs.curve_;
   samples_ = rhs.samples_;
@@ -125,6 +135,11 @@ PlotWidget::Polygon::Polygon(QwtPlot * plot, const std::string & legend, mc_rtc:
 
 PlotWidget::Polygon::Polygon(Polygon && rhs)
 {
+  if(item_)
+  {
+    item_->detach();
+    delete item_;
+  }
   poly_ = rhs.poly_;
   item_ = rhs.item_;
   polygon_ = rhs.polygon_;
@@ -140,6 +155,11 @@ PlotWidget::Polygon & PlotWidget::Polygon::operator=(Polygon && rhs)
   if(&rhs == this)
   {
     return *this;
+  }
+  if(item_)
+  {
+    item_->detach();
+    delete item_;
   }
   poly_ = rhs.poly_;
   item_ = rhs.item_;
@@ -195,33 +215,23 @@ PlotWidget::PolygonsVector::PolygonsVector(QwtPlot * plot, const std::string & l
 
 QRectF PlotWidget::PolygonsVector::update(const std::vector<PolygonDescription> & poly)
 {
-  QRectF rect;
   polygons_.resize(poly.size());
   for(size_t i = 0; i < polygons_.size(); ++i)
   {
     if(polygons_[i].poly() != poly[i])
     {
       polygons_[i] = Polygon(plot_, legend_, side_);
-      if(i == 0)
-      {
-        rect = polygons_[i].update(poly[i]);
-      }
-      else
-      {
-        rect = rect.united(polygons_[i].update(poly[i]));
-      }
+      polygons_[i].update(poly[i]);
     }
-    else
-    {
-      if(i == 0)
-      {
-        rect = polygons_[i].item()->boundingRect();
-      }
-      else
-      {
-        rect = rect.united(polygons_[i].item()->boundingRect());
-      }
-    }
+  }
+  QRectF rect;
+  if(polygons_.size())
+  {
+    rect = polygons_[0].item()->boundingRect();
+  }
+  for(size_t i = 1; i < polygons_.size(); ++i)
+  {
+    rect = rect.united(polygons_[i].item()->QwtPlotItem::boundingRect());
   }
   return rect;
 }

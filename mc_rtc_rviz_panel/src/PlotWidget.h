@@ -80,7 +80,7 @@ private:
     QRectF update(double x, double y, mc_rtc::gui::Color color, mc_rtc::gui::plot::Style style);
 
   private:
-    QwtPlotCurve * curve_;
+    QwtPlotCurve * curve_ = nullptr;
     QVector<QPointF> samples_;
     QRectF rect_;
   };
@@ -107,7 +107,7 @@ private:
 
   private:
     mc_rtc::gui::plot::PolygonDescription poly_;
-    QwtPlotShapeItem * item_;
+    QwtPlotShapeItem * item_ = nullptr;
     QPolygonF polygon_;
   };
   struct PolygonsVector
