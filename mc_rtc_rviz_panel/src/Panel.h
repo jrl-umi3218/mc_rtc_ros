@@ -213,6 +213,16 @@ protected:
                   mc_rtc::gui::Color color,
                   mc_rtc::gui::plot::Style style,
                   mc_rtc::gui::plot::Side side) override;
+  void plot_polygon(uint64_t id,
+                    uint64_t did,
+                    const std::string & legend,
+                    const mc_rtc::gui::plot::PolygonDescription & polygon,
+                    mc_rtc::gui::plot::Side side) override;
+  void plot_polygons(uint64_t id,
+                     uint64_t did,
+                     const std::string & legend,
+                     const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygon,
+                     mc_rtc::gui::plot::Side side) override;
   void end_plot(uint64_t id) override;
 
   template<typename T, typename... Args>
@@ -343,6 +353,16 @@ private slots:
                       mc_rtc::gui::Color color,
                       mc_rtc::gui::plot::Style style,
                       mc_rtc::gui::plot::Side side);
+  void got_plot_polygon(uint64_t id,
+                        uint64_t did,
+                        const std::string & legend,
+                        const mc_rtc::gui::plot::PolygonDescription & polygon,
+                        mc_rtc::gui::plot::Side side);
+  void got_plot_polygons(uint64_t id,
+                         uint64_t did,
+                         const std::string & legend,
+                         const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygon,
+                         mc_rtc::gui::plot::Side side);
   void got_end_plot(uint64_t id);
 signals:
   void signal_start();
@@ -430,6 +450,16 @@ signals:
                          mc_rtc::gui::Color color,
                          mc_rtc::gui::plot::Style style,
                          mc_rtc::gui::plot::Side side);
+  void signal_plot_polygon(uint64_t id,
+                           uint64_t did,
+                           const std::string & legend,
+                           const mc_rtc::gui::plot::PolygonDescription & polygon,
+                           mc_rtc::gui::plot::Side side);
+  void signal_plot_polygons(uint64_t id,
+                            uint64_t did,
+                            const std::string & legend,
+                            const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygon,
+                            mc_rtc::gui::plot::Side side);
   void signal_end_plot(uint64_t id);
 };
 

@@ -150,6 +150,9 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<mc_rtc::gui::plot::Range>("mc_rtc::gui::plot::Range");
   qRegisterMetaType<mc_rtc::gui::plot::Side>("mc_rtc::gui::plot::Side");
   qRegisterMetaType<mc_rtc::gui::plot::Style>("mc_rtc::gui::plot::Style");
+  qRegisterMetaType<mc_rtc::gui::plot::PolygonDescription>("mc_rtc::gui::plot::PolygonDescription");
+  qRegisterMetaType<std::vector<mc_rtc::gui::plot::PolygonDescription>>(
+      "std::vector<mc_rtc::gui::plot::PolygonDescription>");
   qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   qRegisterMetaType<std::vector<std::vector<Eigen::Vector3d>>>("std::vector<std::vector<Eigen::Vector3d>>");
@@ -267,6 +270,19 @@ Panel::Panel(QWidget * parent)
           this,
           SLOT(got_plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
                               mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side)));
+  connect(this,
+          SIGNAL(signal_plot_polygon(uint64_t, uint64_t, const std::string &,
+                                     const mc_rtc::gui::plot::PolygonDescription &, mc_rtc::gui::plot::Side)),
+          this,
+          SLOT(got_plot_polygon(uint64_t, uint64_t, const std::string &, const mc_rtc::gui::plot::PolygonDescription &,
+                                mc_rtc::gui::plot::Side)));
+  connect(
+      this,
+      SIGNAL(signal_plot_polygons(uint64_t, uint64_t, const std::string &,
+                                  const std::vector<mc_rtc::gui::plot::PolygonDescription> &, mc_rtc::gui::plot::Side)),
+      this,
+      SLOT(got_plot_polygons(uint64_t, uint64_t, const std::string &,
+                             const std::vector<mc_rtc::gui::plot::PolygonDescription> &, mc_rtc::gui::plot::Side)));
   connect(this, SIGNAL(signal_end_plot(uint64_t)), this, SLOT(got_end_plot(uint64_t)));
   mc_control::ControllerClient::start();
 }
@@ -559,6 +575,24 @@ void Panel::plot_point(uint64_t id,
                        mc_rtc::gui::plot::Side side)
 {
   Q_EMIT signal_plot_point(id, did, legend, x, y, color, style, side);
+}
+
+void Panel::plot_polygon(uint64_t id,
+                         uint64_t did,
+                         const std::string & legend,
+                         const mc_rtc::gui::plot::PolygonDescription & polygon,
+                         mc_rtc::gui::plot::Side side)
+{
+  Q_EMIT signal_plot_polygon(id, did, legend, polygon, side);
+}
+
+void Panel::plot_polygons(uint64_t id,
+                          uint64_t did,
+                          const std::string & legend,
+                          const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygons,
+                          mc_rtc::gui::plot::Side side)
+{
+  Q_EMIT signal_plot_polygons(id, did, legend, polygons, side);
 }
 
 void Panel::end_plot(uint64_t id)
@@ -879,6 +913,24 @@ void Panel::got_plot_point(uint64_t id,
                            mc_rtc::gui::plot::Side side)
 {
   plots_[id]->plot(did, legend, x, y, color, style, side);
+}
+
+void Panel::got_plot_polygon(uint64_t id,
+                             uint64_t did,
+                             const std::string & legend,
+                             const mc_rtc::gui::plot::PolygonDescription & polygon,
+                             mc_rtc::gui::plot::Side side)
+{
+  plots_[id]->plot(did, legend, polygon, side);
+}
+
+void Panel::got_plot_polygons(uint64_t id,
+                              uint64_t did,
+                              const std::string & legend,
+                              const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygons,
+                              mc_rtc::gui::plot::Side side)
+{
+  plots_[id]->plot(did, legend, polygons, side);
 }
 
 void Panel::got_end_plot(uint64_t id)
