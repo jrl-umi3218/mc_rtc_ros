@@ -1,5 +1,7 @@
 #include "PlotWidget.h"
 
+#include <qwt/qwt_symbol.h>
+
 namespace mc_rtc_rviz
 {
 
@@ -11,15 +13,20 @@ using Side = mc_rtc::gui::plot::Side;
 using Style = mc_rtc::gui::plot::Style;
 using PolygonDescription = mc_rtc::gui::plot::PolygonDescription;
 
+QColor convert(const Color & color)
+{
+  return QColor::fromRgbF(color.r, color.g, color.b, color.a);
+}
+
 template<typename T>
 bool setPen(T * curve, Color color, Style style)
 {
-  if(style == Style::Scatter)
+  if(style == Style::Point)
   {
     setPen(curve, color, Style::Dotted);
     return false;
   }
-  auto qc = QColor::fromRgbF(color.r, color.g, color.b, color.a);
+  auto qc = convert(color);
   auto pstyle = Qt::SolidLine;
   if(style == Style::Dashed)
   {
@@ -91,15 +98,22 @@ QRectF PlotWidget::Curve::update(double x, double y, mc_rtc::gui::Color color, m
     rect_.setBottom(y);
     rect_.setTop(y);
   }
-  samples_.push_back({x, y});
   if(setPen(curve_, color, style))
   {
     curve_->setStyle(QwtPlotCurve::Lines);
   }
   else
   {
-    curve_->setStyle(QwtPlotCurve::Dots);
+    samples_.resize(0);
+    auto symbol = new QwtSymbol(QwtSymbol::XCross);
+    auto qc = convert(color);
+    symbol->setColor(qc);
+    symbol->setPen(qc);
+    symbol->setSize(10);
+    curve_->setSymbol(symbol);
+    curve_->setStyle(QwtPlotCurve::NoCurve);
   }
+  samples_.push_back({x, y});
   curve_->setSamples(samples_);
   rect_.setLeft(std::min(x, rect_.left()));
   rect_.setRight(std::max(x, rect_.right()));
@@ -193,7 +207,7 @@ QRectF PlotWidget::Polygon::update(const PolygonDescription & poly)
   const auto & fill = poly_.fill();
   if(poly_.closed())
   {
-    item_->setBrush(QColor::fromRgbF(fill.r, fill.g, fill.b, fill.a));
+    item_->setBrush(convert(fill));
   }
   item_->setPolygon(polygon_);
   return polygon_.boundingRect();
