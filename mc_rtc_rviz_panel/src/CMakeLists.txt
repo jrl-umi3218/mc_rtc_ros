@@ -14,6 +14,7 @@ set(MOC_HEADERS
   FormWidget.h
   GenericInputWidget.h
   NumberSliderWidget.h
+  PlotWidget.h
   SchemaWidget.h
 )
 
@@ -60,7 +61,6 @@ set(HEADER_FILES
   ArrayLabelWidget.h
   ClientWidget.h
   LabelWidget.h
-  PlotWidget.h
   utils.h
 )
 

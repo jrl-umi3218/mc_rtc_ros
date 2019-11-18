@@ -263,6 +263,11 @@ PlotWidget::PlotWidget(const std::string & wtitle, const std::string & title, QW
   grid_->setPen(QColor::fromRgbF(0.0, 0.0, 0.0, 0.5), 0.0, Qt::DashLine);
   grid_->attach(plot_);
   layout->addWidget(plot_);
+  auto hlayout = new QHBoxLayout();
+  layout->addLayout(hlayout);
+  auto limit_xrange_cbox = new QCheckBox("Only show the last 10 seconds", this);
+  hlayout->addWidget(limit_xrange_cbox);
+  connect(limit_xrange_cbox, SIGNAL(stateChanged(int)), this, SLOT(limit_xrange_cbox_changed(int)));
   show();
 }
 
@@ -371,7 +376,7 @@ void PlotWidget::refresh()
     plot_->enableAxis(QwtPlot::yRight);
   }
   auto inf = mc_rtc::gui::plot::Range::inf;
-  auto setScale = [this, inf](int id, const mc_rtc::gui::plot::Range & range, double min, double max) {
+  auto setScale = [this, inf](int id, const mc_rtc::gui::plot::Range & range, double min, double max, bool limit) {
     min = range.min != -inf ? range.min : min;
     max = range.max != inf ? range.max : max;
     if(min == inf)
@@ -384,8 +389,15 @@ void PlotWidget::refresh()
       max = min + 0.1;
     }
     double r = max - min;
-    max += r * 0.05;
-    min -= r * 0.05;
+    if(limit && r > 10)
+    {
+      min = max - 10;
+    }
+    else
+    {
+      max += r * 0.05;
+      min -= r * 0.05;
+    }
     plot_->setAxisScale(id, min, max);
   };
   auto & yLRect = boundingRects_[Side::Left];
@@ -399,9 +411,9 @@ void PlotWidget::refresh()
   {
     xRect = yRRect;
   }
-  setScale(QwtPlot::xBottom, xRange_, xRect.left(), xRect.right());
-  setScale(QwtPlot::yLeft, yLeftRange_, yLRect.top(), yLRect.bottom());
-  setScale(QwtPlot::yRight, yRightRange_, yRRect.top(), yRRect.bottom());
+  setScale(QwtPlot::xBottom, xRange_, xRect.left(), xRect.right(), limit_xrange_);
+  setScale(QwtPlot::yLeft, yLeftRange_, yLRect.top(), yLRect.bottom(), false);
+  setScale(QwtPlot::yRight, yRightRange_, yRRect.top(), yRRect.bottom(), false);
   plot_->replot();
 }
 
@@ -424,6 +436,11 @@ void PlotWidget::closeEvent(QCloseEvent * event)
   {
     event->ignore();
   }
+}
+
+void PlotWidget::limit_xrange_cbox_changed(int state)
+{
+  limit_xrange_ = (state == Qt::Checked);
 }
 
 } // namespace mc_rtc_rviz

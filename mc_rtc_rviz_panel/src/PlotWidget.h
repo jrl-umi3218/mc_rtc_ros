@@ -19,6 +19,8 @@ namespace mc_rtc_rviz
 
 struct PlotWidget : public QDialog
 {
+  Q_OBJECT
+public:
   PlotWidget(const std::string & wtitle, const std::string & title, QWidget * parent);
 
   const std::string & title() const;
@@ -135,6 +137,9 @@ private:
   mc_rtc::gui::plot::Range xRange_;
   mc_rtc::gui::plot::Range yLeftRange_;
   mc_rtc::gui::plot::Range yRightRange_;
+  bool limit_xrange_ = false;
+private slots:
+  void limit_xrange_cbox_changed(int);
 };
 
 } // namespace mc_rtc_rviz
