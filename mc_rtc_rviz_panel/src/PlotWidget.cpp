@@ -1,5 +1,6 @@
 #include "PlotWidget.h"
 
+#include <qwt/qwt_plot_renderer.h>
 #include <qwt/qwt_symbol.h>
 
 namespace mc_rtc_rviz
@@ -263,11 +264,12 @@ PlotWidget::PlotWidget(const std::string & wtitle, const std::string & title, QW
   grid_->setPen(QColor::fromRgbF(0.0, 0.0, 0.0, 0.5), 0.0, Qt::DashLine);
   grid_->attach(plot_);
   layout->addWidget(plot_);
-  auto hlayout = new QHBoxLayout();
-  layout->addLayout(hlayout);
   auto limit_xrange_cbox = new QCheckBox("Only show the last 10 seconds", this);
-  hlayout->addWidget(limit_xrange_cbox);
+  layout->addWidget(limit_xrange_cbox);
   connect(limit_xrange_cbox, SIGNAL(stateChanged(int)), this, SLOT(limit_xrange_cbox_changed(int)));
+  auto save_button = new QPushButton("Save as...", this);
+  layout->addWidget(save_button);
+  connect(save_button, SIGNAL(released()), this, SLOT(save_button_released()));
   show();
 }
 
@@ -441,6 +443,12 @@ void PlotWidget::closeEvent(QCloseEvent * event)
 void PlotWidget::limit_xrange_cbox_changed(int state)
 {
   limit_xrange_ = (state == Qt::Checked);
+}
+
+void PlotWidget::save_button_released()
+{
+  QwtPlotRenderer renderer(this);
+  renderer.exportTo(plot_, (title_ + ".svg").c_str());
 }
 
 } // namespace mc_rtc_rviz

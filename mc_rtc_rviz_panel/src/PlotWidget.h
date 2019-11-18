@@ -140,6 +140,7 @@ private:
   bool limit_xrange_ = false;
 private slots:
   void limit_xrange_cbox_changed(int);
+  void save_button_released();
 };
 
 } // namespace mc_rtc_rviz
