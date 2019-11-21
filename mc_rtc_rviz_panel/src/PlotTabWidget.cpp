@@ -14,6 +14,7 @@ PlotDialog::PlotDialog(PlotWidget * plot, PlotTabWidget * parent, QString title)
   plot->show();
   show();
   connect(this, SIGNAL(rejected()), this, SLOT(handle_close()));
+  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_W), this, SLOT(reject()));
 }
 
 void PlotDialog::closeEvent(QCloseEvent * event)
