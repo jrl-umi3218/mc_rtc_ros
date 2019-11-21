@@ -51,11 +51,13 @@ if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
   qt4_wrap_cpp(MOC_FILES
     ${MOC_HEADERS}
   )
+  qt4_add_resources(QRC_FILES icons.qrc)
 else()
   find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
   qt5_wrap_cpp(MOC_FILES
     ${MOC_HEADERS}
   )
+  qt5_add_resources(QRC_FILES icons.qrc)
 endif()
 
 set(HEADER_FILES
@@ -88,6 +90,7 @@ set(SOURCE_FILES
   PlotTabWidget.cpp
   SchemaWidget.cpp
   ${MOC_FILES}
+  ${QRC_FILES}
 )
 
 if(NOT ${DISABLE_ROS})
