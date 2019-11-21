@@ -5,11 +5,43 @@
 namespace mc_rtc_rviz
 {
 
+PlotTabBar::PlotTabBar(QWidget * parent) : QTabBar(parent) {}
+
+void PlotTabBar::mouseReleaseEvent(QMouseEvent * event)
+{
+  if(event->button() == Qt::MiddleButton)
+  {
+    auto pos = event->pos();
+    for(int i = 0; i < count(); ++i)
+    {
+      if(tabRect(i).contains(pos))
+      {
+        auto tab = static_cast<QTabWidget *>(parent());
+        Q_EMIT tab->tabCloseRequested(i);
+        return;
+      }
+    }
+  }
+  QTabBar::mouseReleaseEvent(event);
+}
+
+PlotTab::PlotTab(QWidget * parent) : QTabWidget(parent)
+{
+  connect(this, SIGNAL(tabCloseRequested(int)), parent, SLOT(closeTabOnRequest(int)));
+}
+
+void PlotTab::setTabBar(QTabBar * bar)
+{
+  QTabWidget::setTabBar(bar);
+}
+
 PlotTabWidget::PlotTabWidget(const ClientWidgetParam & param) : ClientWidget(param)
 {
   auto layout = new QHBoxLayout(this);
-  tab_ = new QTabWidget(this);
+  tab_ = new PlotTab(this);
+  tab_->setTabBar(new PlotTabBar(tab_));
   layout->addWidget(tab_);
+  tab_->setTabsClosable(true);
 }
 
 void PlotTabWidget::resetSeen()
@@ -32,11 +64,6 @@ bool PlotTabWidget::wasSeen()
     {
       ++it;
     }
-  }
-  for(auto it = std::begin(inactive_plots_); it != std::end(inactive_plots_);)
-  {
-    auto plot = *it;
-    ++it;
   }
   return (plots_.size() + inactive_plots_.size()) != 0;
 }
@@ -61,6 +88,7 @@ void PlotTabWidget::start_plot(uint64_t id, const std::string & title)
     }
     plots_[id] = new PlotWidget(title, this);
     tab_->addTab(plots_[id], tabTitle.c_str());
+    tab_->setCurrentIndex(tab_->count() - 1);
   }
 }
 
@@ -116,6 +144,20 @@ void PlotTabWidget::plot_polygons(uint64_t id,
 void PlotTabWidget::end_plot(uint64_t id)
 {
   plots_[id]->refresh();
+}
+
+void PlotTabWidget::closeTabOnRequest(int i)
+{
+  auto plot = static_cast<PlotWidget *>(tab_->widget(i));
+  for(auto it = inactive_plots_.begin(); it != inactive_plots_.end(); ++it)
+  {
+    if(*it == plot)
+    {
+      inactive_plots_.erase(it);
+      delete plot;
+      return;
+    }
+  }
 }
 
 } // namespace mc_rtc_rviz

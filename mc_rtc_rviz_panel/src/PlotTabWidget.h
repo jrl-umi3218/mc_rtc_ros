@@ -13,6 +13,26 @@ namespace mc_rtc_rviz
 
 struct PlotWidget;
 
+struct PlotTabBar : public QTabBar
+{
+  Q_OBJECT
+public:
+  PlotTabBar(QWidget * parent);
+
+  void mouseReleaseEvent(QMouseEvent * event) override;
+
+private:
+};
+
+struct PlotTab : public QTabWidget
+{
+  Q_OBJECT
+public:
+  PlotTab(QWidget * parent);
+
+  void setTabBar(QTabBar * bar);
+};
+
 struct PlotTabWidget : public ClientWidget
 {
   Q_OBJECT
@@ -56,13 +76,15 @@ public:
 
 private:
   /** Holds plots in tabs */
-  QTabWidget * tab_;
+  PlotTab * tab_;
   /** Plots */
   std::unordered_map<uint64_t, PlotWidget *> plots_;
   /** Inactive plots */
   std::vector<PlotWidget *> inactive_plots_;
   /** Seen plots this round */
   std::unordered_map<uint64_t, bool> seen_;
+private slots:
+  void closeTabOnRequest(int i);
 };
 
 } // namespace mc_rtc_rviz
