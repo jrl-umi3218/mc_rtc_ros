@@ -65,8 +65,6 @@ struct MarkerArray
 namespace mc_rtc_rviz
 {
 
-struct PlotWidget;
-
 class Panel : public CategoryWidget, public mc_control::ControllerClient
 {
   Q_OBJECT
@@ -91,6 +89,7 @@ protected:
   struct WidgetTree
   {
     ClientWidget * parent = nullptr;
+    void start();
     void clean();
     std::map<std::string, WidgetTree> sub_trees_;
   };
@@ -243,7 +242,7 @@ protected:
       parent->addWidget(w_ptr);
     }
     auto & w = static_cast<T &>(*w_ptr);
-    w.seen(true);
+    w.seen();
     latestWidget_ = w_ptr;
     return w;
   }
@@ -263,10 +262,6 @@ private:
   mutable mc_rtc::Configuration config_;
   std::string sub_uri_;
   std::string push_uri_;
-  /** Plots */
-  std::unordered_map<uint64_t, PlotWidget *> plots_;
-  /** Inactive plots */
-  std::vector<PlotWidget *> inactive_plots_;
 private slots:
   void contextMenu(const QPoint & pos);
   void contextMenu_editConnection();

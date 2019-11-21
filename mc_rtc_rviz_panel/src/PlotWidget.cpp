@@ -158,6 +158,7 @@ PlotWidget::Polygon::Polygon(Polygon && rhs)
   poly_ = rhs.poly_;
   item_ = rhs.item_;
   polygon_ = rhs.polygon_;
+  rect_ = rhs.rect_;
   rhs.item_ = nullptr;
   if(item_)
   {
@@ -179,6 +180,7 @@ PlotWidget::Polygon & PlotWidget::Polygon::operator=(Polygon && rhs)
   poly_ = rhs.poly_;
   item_ = rhs.item_;
   polygon_ = rhs.polygon_;
+  rect_ = rhs.rect_;
   rhs.item_ = nullptr;
   if(item_)
   {
@@ -191,13 +193,29 @@ QRectF PlotWidget::Polygon::update(const PolygonDescription & poly)
 {
   if(poly_ == poly)
   {
-    return polygon_.boundingRect();
+    return rect_;
   }
   poly_ = poly;
   polygon_.clear();
+  if(poly_.points().size())
+  {
+    const auto & p = poly_.points()[0];
+    rect_.setLeft(p[0]);
+    rect_.setRight(p[0]);
+    rect_.setTop(p[1]);
+    rect_.setBottom(p[1]);
+  }
+  else
+  {
+    rect_ = QRectF();
+  }
   for(const auto & p : poly_.points())
   {
     polygon_ << QPointF{p[0], p[1]};
+    rect_.setLeft(std::min(p[0], rect_.left()));
+    rect_.setRight(std::max(p[0], rect_.right()));
+    rect_.setBottom(std::max(p[1], rect_.bottom()));
+    rect_.setTop(std::min(p[1], rect_.top()));
   }
   if(poly_.closed())
   {
@@ -211,7 +229,7 @@ QRectF PlotWidget::Polygon::update(const PolygonDescription & poly)
     item_->setBrush(convert(fill));
   }
   item_->setPolygon(polygon_);
-  return polygon_.boundingRect();
+  return rect_;
 }
 
 PlotWidget::Polygon::~Polygon()
@@ -242,19 +260,17 @@ QRectF PlotWidget::PolygonsVector::update(const std::vector<PolygonDescription> 
   QRectF rect;
   if(polygons_.size())
   {
-    rect = polygons_[0].item()->boundingRect();
+    rect = polygons_[0].rect();
   }
   for(size_t i = 1; i < polygons_.size(); ++i)
   {
-    rect = rect.united(polygons_[i].item()->QwtPlotItem::boundingRect());
+    rect = rect.united(polygons_[i].rect());
   }
   return rect;
 }
 
-PlotWidget::PlotWidget(const std::string & wtitle, const std::string & title, QWidget * parent)
-: QDialog(parent), title_(title)
+PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(parent), title_(title)
 {
-  setWindowTitle(wtitle.c_str());
   auto layout = new QVBoxLayout(this);
   plot_ = new QwtPlot(QwtText(title.c_str()), this);
   plot_->setCanvasBackground(Qt::white);
@@ -368,7 +384,6 @@ void PlotWidget::update(Side side, QRectF rect)
 
 void PlotWidget::refresh()
 {
-  seen_ = true;
   if(!has_left_plot_)
   {
     plot_->enableAxis(QwtPlot::yLeft, false);
@@ -395,11 +410,6 @@ void PlotWidget::refresh()
     {
       min = max - 10;
     }
-    else
-    {
-      max += r * 0.05;
-      min -= r * 0.05;
-    }
     plot_->setAxisScale(id, min, max);
   };
   auto & yLRect = boundingRects_[Side::Left];
@@ -417,27 +427,6 @@ void PlotWidget::refresh()
   setScale(QwtPlot::yLeft, yLeftRange_, yLRect.top(), yLRect.bottom(), false);
   setScale(QwtPlot::yRight, yRightRange_, yRRect.top(), yRRect.bottom(), false);
   plot_->replot();
-}
-
-void PlotWidget::mark_done()
-{
-  if(!done_)
-  {
-    done_ = true;
-    setWindowTitle(windowTitle() + " (DONE)");
-  }
-}
-
-void PlotWidget::closeEvent(QCloseEvent * event)
-{
-  if(done_)
-  {
-    event->accept();
-  }
-  else
-  {
-    event->ignore();
-  }
 }
 
 void PlotWidget::limit_xrange_cbox_changed(int state)

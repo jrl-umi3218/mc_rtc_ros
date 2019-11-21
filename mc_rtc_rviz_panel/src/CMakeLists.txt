@@ -15,6 +15,7 @@ set(MOC_HEADERS
   GenericInputWidget.h
   NumberSliderWidget.h
   PlotWidget.h
+  PlotTabWidget.h
   SchemaWidget.h
 )
 
@@ -84,6 +85,7 @@ set(SOURCE_FILES
   NumberSliderWidget.cpp
   Panel.cpp
   PlotWidget.cpp
+  PlotTabWidget.cpp
   SchemaWidget.cpp
   ${MOC_FILES}
 )

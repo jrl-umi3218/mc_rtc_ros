@@ -17,11 +17,11 @@
 namespace mc_rtc_rviz
 {
 
-struct PlotWidget : public QDialog
+struct PlotWidget : public QWidget
 {
   Q_OBJECT
 public:
-  PlotWidget(const std::string & wtitle, const std::string & title, QWidget * parent);
+  PlotWidget(const std::string & title, QWidget * parent);
 
   const std::string & title() const;
 
@@ -50,20 +50,6 @@ public:
             mc_rtc::gui::plot::Side side);
 
   void refresh();
-
-  bool seen()
-  {
-    if(seen_)
-    {
-      seen_ = false;
-      return true;
-    }
-    return false;
-  }
-
-  void mark_done();
-
-  void closeEvent(QCloseEvent * event) override;
 
 private:
   std::string title_;
@@ -107,10 +93,16 @@ private:
       return poly_;
     }
 
+    const QRectF & rect() const
+    {
+      return rect_;
+    }
+
   private:
     mc_rtc::gui::plot::PolygonDescription poly_;
     QwtPlotShapeItem * item_ = nullptr;
     QPolygonF polygon_;
+    QRectF rect_;
   };
   struct PolygonsVector
   {
@@ -130,8 +122,6 @@ private:
   std::unordered_map<uint64_t, Polygon> polygons_;
   std::unordered_map<uint64_t, PolygonsVector> polygonsVectors_;
   std::unordered_map<mc_rtc::gui::plot::Side, QRectF> boundingRects_;
-  bool seen_ = true;
-  bool done_ = false;
   bool has_left_plot_ = false;
   bool has_right_plot_ = false;
   mc_rtc::gui::plot::Range xRange_;

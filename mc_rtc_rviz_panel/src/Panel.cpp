@@ -25,7 +25,7 @@
 #include "ConnectionDialog.h"
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
-#include "PlotWidget.h"
+#include "PlotTabWidget.h"
 #include "SchemaWidget.h"
 
 #include <boost/filesystem.hpp>
@@ -294,6 +294,7 @@ void Panel::started()
 
 void Panel::got_start()
 {
+  tree_.start();
   latestWidget_ = nullptr;
 }
 
@@ -311,38 +312,6 @@ void Panel::got_stop()
   marker_array_pub_.publish(marker_array_);
   marker_array_.markers.clear();
 #endif
-  for(auto it = std::begin(plots_); it != std::end(plots_);)
-  {
-    if(!it->second->isVisible())
-    {
-      it = plots_.erase(it);
-    }
-    else
-    {
-      if(!it->second->seen())
-      {
-        it->second->mark_done();
-        inactive_plots_.push_back(it->second);
-        it = plots_.erase(it);
-      }
-      else
-      {
-        ++it;
-      }
-    }
-  }
-  for(auto it = std::begin(inactive_plots_); it != std::end(inactive_plots_);)
-  {
-    auto plot = *it;
-    if(!plot->isVisible())
-    {
-      it = inactive_plots_.erase(it);
-    }
-    else
-    {
-      ++it;
-    }
-  }
   if(ros::ok())
   {
     ros::spinOnce();
@@ -609,7 +578,7 @@ void Panel::got_category(const std::vector<std::string> & parent, const std::str
     tree.parent->addWidget(cat);
     tree.sub_trees_[category].parent = cat;
   }
-  tree.sub_trees_[category].parent->seen(true);
+  tree.sub_trees_[category].parent->seen();
 }
 
 void Panel::got_label(const WidgetId & id, const std::string & data)
@@ -867,40 +836,27 @@ void Panel::got_form_data_combo_input(const WidgetId & formId,
 
 void Panel::got_start_plot(uint64_t id, const std::string & title)
 {
-  if(!plots_.count(id))
-  {
-    size_t i = 0;
-    for(const auto & p : plots_)
-    {
-      if(p.second->title() == title)
-      {
-        i += 1;
-      }
-    }
-    if(i == 0)
-    {
-      plots_[id] = new PlotWidget(title, title, this);
-    }
-    else
-    {
-      plots_[id] = new PlotWidget(title + " (" + std::to_string(i) + ")", title, this);
-    }
-  }
+  got_category({}, "Plots");
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.start_plot(id, title);
 }
 
 void Panel::got_plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
 {
-  plots_[id]->setup_xaxis(legend, range);
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_setup_xaxis(id, legend, range);
 }
 
 void Panel::got_plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
 {
-  plots_[id]->setup_yaxis_left(legend, range);
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_setup_yaxis_left(id, legend, range);
 }
 
 void Panel::got_plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
 {
-  plots_[id]->setup_yaxis_right(legend, range);
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_setup_yaxis_right(id, legend, range);
 }
 
 void Panel::got_plot_point(uint64_t id,
@@ -912,7 +868,8 @@ void Panel::got_plot_point(uint64_t id,
                            mc_rtc::gui::plot::Style style,
                            mc_rtc::gui::plot::Side side)
 {
-  plots_[id]->plot(did, legend, x, y, color, style, side);
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_point(id, did, legend, x, y, color, style, side);
 }
 
 void Panel::got_plot_polygon(uint64_t id,
@@ -921,7 +878,8 @@ void Panel::got_plot_polygon(uint64_t id,
                              const mc_rtc::gui::plot::PolygonDescription & polygon,
                              mc_rtc::gui::plot::Side side)
 {
-  plots_[id]->plot(did, legend, polygon, side);
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_polygon(id, did, legend, polygon, side);
 }
 
 void Panel::got_plot_polygons(uint64_t id,
@@ -930,12 +888,14 @@ void Panel::got_plot_polygons(uint64_t id,
                               const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygons,
                               mc_rtc::gui::plot::Side side)
 {
-  plots_[id]->plot(did, legend, polygons, side);
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_polygons(id, did, legend, polygons, side);
 }
 
 void Panel::got_end_plot(uint64_t id)
 {
-  plots_[id]->refresh();
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.end_plot(id);
 }
 
 Panel::WidgetTree & Panel::get_category(const std::vector<std::string> & category)
@@ -946,6 +906,18 @@ Panel::WidgetTree & Panel::get_category(const std::vector<std::string> & categor
     ret = &(ret->sub_trees_[c]);
   }
   return *ret;
+}
+
+void Panel::WidgetTree::start()
+{
+  if(parent)
+  {
+    parent->resetSeen();
+  }
+  for(auto & st : sub_trees_)
+  {
+    st.second.start();
+  }
 }
 
 void Panel::WidgetTree::clean()

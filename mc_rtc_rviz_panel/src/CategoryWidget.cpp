@@ -66,7 +66,7 @@ void CategoryWidget::addWidget(ClientWidget * w)
 
 void CategoryWidget::removeWidget(ClientWidget * w)
 {
-  w->seen(false);
+  w->resetSeen();
   if(dynamic_cast<CategoryWidget *>(w))
   {
     for(int i = 0; i < tabs_->count(); ++i)
@@ -105,7 +105,7 @@ size_t CategoryWidget::clean()
   for(auto it = widgets_.begin(); it != widgets_.end();)
   {
     ClientWidget * w = *it;
-    if(!w->seen())
+    if(!w->wasSeen())
     {
       removeWidget(w);
     }
@@ -117,13 +117,32 @@ size_t CategoryWidget::clean()
   return widgets_.size();
 }
 
+bool CategoryWidget::wasSeen()
+{
+  // A category is seen if at least one element was seen
+  bool s = false;
+  for(auto w : widgets_)
+  {
+    s = w->wasSeen() || s;
+  }
+  return s;
+}
+
+void CategoryWidget::resetSeen()
+{
+  for(auto w : widgets_)
+  {
+    w->resetSeen();
+  }
+}
+
 ClientWidget * CategoryWidget::widget(const std::string & name)
 {
   for(auto & w : widgets_)
   {
     if(w->name() == name)
     {
-      w->seen(true);
+      w->seen();
       return w;
     }
   }

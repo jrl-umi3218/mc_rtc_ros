@@ -25,22 +25,12 @@ ClientWidget::ClientWidget(const ClientWidgetParam & params)
 {
 }
 
-bool ClientWidget::seen()
-{
-  if(seen_)
-  {
-    seen_ = false;
-    return true;
-  }
-  return false;
-}
-
-void ClientWidget::addWidget(ClientWidget * w)
+void ClientWidget::addWidget(ClientWidget *)
 {
   throw(std::runtime_error("This is only implemented for container widgets"));
 }
 
-void ClientWidget::removeWidget(ClientWidget * w)
+void ClientWidget::removeWidget(ClientWidget *)
 {
   throw(std::runtime_error("This is only implemented for container widgets"));
 }
