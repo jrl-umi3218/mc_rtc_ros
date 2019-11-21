@@ -85,6 +85,9 @@ private:
   std::unordered_map<uint64_t, bool> seen_;
 private slots:
   void closeTabOnRequest(int i);
+  void previousTab();
+  void nextTab();
+  void closeCurrentTab();
 };
 
 } // namespace mc_rtc_rviz

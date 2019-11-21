@@ -42,6 +42,9 @@ PlotTabWidget::PlotTabWidget(const ClientWidgetParam & param) : ClientWidget(par
   tab_->setTabBar(new PlotTabBar(tab_));
   layout->addWidget(tab_);
   tab_->setTabsClosable(true);
+  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageUp), this, SLOT(previousTab()));
+  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageDown), this, SLOT(nextTab()));
+  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_W), this, SLOT(closeCurrentTab()));
 }
 
 void PlotTabWidget::resetSeen()
@@ -158,6 +161,35 @@ void PlotTabWidget::closeTabOnRequest(int i)
       return;
     }
   }
+}
+
+void PlotTabWidget::previousTab()
+{
+  if(tab_->currentIndex() != 0)
+  {
+    tab_->setCurrentIndex(tab_->currentIndex() - 1);
+  }
+  else
+  {
+    tab_->setCurrentIndex(tab_->count() - 1);
+  }
+}
+
+void PlotTabWidget::nextTab()
+{
+  if(tab_->currentIndex() != tab_->count() - 1)
+  {
+    tab_->setCurrentIndex(tab_->currentIndex() + 1);
+  }
+  else
+  {
+    tab_->setCurrentIndex(0);
+  }
+}
+
+void PlotTabWidget::closeCurrentTab()
+{
+  Q_EMIT tab_->tabCloseRequested(tab_->currentIndex());
 }
 
 } // namespace mc_rtc_rviz
