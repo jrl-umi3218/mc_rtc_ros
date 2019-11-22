@@ -10,9 +10,10 @@
 #include <qwt/qwt_plot.h>
 #include <qwt/qwt_plot_curve.h>
 #include <qwt/qwt_plot_grid.h>
-#include <qwt/qwt_plot_shapeitem.h>
 
 #include <unordered_map>
+
+struct QwtPlotShapeItem;
 
 namespace mc_rtc_rviz
 {

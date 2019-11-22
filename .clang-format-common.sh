@@ -11,5 +11,5 @@ else
 fi
 
 # Find all source files in the project minus those that are auto-generated or we do not maintain
-src_files=`find . -name '*.cpp' -or -name '*.h' -or -name '*.hpp'|grep -Ev "imgui"`
+src_files=`find . -name '*.cpp' -or -name '*.h' -or -name '*.hpp'|grep -Ev "imgui"|grep -Ev "qwt_"`
 
