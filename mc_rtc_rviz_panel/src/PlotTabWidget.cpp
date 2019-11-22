@@ -5,9 +5,45 @@
 namespace mc_rtc_rviz
 {
 
+struct TabStyle : public QProxyStyle
+{
+  TabStyle(PlotTabBar * bar, PlotTabWidget * tab) : bar_(bar), tab_(tab) {}
+
+  void drawControl(ControlElement element,
+                   const QStyleOption * option,
+                   QPainter * painter,
+                   const QWidget * widget = nullptr) const override
+  {
+    if(element == QStyle::CE_TabBarTab)
+    {
+      auto idx = bar_->tabAt(option->rect.center());
+      auto plot = static_cast<PlotWidget *>(tab_->tab()->widget(idx));
+      if(!tab_->is_done(plot))
+      {
+        QFont font = widget->font();
+        font.setBold(true);
+        painter->save();
+        painter->setFont(font);
+        QProxyStyle::drawControl(element, option, painter, widget);
+        painter->restore();
+        return;
+      }
+    }
+    QProxyStyle::drawControl(element, option, painter, widget);
+  }
+
+private:
+  PlotTabBar * bar_;
+  PlotTabWidget * tab_;
+};
+
 PlotDialog::PlotDialog(PlotWidget * plot, PlotTabWidget * parent, QString title)
 : QDialog(parent), plot_(plot), parent_(parent)
 {
+  if(parent->is_done(plot))
+  {
+    title += " (DONE)";
+  }
   setWindowTitle(title);
   auto layout = new QVBoxLayout(this);
   layout->addWidget(plot);
@@ -62,7 +98,32 @@ void CloseTabButton::clicked()
   Q_EMIT tab_->tab()->tabCloseRequested(index_);
 }
 
-PlotTabBar::PlotTabBar(QWidget * parent, PlotTabWidget * tab) : QTabBar(parent), tab_(tab) {}
+PlotTabBar::PlotTabBar(QWidget * parent, PlotTabWidget * tab) : QTabBar(parent), tab_(tab)
+{
+  this->setStyle(new TabStyle(this, tab_));
+}
+
+QSize PlotTabBar::tabSizeHint(int index) const
+{
+  auto plot = static_cast<PlotWidget *>(tab_->tab()->widget(index));
+  if(!tab_->is_done(plot))
+  {
+    auto s = QTabBar::tabSizeHint(index);
+
+    const QFontMetrics fm(font());
+    const int w = fm.width(tabText(index));
+    const int h = fm.height();
+
+    QFont f = font();
+    f.setBold(true);
+    const QFontMetrics bfm(f);
+    const int bw = bfm.width(tabText(index));
+    const int bh = bfm.height();
+
+    return {s.width() + bw - w, s.height() + bh - h};
+  }
+  return QTabBar::tabSizeHint(index);
+}
 
 void PlotTabBar::mouseReleaseEvent(QMouseEvent * event)
 {
@@ -138,9 +199,11 @@ bool PlotTabWidget::wasSeen()
     if(!seen_.count(it->first))
     {
       auto idx = tab_->indexOf(it->second);
+      auto plot = it->second;
+      inactive_plots_.push_back(it->second);
+      it = plots_.erase(it);
       if(idx != -1)
       {
-        tab_->setTabText(idx, tab_->tabText(idx) + " (DONE)");
         tab_->tabBar()->setTabButton(idx, QTabBar::RightSide, new CloseTabButton(idx, this, tab_->tabBar()));
       }
       else
@@ -148,14 +211,12 @@ bool PlotTabWidget::wasSeen()
         for(size_t i = 0; i < dialogs_.size(); ++i)
         {
           auto & diag = dialogs_[i];
-          if(diag->plot() == it->second)
+          if(diag->plot() == plot)
           {
             diag->setWindowTitle(diag->windowTitle() + " (DONE)");
           }
         }
       }
-      inactive_plots_.push_back(it->second);
-      it = plots_.erase(it);
     }
     else
     {
@@ -287,7 +348,12 @@ void PlotTabWidget::popTab(int idx)
 void PlotTabWidget::close_dialog(PlotDialog * dialog)
 {
   auto plot = dialog->plot();
-  add_plot_widget(dialog->windowTitle(), plot);
+  auto title = dialog->windowTitle();
+  if(title.endsWith(" (DONE)"))
+  {
+    title.chop(strlen(" (DONE)"));
+  }
+  add_plot_widget(title, plot);
   for(auto it = dialogs_.begin(); it != dialogs_.end(); ++it)
   {
     if(*it == dialog)
@@ -296,6 +362,11 @@ void PlotTabWidget::close_dialog(PlotDialog * dialog)
       return;
     }
   }
+}
+
+bool PlotTabWidget::is_done(PlotWidget * widget)
+{
+  return std::find(inactive_plots_.begin(), inactive_plots_.end(), widget) != inactive_plots_.end();
 }
 
 bool PlotTabWidget::remove_plot_widget(PlotWidget * widget)
@@ -315,7 +386,7 @@ bool PlotTabWidget::remove_plot_widget(PlotWidget * widget)
 void PlotTabWidget::add_plot_widget(QString title, PlotWidget * widget)
 {
   tab_->addTab(widget, title);
-  if(title.endsWith("(DONE)"))
+  if(is_done(widget))
   {
     auto idx = tab_->count() - 1;
     tab_->tabBar()->setTabButton(idx, QTabBar::RightSide, new CloseTabButton(idx, this, tab_->tabBar()));

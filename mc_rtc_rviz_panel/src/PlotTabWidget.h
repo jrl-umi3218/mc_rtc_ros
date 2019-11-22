@@ -56,6 +56,9 @@ public:
 
   void tabLayoutChange() override;
 
+protected:
+  QSize tabSizeHint(int index) const override;
+
 private:
   PlotTabWidget * tab_;
 };
@@ -129,6 +132,8 @@ public:
                      mc_rtc::gui::plot::Side side);
 
   void end_plot(uint64_t id);
+
+  bool is_done(PlotWidget * widget);
 
   bool remove_plot_widget(PlotWidget * widget);
 
