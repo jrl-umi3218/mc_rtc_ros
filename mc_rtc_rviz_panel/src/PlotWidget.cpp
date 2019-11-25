@@ -1,10 +1,10 @@
 #include "PlotWidget.h"
 
 #include <qwt/qwt_global.h>
-#if QWT_VERSION > 0x060100
+#if QWT_VERSION >= 0x060100
 #  include <qwt/qwt_plot_shapeitem.h>
 #else
-#  include "qwt_plot_shapeitem.cpp"
+#  error "This requires Qwt >= 6.1.0 to build"
 #endif
 
 #include <qwt/qwt_plot_renderer.h>

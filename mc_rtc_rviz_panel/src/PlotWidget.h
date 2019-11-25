@@ -11,6 +11,7 @@
 #include <qwt/qwt_plot_curve.h>
 #include <qwt/qwt_plot_grid.h>
 
+#include <map>
 #include <unordered_map>
 
 struct QwtPlotShapeItem;
@@ -122,7 +123,7 @@ private:
   std::unordered_map<uint64_t, Curve> curves_;
   std::unordered_map<uint64_t, Polygon> polygons_;
   std::unordered_map<uint64_t, PolygonsVector> polygonsVectors_;
-  std::unordered_map<mc_rtc::gui::plot::Side, QRectF> boundingRects_;
+  std::map<mc_rtc::gui::plot::Side, QRectF> boundingRects_;
   bool has_left_plot_ = false;
   bool has_right_plot_ = false;
   mc_rtc::gui::plot::Range xRange_;

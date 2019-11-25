@@ -70,6 +70,10 @@ public:
   PlotTab(QWidget * parent);
 
   void setTabBar(QTabBar * bar);
+
+  using QTabWidget::tabCloseRequested;
+
+  using QTabWidget::tabBar;
 };
 
 struct PlotDialog : public QDialog

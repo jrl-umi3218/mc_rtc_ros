@@ -134,7 +134,7 @@ void PlotTabBar::mouseReleaseEvent(QMouseEvent * event)
     {
       if(tabRect(i).contains(pos))
       {
-        auto tab = static_cast<QTabWidget *>(parent());
+        auto tab = static_cast<PlotTab *>(parent());
         Q_EMIT tab->tabCloseRequested(i);
         return;
       }

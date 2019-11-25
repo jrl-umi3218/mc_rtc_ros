@@ -30,6 +30,13 @@ build_gcc:
     - export ROS_GIT_DEPENDENCIES=""
     - . /tmp/_ci/catkin_dep_ws/devel/setup.sh
     - ./.jrl-ci/run before_install
+    - cd $HOME
+    - wget https://sourceforge.net/projects/qwt/files/qwt/6.1.4/qwt-6.1.4.tar.bz2
+    - tar xjf qwt-6.1.4.tar.bz2
+    - cd qwt-6.1.4
+    - sed -i -e's@QWT_INSTALL_PREFIX    = /usr/local/qwt-$$QWT_VERSION@QWT_INSTALL_PREFIX = /usr/local@' qwtconfig.pri
+    - sed -i -e's@QWT_INSTALL_HEADERS   = $${QWT_INSTALL_PREFIX}/include@QWT_INSTALL_HEADERS = $${QWT_INSTALL_PREFIX}/include/qwt@' qwtconfig.pri
+    - qmake && make && make install
     - ./.jrl-ci/run build
     - ./.jrl-ci/run after_success
   tags:
