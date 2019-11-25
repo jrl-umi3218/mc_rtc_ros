@@ -37,6 +37,7 @@ build_gcc:
     - sed -i -e's@QWT_INSTALL_PREFIX    = /usr/local/qwt-$$QWT_VERSION@QWT_INSTALL_PREFIX = /usr/local@' qwtconfig.pri
     - sed -i -e's@QWT_INSTALL_HEADERS   = $${QWT_INSTALL_PREFIX}/include@QWT_INSTALL_HEADERS = $${QWT_INSTALL_PREFIX}/include/qwt@' qwtconfig.pri
     - qmake && make && make install
+    - cd $CI_PROJECT_DIR
     - ./.jrl-ci/run build
     - ./.jrl-ci/run after_success
   tags:
