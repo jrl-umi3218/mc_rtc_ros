@@ -26,7 +26,7 @@ build_gcc:
   stage: build
   script:
     - export APT_DEPENDENCIES=""
-    - export GIT_DEPENDENCIES="git@gite.lirmm.fr:multi-contact/mc_rtc#topic/LivePlotting"
+    - export GIT_DEPENDENCIES="git@gite.lirmm.fr:multi-contact/mc_rtc"
     - export ROS_GIT_DEPENDENCIES=""
     - . /tmp/_ci/catkin_dep_ws/devel/setup.sh
     - ./.jrl-ci/run before_install
