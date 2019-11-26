@@ -89,6 +89,7 @@ protected:
   struct WidgetTree
   {
     ClientWidget * parent = nullptr;
+    void start();
     void clean();
     std::map<std::string, WidgetTree> sub_trees_;
   };
@@ -199,6 +200,30 @@ protected:
                              const std::vector<std::string> & ref,
                              bool send_index) override;
 
+  void start_plot(uint64_t id, const std::string & title) override;
+  void plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range) override;
+  void plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range) override;
+  void plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range) override;
+  void plot_point(uint64_t id,
+                  uint64_t did,
+                  const std::string & legend,
+                  double x,
+                  double y,
+                  mc_rtc::gui::Color color,
+                  mc_rtc::gui::plot::Style style,
+                  mc_rtc::gui::plot::Side side) override;
+  void plot_polygon(uint64_t id,
+                    uint64_t did,
+                    const std::string & legend,
+                    const mc_rtc::gui::plot::PolygonDescription & polygon,
+                    mc_rtc::gui::plot::Side side) override;
+  void plot_polygons(uint64_t id,
+                     uint64_t did,
+                     const std::string & legend,
+                     const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygon,
+                     mc_rtc::gui::plot::Side side) override;
+  void end_plot(uint64_t id) override;
+
   template<typename T, typename... Args>
   T & get_widget(const WidgetId & id, Args &&... args)
   {
@@ -217,7 +242,7 @@ protected:
       parent->addWidget(w_ptr);
     }
     auto & w = static_cast<T &>(*w_ptr);
-    w.seen(true);
+    w.seen();
     latestWidget_ = w_ptr;
     return w;
   }
@@ -311,6 +336,29 @@ private slots:
                                  bool required,
                                  const std::vector<std::string> & ref,
                                  bool send_index);
+  void got_start_plot(uint64_t id, const std::string & title);
+  void got_plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range);
+  void got_plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range);
+  void got_plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range);
+  void got_plot_point(uint64_t id,
+                      uint64_t did,
+                      const std::string & legend,
+                      double x,
+                      double y,
+                      mc_rtc::gui::Color color,
+                      mc_rtc::gui::plot::Style style,
+                      mc_rtc::gui::plot::Side side);
+  void got_plot_polygon(uint64_t id,
+                        uint64_t did,
+                        const std::string & legend,
+                        const mc_rtc::gui::plot::PolygonDescription & polygon,
+                        mc_rtc::gui::plot::Side side);
+  void got_plot_polygons(uint64_t id,
+                         uint64_t did,
+                         const std::string & legend,
+                         const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygon,
+                         mc_rtc::gui::plot::Side side);
+  void got_end_plot(uint64_t id);
 signals:
   void signal_start();
   void signal_stop();
@@ -385,6 +433,29 @@ signals:
                                     bool required,
                                     const std::vector<std::string> & ref,
                                     bool send_index);
+  void signal_start_plot(uint64_t id, const std::string & title);
+  void signal_plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range);
+  void signal_plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range);
+  void signal_plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range);
+  void signal_plot_point(uint64_t id,
+                         uint64_t did,
+                         const std::string & legend,
+                         double x,
+                         double y,
+                         mc_rtc::gui::Color color,
+                         mc_rtc::gui::plot::Style style,
+                         mc_rtc::gui::plot::Side side);
+  void signal_plot_polygon(uint64_t id,
+                           uint64_t did,
+                           const std::string & legend,
+                           const mc_rtc::gui::plot::PolygonDescription & polygon,
+                           mc_rtc::gui::plot::Side side);
+  void signal_plot_polygons(uint64_t id,
+                            uint64_t did,
+                            const std::string & legend,
+                            const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygon,
+                            mc_rtc::gui::plot::Side side);
+  void signal_end_plot(uint64_t id);
 };
 
 } // namespace mc_rtc_rviz

@@ -14,6 +14,8 @@ set(MOC_HEADERS
   FormWidget.h
   GenericInputWidget.h
   NumberSliderWidget.h
+  PlotWidget.h
+  PlotTabWidget.h
   SchemaWidget.h
 )
 
@@ -49,11 +51,13 @@ if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
   qt4_wrap_cpp(MOC_FILES
     ${MOC_HEADERS}
   )
+  qt4_add_resources(QRC_FILES icons.qrc)
 else()
   find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
   qt5_wrap_cpp(MOC_FILES
     ${MOC_HEADERS}
   )
+  qt5_add_resources(QRC_FILES icons.qrc)
 endif()
 
 set(HEADER_FILES
@@ -82,8 +86,11 @@ set(SOURCE_FILES
   LabelWidget.cpp
   NumberSliderWidget.cpp
   Panel.cpp
+  PlotWidget.cpp
+  PlotTabWidget.cpp
   SchemaWidget.cpp
   ${MOC_FILES}
+  ${QRC_FILES}
 )
 
 if(NOT ${DISABLE_ROS})
@@ -115,9 +122,9 @@ if(NOT EXISTS "${MC_RTC_DOCDIR}")
 endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DMC_RTC_DOCDIR="${MC_RTC_DOCDIR}")
 if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
-  target_link_libraries(${PROJECT_NAME} PUBLIC Qt4::QtCore Qt4::QtGui)
+  target_link_libraries(${PROJECT_NAME} PUBLIC Qt4::QtCore Qt4::QtGui qwt)
 else()
-  target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
+  target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets qwt-qt5)
 endif()
 
 add_executable(mc_rtc_gui main.cpp)

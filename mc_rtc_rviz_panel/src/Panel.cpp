@@ -25,6 +25,7 @@
 #include "ConnectionDialog.h"
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
+#include "PlotTabWidget.h"
 #include "SchemaWidget.h"
 
 #include <boost/filesystem.hpp>
@@ -133,6 +134,7 @@ Panel::Panel(QWidget * parent)
   marker_array_pub_ =
       mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::MarkerArray>("/mc_rtc_rviz", 0);
 #endif
+  qRegisterMetaType<uint64_t>("uint64_t");
   qRegisterMetaType<std::string>("std::string");
   qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
   qRegisterMetaType<WidgetId>("WidgetId");
@@ -145,6 +147,12 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<mc_rtc::gui::ForceConfig>("mc_rtc::gui::ForceConfig");
   qRegisterMetaType<mc_rtc::gui::LineConfig>("mc_rtc::gui::LineConfig");
   qRegisterMetaType<mc_rtc::gui::PointConfig>("mc_rtc::gui::PointConfig");
+  qRegisterMetaType<mc_rtc::gui::plot::Range>("mc_rtc::gui::plot::Range");
+  qRegisterMetaType<mc_rtc::gui::plot::Side>("mc_rtc::gui::plot::Side");
+  qRegisterMetaType<mc_rtc::gui::plot::Style>("mc_rtc::gui::plot::Style");
+  qRegisterMetaType<mc_rtc::gui::plot::PolygonDescription>("mc_rtc::gui::plot::PolygonDescription");
+  qRegisterMetaType<std::vector<mc_rtc::gui::plot::PolygonDescription>>(
+      "std::vector<mc_rtc::gui::plot::PolygonDescription>");
   qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   qRegisterMetaType<std::vector<std::vector<Eigen::Vector3d>>>("std::vector<std::vector<Eigen::Vector3d>>");
@@ -248,6 +256,34 @@ Panel::Panel(QWidget * parent)
           this,
           SLOT(got_form_data_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &,
                                          bool)));
+  connect(this, SIGNAL(signal_start_plot(uint64_t, const std::string &)), this,
+          SLOT(got_start_plot(uint64_t, const std::string &)));
+  connect(this, SIGNAL(signal_plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)), this,
+          SLOT(got_plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
+  connect(this, SIGNAL(signal_plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)),
+          this, SLOT(got_plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
+  connect(this, SIGNAL(signal_plot_setup_yaxis_right(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)),
+          this, SLOT(got_plot_setup_yaxis_right(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
+  connect(this,
+          SIGNAL(signal_plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
+                                   mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side)),
+          this,
+          SLOT(got_plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
+                              mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side)));
+  connect(this,
+          SIGNAL(signal_plot_polygon(uint64_t, uint64_t, const std::string &,
+                                     const mc_rtc::gui::plot::PolygonDescription &, mc_rtc::gui::plot::Side)),
+          this,
+          SLOT(got_plot_polygon(uint64_t, uint64_t, const std::string &, const mc_rtc::gui::plot::PolygonDescription &,
+                                mc_rtc::gui::plot::Side)));
+  connect(
+      this,
+      SIGNAL(signal_plot_polygons(uint64_t, uint64_t, const std::string &,
+                                  const std::vector<mc_rtc::gui::plot::PolygonDescription> &, mc_rtc::gui::plot::Side)),
+      this,
+      SLOT(got_plot_polygons(uint64_t, uint64_t, const std::string &,
+                             const std::vector<mc_rtc::gui::plot::PolygonDescription> &, mc_rtc::gui::plot::Side)));
+  connect(this, SIGNAL(signal_end_plot(uint64_t)), this, SLOT(got_end_plot(uint64_t)));
   mc_control::ControllerClient::start();
 }
 
@@ -258,6 +294,7 @@ void Panel::started()
 
 void Panel::got_start()
 {
+  tree_.start();
   latestWidget_ = nullptr;
 }
 
@@ -477,6 +514,61 @@ void Panel::form_data_combo_input(const WidgetId & formId,
   Q_EMIT signal_form_data_combo_input(formId, name, required, ref, send_index);
 }
 
+void Panel::start_plot(uint64_t id, const std::string & title)
+{
+  Q_EMIT signal_start_plot(id, title);
+}
+
+void Panel::plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  Q_EMIT signal_plot_setup_xaxis(id, legend, range);
+}
+
+void Panel::plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  Q_EMIT signal_plot_setup_yaxis_left(id, legend, range);
+}
+
+void Panel::plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  Q_EMIT signal_plot_setup_yaxis_right(id, legend, range);
+}
+
+void Panel::plot_point(uint64_t id,
+                       uint64_t did,
+                       const std::string & legend,
+                       double x,
+                       double y,
+                       mc_rtc::gui::Color color,
+                       mc_rtc::gui::plot::Style style,
+                       mc_rtc::gui::plot::Side side)
+{
+  Q_EMIT signal_plot_point(id, did, legend, x, y, color, style, side);
+}
+
+void Panel::plot_polygon(uint64_t id,
+                         uint64_t did,
+                         const std::string & legend,
+                         const mc_rtc::gui::plot::PolygonDescription & polygon,
+                         mc_rtc::gui::plot::Side side)
+{
+  Q_EMIT signal_plot_polygon(id, did, legend, polygon, side);
+}
+
+void Panel::plot_polygons(uint64_t id,
+                          uint64_t did,
+                          const std::string & legend,
+                          const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygons,
+                          mc_rtc::gui::plot::Side side)
+{
+  Q_EMIT signal_plot_polygons(id, did, legend, polygons, side);
+}
+
+void Panel::end_plot(uint64_t id)
+{
+  Q_EMIT signal_end_plot(id);
+}
+
 void Panel::got_category(const std::vector<std::string> & parent, const std::string & category)
 {
   auto & tree = get_category(parent);
@@ -486,7 +578,7 @@ void Panel::got_category(const std::vector<std::string> & parent, const std::str
     tree.parent->addWidget(cat);
     tree.sub_trees_[category].parent = cat;
   }
-  tree.sub_trees_[category].parent->seen(true);
+  tree.sub_trees_[category].parent->seen();
 }
 
 void Panel::got_label(const WidgetId & id, const std::string & data)
@@ -742,6 +834,70 @@ void Panel::got_form_data_combo_input(const WidgetId & formId,
   form.element<form::DataComboInput>(name, required, data_, ref, send_index);
 }
 
+void Panel::got_start_plot(uint64_t id, const std::string & title)
+{
+  got_category({}, "Plots");
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.start_plot(id, title);
+}
+
+void Panel::got_plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_setup_xaxis(id, legend, range);
+}
+
+void Panel::got_plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_setup_yaxis_left(id, legend, range);
+}
+
+void Panel::got_plot_setup_yaxis_right(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
+{
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_setup_yaxis_right(id, legend, range);
+}
+
+void Panel::got_plot_point(uint64_t id,
+                           uint64_t did,
+                           const std::string & legend,
+                           double x,
+                           double y,
+                           mc_rtc::gui::Color color,
+                           mc_rtc::gui::plot::Style style,
+                           mc_rtc::gui::plot::Side side)
+{
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_point(id, did, legend, x, y, color, style, side);
+}
+
+void Panel::got_plot_polygon(uint64_t id,
+                             uint64_t did,
+                             const std::string & legend,
+                             const mc_rtc::gui::plot::PolygonDescription & polygon,
+                             mc_rtc::gui::plot::Side side)
+{
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_polygon(id, did, legend, polygon, side);
+}
+
+void Panel::got_plot_polygons(uint64_t id,
+                              uint64_t did,
+                              const std::string & legend,
+                              const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygons,
+                              mc_rtc::gui::plot::Side side)
+{
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.plot_polygons(id, did, legend, polygons, side);
+}
+
+void Panel::got_end_plot(uint64_t id)
+{
+  auto & w = get_widget<PlotTabWidget>({{"Plots"}, ""});
+  w.end_plot(id);
+}
+
 Panel::WidgetTree & Panel::get_category(const std::vector<std::string> & category)
 {
   auto ret = &tree_;
@@ -750,6 +906,18 @@ Panel::WidgetTree & Panel::get_category(const std::vector<std::string> & categor
     ret = &(ret->sub_trees_[c]);
   }
   return *ret;
+}
+
+void Panel::WidgetTree::start()
+{
+  if(parent)
+  {
+    parent->resetSeen();
+  }
+  for(auto & st : sub_trees_)
+  {
+    st.second.start();
+  }
 }
 
 void Panel::WidgetTree::clean()

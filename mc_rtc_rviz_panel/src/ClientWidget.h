@@ -59,13 +59,22 @@ public:
     return id().sid;
   }
 
-  /** Return the value of seen and set it back to false */
-  bool seen();
-
-  /** Set seen value */
-  void seen(bool s)
+  /** Return true if the element was seen this round */
+  virtual bool wasSeen()
   {
-    seen_ = s;
+    return seen_;
+  }
+
+  /** Called to set seen status back to false */
+  virtual void resetSeen()
+  {
+    seen_ = false;
+  }
+
+  /** Called to set seen status to true */
+  void seen()
+  {
+    seen_ = true;
   }
 
   /** Get the element visibility stored in the configuration */

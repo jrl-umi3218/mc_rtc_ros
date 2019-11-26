@@ -23,6 +23,10 @@ public:
 
   ClientWidget * widget(const std::string & name) override;
 
+  bool wasSeen() override;
+
+  void resetSeen() override;
+
 private:
   QVBoxLayout * main_layout_ = nullptr;
   std::map<int, QHBoxLayout *> stack_layouts_;

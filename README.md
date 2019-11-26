@@ -18,3 +18,5 @@ This ROS stack aims at providing various tools to use along mc_rtc.
 This stack requires:
 - [mc_rtc](https://gite.lirmm.fr/multi-contact/mc_rtc)
 - [mc_rtc_ros_data](https://gite.lirmm.fr/multi-contact/mc_rtc_ros_data)
+- [Qt](https://www.qt.io/): if building with ROS and RViz then the versions that RViZ was built with otherwise Qt4/Qt5
+- [QWT](https://qwt.sourceforge.io/)
