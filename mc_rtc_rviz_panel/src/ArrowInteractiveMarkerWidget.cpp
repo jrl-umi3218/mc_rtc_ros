@@ -69,6 +69,19 @@ void ArrowInteractiveMarkerWidget::update(const Eigen::Vector3d & start,
                                           const Eigen::Vector3d & end,
                                           const mc_rtc::gui::ArrowConfig & c)
 {
+  if(!is_in_range(start))
+  {
+    LOG_ERROR("Could not display arrow " << id2name(id()) << ": invalid value in start coordinates ("
+                                         << start.transpose() << ")");
+    return;
+  }
+  if(!is_in_range(end))
+  {
+    LOG_ERROR("Could not display arrow " << id2name(id()) << ": invalid value in end coordinates (" << end.transpose()
+                                         << ")");
+    return;
+  }
+
   arrow_points_.head<3>() = start;
   arrow_points_.tail<3>() = end;
   if(visible())

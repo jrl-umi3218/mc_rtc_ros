@@ -7,16 +7,20 @@
 #include <mc_rtc/gui/types.h>
 
 #include <SpaceVecAlg/SpaceVecAlg>
-
 #include <visualization_msgs/InteractiveMarker.h>
 #include <visualization_msgs/InteractiveMarkerControl.h>
-
 #include <interactive_markers/interactive_marker_server.h>
 
 namespace vm = visualization_msgs;
 
 namespace mc_rtc_rviz
 {
+
+template<typename Derived>
+inline bool is_in_range(const Eigen::MatrixBase<Derived> & x, double min = -10e10, double max = 10e10)
+{
+  return (x.array() > min).all() && (x.array() < max).all();
+}
 
 visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos, const mc_rtc::gui::Color & color, double scale);
 geometry_msgs::Point rosPoint(const Eigen::Vector3d & vec);
