@@ -29,53 +29,80 @@ DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & param
 
 void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d> & points)
 {
-  configure();
   path_.points.clear();
   for(const auto & p : points)
   {
+    if(!is_in_range(p))
+    {
+      LOG_ERROR("Could not display trajectory " << id2name(id()) << ": invalid value in coordinates (" << p.transpose()
+                                                << ")");
+      return;
+    }
     geometry_msgs::Point pose;
     pose.x = p.x();
     pose.y = p.y();
     pose.z = p.z();
     path_.points.push_back(pose);
   }
+  configure();
   publish();
 }
 
 void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd> & points)
 {
-  configure();
   path_.points.clear();
-  for(const auto & p : points)
+  for(const auto & point : points)
   {
+    const auto & p = point.translation();
+    if(!is_in_range(p))
+    {
+      LOG_ERROR("Could not display trajectory " << id2name(id()) << ": invalid value in coordinates (" << p.transpose()
+                                                << ")");
+      return;
+    }
     geometry_msgs::Point pose;
-    pose.x = p.translation().x();
-    pose.y = p.translation().y();
-    pose.z = p.translation().z();
+    pose.x = p.x();
+    pose.y = p.y();
+    pose.z = p.z();
     path_.points.push_back(pose);
   }
+  configure();
   publish();
 }
 
 void DisplayTrajectoryWidget::update(const Eigen::Vector3d & point)
 {
-  configure();
+  if(!is_in_range(point))
+  {
+    LOG_ERROR("Could not display trajectory " << id2name(id()) << ": invalid value in coordinates ("
+                                              << point.transpose() << ")");
+    return;
+  }
   geometry_msgs::Point pose;
   pose.x = point.x();
   pose.y = point.y();
   pose.z = point.z();
   path_.points.push_back(pose);
+  configure();
   publish();
 }
 
 void DisplayTrajectoryWidget::update(const sva::PTransformd & point)
 {
+  const auto & p = point.translation();
+  if(!is_in_range(p))
+  {
+    LOG_ERROR("Could not display trajectory " << id2name(id()) << ": invalid value in coordinates (" << p.transpose()
+                                              << ")");
+    return;
+  }
   configure();
   geometry_msgs::Point pose;
-  pose.x = point.translation().x();
-  pose.y = point.translation().y();
-  pose.z = point.translation().z();
+  pose.x = p.x();
+  pose.y = p.y();
+  pose.z = p.z();
   path_.points.push_back(pose);
+  configure();
   publish();
 }
 

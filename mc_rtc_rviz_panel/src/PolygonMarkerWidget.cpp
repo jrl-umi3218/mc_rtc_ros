@@ -53,6 +53,11 @@ void PolygonMarkerWidget::update(const std::string & ns,
   m.lifetime = ros::Duration(1);
   for(const auto & point : points)
   {
+    if(!is_in_range(point))
+    {
+      LOG_ERROR("Could not display polygon " << ns << ": invalid value in coordinates (" << point.transpose() << ")");
+      return;
+    }
     geometry_msgs::Point p;
     p.x = point.x();
     p.y = point.y();
