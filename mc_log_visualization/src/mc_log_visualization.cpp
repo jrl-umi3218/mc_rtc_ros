@@ -4,6 +4,45 @@
 
 #include "LogPublisher.h"
 
+namespace
+{
+template<typename T>
+void getParam(ros::NodeHandle & n, const std::string & param, T & out)
+{
+  std::string true_param;
+  n.searchParam(param, true_param);
+  n.getParam(true_param, out);
+}
+
+std::vector<std::string> robotParam(ros::NodeHandle & n)
+{
+  std::string robot_str = "";
+  getParam(n, "robot", robot_str);
+  if(robot_str.size() == 0)
+  {
+    return {};
+  }
+  if(robot_str[0] == '[')
+  {
+    std::vector<std::string> ret = {""};
+    for(size_t i = 1; i < robot_str.size(); ++i)
+    {
+      const auto & c = robot_str[i];
+      if(c == ',')
+      {
+        ret.push_back("");
+      }
+      else if(c != ']' && c != ' ')
+      {
+        ret.back() += c;
+      }
+    }
+    return ret;
+  }
+  return {robot_str};
+}
+} // namespace
+
 int main(int argc, char * argv[])
 {
   ros::init(argc, argv, "log_visualizer", ros::init_options::NoSigintHandler);
@@ -12,18 +51,15 @@ int main(int argc, char * argv[])
   {
     LOG_ERROR_AND_THROW(std::runtime_error, "Failed to initialized node handle")
   }
+
+  ros::NodeHandle nh_private("~");
+
   std::string log = "";
-  {
-    std::string param;
-    nh->searchParam("log", param);
-    nh->getParam(param, log);
-  }
+  getParam(nh_private, "log", log);
+
   mc_rbdyn::RobotModulePtr mod;
   {
-    std::vector<std::string> robot_params;
-    std::string param;
-    nh->searchParam("robot_module", param);
-    nh->getParam(param, robot_params);
+    std::vector<std::string> robot_params = robotParam(nh_private);
     if(robot_params.size() == 1)
     {
       mod = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]);
@@ -42,11 +78,7 @@ int main(int argc, char * argv[])
     }
   }
   double dt = 0.005;
-  {
-    std::string param = "";
-    nh->searchParam("dt", param);
-    nh->getParam(param, dt);
-  }
+  getParam(nh_private, "dt", dt);
 
   LOG_INFO("Replaying log: " << log)
   LogPublisher appli(*nh, log, mod, dt);

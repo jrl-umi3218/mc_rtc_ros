@@ -1,12 +1,11 @@
 <launch>
-  <arg name="robot" default="robot/jvrc1" />
-  <include file="$(find mc_scenario)/$(arg robot).xml" />
-
-  <arg name="log" />
-  <param name="log" value="$(arg log)" />
-
   <arg name="dt" default="0.005" />
-  <param name="dt" value="$(arg dt)" />
+  <arg name="log" />
+  <arg name="robot" />
 
-  <node name="log_visualizer" pkg="mc_log_visualization" type="mc_log_visualization" output="screen" />
+  <node name="log_visualizer" pkg="mc_log_visualization" type="mc_log_visualization" output="screen">
+    <param name="dt" value="$(arg dt)" />
+    <param name="log" value="$(arg log)" />
+    <param name="robot" value="$(arg robot)" />
+  </node>
 </launch>
