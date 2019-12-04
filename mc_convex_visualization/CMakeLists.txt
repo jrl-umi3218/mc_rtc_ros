@@ -26,4 +26,4 @@ set(src_files
 )
 
 add_executable(sch_visualizer ${src_files})
-target_link_libraries(sch_visualizer PUBLIC mc_rtc::mc_rbdyn ${catkin_LIBRARIES})
+target_link_libraries(sch_visualizer PUBLIC mc_rtc::mc_rbdyn mc_rtc::mc_rtc_ros ${catkin_LIBRARIES})

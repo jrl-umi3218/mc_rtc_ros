@@ -3,7 +3,10 @@
  */
 
 #include <mc_rbdyn/RobotLoader.h>
+#include <mc_rbdyn/Robots.h>
 #include <mc_rbdyn/SCHAddon.h>
+
+#include <mc_rtc/ros.h>
 
 #include <sch/S_Polyhedron/S_Polyhedron.h>
 
@@ -22,6 +25,34 @@ void getParam(ros::NodeHandle & n, const std::string & param, T & out)
   n.searchParam(param, true_param);
   n.getParam(true_param, out);
 }
+
+std::vector<std::string> robotParam(ros::NodeHandle & n)
+{
+  std::string robot_str = "";
+  getParam(n, "robot", robot_str);
+  if(robot_str.size() == 0)
+  {
+    return {};
+  }
+  if(robot_str[0] == '[')
+  {
+    std::vector<std::string> ret = {""};
+    for(size_t i = 1; i < robot_str.size(); ++i)
+    {
+      const auto & c = robot_str[i];
+      if(c == ',')
+      {
+        ret.push_back("");
+      }
+      else if(c != ']' && c != ' ')
+      {
+        ret.back() += c;
+      }
+    }
+    return ret;
+  }
+  return {robot_str};
+}
 } // namespace
 
 int main(int argc, char ** argv)
@@ -29,38 +60,58 @@ int main(int argc, char ** argv)
   ros::init(argc, argv, "mc_convex_visualization");
 
   ros::NodeHandle n;
-  std::vector<std::string> robot_params = {"HRP2DRC"};
-  std::string tf_prefix = "";
+  ros::NodeHandle n_private("~");
+
+  std::vector<std::string> robot_module = {};
+  getParam(n, "robot_module", robot_module);
+  std::vector<std::string> robot_param = robotParam(n_private);
+  std::vector<std::string> robot_params = robot_param.size() ? robot_param : robot_module;
+
   std::vector<std::string> filtered_convexes = {};
-  getParam(n, "robot_module", robot_params);
+  getParam(n, "filtered_convexes", filtered_convexes);
+
+  std::string tf_prefix = "";
   getParam(n, "tf_prefix", tf_prefix);
   if(tf_prefix.size() && tf_prefix[tf_prefix.size() - 1] != '/')
   {
     tf_prefix += '/';
   }
-  getParam(n, "filtered_convexes", filtered_convexes);
+
+  bool publish = false;
+  getParam(n_private, "publish", publish);
+  std::unique_ptr<mc_rtc::RobotPublisher> robot_pub;
+  if(publish)
+  {
+    robot_pub.reset(new mc_rtc::RobotPublisher(tf_prefix, 50, 0.01));
+  }
 
   ros::Publisher sch_pub = n.advertise<visualization_msgs::MarkerArray>("sch_marker", 1000);
 
-  std::shared_ptr<mc_rbdyn::RobotModule> robot;
+  std::shared_ptr<mc_rbdyn::RobotModule> robotModule;
   /* SHAME */
   if(robot_params.size() == 1)
   {
-    robot = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]);
+    robotModule = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]);
   }
   else if(robot_params.size() == 2)
   {
-    robot = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1]);
+    robotModule = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1]);
   }
   else if(robot_params.size() == 3)
   {
-    robot = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1], robot_params[2]);
+    robotModule = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1], robot_params[2]);
   }
   else
   {
     ROS_ERROR_STREAM("Invalid robot_params size passed to mc_convex_visualization: " << robot_params.size());
   }
-  auto cols = robot->convexHull();
+  auto cols = robotModule->convexHull();
+
+  auto robot = mc_rbdyn::loadRobot(*robotModule);
+  if(robot_pub)
+  {
+    robot_pub->init(robot->robot());
+  }
 
   visualization_msgs::MarkerArray markers;
   unsigned id = 0;
@@ -73,9 +124,9 @@ int main(int argc, char ** argv)
     const std::string & frame = col.second.first;
     sch::S_Polyhedron * poly = sch::mc_rbdyn::Polyhedron(col.second.second);
     sva::PTransformd colTrans = sva::PTransformd::Identity();
-    if(robot->collisionTransforms().count(frame))
+    if(robotModule->collisionTransforms().count(frame))
     {
-      colTrans = robot->collisionTransforms().at(frame);
+      colTrans = robotModule->collisionTransforms().at(frame);
     }
     auto & pa = *(poly->getPolyhedronAlgorithm());
     visualization_msgs::Marker marker;
@@ -134,6 +185,10 @@ int main(int argc, char ** argv)
   while(ros::ok())
   {
     sch_pub.publish(markers);
+    if(robot_pub)
+    {
+      robot_pub->update(0.01, robot->robot(), {});
+    }
     ros::spinOnce();
     rate.sleep();
   }
