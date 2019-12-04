@@ -53,69 +53,14 @@ std::vector<std::string> robotParam(ros::NodeHandle & n)
   }
   return {robot_str};
 }
-} // namespace
 
-int main(int argc, char ** argv)
+visualization_msgs::MarkerArray convexMarkers(const std::string & tf_prefix,
+                                              const mc_rbdyn::RobotModulePtr & robotModule,
+                                              const std::vector<std::string> & filtered_convexes)
 {
-  ros::init(argc, argv, "mc_convex_visualization");
-
-  ros::NodeHandle n;
-  ros::NodeHandle n_private("~");
-
-  std::vector<std::string> robot_module = {};
-  getParam(n, "robot_module", robot_module);
-  std::vector<std::string> robot_param = robotParam(n_private);
-  std::vector<std::string> robot_params = robot_param.size() ? robot_param : robot_module;
-
-  std::vector<std::string> filtered_convexes = {};
-  getParam(n, "filtered_convexes", filtered_convexes);
-
-  std::string tf_prefix = "";
-  getParam(n, "tf_prefix", tf_prefix);
-  if(tf_prefix.size() && tf_prefix[tf_prefix.size() - 1] != '/')
-  {
-    tf_prefix += '/';
-  }
-
-  bool publish = false;
-  getParam(n_private, "publish", publish);
-  std::unique_ptr<mc_rtc::RobotPublisher> robot_pub;
-  if(publish)
-  {
-    robot_pub.reset(new mc_rtc::RobotPublisher(tf_prefix, 50, 0.01));
-  }
-
-  ros::Publisher sch_pub = n.advertise<visualization_msgs::MarkerArray>("sch_marker", 1000);
-
-  std::shared_ptr<mc_rbdyn::RobotModule> robotModule;
-  /* SHAME */
-  if(robot_params.size() == 1)
-  {
-    robotModule = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]);
-  }
-  else if(robot_params.size() == 2)
-  {
-    robotModule = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1]);
-  }
-  else if(robot_params.size() == 3)
-  {
-    robotModule = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1], robot_params[2]);
-  }
-  else
-  {
-    ROS_ERROR_STREAM("Invalid robot_params size passed to mc_convex_visualization: " << robot_params.size());
-  }
-  auto cols = robotModule->convexHull();
-
-  auto robot = mc_rbdyn::loadRobot(*robotModule);
-  if(robot_pub)
-  {
-    robot_pub->init(robot->robot());
-  }
-
   visualization_msgs::MarkerArray markers;
   unsigned id = 0;
-  for(const auto & col : cols)
+  for(const auto & col : robotModule->convexHull())
   {
     if(std::find(filtered_convexes.begin(), filtered_convexes.end(), col.first) != filtered_convexes.end())
     {
@@ -180,6 +125,81 @@ int main(int argc, char ** argv)
     }
     markers.markers.push_back(marker);
   }
+  return markers;
+}
+
+mc_rbdyn::RobotModulePtr rmFromParam(const std::vector<std::string> & robot_params)
+{
+  if(robot_params.size() == 1)
+  {
+    return mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]);
+  }
+  else if(robot_params.size() == 2)
+  {
+    return mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1]);
+  }
+  else if(robot_params.size() == 3)
+  {
+    return mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1], robot_params[2]);
+  }
+  else if(robot_params.size() > 3)
+  {
+    ROS_ERROR_STREAM("Invalid robot_params size passed to mc_surfaces_visualization: " << robot_params.size());
+  }
+  return nullptr;
+}
+
+} // namespace
+
+int main(int argc, char ** argv)
+{
+  ros::init(argc, argv, "mc_convex_visualization");
+
+  ros::NodeHandle n;
+  ros::NodeHandle n_private("~");
+
+  std::vector<std::string> robot_module = {};
+  getParam(n, "robot_module", robot_module);
+  std::vector<std::string> robot_param = robotParam(n_private);
+  bool robot_set = robot_param.size() != 0;
+  std::vector<std::string> robot_params = robot_set ? robot_param : robot_module;
+
+  std::vector<std::string> filtered_convexes = {};
+  getParam(n, "filtered_convexes", filtered_convexes);
+
+  std::string tf_prefix = "";
+  getParam(n, "tf_prefix", tf_prefix);
+  if(tf_prefix.size() && tf_prefix[tf_prefix.size() - 1] != '/')
+  {
+    tf_prefix += '/';
+  }
+
+  bool publish = false;
+  getParam(n_private, "publish", publish);
+
+  ros::Publisher sch_pub = n.advertise<visualization_msgs::MarkerArray>("sch_marker", 1000);
+
+  std::shared_ptr<mc_rbdyn::RobotModule> robotModule = nullptr;
+  std::unique_ptr<mc_rtc::RobotPublisher> robot_pub;
+  std::unique_ptr<mc_rbdyn::Robots> robots;
+  visualization_msgs::MarkerArray markers;
+  auto init = [&]() {
+    robotModule = rmFromParam(robot_params);
+    if(!robotModule)
+    {
+      return;
+    }
+    robots.reset(new mc_rbdyn::Robots());
+    robots->load(*robotModule);
+    markers = convexMarkers(tf_prefix, robotModule, filtered_convexes);
+    if(publish)
+    {
+      robot_pub.reset(new mc_rtc::RobotPublisher(tf_prefix, 50, 0.01));
+      robot_pub->init(robots->robot());
+    }
+  };
+
+  init();
 
   ros::Rate rate(10);
   while(ros::ok())
@@ -187,7 +207,13 @@ int main(int argc, char ** argv)
     sch_pub.publish(markers);
     if(robot_pub)
     {
-      robot_pub->update(0.01, robot->robot(), {});
+      robot_pub->update(0.01, robots->robot(), {});
+    }
+    getParam(n, "robot_module", robot_module);
+    if(!robot_set && robot_module.size() && robot_module != robot_params)
+    {
+      robot_params = robot_module;
+      init();
     }
     ros::spinOnce();
     rate.sleep();
