@@ -1,48 +1,30 @@
-This package loads all surfaces of a given robot and publishes
-them as markers into RViz.
+# mc\_surfaces\_visualization
 
-Usage:
-This package depends on ROS. To build, place yourself in a
-catkin_workspace and simply run catkin_make.
+This tool allows to visualize the surfaces of an mc\_rtc robot in the RViZ application.
 
-```
-git clone --recursive git@gite.lirmm.fr:multi-contact/mc_surfaces_visualization_ros.git
-roscd
-catkin_make
-(optional) catkin_make install
-```
+## Launching the visualization
 
-Requires:
+The visualization is launched as follows:
+
 ```bash
-#Non ros
-mc_rtc
-boost (program_options)
-#ROS
-geometry_msgs
-visualization_msgs
+$ roslaunch mc_surfaces_visualization display.launch robot:=JVRC1
 ```
 
-Once built, just run:
-```
-roslaunch surfaces_visualization_ros display.launch
-```
+The `robot` argument should be the same as what you would pass to the `mc_rbdyn::RobotLoader::get_robot_module` function, this can also be a robot alias. For example:
 
-To change the robot, one has to specify:
-- The package
-- The robot
-
-To change the package, you *must* edit `display.launch` because ROS pre-Kinetic
-does not allow recursive argument substitution. To change the robot, simply use
-the `robot` argument like so:
 ```bash
-roslaunch surfaces_visualization_ros display.launch robot:=my_robot
+# Specify a vector of arguments
+$ roslaunch mc_surfaces_visualization display.launch robot:="[env, `rospack find mc_env_description`, ground]"
+# Or an alias
+$ roslaunch mc_surfaces_visualization display.launch robot:=env/ground
 ```
 
-For example,
-```bash
-roslaunch surfaces_visualization_ros display.launch robot:=litter
-```
+## Surfaces visualization
 
-Note that if the robot does not display correctly, it is probably because it does
-not have a `base_link`. In that case, simply change the fixed reference frame to
-any frame in Rviz.
+In the visualization:
+
+- planar surfaces are drawn in green with a blue arrow showing the normal direction of the surface
+- cylindrical surfaces are green cylinders
+- gripper surfaces are represented with blue arrows representing the normal direction of the gripper's points' frames
+
+You can show/hide selected surfaces by enabling/disabling their namespaces in the associated MarkerArray

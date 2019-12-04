@@ -27,4 +27,4 @@ set(src_files
 )
 
 add_executable(surfaces_publisher ${src_files})
-target_link_libraries(surfaces_publisher PUBLIC mc_rtc::mc_rbdyn ${catkin_LIBRARIES})
+target_link_libraries(surfaces_publisher PUBLIC mc_rtc::mc_rbdyn mc_rtc::mc_rtc_ros ${catkin_LIBRARIES})
