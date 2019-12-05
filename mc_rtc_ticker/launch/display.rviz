@@ -3,13 +3,6 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Global Options1
-        - /Status1
-        - /Env1
-        - /Robot1
-        - /MarkerArray4
-        - /MarkerArray4/Namespaces1
       Splitter Ratio: 0.5
     Tree Height: 78
   - Class: rviz/Selection
@@ -331,7 +324,7 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /control/surfaces
-      Name: MarkerArray
+      Name: Robot surfaces
       Namespaces:
         {}
       Queue Size: 100
@@ -339,7 +332,7 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /control/env_1/surfaces
-      Name: MarkerArray
+      Name: Env surfaces
       Namespaces:
         {}
       Queue Size: 100
@@ -347,7 +340,7 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /control/sch_marker
-      Name: MarkerArray
+      Name: Robot convexes
       Namespaces:
         {}
       Queue Size: 100
@@ -355,7 +348,7 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /control/env_1/sch_marker
-      Name: MarkerArray
+      Name: Env convexes
       Namespaces:
         {}
       Queue Size: 100
@@ -363,7 +356,7 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /control/contact_force
-      Name: MarkerArray
+      Name: Robot contact forces
       Namespaces:
         {}
       Queue Size: 100
@@ -371,7 +364,7 @@ Visualization Manager:
     - Class: rviz/InteractiveMarkers
       Enable Transparency: true
       Enabled: true
-      Name: InteractiveMarkers
+      Name: mc_rtc GUI interactive markers
       Show Axes: false
       Show Descriptions: true
       Show Visual Aids: false
@@ -380,7 +373,7 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /mc_rtc_rviz
-      Name: MarkerArray
+      Name: mc_rtc GUI markers
       Namespaces:
         {}
       Queue Size: 100

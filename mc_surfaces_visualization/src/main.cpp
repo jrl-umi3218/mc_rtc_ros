@@ -8,11 +8,13 @@
 #include <mc_rbdyn/RobotLoader.h>
 #include <mc_rbdyn/Robots.h>
 
+#include <mc_rtc/ros.h>
+
 #include <ros/ros.h>
 #include <visualization_msgs/MarkerArray.h>
 
+#include <fstream>
 #include <iostream>
-#include <tf/transform_broadcaster.h>
 
 namespace
 {
@@ -24,80 +26,47 @@ void getParam(ros::NodeHandle & n, const std::string & param, T & out)
   n.getParam(true_param, out);
 }
 
-tf::StampedTransform tfFromSurface(const std::string & prefix, const mc_rbdyn::Surface & surf)
+std::vector<std::string> robotParam(ros::NodeHandle & n)
 {
-  tf::StampedTransform tf;
-
-  const sva::PTransformd & pt = surf.X_b_s();
-  tf.setOrigin(tf::Vector3(pt.translation().x(), pt.translation().y(), pt.translation().z()));
-
-  Eigen::Quaterniond ori(pt.rotation().transpose());
-  tf.setRotation(tf::Quaternion(ori.x(), ori.y(), ori.z(), ori.w()));
-
-  tf.frame_id_ = prefix + surf.bodyName();
-  tf.child_frame_id_ = prefix + "surfaces/" + surf.name();
-  tf.stamp_ = ros::Time::now();
-
-  return tf;
+  std::string robot_str = "";
+  getParam(n, "robot", robot_str);
+  if(robot_str.size() == 0)
+  {
+    return {};
+  }
+  if(robot_str[0] == '[')
+  {
+    std::vector<std::string> ret = {""};
+    for(size_t i = 1; i < robot_str.size(); ++i)
+    {
+      const auto & c = robot_str[i];
+      if(c == ',')
+      {
+        ret.push_back("");
+      }
+      else if(c != ']' && c != ' ')
+      {
+        ret.back() += c;
+      }
+    }
+    return ret;
+  }
+  return {robot_str};
 }
-} // namespace
 
-int main(int argc, char ** argv)
+visualization_msgs::MarkerArray surfaceMarkers(const std::string & tf_prefix, const mc_rbdyn::Robot & robot)
 {
-  ros::init(argc, argv, "surfaces_visualization");
-
-  ros::NodeHandle n;
-
-  std::vector<std::string> robot_params = {"env", mc_rtc::MC_ENV_DESCRIPTION_PATH, "door"};
-  std::string tf_prefix = "";
-  getParam(n, "robot_module", robot_params);
-  getParam(n, "tf_prefix", tf_prefix);
-  if(tf_prefix.size() && tf_prefix[tf_prefix.size() - 1] != '/')
-  {
-    tf_prefix += '/';
-  }
-
-  ros::Publisher surface_pub = n.advertise<visualization_msgs::MarkerArray>("surfaces", 1000);
-
-  std::shared_ptr<mc_rbdyn::RobotModule> robotModule;
-
-  /* SHAME */
-  if(robot_params.size() == 1)
-  {
-    robotModule = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]);
-  }
-  else if(robot_params.size() == 2)
-  {
-    robotModule = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1]);
-  }
-  else if(robot_params.size() == 3)
-  {
-    robotModule = mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1], robot_params[2]);
-  }
-  else
-  {
-    ROS_ERROR_STREAM("Invalid robot_params size passed to mc_surfaces_visualization: " << robot_params.size());
-  }
-
-  auto robot = mc_rbdyn::loadRobot(*robotModule);
-
-  tf::TransformBroadcaster br;
-  std::vector<tf::StampedTransform> transforms;
-
   visualization_msgs::MarkerArray markers;
   unsigned id = 0;
-  for(const auto & pair : robot->robots()[0].surfaces())
+  for(const auto & pair : robot.surfaces())
   {
 
     std::shared_ptr<mc_rbdyn::Surface> surf = pair.second;
     const std::string & frame = surf->name();
 
-    tf::StampedTransform stf = tfFromSurface(tf_prefix, *surf);
-    transforms.push_back(stf);
-
     visualization_msgs::Marker marker;
-    marker.header.frame_id = stf.child_frame_id_;
-    marker.header.stamp = stf.stamp_;
+    marker.header.frame_id = tf_prefix + "surfaces/" + surf->name();
+    marker.header.stamp = ros::Time::now();
     marker.ns = frame;
     marker.id = ++id;
     marker.action = visualization_msgs::Marker::ADD;
@@ -149,6 +118,8 @@ int main(int argc, char ** argv)
       marker.points.push_back(marker.points[0]);
 
       marker.scale.x = 0.01;
+      marker.scale.y = 0;
+      marker.scale.z = 0;
 
       markers.markers.push_back(marker);
 
@@ -179,6 +150,10 @@ int main(int argc, char ** argv)
       marker.scale.y = 0.01;
       marker.color.g = 0.0;
       marker.color.b = 1.0;
+      marker.pose.orientation.w = 1;
+      marker.pose.orientation.x = 0;
+      marker.pose.orientation.y = 0;
+      marker.pose.orientation.z = 0;
       const std::vector<sva::PTransformd> pFO =
           dynamic_cast<mc_rbdyn::GripperSurface *>(surf.get())->pointsFromOrigin();
       for(const auto & p : pFO)
@@ -200,6 +175,78 @@ int main(int argc, char ** argv)
       }
     }
   }
+  return markers;
+}
+
+mc_rbdyn::RobotModulePtr rmFromParam(const std::vector<std::string> & robot_params)
+{
+  if(robot_params.size() == 1)
+  {
+    return mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]);
+  }
+  else if(robot_params.size() == 2)
+  {
+    return mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1]);
+  }
+  else if(robot_params.size() == 3)
+  {
+    return mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1], robot_params[2]);
+  }
+  else if(robot_params.size() > 3)
+  {
+    ROS_ERROR_STREAM("Invalid robot_params size passed to mc_surfaces_visualization: " << robot_params.size());
+  }
+  return nullptr;
+}
+
+} // namespace
+
+int main(int argc, char ** argv)
+{
+  ros::init(argc, argv, "surfaces_visualization");
+
+  ros::NodeHandle n;
+  ros::NodeHandle n_private("~");
+
+  std::vector<std::string> robot_module = {};
+  getParam(n, "robot_module", robot_module);
+  std::vector<std::string> robot_param = robotParam(n_private);
+  std::vector<std::string> robot_params = robot_param.size() ? robot_param : robot_module;
+  bool robot_set = robot_param.size() != 0;
+
+  std::string tf_prefix = "";
+  getParam(n, "tf_prefix", tf_prefix);
+  if(tf_prefix.size() && tf_prefix[tf_prefix.size() - 1] != '/')
+  {
+    tf_prefix += '/';
+  }
+
+  bool publish = false;
+  getParam(n_private, "publish", publish);
+
+  ros::Publisher surface_pub = n.advertise<visualization_msgs::MarkerArray>("surfaces", 1000);
+
+  std::shared_ptr<mc_rbdyn::RobotModule> robotModule = nullptr;
+  std::unique_ptr<mc_rtc::RobotPublisher> robot_pub;
+  std::unique_ptr<mc_rbdyn::Robots> robots;
+  visualization_msgs::MarkerArray markers;
+  auto init = [&]() {
+    robotModule = rmFromParam(robot_params);
+    if(!robotModule)
+    {
+      return;
+    }
+    robots.reset(new mc_rbdyn::Robots());
+    robots->load(*robotModule);
+    markers = surfaceMarkers(tf_prefix, robots->robot());
+    if(publish)
+    {
+      robot_pub.reset(new mc_rtc::RobotPublisher(tf_prefix, 50, 0.01));
+      robot_pub->init(robots->robot());
+    }
+  };
+
+  init();
 
   ros::Rate rate(10);
   while(ros::ok())
@@ -210,12 +257,17 @@ int main(int argc, char ** argv)
       m.header.stamp = now;
     }
     surface_pub.publish(markers);
-    for(auto & stf : transforms)
+    if(robot_pub)
     {
-      stf.stamp_ = now;
+      robot_pub->update(0.01, robots->robot(), {});
     }
-    br.sendTransform(transforms);
     ros::spinOnce();
+    getParam(n, "robot_module", robot_module);
+    if(!robot_set && robot_module.size() && robot_module != robot_params)
+    {
+      robot_params = robot_module;
+      init();
+    }
     rate.sleep();
   }
 
