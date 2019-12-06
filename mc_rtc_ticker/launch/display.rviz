@@ -85,7 +85,7 @@ Visualization Manager:
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
       Name: RealRobot
-      Robot Description: /control/robot_description
+      Robot Description: /real/robot_description
       TF Prefix: /real
       Update Interval: 0
       Value: false
@@ -143,8 +143,6 @@ Visualization Manager:
       Enabled: true
       Marker Topic: /mc_rtc_rviz
       Name: mc_rtc GUI markers
-      Namespaces:
-        Tasks/Stabilizer/Markers/Contacts/SupportContacts: true
       Queue Size: 100
       Value: true
   Enabled: true
