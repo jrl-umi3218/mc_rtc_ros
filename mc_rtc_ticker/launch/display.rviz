@@ -1,10 +1,11 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 78
+    Help Height: 0
     Name: Displays
     Property Tree Widget:
-      Splitter Ratio: 0.5
-    Tree Height: 78
+      Expanded: ~
+      Splitter Ratio: 0.6
+    Tree Height: 237
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -13,10 +14,11 @@ Panels:
       - /2D Nav Goal1
       - /Publish Point1
     Name: Tool Properties
-    Splitter Ratio: 0.588679016
+    Splitter Ratio: 0.59
   - Class: rviz/Views
     Expanded:
       - /Current View1
+      - /Current View1/Focal Point1
     Name: Views
     Splitter Ratio: 0.5
   - Class: rviz/Time
@@ -26,6 +28,8 @@ Panels:
     SyncSource: ""
   - Class: mc_rtc_rviz_panel/mc_rtc panel
     Name: mc_rtc panel
+Preferences:
+  PromptSaveOnExit: false
 Visualization Manager:
   Class: ""
   Displays:
@@ -54,272 +58,37 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Alpha: 0.5
+    - Alpha: 0.8
       Class: rviz/RobotModel
       Collision Enabled: false
       Enabled: true
       Links:
-        Accelerometer:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         All Links Enabled: true
-        BODY:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        CHEST_LINK0:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        CHEST_LINK1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
-        HEAD_LINK0:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        HEAD_LINK1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LARM_LINK0:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LARM_LINK1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LARM_LINK2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LARM_LINK3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LARM_LINK4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LARM_LINK5:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LARM_LINK6:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LARM_LINK7:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LHAND_LINK0:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LHAND_LINK1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LHAND_LINK2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LHAND_LINK3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LHAND_LINK4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LLEG_LINK0:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LLEG_LINK1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LLEG_LINK2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LLEG_LINK3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LLEG_LINK4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LLEG_LINK5:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        LeftFootForceSensor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        LeftHandForceSensor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         Link Tree Style: Links in Alphabetic Order
-        RARM_LINK0:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RARM_LINK1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RARM_LINK2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RARM_LINK3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RARM_LINK4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RARM_LINK5:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RARM_LINK6:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RARM_LINK7:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RHAND_LINK0:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RHAND_LINK1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RHAND_LINK2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RHAND_LINK3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RHAND_LINK4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RLEG_LINK0:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RLEG_LINK1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RLEG_LINK2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RLEG_LINK3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RLEG_LINK4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RLEG_LINK5:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        RightFootForceSensor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        RightHandForceSensor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        l_gripper:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        r_gripper:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        xtion_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-      Name: Robot
+      Name: ControlRobot
       Robot Description: /control/robot_description
       TF Prefix: /control
       Update Interval: 0
       Value: true
+      Visual Enabled: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: false
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+      Name: RealRobot
+      Robot Description: /control/robot_description
+      TF Prefix: /real
+      Update Interval: 0
+      Value: false
       Visual Enabled: true
     - Class: rviz/MarkerArray
       Enabled: true
@@ -375,12 +144,13 @@ Visualization Manager:
       Marker Topic: /mc_rtc_rviz
       Name: mc_rtc GUI markers
       Namespaces:
-        {}
+        Tasks/Stabilizer/Markers/Contacts/SupportContacts: true
       Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
-    Background Color: 48; 48; 48
+    Background Color: 211; 215; 207
+    Default Light: true
     Fixed Frame: robot_map
     Frame Rate: 30
   Name: root
@@ -402,33 +172,33 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.61645889
+      Distance: 2.5
       Enable Stereo Rendering:
-        Stereo Eye Separation: 0.0599999987
+        Stereo Eye Separation: 0.05
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.468569279
-        Y: 0.37348929
-        Z: 1.15054739
+        X: 0
+        Y: 0
+        Z: 0.8
       Focal Shape Fixed Size: true
-      Focal Shape Size: 0.0500000007
+      Focal Shape Size: 0.05
       Invert Z Axis: false
       Name: Current View
-      Near Clip Distance: 0.00999999978
-      Pitch: 0.419756889
+      Near Clip Distance: 0.01
+      Pitch: 0.2
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.80036497
+      Yaw: 0
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1559
+  Height: 1038
   Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd00000004000000000000027a00000546fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000007200fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000004bb000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb00000018006d0063005f007200740063002000700061006e0065006c01000000400000043a0000043a00fffffffb000000100044006900730070006c0061007900730100000486000001000000010000fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000013b0000027dfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000500000027d000000e800fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000078000000058fc0100000002fb0000000800540069006d00650100000000000007800000057800fffffffb0000000800540069006d00650100000000000004500000000000000000000004fa0000054600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001b7000003b4fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000004bb000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb00000018006d0063005f007200740063002000700061006e0065006c010000003d000002840000007100fffffffb000000100044006900730070006c00610079007301000002c70000012a000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000013b000003b4fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d000003b4000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000078000000058fc0100000002fb0000000800540069006d0065000000000000000780000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000005c3000003b400000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -438,7 +208,7 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1920
-  X: 640
-  Y: 24
+  X: 0
+  Y: 0
   mc_rtc panel:
     collapsed: false
