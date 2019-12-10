@@ -30,4 +30,4 @@ set(src_files
 )
 
 add_executable(mc_log_visualization ${src_files})
-target_link_libraries(mc_log_visualization PUBLIC ${catkin_LIBRARIES} mc_rtc::mc_control)
+target_link_libraries(mc_log_visualization PUBLIC ${catkin_LIBRARIES} mc_rtc::mc_control mc_rtc::mc_rtc_ros)

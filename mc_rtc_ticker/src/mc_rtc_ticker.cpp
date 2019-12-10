@@ -37,7 +37,6 @@ T getParam(ros::NodeHandle & n, const std::string & param, const T & def)
 }
 } // namespace
 
-#ifdef MC_RTC_HAS_ROS
 int main()
 {
   auto nh_p = mc_rtc::ROSBridge::get_node_handle();
@@ -242,10 +241,3 @@ int main()
 
   return 0;
 }
-#else
-int main()
-{
-  std::cerr << "mc_rtc was built without ROS support, aborting" << std::endl;
-  return 1;
-}
-#endif

@@ -23,7 +23,7 @@ set(MC_RTC_TICKER_HDR
 )
 
 add_executable(mc_rtc_ticker ${MC_RTC_TICKER_SRC} ${MC_RTC_TICKER_HDR})
-target_link_libraries(mc_rtc_ticker mc_rtc::mc_control)
+target_link_libraries(mc_rtc_ticker mc_rtc::mc_control mc_rtc::mc_rtc_ros)
 
 install(TARGETS mc_rtc_ticker
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
