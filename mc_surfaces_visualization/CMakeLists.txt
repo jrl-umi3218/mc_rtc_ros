@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.1)
 set(CMAKE_CXX_STANDARD 11)
-set(PROJECT_NAME mc_surfaces_visualization))
+set(PROJECT_NAME mc_surfaces_visualization)
 project(${PROJECT_NAME} LANGUAGES CXX VERSION 1.0.0)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -12,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   roscpp
   std_msgs
-  tf
 )
 
 catkin_package()
