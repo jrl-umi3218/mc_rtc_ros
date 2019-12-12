@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
 <package>
   <name>mc_surfaces_visualization</name>
-  <version>0.0.1</version>
+  <version>1.0.0</version>
   <description>Visualize contact surfaces in RVIz</description>
 
-  <maintainer email="h.audren@gmail.com">haudren</maintainer>
+  <author email="h.audren@gmail.com">Hervé Audren</author>
+  <maintainer email="pierre.gergondet@gmail.com">Pierre Gergondet</maintainer>
 
-  <license>TODO</license>
+  <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -14,11 +15,9 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>visualization_msgs</build_depend>
-  <build_depend>tf</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>visualization_msgs</run_depend>
-  <run_depend>tf</run_depend>
 </package>
