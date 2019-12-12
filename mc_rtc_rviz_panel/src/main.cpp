@@ -22,7 +22,9 @@ void signal_handler(int sig)
 
 int main(int argc, char * argv[])
 {
+#ifndef DISABLE_ROS
   ros::init(argc, argv, "mc_rtc_gui");
+#endif
   QApplication app(argc, argv);
   app_ = &app;
   QMainWindow window;

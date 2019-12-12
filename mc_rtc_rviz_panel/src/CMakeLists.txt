@@ -16,11 +16,10 @@ set(MOC_HEADERS
   NumberSliderWidget.h
   PlotWidget.h
   PlotTabWidget.h
-  SchemaWidget.h
-)
+  SchemaWidget.h)
 
 if(NOT ${DISABLE_ROS})
-  list(APPEND MOC_HEADERS
+  set(ROS_MOC_HEADERS
     InteractiveMarkerWidget.h
     ArrowInteractiveMarkerWidget.h
     ForceInteractiveMarkerWidget.h
@@ -48,15 +47,17 @@ else()
 endif()
 if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
   find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
-  qt4_wrap_cpp(MOC_FILES
-    ${MOC_HEADERS}
-  )
+  qt4_wrap_cpp(MOC_FILES ${MOC_HEADERS})
+  if(NOT ${DISABLE_ROS})
+    qt4_wrap_cpp(ROS_MOC_FILES ${ROS_MOC_HEADERS})
+  endif()
   qt4_add_resources(QRC_FILES icons.qrc)
 else()
   find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
-  qt5_wrap_cpp(MOC_FILES
-    ${MOC_HEADERS}
-  )
+  qt5_wrap_cpp(MOC_FILES ${MOC_HEADERS})
+  if(NOT ${DISABLE_ROS})
+    qt5_wrap_cpp(ROS_MOC_FILES ${ROS_MOC_HEADERS})
+  endif()
   qt5_add_resources(QRC_FILES icons.qrc)
 endif()
 
@@ -64,11 +65,11 @@ set(HEADER_FILES
   ArrayLabelWidget.h
   ClientWidget.h
   LabelWidget.h
-  utils.h
-)
+  utils.h)
 
 if(NOT ${DISABLE_ROS})
-  list(APPEND HEADER_FILES utils.h)
+  list(APPEND HEADER_FILES
+    utils.h)
 endif()
 
 set(SOURCE_FILES
@@ -85,16 +86,31 @@ set(SOURCE_FILES
   GenericInputWidget.cpp
   LabelWidget.cpp
   NumberSliderWidget.cpp
-  Panel.cpp
   PlotWidget.cpp
   PlotTabWidget.cpp
   SchemaWidget.cpp
   ${MOC_FILES}
-  ${QRC_FILES}
-)
+  ${QRC_FILES})
+
+add_library(_gui_objects OBJECT ${SOURCE_FILES})
+target_compile_definitions(_gui_objects PRIVATE -DMC_RTC_DOCDIR="${MC_RTC_DOCDIR}")
+if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
+  target_include_directories(_gui_objects PRIVATE $<TARGET_PROPERTY:Qt4::QtCore,INTERFACE_INCLUDE_DIRECTORIES>)
+  target_compile_definitions(_gui_objects PRIVATE $<TARGET_PROPERTY:Qt4::QtCore,INTERFACE_COMPILE_DEFINITIONS>)
+  target_include_directories(_gui_objects PRIVATE $<TARGET_PROPERTY:Qt4::QtGui,INTERFACE_INCLUDE_DIRECTORIES>)
+  target_compile_definitions(_gui_objects PRIVATE $<TARGET_PROPERTY:Qt4::QtGui,INTERFACE_COMPILE_DEFINITIONS>)
+else()
+  target_include_directories(_gui_objects PRIVATE $<TARGET_PROPERTY:Qt5::Core,INTERFACE_INCLUDE_DIRECTORIES>)
+  target_compile_definitions(_gui_objects PRIVATE $<TARGET_PROPERTY:Qt5::Core,INTERFACE_COMPILE_DEFINITIONS>)
+  target_include_directories(_gui_objects PRIVATE $<TARGET_PROPERTY:Qt5::Gui,INTERFACE_INCLUDE_DIRECTORIES>)
+  target_compile_definitions(_gui_objects PRIVATE $<TARGET_PROPERTY:Qt5::Gui,INTERFACE_COMPILE_DEFINITIONS>)
+  target_include_directories(_gui_objects PRIVATE $<TARGET_PROPERTY:Qt5::Widgets,INTERFACE_INCLUDE_DIRECTORIES>)
+  target_compile_definitions(_gui_objects PRIVATE $<TARGET_PROPERTY:Qt5::Widgets,INTERFACE_COMPILE_DEFINITIONS>)
+endif()
+target_compile_options(_gui_objects PRIVATE -fPIC)
 
 if(NOT ${DISABLE_ROS})
-  list(APPEND SOURCE_FILES
+  set(ROS_SOURCE_FILES
     InteractiveMarkerWidget.cpp
     ArrowInteractiveMarkerWidget.cpp
     ForceInteractiveMarkerWidget.cpp
@@ -104,23 +120,51 @@ if(NOT ${DISABLE_ROS})
     DisplayTrajectoryWidget.cpp
     PolygonMarkerWidget.cpp
     utils.cpp
-    plugin.cpp)
+    plugin.cpp
+    ${ROS_MOC_FILES})
+  add_library(_gui_ros_objects OBJECT ${ROS_SOURCE_FILES})
+  if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
+    target_include_directories(_gui_ros_objects PRIVATE $<TARGET_PROPERTY:Qt4::QtCore,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_compile_definitions(_gui_ros_objects PRIVATE $<TARGET_PROPERTY:Qt4::QtCore,INTERFACE_COMPILE_DEFINITIONS>)
+    target_include_directories(_gui_ros_objects PRIVATE $<TARGET_PROPERTY:Qt4::QtGui,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_compile_definitions(_gui_ros_objects PRIVATE $<TARGET_PROPERTY:Qt4::QtGui,INTERFACE_COMPILE_DEFINITIONS>)
+  else()
+    target_include_directories(_gui_ros_objects PRIVATE $<TARGET_PROPERTY:Qt5::Core,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_compile_definitions(_gui_ros_objects PRIVATE $<TARGET_PROPERTY:Qt5::Core,INTERFACE_COMPILE_DEFINITIONS>)
+    target_include_directories(_gui_ros_objects PRIVATE $<TARGET_PROPERTY:Qt5::Gui,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_compile_definitions(_gui_ros_objects PRIVATE $<TARGET_PROPERTY:Qt5::Gui,INTERFACE_COMPILE_DEFINITIONS>)
+    target_include_directories(_gui_ros_objects PRIVATE $<TARGET_PROPERTY:Qt5::Widgets,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_compile_definitions(_gui_ros_objects PRIVATE $<TARGET_PROPERTY:Qt5::Widgets,INTERFACE_COMPILE_DEFINITIONS>)
+  endif()
+  target_compile_options(_gui_ros_objects PRIVATE -fPIC)
 endif()
 
-find_package(mc_rtc REQUIRED)
-
-add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${MOC_HEADERS})
-target_link_libraries(${PROJECT_NAME} PUBLIC mc_rtc::mc_control_client mc_rtc::mc_rtc_ros)
-if(NOT ${DISABLE_ROS})
-  add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES})
-endif()
 set(MC_RTC_DOCDIR "${mc_rtc_DIR}/../../../share/doc/mc_rtc")
 get_filename_component(MC_RTC_DOCDIR "${MC_RTC_DOCDIR}" ABSOLUTE)
 if(NOT EXISTS "${MC_RTC_DOCDIR}")
   message(SEND_ERROR "Provided mc_rtc documentation directory (${MC_RTC_DOCDIR}) does not exist")
 endif()
-target_compile_definitions(${PROJECT_NAME} PRIVATE -DMC_RTC_DOCDIR="${MC_RTC_DOCDIR}")
+
+if(NOT ${DISABLE_ROS})
+  add_library(${PROJECT_NAME} Panel.cpp ${HEADER_FILES} ${MOC_HEADERS} ${ROS_MOC_HEADERS} $<TARGET_OBJECTS:_gui_objects> $<TARGET_OBJECTS:_gui_ros_objects>)
+  add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES})
+  if(${BUILD_ROS_FREE_GUI})
+    add_executable(mc_rtc_gui_noros main.cpp Panel.cpp ${HEADER_FILES} ${MOC_HEADERS} $<TARGET_OBJECTS:_gui_objects>)
+    target_compile_options(mc_rtc_gui_noros PRIVATE -DDISABLE_ROS)
+    if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
+      target_link_libraries(mc_rtc_gui_noros PUBLIC Qt4::QtCore Qt4::QtGui qwt)
+    else()
+      target_link_libraries(mc_rtc_gui_noros PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets qwt-qt5)
+    endif()
+    target_link_libraries(mc_rtc_gui_noros PUBLIC mc_rtc::mc_control_client)
+  endif()
+else()
+  add_library(${PROJECT_NAME} Panel.cpp ${HEADER_FILES} ${MOC_HEADERS} $<TARGET_OBJECTS:_gui_objects>)
+  target_compile_options(${PROJECT_NAME} PRIVATE -DDISABLE_ROS)
+endif()
+
+target_link_libraries(${PROJECT_NAME} PUBLIC mc_rtc::mc_control_client mc_rtc::mc_rtc_ros)
 if(NOT ${FORCE_QT5} AND ${ROS_DISTRO} STREQUAL "indigo")
   target_link_libraries(${PROJECT_NAME} PUBLIC Qt4::QtCore Qt4::QtGui qwt)
 else()
@@ -138,6 +182,10 @@ install(
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+if(TARGET mc_rtc_gui_noros)
+  install(TARGETS mc_rtc_gui_noros DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+endif()
 
 if(NOT ${DISABLE_ROS})
   install(

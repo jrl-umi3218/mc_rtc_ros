@@ -19,57 +19,24 @@
 #  include <visualization_msgs/MarkerArray.h>
 
 #  include <interactive_markers/interactive_marker_server.h>
-#  include <rviz/panel.h>
 #  include <tf/tfMessage.h>
 #  include <tf/transform_listener.h>
-
-#else
-
-namespace ros
-{
-struct NodeHandle
-{
-};
-struct Publisher
-{
-};
-inline void spinOnce() {}
-inline bool ok()
-{
-  return true;
-}
-inline void init(int argc, char * argv[], const std::string &) {}
-} // namespace ros
-
-namespace interactive_markers
-{
-struct InteractiveMarkerServer
-{
-  struct FeedbackCallback
-  {
-  };
-  InteractiveMarkerServer(const std::string &) {}
-  void applyChanges() {}
-};
-} // namespace interactive_markers
-
-namespace visualization_msgs
-{
-struct MarkerArray
-{
-};
-} // namespace visualization_msgs
 
 #endif
 
 namespace mc_rtc_rviz
 {
 
+/** Hide ROS details in pimpl */
+struct PanelImpl;
+
 class Panel : public CategoryWidget, public mc_control::ControllerClient
 {
   Q_OBJECT
 public:
   Panel(QWidget * parent = 0);
+
+  ~Panel();
 
   /** Returns true if the provided widget should be visible
    *
@@ -251,11 +218,7 @@ protected:
   mc_rtc::Configuration config(const WidgetId & id) const;
 
 private:
-  /** ROS stuff */
-  ros::NodeHandle nh_;
-  std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server_;
-  visualization_msgs::MarkerArray marker_array_;
-  ros::Publisher marker_array_pub_;
+  std::unique_ptr<PanelImpl> impl_;
   /** Latest widget added */
   ClientWidget * latestWidget_ = nullptr;
   /** Configuration */

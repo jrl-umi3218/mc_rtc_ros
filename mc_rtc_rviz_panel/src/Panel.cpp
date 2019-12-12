@@ -123,17 +123,34 @@ std::string getPushURI()
 
 } // namespace
 
+#ifndef DISABLE_ROS
+struct PanelImpl
+{
+  PanelImpl()
+  : nh_(),
+    int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
+  {
+    marker_array_pub_ =
+        mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::MarkerArray>("/mc_rtc_rviz", 0);
+  }
+  ros::NodeHandle nh_;
+  std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server_;
+  visualization_msgs::MarkerArray marker_array_;
+  ros::Publisher marker_array_pub_;
+};
+#else
+struct PanelImpl
+{
+};
+#endif
+
 Panel::Panel(QWidget * parent)
 : CategoryWidget(ClientWidgetParam{*this, parent, {{}, "ROOT"}}), mc_control::ControllerClient(getSubURI(),
                                                                                                getPushURI(),
                                                                                                2),
-  nh_(), int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers")),
+  impl_(new PanelImpl()),
   config_(loadPanelConfiguration()), sub_uri_(getSubURI(config_)), push_uri_(getPushURI(config_))
 {
-#ifndef DISABLE_ROS
-  marker_array_pub_ =
-      mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::MarkerArray>("/mc_rtc_rviz", 0);
-#endif
   qRegisterMetaType<uint64_t>("uint64_t");
   qRegisterMetaType<std::string>("std::string");
   qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
@@ -307,15 +324,19 @@ void Panel::got_stop()
 {
   tree_.clean();
   this->clean();
-  int_server_->applyChanges();
 #ifndef DISABLE_ROS
-  marker_array_pub_.publish(marker_array_);
-  marker_array_.markers.clear();
-#endif
+  impl_->int_server_->applyChanges();
+  impl_->marker_array_pub_.publish(impl_->marker_array_);
+  impl_->marker_array_.markers.clear();
   if(ros::ok())
   {
     ros::spinOnce();
   }
+#endif
+}
+
+Panel::~Panel()
+{
 }
 
 void Panel::category(const std::vector<std::string> & parent, const std::string & category)
@@ -654,7 +675,7 @@ void Panel::got_point3d(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<Point3DInteractiveMarkerWidget>(id, requestId, int_server_, config, !ro, label);
+  auto & w = get_widget<Point3DInteractiveMarkerWidget>(id, requestId, impl_->int_server_, config, !ro, label);
   w.update(pos);
 #endif
 }
@@ -663,7 +684,7 @@ void Panel::got_rotation(const WidgetId & id, const WidgetId & requestId, bool r
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, !ro, false, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, impl_->int_server_, !ro, false, label);
   w.update(pos);
 #endif
 }
@@ -672,7 +693,7 @@ void Panel::got_transform(const WidgetId & id, const WidgetId & requestId, bool 
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, int_server_, !ro, !ro, label);
+  auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, impl_->int_server_, !ro, !ro, label);
   w.update(pos);
 #endif
 }
@@ -685,7 +706,7 @@ void Panel::got_xytheta(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, int_server_, sva::PTransformd::Identity(), !ro,
+  auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, impl_->int_server_, sva::PTransformd::Identity(), !ro,
                                                         !ro, label);
   w.update(vec, altitude);
 #endif
@@ -696,7 +717,7 @@ void Panel::got_trajectory(const WidgetId & id,
                            const mc_rtc::gui::LineConfig & config)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<DisplayTrajectoryWidget>(id, marker_array_, config);
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_, config);
   w.update(points);
 #endif
 }
@@ -706,7 +727,7 @@ void Panel::got_trajectory(const WidgetId & id,
                            const mc_rtc::gui::LineConfig & config)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<DisplayTrajectoryWidget>(id, marker_array_, config);
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_, config);
   w.update(points);
 #endif
 }
@@ -714,7 +735,7 @@ void Panel::got_trajectory(const WidgetId & id,
 void Panel::got_trajectory(const WidgetId & id, const Eigen::Vector3d & point, const mc_rtc::gui::LineConfig & config)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<DisplayTrajectoryWidget>(id, marker_array_, config);
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_, config);
   w.update(point);
 #endif
 }
@@ -722,7 +743,7 @@ void Panel::got_trajectory(const WidgetId & id, const Eigen::Vector3d & point, c
 void Panel::got_trajectory(const WidgetId & id, const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<DisplayTrajectoryWidget>(id, marker_array_, config);
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_, config);
   w.update(point);
 #endif
 }
@@ -732,7 +753,7 @@ void Panel::got_polygon(const WidgetId & id,
                         const mc_rtc::gui::Color & c)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<PolygonMarkerWidget>(id, marker_array_);
+  auto & w = get_widget<PolygonMarkerWidget>(id, impl_->marker_array_);
   w.update(polygons, c);
 #endif
 }
@@ -747,7 +768,7 @@ void Panel::got_force(const WidgetId & id,
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w =
-      get_widget<ForceInteractiveMarkerWidget>(id, requestId, int_server_, surface, forcep, forceConfig, ro, label);
+      get_widget<ForceInteractiveMarkerWidget>(id, requestId, impl_->int_server_, surface, forcep, forceConfig, ro, label);
   w.update(surface, forcep, forceConfig);
 #endif
 }
@@ -761,7 +782,7 @@ void Panel::got_arrow(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, int_server_, start, end, config, !ro, !ro, label);
+  auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, impl_->int_server_, start, end, config, !ro, !ro, label);
   w.update(start, end, config);
 #endif
 }

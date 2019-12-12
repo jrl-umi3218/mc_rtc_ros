@@ -2,6 +2,8 @@
  * Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
  */
 
+#include <rviz/panel.h>
+
 #include "Panel.h"
 
 namespace mc_rtc_rviz
