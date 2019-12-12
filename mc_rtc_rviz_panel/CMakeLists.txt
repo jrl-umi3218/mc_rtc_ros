@@ -9,7 +9,6 @@ set(PROJECT_DESCRIPTION "mc_rtc RVIz panel for prototyping controllers")
 set(PROJECT_URL "")
 project(${PROJECT_NAME})
 
-set(CXX_DISABLE_WERROR 0)
 set(CMAKE_CXX_STANDARD 11)
 
 find_package(catkin)

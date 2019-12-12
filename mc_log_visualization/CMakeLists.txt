@@ -31,3 +31,9 @@ set(src_files
 
 add_executable(mc_log_visualization ${src_files})
 target_link_libraries(mc_log_visualization PUBLIC ${catkin_LIBRARIES} mc_rtc::mc_control mc_rtc::mc_rtc_ros)
+
+install(TARGETS mc_log_visualization
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
