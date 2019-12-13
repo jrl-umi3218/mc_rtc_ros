@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+TMP = $(CURDIR)/debian/tmp
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure --
+
+override_dh_auto_install:
+	dh_auto_install --destdir=$(TMP)

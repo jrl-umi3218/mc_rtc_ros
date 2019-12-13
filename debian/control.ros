@@ -1,0 +1,55 @@
+
+Package: ros-@ROS_DISTRO@-mc-convex-visualization
+Architecture: any
+Section: science
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+         ros-@ROS_DISTRO@-rviz
+Description: mc-rtc - Convex visualization
+ RViZ based tools to visualize convexes
+
+Package: ros-@ROS_DISTRO@-mc-log-visualization
+Architecture: any
+Section: science
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+         ros-@ROS_DISTRO@-rviz
+Description: mc-rtc - Log visualization
+ RViZ based tools to visualize logs
+
+Package: ros-@ROS_DISTRO@-mc-rtc-rviz-panel
+Architecture: any
+Section: science
+Depends: ${mic:Depends},
+         ${shlibs:Depends},
+         ros-@ROS_DISTRO@-rviz
+Description: mc-rtc - RViZ panel
+ RViZ plugin implementing mc_rtc GUI
+
+Package: ros-@ROS_DISTRO@-mc-rtc-ticker
+Architecture: any
+Section: science
+Depends: ${misc:Depends},
+         ${shlibs:Depends}
+Description: mc-rtc - ROS ticker
+ mc_rtc interface implementation using ROS for kinematic simulations
+
+Package: ros-@ROS_DISTRO@-mc-surfaces-visualization
+Architecture: any
+Section: science
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+         ros-@ROS_DISTRO@-rviz
+Description: mc-rtc - Surfaces visualization
+ RViZ based tools to visualize surfaces
+
+Package: ros-@ROS_DISTRO@-mc-rtc-tools
+Architecture: any
+Section: science
+Depends: ros-@ROS_DISTRO@-mc-convex-visualization,
+         ros-@ROS_DISTRO@-mc-log-visualization,
+         ros-@ROS_DISTRO@-mc-rtc-rviz-panel,
+         ros-@ROS_DISTRO@-mc-rtc-ticker,
+         ros-@ROS_DISTRO@-mc-surfaces-visualization
+Description: mc-rtc - ROS tools
+ Collection of ROS-based tools for mc_rtc

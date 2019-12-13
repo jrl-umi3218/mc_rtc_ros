@@ -1,0 +1,3 @@
+opt/ros/@ROS_DISTRO@/lib/mc_log_visualization/*
+opt/ros/@ROS_DISTRO@/lib/pkgconfig/mc_log_visualization.pc
+opt/ros/@ROS_DISTRO@/share/mc_log_visualization/*

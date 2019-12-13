@@ -35,6 +35,14 @@ if(${catkin_FOUND})
 
   include_directories(${catkin_INCLUDE_DIRS})
   link_directories(${catkin_LIBRARY_DIRS})
+
+  if(NOT ${DISABLE_ROS})
+    install(
+      FILES
+      rviz_plugin.xml
+      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+    )
+  endif()
 else()
   set(BUILD_ROS_FREE_GUI ON)
   set(DISABLE_ROS 1)

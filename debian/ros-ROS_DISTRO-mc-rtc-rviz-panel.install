@@ -1,0 +1,4 @@
+opt/ros/@ROS_DISTRO@/lib/libmc_rtc_rviz_panel.so
+opt/ros/@ROS_DISTRO@/lib/mc_rtc_rviz_panel/mc_rtc_gui
+opt/ros/@ROS_DISTRO@/lib/pkgconfig/mc_rtc_rviz_panel.pc
+opt/ros/@ROS_DISTRO@/share/mc_rtc_rviz_panel/*

@@ -1,0 +1,3 @@
+opt/ros/@ROS_DISTRO@/lib/mc_surfaces_visualization/*
+opt/ros/@ROS_DISTRO@/lib/pkgconfig/mc_surfaces_visualization.pc
+opt/ros/@ROS_DISTRO@/share/mc_surfaces_visualization/*

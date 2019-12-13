@@ -1,0 +1,3 @@
+opt/ros/@ROS_DISTRO@/lib/mc_convex_visualization/*
+opt/ros/@ROS_DISTRO@/lib/pkgconfig/mc_convex_visualization.pc
+opt/ros/@ROS_DISTRO@/share/mc_convex_visualization/*
