@@ -98,18 +98,6 @@ std::vector<vm::Marker> makeArrowMarker(const Eigen::Vector3d & start,
   m.color.g = c.color.g;
   m.color.b = c.color.b;
   markers.push_back(m);
-
-  if(c.start_point_scale > 0)
-  {
-    markers.push_back(getPointMarker(start, c.color, c.start_point_scale));
-    markers.back().action = m.action;
-  }
-
-  if(c.end_point_scale > 0)
-  {
-    markers.push_back(getPointMarker(end, c.color, c.end_point_scale));
-    markers.back().action = m.action;
-  }
   return markers;
 }
 
