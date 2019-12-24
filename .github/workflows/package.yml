@@ -40,8 +40,6 @@ jobs:
         export VERSION=`echo ${{ github.ref }} | sed -e 's@refs/tags/v@@'`
         echo "::set-env name=REJECTION::PROJECT_VERSION in CMakeLists.txt does not match tag"
         grep -q "project(mc_rtc_ros VERSION ${VERSION})" CMakeLists.txt
-        echo "::set-env name=REJECTION::PROJECT_VERSION in package.xml does not match tag"
-        grep -q "<version>${VERSION}</version>" package.xml
         echo "::set-env name=REJECTION::Upstream version in debian/changelog does not match tag"
         head -n 1 debian/changelog | grep -q "mc-rtc-ros (${VERSION}"
         echo "::set-env name=REJECTION::"
