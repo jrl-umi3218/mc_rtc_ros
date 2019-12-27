@@ -148,8 +148,8 @@ Panel::Panel(QWidget * parent)
 : CategoryWidget(ClientWidgetParam{*this, parent, {{}, "ROOT"}}), mc_control::ControllerClient(getSubURI(),
                                                                                                getPushURI(),
                                                                                                2),
-  impl_(new PanelImpl()),
-  config_(loadPanelConfiguration()), sub_uri_(getSubURI(config_)), push_uri_(getPushURI(config_))
+  impl_(new PanelImpl()), config_(loadPanelConfiguration()), sub_uri_(getSubURI(config_)),
+  push_uri_(getPushURI(config_))
 {
   qRegisterMetaType<uint64_t>("uint64_t");
   qRegisterMetaType<std::string>("std::string");
@@ -335,9 +335,7 @@ void Panel::got_stop()
 #endif
 }
 
-Panel::~Panel()
-{
-}
+Panel::~Panel() {}
 
 void Panel::category(const std::vector<std::string> & parent, const std::string & category)
 {
@@ -706,8 +704,8 @@ void Panel::got_xytheta(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, impl_->int_server_, sva::PTransformd::Identity(), !ro,
-                                                        !ro, label);
+  auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, impl_->int_server_, sva::PTransformd::Identity(),
+                                                        !ro, !ro, label);
   w.update(vec, altitude);
 #endif
 }
@@ -767,8 +765,8 @@ void Panel::got_force(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w =
-      get_widget<ForceInteractiveMarkerWidget>(id, requestId, impl_->int_server_, surface, forcep, forceConfig, ro, label);
+  auto & w = get_widget<ForceInteractiveMarkerWidget>(id, requestId, impl_->int_server_, surface, forcep, forceConfig,
+                                                      ro, label);
   w.update(surface, forcep, forceConfig);
 #endif
 }
@@ -782,7 +780,8 @@ void Panel::got_arrow(const WidgetId & id,
 {
 #ifndef DISABLE_ROS
   auto label = latestWidget_;
-  auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, impl_->int_server_, start, end, config, !ro, !ro, label);
+  auto & w =
+      get_widget<ArrowInteractiveMarkerWidget>(id, requestId, impl_->int_server_, start, end, config, !ro, !ro, label);
   w.update(start, end, config);
 #endif
 }
