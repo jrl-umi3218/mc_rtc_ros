@@ -13,6 +13,9 @@ set(CMAKE_CXX_STANDARD 11)
 
 find_package(mc_rtc REQUIRED)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMakeModules)
+find_package(Qwt)
+
 find_package(catkin)
 
 if(${catkin_FOUND})
