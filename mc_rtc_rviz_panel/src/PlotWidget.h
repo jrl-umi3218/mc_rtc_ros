@@ -6,10 +6,10 @@
 
 #include "ClientWidget.h"
 
-#include <qwt/qwt_legend.h>
-#include <qwt/qwt_plot.h>
-#include <qwt/qwt_plot_curve.h>
-#include <qwt/qwt_plot_grid.h>
+#include <qwt_legend.h>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_grid.h>
 
 #include <map>
 #include <unordered_map>
