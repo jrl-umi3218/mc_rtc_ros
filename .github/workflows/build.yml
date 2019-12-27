@@ -79,6 +79,13 @@ jobs:
         echo "::set-env name=PATH::${PATH}"
         echo "::set-env name=LD_LIBRARY_PATH::${LD_LIBRARY_PATH}"
         popd
+    - name: Setup env
+      if: matrix.os == 'macos-latest'
+      run: |
+        export PATH=/usr/local/opt/qt/bin:$PATH
+        echo "::set-env name=PATH::${PATH}"
+        export CMAKE_PREFIX_PATH=/usr/local/opt/qt:${CMAKE_PREFIX_PATH}
+        echo "::set-env name=CMAKE_PREFIX_PATH::${CMAKE_PREFIX_PATH}"
     - name: Install dependencies
       uses: jrl-umi3218/github-actions/install-dependencies@master
       with:
