@@ -1,14 +1,13 @@
 #include "PlotWidget.h"
 
-#include <qwt/qwt_global.h>
-#if QWT_VERSION >= 0x060100
-#  include <qwt/qwt_plot_shapeitem.h>
-#else
+#include <qwt_global.h>
+#if QWT_VERSION < 0x060100
 #  error "This requires Qwt >= 6.1.0 to build"
 #endif
 
-#include <qwt/qwt_plot_renderer.h>
-#include <qwt/qwt_symbol.h>
+#include <qwt_plot_renderer.h>
+#include <qwt_plot_shapeitem.h>
+#include <qwt_symbol.h>
 
 namespace mc_rtc_rviz
 {

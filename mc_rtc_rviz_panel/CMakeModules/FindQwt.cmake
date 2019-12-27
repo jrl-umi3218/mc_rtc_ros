@@ -8,6 +8,10 @@ set(QWT_PATHS
     "${CMAKE_INSTALL_PREFIX}"
    )
 
+set(QWT_HINTS
+  /usr/local/opt/qwt/lib
+)
+
 find_path(Qwt_INCLUDE_DIR
           NAMES qwt.h
           PATHS ${QWT_PATHS}
