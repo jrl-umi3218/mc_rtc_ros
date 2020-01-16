@@ -107,6 +107,7 @@ jobs:
           - path: jrl-umi3218/SpaceVecAlg
           - path: jrl-umi3218/sch-core
           - path: jrl-umi3218/eigen-qld
+          - path: jrl-umi3218/eigen-quadprog
           - path: jrl-umi3218/sch-core-python
           - path: jrl-umi3218/RBDyn
           - path: jrl-umi3218/Tasks
