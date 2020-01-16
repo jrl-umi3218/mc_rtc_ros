@@ -26,7 +26,7 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
 endif()
 
 find_library(Qwt_LIBRARY
-             NAMES qwt qwt-qt4 qwt-qt5
+             NAMES qwt-qt5 qwt qwt-qt4
              PATHS ${QWT_PATHS}
              HINTS ${QWT_HINTS}
              PATH_SUFFIXES ${ARCH_SUFFIX}
