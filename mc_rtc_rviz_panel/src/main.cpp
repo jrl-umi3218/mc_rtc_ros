@@ -26,6 +26,7 @@ int main(int argc, char * argv[])
   ros::init(argc, argv, "mc_rtc_gui");
 #endif
   QApplication app(argc, argv);
+  app.setWindowIcon(QIcon(":/icons/gui.ico"));
   app_ = &app;
   QMainWindow window;
   window.setWindowTitle("mc_rtc GUI");
