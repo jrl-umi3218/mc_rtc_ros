@@ -1,6 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
 <qresource>
+  <file>icons/gui.ico</file>
   <file>icons/close.svg</file>
   <file>icons/view-fullscreen.svg</file>
 </qresource>
