@@ -13,16 +13,18 @@ class ConnectionDialog : public QDialog
 {
   Q_OBJECT
 public:
-  ConnectionDialog(std::string & sub_uri, std::string & push_uri, QWidget * parent = nullptr);
+  ConnectionDialog(std::string & sub_uri, std::string & push_uri, double & timeout, QWidget * parent = nullptr);
 
   void accept() override;
 
 private:
   std::string & sub_uri_;
   std::string & push_uri_;
+  double & timeout_;
   QFormLayout * layout_;
   QLineEdit * subEdit_;
   QLineEdit * pushEdit_;
+  QLineEdit * timeoutEdit_;
   QPushButton * confirmButton_;
   QPushButton * cancelButton_;
   QPushButton * defaultButton_;
