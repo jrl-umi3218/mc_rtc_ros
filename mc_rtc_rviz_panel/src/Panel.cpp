@@ -54,7 +54,12 @@ bfs::path getConfigDirectory()
 
 bfs::path getConfigPath()
 {
-  return getConfigDirectory() / "rviz_panel.conf";
+  bfs::path config = getConfigDirectory() / "rviz_panel.conf";
+  if(bfs::exists(config))
+  {
+    return config;
+  }
+  return getConfigDirectory() / "rviz_panel.yaml";
 }
 
 mc_rtc::Configuration loadPanelConfiguration()
@@ -121,6 +126,12 @@ std::string getPushURI()
   return getPushURI(config);
 }
 
+double getTimeout()
+{
+  auto config = loadPanelConfiguration();
+  return config("timeout", 2.0);
+}
+
 } // namespace
 
 #ifndef DISABLE_ROS
@@ -147,7 +158,7 @@ struct PanelImpl
 Panel::Panel(QWidget * parent)
 : CategoryWidget(ClientWidgetParam{*this, parent, {{}, "ROOT"}}), mc_control::ControllerClient(getSubURI(),
                                                                                                getPushURI(),
-                                                                                               2),
+                                                                                               getTimeout()),
   impl_(new PanelImpl()), config_(loadPanelConfiguration()), sub_uri_(getSubURI(config_)),
   push_uri_(getPushURI(config_))
 {
@@ -983,7 +994,8 @@ void Panel::contextMenu_editConnection()
 {
   std::string sub_uri = sub_uri_;
   std::string push_uri = push_uri_;
-  ConnectionDialog dialog(sub_uri, push_uri, this);
+  double timeout = timeout_;
+  ConnectionDialog dialog(sub_uri, push_uri, timeout, this);
   if(dialog.exec())
   {
     try
@@ -1004,6 +1016,8 @@ void Panel::contextMenu_editConnection()
     }
     config_("URI").add("sub", sub_uri_);
     config_("URI").add("push", push_uri_);
+    config_.add("timeout", timeout);
+    this->timeout(timeout);
     savePanelConfiguration(config_);
   }
 }
