@@ -62,14 +62,17 @@ bfs::path getConfigPath()
   return getConfigDirectory() / "rviz_panel.yaml";
 }
 
-mc_rtc::Configuration loadPanelConfiguration()
+const mc_rtc::Configuration & loadPanelConfiguration()
 {
-  mc_rtc::Configuration config;
-  auto config_path = getConfigPath();
-  if(bfs::exists(config_path) && bfs::is_regular(config_path))
-  {
-    config.load(config_path.string());
-  }
+  static mc_rtc::Configuration config = []() {
+    mc_rtc::Configuration config;
+    auto config_path = getConfigPath();
+    if(bfs::exists(config_path) && bfs::is_regular(config_path))
+    {
+      config.load(config_path.string());
+    }
+    return config;
+  }();
   return config;
 }
 
@@ -94,36 +97,16 @@ void savePanelConfiguration(const mc_rtc::Configuration & config)
   config.save(config_path.string());
 }
 
-std::string defaultSubURI()
+const std::vector<ConnectionConfiguration> & getConnectionConfigurations()
 {
-  return "ipc://" + (bfs::temp_directory_path() / "mc_rtc_pub.ipc").string();
+  const auto & config = loadPanelConfiguration();
+  static auto configs = config("URI", std::vector<ConnectionConfiguration>(1));
+  return configs;
 }
 
-std::string getSubURI(const mc_rtc::Configuration & config)
+const ConnectionConfiguration & getConnectionConfiguration()
 {
-  return config("URI", mc_rtc::Configuration{})("sub", defaultSubURI());
-}
-
-std::string getSubURI()
-{
-  auto config = loadPanelConfiguration();
-  return getSubURI(config);
-}
-
-std::string defaultPushURI()
-{
-  return "ipc://" + (bfs::temp_directory_path() / "mc_rtc_rep.ipc").string();
-}
-
-std::string getPushURI(const mc_rtc::Configuration & config)
-{
-  return config("URI", mc_rtc::Configuration{})("push", defaultPushURI());
-}
-
-std::string getPushURI()
-{
-  auto config = loadPanelConfiguration();
-  return getPushURI(config);
+  return getConnectionConfigurations()[0];
 }
 
 double getTimeout()
@@ -156,11 +139,11 @@ struct PanelImpl
 #endif
 
 Panel::Panel(QWidget * parent)
-: CategoryWidget(ClientWidgetParam{*this, parent, {{}, "ROOT"}}), mc_control::ControllerClient(getSubURI(),
-                                                                                               getPushURI(),
-                                                                                               getTimeout()),
-  impl_(new PanelImpl()), config_(loadPanelConfiguration()), sub_uri_(getSubURI(config_)),
-  push_uri_(getPushURI(config_))
+: CategoryWidget(ClientWidgetParam{*this, parent, {{}, "ROOT"}}), mc_control::ControllerClient(
+                                                                      getConnectionConfiguration().sub_uri(),
+                                                                      getConnectionConfiguration().push_uri(),
+                                                                      getTimeout()),
+  impl_(new PanelImpl()), config_(loadPanelConfiguration()), connectionConfigs_(getConnectionConfigurations())
 {
   qRegisterMetaType<uint64_t>("uint64_t");
   qRegisterMetaType<std::string>("std::string");
@@ -992,15 +975,15 @@ void Panel::contextMenu(const QPoint & pos)
 
 void Panel::contextMenu_editConnection()
 {
-  std::string sub_uri = sub_uri_;
-  std::string push_uri = push_uri_;
+  auto configs = connectionConfigs_;
   double timeout = timeout_;
-  ConnectionDialog dialog(sub_uri, push_uri, timeout, this);
+  ConnectionDialog dialog(configs, timeout, this);
   if(dialog.exec())
   {
     try
     {
-      reconnect(sub_uri, push_uri);
+      const auto & cfg = configs[0];
+      reconnect(cfg.sub_uri(), cfg.push_uri());
     }
     catch(std::runtime_error & exc)
     {
@@ -1008,14 +991,8 @@ void Panel::contextMenu_editConnection()
       exc.what();
       return;
     }
-    sub_uri_ = sub_uri;
-    push_uri_ = push_uri;
-    if(!config_.has("URI"))
-    {
-      config_.add("URI");
-    }
-    config_("URI").add("sub", sub_uri_);
-    config_("URI").add("push", push_uri_);
+    connectionConfigs_ = configs;
+    config_.add("URI", configs);
     config_.add("timeout", timeout);
     this->timeout(timeout);
     savePanelConfiguration(config_);
@@ -1024,7 +1001,7 @@ void Panel::contextMenu_editConnection()
 
 void Panel::contextMenu_reconnect()
 {
-  reconnect(sub_uri_, push_uri_);
+  reconnect(connectionConfigs_[0].sub_uri(), connectionConfigs_[0].push_uri());
 }
 
 bool Panel::visible(const WidgetId & id) const

@@ -7,6 +7,7 @@
 #ifndef Q_MOC_RUN
 
 #  include "CategoryWidget.h"
+#  include "ConnectionConfiguration.h"
 
 #  include <memory>
 #  include <unordered_map>
@@ -223,8 +224,7 @@ private:
   ClientWidget * latestWidget_ = nullptr;
   /** Configuration */
   mutable mc_rtc::Configuration config_;
-  std::string sub_uri_;
-  std::string push_uri_;
+  mutable std::vector<ConnectionConfiguration> connectionConfigs_;
 private slots:
   void contextMenu(const QPoint & pos);
   void contextMenu_editConnection();
