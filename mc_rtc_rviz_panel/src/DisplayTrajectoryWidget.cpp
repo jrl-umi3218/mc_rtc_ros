@@ -27,6 +27,13 @@ DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & param
   connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
 }
 
+DisplayTrajectoryWidget::~DisplayTrajectoryWidget()
+{
+  configure();
+  path_.action = visualization_msgs::Marker::DELETE;
+  publish();
+}
+
 void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d> & points)
 {
   path_.points.clear();
@@ -119,7 +126,6 @@ void DisplayTrajectoryWidget::configure()
   path_.color.b = config_.color.b;
   path_.color.a = config_.color.a;
   path_.action = visualization_msgs::Marker::ADD;
-  path_.lifetime = ros::Duration(1);
   path_.ns = id2name(id());
 }
 

@@ -25,6 +25,18 @@ PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params, visua
   layout->addWidget(button_);
 }
 
+PolygonMarkerWidget::~PolygonMarkerWidget()
+{
+  visualization_msgs::Marker m;
+  m.action = visualization_msgs::Marker::DELETE;
+  m.ns = id2name(id());
+  for(size_t i = 0; i < currPolygonNum_; ++i)
+  {
+    m.id = i;
+    markers_.markers.push_back(m);
+  }
+}
+
 void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                                  const mc_rtc::gui::Color & c)
 {
@@ -50,7 +62,6 @@ void PolygonMarkerWidget::update(const std::string & ns,
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::LINE_STRIP;
   m.action = visualization_msgs::Marker::ADD;
-  m.lifetime = ros::Duration(1);
   for(const auto & point : points)
   {
     if(!is_in_range(point))
