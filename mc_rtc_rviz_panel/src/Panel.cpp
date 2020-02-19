@@ -329,7 +329,11 @@ void Panel::got_stop()
 #endif
 }
 
-Panel::~Panel() {}
+Panel::~Panel()
+{
+  got_start();
+  got_stop();
+}
 
 void Panel::category(const std::vector<std::string> & parent, const std::string & category)
 {
