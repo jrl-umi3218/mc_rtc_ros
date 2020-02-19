@@ -24,6 +24,7 @@ public:
   void update(const std::vector<std::vector<Eigen::Vector3d>> & polygons, const mc_rtc::gui::Color & c);
 
   ~PolygonMarkerWidget() override;
+
 private:
   void update(const std::string & ns,
               const unsigned id,

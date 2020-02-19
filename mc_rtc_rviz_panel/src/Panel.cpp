@@ -713,8 +713,8 @@ void Panel::got_trajectory(const WidgetId & id,
                            const mc_rtc::gui::LineConfig & config)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_, config);
-  w.update(points);
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
+  w.update(points, config);
 #endif
 }
 
@@ -723,24 +723,24 @@ void Panel::got_trajectory(const WidgetId & id,
                            const mc_rtc::gui::LineConfig & config)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_, config);
-  w.update(points);
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
+  w.update(points, config);
 #endif
 }
 
 void Panel::got_trajectory(const WidgetId & id, const Eigen::Vector3d & point, const mc_rtc::gui::LineConfig & config)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_, config);
-  w.update(point);
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
+  w.update(point, config);
 #endif
 }
 
 void Panel::got_trajectory(const WidgetId & id, const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_, config);
-  w.update(point);
+  auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
+  w.update(point, config);
 #endif
 }
 
