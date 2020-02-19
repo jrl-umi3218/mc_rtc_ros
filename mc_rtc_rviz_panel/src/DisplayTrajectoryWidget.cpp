@@ -10,9 +10,8 @@ namespace mc_rtc_rviz
 {
 
 DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & params,
-                                                 visualization_msgs::MarkerArray & markers,
-                                                 const mc_rtc::gui::LineConfig & config)
-: ClientWidget(params), markers_(markers), config_(config), visible_(visible()), was_visible_(visible_)
+                                                 visualization_msgs::MarkerArray & markers)
+: ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
   if(!secret())
@@ -29,12 +28,13 @@ DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & param
 
 DisplayTrajectoryWidget::~DisplayTrajectoryWidget()
 {
-  configure();
+  configure({});
   path_.action = visualization_msgs::Marker::DELETE;
   publish();
 }
 
-void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d> & points)
+void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d> & points,
+                                     const mc_rtc::gui::LineConfig & config)
 {
   path_.points.clear();
   for(const auto & p : points)
@@ -51,11 +51,12 @@ void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d> & points
     pose.z = p.z();
     path_.points.push_back(pose);
   }
-  configure();
+  configure(config);
   publish();
 }
 
-void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd> & points)
+void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd> & points,
+                                     const mc_rtc::gui::LineConfig & config)
 {
   path_.points.clear();
   for(const auto & point : points)
@@ -73,11 +74,11 @@ void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd> & point
     pose.z = p.z();
     path_.points.push_back(pose);
   }
-  configure();
+  configure(config);
   publish();
 }
 
-void DisplayTrajectoryWidget::update(const Eigen::Vector3d & point)
+void DisplayTrajectoryWidget::update(const Eigen::Vector3d & point, const mc_rtc::gui::LineConfig & config)
 {
   if(!is_in_range(point))
   {
@@ -90,11 +91,11 @@ void DisplayTrajectoryWidget::update(const Eigen::Vector3d & point)
   pose.y = point.y();
   pose.z = point.z();
   path_.points.push_back(pose);
-  configure();
+  configure(config);
   publish();
 }
 
-void DisplayTrajectoryWidget::update(const sva::PTransformd & point)
+void DisplayTrajectoryWidget::update(const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config)
 {
   const auto & p = point.translation();
   if(!is_in_range(p))
@@ -103,28 +104,28 @@ void DisplayTrajectoryWidget::update(const sva::PTransformd & point)
                                               << ")");
     return;
   }
-  configure();
+  configure(config);
   geometry_msgs::Point pose;
   pose.x = p.x();
   pose.y = p.y();
   pose.z = p.z();
   path_.points.push_back(pose);
-  configure();
+  configure(config);
   publish();
 }
 
-void DisplayTrajectoryWidget::configure()
+void DisplayTrajectoryWidget::configure(const mc_rtc::gui::LineConfig & config)
 {
-  path_.type = config_.style == mc_rtc::gui::LineStyle::Dotted ? visualization_msgs::Marker::POINTS
-                                                               : visualization_msgs::Marker::LINE_STRIP;
+  path_.type = config.style == mc_rtc::gui::LineStyle::Dotted ? visualization_msgs::Marker::POINTS
+                                                              : visualization_msgs::Marker::LINE_STRIP;
   path_.header.frame_id = "/robot_map";
   path_.header.stamp = ros::Time::now();
-  path_.scale.x = config_.width;
-  path_.scale.y = config_.width;
-  path_.color.r = config_.color.r;
-  path_.color.g = config_.color.g;
-  path_.color.b = config_.color.b;
-  path_.color.a = config_.color.a;
+  path_.scale.x = config.width;
+  path_.scale.y = config.width;
+  path_.color.r = config.color.r;
+  path_.color.g = config.color.g;
+  path_.color.b = config.color.b;
+  path_.color.a = config.color.a;
   path_.action = visualization_msgs::Marker::ADD;
   path_.ns = id2name(id());
 }
