@@ -184,34 +184,9 @@ int main()
       }
     }
     controller.setEncoderValues(q);
-    if(controller.run())
+    if(controller.run() && cfp_ptr)
     {
-      std::map<std::string, std::vector<double>> gAQs; // will store only the active joints values
-      std::map<std::string, std::vector<double>> gQs = controller.gripperQ();
-      for(const auto & g : controller.gripperActiveJoints())
-      {
-        const auto & gn = g.first;
-        const auto & gAJs = g.second;
-        auto gJs = controller.gripperJoints()[gn];
-        const auto & gQ = gQs[gn];
-        gAQs[gn] = {};
-        for(const auto & gAJ : gAJs)
-        {
-          for(size_t i = 0; i < gJs.size(); ++i)
-          {
-            if(gJs[i] == gAJ)
-            {
-              gAQs[gn].push_back(gQ[i]);
-              break;
-            }
-          }
-        }
-      }
-      controller.setActualGripperQ(gAQs);
-      if(cfp_ptr)
-      {
-        cfp_ptr->update();
-      }
+      cfp_ptr->update();
     }
     if(bench)
     {

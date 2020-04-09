@@ -209,7 +209,7 @@ int main(int argc, char ** argv)
     sch_pub.publish(markers);
     if(robot_pub)
     {
-      robot_pub->update(0.01, robots->robot(), {});
+      robot_pub->update(0.01, robots->robot());
     }
     getParam(n, "robot_module", robot_module);
     if(!robot_set && robot_module.size() && robot_module != robot_params)
