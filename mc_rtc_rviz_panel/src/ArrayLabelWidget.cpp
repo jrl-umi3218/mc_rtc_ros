@@ -23,7 +23,7 @@ ArrayLabelWidget::ArrayLabelWidget(const ClientWidgetParam & param, const std::v
 
 void ArrayLabelWidget::update(const Eigen::VectorXd & data)
 {
-  if(normLabel_)
+  if(normLabel_ && data.size() > 6)
   {
     std::stringstream ss;
     ss << "<font>";
@@ -41,6 +41,10 @@ void ArrayLabelWidget::update(const Eigen::VectorXd & data)
   }
   else
   {
+    if(normLabel_)
+    {
+      normLabel_->hide();
+    }
     ArrayInputWidget::update(data);
   }
 }
