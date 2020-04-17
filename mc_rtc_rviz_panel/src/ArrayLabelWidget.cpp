@@ -37,7 +37,11 @@ void ArrayLabelWidget::update(const Eigen::VectorXd & data)
     }
     ss << "</font>";
     normLabel_->setToolTip(ss.str().c_str());
-    normLabel_->setText(QString::number(data.norm()));
+    normLabel_->setText("norm = " + QString::number(data.norm()));
+    if(data.size() <= 6)
+    {
+      ArrayInputWidget::update(data);
+    }
   }
   else
   {

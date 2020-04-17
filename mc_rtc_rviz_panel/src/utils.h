@@ -77,10 +77,6 @@ struct SharedMarker
 
   void applyChanges()
   {
-    // XXX without erasing and re-inserting the marker, applyChanges does
-    // nothing when the marker controls have been modified.
-    server_->erase(marker_.name);
-    server_->insert(marker_, callback_);
     server_->applyChanges();
   }
 
