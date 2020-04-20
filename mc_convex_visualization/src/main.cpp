@@ -107,14 +107,16 @@ visualization_msgs::MarkerArray convexMarkers(const std::string & tf_prefix,
       sva::PTransformd vb(Eigen::Vector3d(b[0], b[1], b[2]));
       sva::PTransformd vc(Eigen::Vector3d(c[0], c[1], c[2]));
       const auto normal = triangles[i].normal;
-      auto cross = (a-b)^(a-c);
-      auto dot = normal*(cross/cross.norm());
+      auto cross = (a - b) ^ (a - c);
+      auto dot = normal * (cross / cross.norm());
       bool reversePointOrder = dot < 0;
       std::vector<sva::PTransformd> vertexOrder = {va, vb, vc};
-      if(reversePointOrder){
+      if(reversePointOrder)
+      {
         vertexOrder = {vc, vb, va};
       }
-      for (size_t i = 0; i < vertexOrder.size(); i++) {
+      for(size_t i = 0; i < vertexOrder.size(); i++)
+      {
         vertexOrder[i] = vertexOrder[i] * colTrans;
         geometry_msgs::Point p;
         p.x = vertexOrder[i].translation().x();
