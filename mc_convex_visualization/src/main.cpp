@@ -106,22 +106,24 @@ visualization_msgs::MarkerArray convexMarkers(const std::string & tf_prefix,
       sva::PTransformd va(Eigen::Vector3d(a[0], a[1], a[2]));
       sva::PTransformd vb(Eigen::Vector3d(b[0], b[1], b[2]));
       sva::PTransformd vc(Eigen::Vector3d(c[0], c[1], c[2]));
-      va = va * colTrans;
-      vb = vb * colTrans;
-      vc = vc * colTrans;
-      geometry_msgs::Point p;
-      p.x = va.translation().x();
-      p.y = va.translation().y();
-      p.z = va.translation().z();
-      marker.points.push_back(p);
-      p.x = vb.translation().x();
-      p.y = vb.translation().y();
-      p.z = vb.translation().z();
-      marker.points.push_back(p);
-      p.x = vc.translation().x();
-      p.y = vc.translation().y();
-      p.z = vc.translation().z();
-      marker.points.push_back(p);
+      const auto normal = triangles[i].normal;
+      auto cross = (a - b) ^ (a - c);
+      auto dot = normal * (cross / cross.norm());
+      bool reversePointOrder = dot < 0;
+      std::vector<sva::PTransformd> vertexOrder = {va, vb, vc};
+      if(reversePointOrder)
+      {
+        vertexOrder = {vc, vb, va};
+      }
+      for(size_t i = 0; i < vertexOrder.size(); i++)
+      {
+        vertexOrder[i] = vertexOrder[i] * colTrans;
+        geometry_msgs::Point p;
+        p.x = vertexOrder[i].translation().x();
+        p.y = vertexOrder[i].translation().y();
+        p.z = vertexOrder[i].translation().z();
+        marker.points.push_back(p);
+      }
     }
     markers.markers.push_back(marker);
   }
