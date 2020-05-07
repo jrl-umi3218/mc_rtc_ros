@@ -19,18 +19,6 @@ LogRobot::LogRobot(const LogRobot::Configuration & config)
   {
     urdf << ifs.rdbuf();
   }
-  if(config_.configuration != config_.encoders)
-  {
-    for(auto & g : config.rm->grippers())
-    {
-      auto g_ptr = std::make_shared<mc_control::Gripper>(
-          robots_->robot(), g.joints, urdf.str(), std::vector<double>(g.joints.size(), 0), config.dt, g.reverse_limits);
-      for(auto & j : g_ptr->names)
-      {
-        gripperJoints_.push_back(j);
-      }
-    }
-  }
 }
 
 void LogRobot::update(const mc_rtc::log::FlatLog & log, size_t i)
@@ -71,20 +59,12 @@ void LogRobot::update(const mc_rtc::log::FlatLog & log, size_t i)
       auto jIndex = robot.jointIndexByName(jN);
       if(robot.mbc().q[jIndex].size() == 1)
       {
-        if(std::find(gripperJoints_.begin(), gripperJoints_.end(), jN) != gripperJoints_.end())
-        {
-          robot.mbc().q[jIndex][0] = encoders[i];
-        }
-        else
-        {
-          robot.mbc().q[jIndex][0] = q[i];
-        }
+        robot.mbc().q[jIndex][0] = q[i];
       }
     }
   }
-  // base.rotation() = base.rotation().transpose();
   robot.posW(base);
-  publisher_.update(config_.dt, robot, {});
+  publisher_.update(config_.dt, robot);
 }
 
 std::vector<std::string> LogRobot::surfaces() const

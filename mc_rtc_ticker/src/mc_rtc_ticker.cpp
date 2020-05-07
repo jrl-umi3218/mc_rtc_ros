@@ -8,6 +8,7 @@
 #include <mc_rtc/config.h>
 #include <mc_rtc/logging.h>
 #include <mc_rtc/ros.h>
+#include <mc_rtc/version.h>
 
 #include <ros/ros.h>
 
@@ -51,6 +52,13 @@ int main()
   {
     conf = getParam<std::string>(nh, "mc_rtc_ticker/conf");
     LOG_INFO("Configuring mc_rtc with " << conf)
+  }
+
+  if(mc_rtc::MC_RTC_VERSION != mc_rtc::version())
+  {
+    LOG_ERROR("mc_rtc_ticker was compiled with "
+              << mc_rtc::MC_RTC_VERSION << " but mc_rtc is at version " << mc_rtc::version()
+              << ", you might face subtle issues or unexpected crashes, please recompile mc_rtc_ticker")
   }
 
   mc_control::MCGlobalController controller(conf);
@@ -184,34 +192,9 @@ int main()
       }
     }
     controller.setEncoderValues(q);
-    if(controller.run())
+    if(controller.run() && cfp_ptr)
     {
-      std::map<std::string, std::vector<double>> gAQs; // will store only the active joints values
-      std::map<std::string, std::vector<double>> gQs = controller.gripperQ();
-      for(const auto & g : controller.gripperActiveJoints())
-      {
-        const auto & gn = g.first;
-        const auto & gAJs = g.second;
-        auto gJs = controller.gripperJoints()[gn];
-        const auto & gQ = gQs[gn];
-        gAQs[gn] = {};
-        for(const auto & gAJ : gAJs)
-        {
-          for(size_t i = 0; i < gJs.size(); ++i)
-          {
-            if(gJs[i] == gAJ)
-            {
-              gAQs[gn].push_back(gQ[i]);
-              break;
-            }
-          }
-        }
-      }
-      controller.setActualGripperQ(gAQs);
-      if(cfp_ptr)
-      {
-        cfp_ptr->update();
-      }
+      cfp_ptr->update();
     }
     if(bench)
     {

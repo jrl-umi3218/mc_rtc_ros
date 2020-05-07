@@ -259,7 +259,7 @@ int main(int argc, char ** argv)
     surface_pub.publish(markers);
     if(robot_pub)
     {
-      robot_pub->update(0.01, robots->robot(), {});
+      robot_pub->update(0.01, robots->robot());
     }
     ros::spinOnce();
     getParam(n, "robot_module", robot_module);

@@ -56,7 +56,6 @@ private:
   Configuration config_;
   mc_rtc::RobotPublisher publisher_;
   std::shared_ptr<mc_rbdyn::Robots> robots_;
-  std::vector<std::string> gripperJoints_;
   sva::PTransformd base;
   std::vector<double> q;
   std::vector<double> encoders;
