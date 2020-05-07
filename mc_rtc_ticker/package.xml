@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>mc_rtc_ticker</name>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <description>The mc_rtc_ticker package</description>
 
   <maintainer email="pierre.gergondet@gmail.com">Pierre Gergondet</maintainer>

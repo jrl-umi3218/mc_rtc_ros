@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>mc_convex_visualization</name>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <description>Visualize hulls in RVIz</description>
 
   <author email="h.audren@gmail.com">Hervé Audren</author>

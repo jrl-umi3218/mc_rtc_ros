@@ -1,3 +1,9 @@
+mc-rtc-ros (1.1.0-1ubuntu1) unstable; urgency=medium
+
+  * Upstream update
+
+ -- Pierre Gergondet <pierre.gergondet+ppa@gmail.com>  Thu, 07 May 2020 12:29:23 +0800
+
 mc-rtc-ros (1.0.0-1ubuntu1) unstable; urgency=medium
 
   * Initial release

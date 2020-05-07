@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
     <name>mc_rtc_rviz_panel</name>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <description>mc_rtc generic edition panel</description>
     <maintainer email="pierre.gergondet@gmail.com">Pierre Gergondet</maintainer>
     <maintainer email="stephane.caron@lirmm.fr">Stéphane Caron</maintainer>
