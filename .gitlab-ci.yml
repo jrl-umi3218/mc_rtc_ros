@@ -1,9 +1,9 @@
 variables:
   CI_TOOL: gitlab-ci
-  APT_DEPENDENCIES: "ros-indigo-common-msgs ros-indigo-tf2-ros ros-indigo-xacro ros-indigo-rviz-animated-view-controller libtasks-qld-dev libmc-rbdyn-urdf-dev libltdl-dev libgeos++-dev libgeos-dev"
-  GIT_DEPENDENCIES: "nanomsg/nanomsg humanoid-path-planner/hpp-spline jbeder/yaml-cpp"
-  ROS_GIT_DEPENDENCIES: "git@gite.lirmm.fr:multi-contact/mc_rtc_ros_data"
-  MASTER_PPA: "pierre-gergondet+ppa/multi-contact-unstable"
+  APT_DEPENDENCIES: "ros-indigo-common-msgs ros-indigo-tf2-ros ros-indigo-xacro ros-indigo-rviz-animated-view-controller libltdl-dev libgeos++-dev libgeos-dev libtinyxml2-dev libboost-all-dev libltdl-dev"
+  GIT_DEPENDENCIES: "jbeder/yaml-cpp jrl-umi3218/SpaceVecAlg jrl-umi3218/RBDyn jrl-umi3218/eigen-qld jrl-umi3218/eigen-quadprog jrl-umi3218/sch-core jrl-umi3218/Tasks jrl-umi3218/mc_rbdyn_urdf nanomsg/nanomsg humanoid-path-planner/hpp-spline#v4.8.1"
+  ROS_GIT_DEPENDENCIES: "jrl-umi3218/mc_rtc_data jrl-umi3218/mc_rtc_msgs"
+  MASTER_PPA: ""
   ROS_DISTRO: "indigo"
   ALLOW_CATKINLINT_FAILURE: "true"
   CMAKE_ADDITIONAL_OPTIONS: "-DPYTHON_BINDING=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_PYTHON_INTERFACE:BOOL=OFF -DYAML_BUILD_SHARED_LIBS:BOOL=ON"
@@ -19,6 +19,7 @@ clang-format:
 before_script:
   - git submodule update --quiet --init --recursive
   - add-apt-repository ppa:pierre-gergondet+ppa/multi-contact-unstable && apt-get update && apt-get upgrade cmake libeigen3-dev -qq
+  - rm -rf debian
   - ./.jrl-ci/dependencies/catkin
   - ./.jrl-ci/run before_install
 
@@ -26,7 +27,7 @@ build_gcc:
   stage: build
   script:
     - export APT_DEPENDENCIES=""
-    - export GIT_DEPENDENCIES="git@gite.lirmm.fr:multi-contact/mc_rtc"
+    - export GIT_DEPENDENCIES="jrl-umi3218/mc_rtc"
     - export ROS_GIT_DEPENDENCIES=""
     - . /tmp/_ci/catkin_dep_ws/devel/setup.sh
     - ./.jrl-ci/run before_install

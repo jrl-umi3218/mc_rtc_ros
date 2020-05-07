@@ -99,7 +99,8 @@ void ConnectionDialog::connectionChanged(int idx)
 {
   using Protocol = ConnectionConfiguration::Protocol;
   const auto & cfg = idx < configs_.size() ? configs_[idx] : ConnectionConfiguration();
-  protocolCombo_->setCurrentText(cfg.protocol() == Protocol::IPC ? "IPC" : "TCP");
+  auto txtIdx = protocolCombo_->findText(cfg.protocol() == Protocol::IPC ? "IPC" : "TCP");
+  protocolCombo_->setCurrentIndex(txtIdx);
   hostEdit_->setText(cfg.host().c_str());
   pushPortEdit_->setText(cfg.push_suffix().c_str());
   subPortEdit_->setText(cfg.sub_suffix().c_str());
