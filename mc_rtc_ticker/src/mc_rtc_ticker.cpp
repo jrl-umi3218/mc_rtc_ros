@@ -8,6 +8,7 @@
 #include <mc_rtc/config.h>
 #include <mc_rtc/logging.h>
 #include <mc_rtc/ros.h>
+#include <mc_rtc/version.h>
 
 #include <ros/ros.h>
 
@@ -51,6 +52,13 @@ int main()
   {
     conf = getParam<std::string>(nh, "mc_rtc_ticker/conf");
     LOG_INFO("Configuring mc_rtc with " << conf)
+  }
+
+  if(mc_rtc::MC_RTC_VERSION != mc_rtc::version())
+  {
+    LOG_ERROR("mc_rtc_ticker was compiled with "
+              << mc_rtc::MC_RTC_VERSION << " but mc_rtc is at version " << mc_rtc::version()
+              << ", you might face subtle issues or unexpected crashes, please recompile mc_rtc_ticker")
   }
 
   mc_control::MCGlobalController controller(conf);
