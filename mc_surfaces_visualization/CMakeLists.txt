@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package()
 
-find_package(mc_rtc REQUIRED)
+find_package(mc_rtc 1.3.0 REQUIRED)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}

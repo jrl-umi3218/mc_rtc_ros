@@ -10,7 +10,7 @@ project(${PROJECT_NAME} LANGUAGES CXX VERSION 1.0.0)
 find_package(catkin REQUIRED)
 catkin_package()
 
-find_package(mc_rtc REQUIRED)
+find_package(mc_rtc 1.3.0 REQUIRED)
 
 include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 
