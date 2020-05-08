@@ -16,6 +16,7 @@ set(MOC_HEADERS
   NumberSliderWidget.h
   PlotWidget.h
   PlotTabWidget.h
+  Schema.h
   SchemaWidget.h)
 
 if(NOT ${DISABLE_ROS})
@@ -90,6 +91,7 @@ set(SOURCE_FILES
   NumberSliderWidget.cpp
   PlotWidget.cpp
   PlotTabWidget.cpp
+  Schema.cpp
   SchemaWidget.cpp
   ${MOC_FILES}
   ${QRC_FILES})
