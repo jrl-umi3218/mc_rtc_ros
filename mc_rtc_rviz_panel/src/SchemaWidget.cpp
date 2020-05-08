@@ -28,6 +28,7 @@ struct Schema
 {
   Schema() = default;
   Schema(const std::string & file);
+  Schema(const mc_rtc::Configuration & data, const std::string & source);
 
   const std::string & title() const
   {
@@ -49,10 +50,11 @@ private:
 static SchemaStore store = {};
 static const std::string schema_dir = std::string(MC_RTC_DOCDIR) + "/json/schemas/";
 
-Schema::Schema(const std::string & file)
+Schema::Schema(const std::string & file) : Schema(mc_rtc::Configuration{file}, file) {}
+
+Schema::Schema(const mc_rtc::Configuration & s, const std::string & source)
 {
-  mc_rtc::Configuration s{file};
-  title_ = s("title", "No title property in " + file);
+  title_ = s("title", "No title property in " + source);
   auto required = s("required", std::vector<std::string>{});
   auto is_required = [&required](const std::string & label) {
     return std::find(required.begin(), required.end(), label) != required.end();
@@ -71,7 +73,8 @@ Schema::Schema(const std::string & file)
     };
   };
   /** Handle: boolean/integer/number/string */
-  auto handle_type = [this, &file](const std::string & k, bool required, const std::string & type) {
+  auto handle_type = [this, &source](const std::string & k, bool required, const std::string & type,
+                                     mc_rtc::Configuration & schema) {
     auto cf = create_form;
     if(type == "boolean")
     {
@@ -106,11 +109,24 @@ Schema::Schema(const std::string & file)
         return v;
       };
     }
+    else if(type == "object")
+    {
+      if(!schema.has("title"))
+      {
+        schema.add("title", k);
+      }
+      Schema s(schema, source);
+      create_form = [cf, k, required, s](QWidget * parent, const mc_rtc::Configuration & data) {
+        auto v = cf(parent, data);
+        v.emplace_back(new form::Form(parent, k, required, s.create_form(parent, data)));
+        return v;
+      };
+    }
     else
     {
       if(type != "string")
       {
-        LOG_WARNING("Property " << k << " in " << file << " has unknown or missing type (value: " << type
+        LOG_WARNING("Property " << k << " in " << source << " has unknown or missing type (value: " << type
                                 << "), treating as string")
       }
       if(k == "body")
@@ -140,8 +156,8 @@ Schema::Schema(const std::string & file)
     }
   };
   /** Handle an array */
-  auto handle_array = [this, &file](const std::string & k, bool required, const std::string & type, size_t min,
-                                    size_t max) {
+  auto handle_array = [this, &source](const std::string & k, bool required, const std::string & type, size_t min,
+                                      size_t max) {
     auto cf = create_form;
     if(type == "integer")
     {
@@ -161,13 +177,13 @@ Schema::Schema(const std::string & file)
     }
     else if(type == "array")
     {
-      LOG_WARNING("Property " << k << " in " << file << " is an array of array, will not display for now")
+      // We do nothing here, arrays of arrays are too difficult to handle in the GUI
     }
     else
     {
       if(type != "string")
       {
-        LOG_WARNING("Property " << k << " in " << file << " has unknonw or missing array items' type (value: " << type
+        LOG_WARNING("Property " << k << " in " << source << " has unknonw or missing array items' type (value: " << type
                                 << "), treating as string")
       }
       create_form = [cf, k, required, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
@@ -186,7 +202,7 @@ Schema::Schema(const std::string & file)
   }
   if(type != "object")
   {
-    LOG_ERROR(title_ << " from " << file << " has unexpected type: " << type)
+    LOG_ERROR(title_ << " from " << source << " has unexpected type: " << type)
     return;
   }
   is_object_ = true;
@@ -208,14 +224,14 @@ Schema::Schema(const std::string & file)
       }
       else
       {
-        handle_type(k, is_required(k), type);
+        handle_type(k, is_required(k), type, prop);
       }
     }
     else if(prop.has("$ref"))
     {
       std::string ref = prop("$ref");
       ref = ref.substr(3); // remove leading /..
-      bfs::path ref_schema{file};
+      bfs::path ref_schema{source};
       ref_schema = bfs::canonical(ref_schema.parent_path() / ref);
       if(!store.count(ref_schema.string()))
       {
@@ -242,7 +258,7 @@ Schema::Schema(const std::string & file)
     }
     else
     {
-      LOG_ERROR("Cannot handle property " << k << " in " << file << ": " << prop.dump())
+      LOG_ERROR("Cannot handle property " << k << " in " << source << ": " << prop.dump())
     }
   }
 }
