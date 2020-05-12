@@ -252,9 +252,32 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
                           int max_size)
 : CommonArrayInput(parent, name, required), fixed_size_(fixed_size), min_size_(min_size), max_size_(max_size)
 {
-  if(min_size == max_size && (min_size == 9 || min_size == 36))
+  bool is_square = false;
+  if(min_size == max_size)
   {
-    stride_ = min_size == 9 ? 3 : 6;
+    if(min_size < 6)
+    {
+      stride_ = min_size;
+    }
+    else if(min_size == 9)
+    {
+      is_square = true;
+      stride_ = 3;
+    }
+    else if(min_size == 16)
+    {
+      is_square = true;
+      stride_ = 4;
+    }
+    else if(min_size == 36)
+    {
+      is_square = true;
+      stride_ = 6;
+    }
+    else
+    {
+      stride_ = 6;
+    }
   }
   spanning_ = true;
   auto mainLayout = new QVBoxLayout(this);
@@ -263,13 +286,13 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
   layout_ = new QGridLayout(w);
   for(int i = 0; i < min_size; ++i)
   {
-    if(stride_ == 1)
+    if(is_square)
     {
-      add_edit(T{});
+      add_edit(i % stride_ == next_row_ ? T{1} : T{0});
     }
     else
     {
-      add_edit(i % stride_ == next_row_ ? T{1} : T{0});
+      add_edit(T{});
     }
   }
   if(!fixed_size)
