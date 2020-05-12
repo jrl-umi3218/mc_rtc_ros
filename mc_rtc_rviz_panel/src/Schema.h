@@ -28,7 +28,10 @@ struct Schema
   Schema(const std::string & file);
 
   /** Load a schema from data, source is the on-disk location of the schema */
-  Schema(const mc_rtc::Configuration & data, const std::string & source);
+  Schema(const mc_rtc::Configuration & data,
+         const std::string & source,
+         const std::string & title = "",
+         bool required = false);
 
   /** Returns the title of the schema */
   inline const std::string & title() const

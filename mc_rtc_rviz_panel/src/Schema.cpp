@@ -12,9 +12,9 @@ namespace mc_rtc_rviz
 
 Schema::Schema(const std::string & file) : Schema(mc_rtc::Configuration{file}, file) {}
 
-Schema::Schema(const mc_rtc::Configuration & s, const std::string & source)
+Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, const std::string & title, bool required_in)
 {
-  title_ = s("title", "No title property in " + source);
+  title_ = s("title", title.size() ? title : "No title property in " + source);
   auto required = s("required", std::vector<std::string>{});
   auto is_required = [&required](const std::string & label) {
     return std::find(required.begin(), required.end(), label) != required.end();
@@ -45,7 +45,7 @@ Schema::Schema(const mc_rtc::Configuration & s, const std::string & source)
   };
   /** Handle: boolean/integer/number/string */
   auto handle_type = [this, &source](const std::string & k, bool required, const std::string & type,
-                                     mc_rtc::Configuration & schema) {
+                                     const mc_rtc::Configuration & schema) {
     auto cf = create_form;
     if(type == "boolean")
     {
@@ -82,11 +82,7 @@ Schema::Schema(const mc_rtc::Configuration & s, const std::string & source)
     }
     else if(type == "object")
     {
-      if(!schema.has("title"))
-      {
-        schema.add("title", k);
-      }
-      Schema s(schema, source);
+      Schema s(schema, source, k, required);
       create_form = [cf, k, required, s](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
         v.emplace_back(new form::Form(parent, k, required, s.create_form(parent, data)));
@@ -204,62 +200,75 @@ Schema::Schema(const mc_rtc::Configuration & s, const std::string & source)
       LOG_WARNING(desc << k << " in " << source << " is an array but items' type is not specified")
     }
   };
-  std::string type = s("type");
-  if(type == "array")
-  {
-    handle_array("", title_, false, s);
-    return;
-  }
-  if(type != "object")
-  {
-    LOG_ERROR(title_ << " from " << source << " has unexpected type: " << type)
-    return;
-  }
-  is_object_ = true;
-  auto properties = s("properties", mc_rtc::Configuration{});
-  for(const auto & k : properties.keys())
-  {
-    auto prop = properties(k);
-    if(prop.has("enum"))
+  auto handle_object = [&](const std::string & title, const mc_rtc::Configuration & schema) {
+    if(!schema.has("properties"))
     {
-      handle_enum(k, is_required(k), prop("enum"));
+      LOG_WARNING(title << " in " << source << " is an object without properties")
+      return;
     }
-    else if(prop.has("type"))
+    auto properties = schema("properties");
+    for(const auto & k : properties.keys())
     {
-      std::string type = prop("type");
-      if(type == "array")
+      auto prop = properties(k);
+      if(prop.has("enum"))
       {
-        handle_array("Property ", k, is_required(k), prop);
+        handle_enum(k, is_required(k), prop("enum"));
       }
-      else
+      else if(prop.has("type"))
       {
-        handle_type(k, is_required(k), type, prop);
-      }
-    }
-    else if(prop.has("$ref"))
-    {
-      const auto & schema = resolve_ref(source, prop("$ref"));
-      auto cf = create_form;
-      bool required = is_required(k);
-      create_form = [cf, k, required, &schema](QWidget * parent, const mc_rtc::Configuration & data) {
-        auto v = cf(parent, data);
-        if(schema.is_object())
+        std::string type = prop("type");
+        if(type == "array")
         {
-          v.emplace_back(new form::Form(parent, k, required, schema.create_form(parent, data)));
+          handle_array("Property ", k, is_required(k), prop);
         }
         else
         {
-          auto el = schema.create_form(parent, data).at(0);
-          el->name(k);
-          v.push_back(el);
+          handle_type(k, is_required(k), type, prop);
         }
-        return v;
-      };
+      }
+      else if(prop.has("$ref"))
+      {
+        const auto & schema = resolve_ref(source, prop("$ref"));
+        auto cf = create_form;
+        bool required = is_required(k);
+        create_form = [cf, k, required, &schema](QWidget * parent, const mc_rtc::Configuration & data) {
+          auto v = cf(parent, data);
+          if(schema.is_object())
+          {
+            v.emplace_back(new form::Form(parent, k, required, schema.create_form(parent, data)));
+          }
+          else
+          {
+            auto el = schema.create_form(parent, data).at(0);
+            el->name(k);
+            v.push_back(el);
+          }
+          return v;
+        };
+      }
+      else
+      {
+        LOG_ERROR("Cannot handle property " << k << " in " << source << ": " << prop.dump())
+      }
     }
-    else
-    {
-      LOG_ERROR("Cannot handle property " << k << " in " << source << ": " << prop.dump())
-    }
+  };
+  if(!s.has("type"))
+  {
+    LOG_ERROR("No type entry for " << title_ << " in " << source)
+  }
+  std::string type = s("type");
+  if(type == "object")
+  {
+    is_object_ = true;
+    handle_object(title_, s);
+  }
+  else if(type == "array")
+  {
+    handle_array("", title_, required_in, s);
+  }
+  else
+  {
+    handle_type(title_, required_in, type, s);
   }
 }
 
