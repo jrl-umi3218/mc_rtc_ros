@@ -340,6 +340,10 @@ void DataComboInput::update_dependencies(FormElement * other)
         auto combo = static_cast<QComboBox *>(other->layout()->itemAt(0)->widget());
         connect(combo, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(currentIndexChanged(const QString &)));
         connected_.insert(need);
+        if(combo->currentIndex() != -1)
+        {
+          update_field(other->name(), combo->currentText().toStdString());
+        }
       }
     }
   }
@@ -418,7 +422,14 @@ void DataComboInput::update_values()
       }
       combo_->addItem(v.c_str());
     }
-    combo_->setCurrentIndex(idx);
+    if(idx != -1)
+    {
+      combo_->setCurrentIndex(idx);
+    }
+    else if(values.size())
+    {
+      combo_->setCurrentIndex(0);
+    }
   }
 }
 

@@ -98,7 +98,15 @@ Schema::Schema(const mc_rtc::Configuration & s, const std::string & source)
         LOG_WARNING("Property " << k << " in " << source << " has unknown or missing type (value: " << type
                                 << "), treating as string")
       }
-      if(k == "body")
+      if(k == "robot")
+      {
+        create_form = [cf, required](QWidget * parent, const mc_rtc::Configuration & data) {
+          auto v = cf(parent, data);
+          v.emplace_back(new form::DataComboInput(parent, "robot", required, data, {"robots"}, false));
+          return v;
+        };
+      }
+      else if(k == "body")
       {
         create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
