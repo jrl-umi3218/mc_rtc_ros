@@ -81,6 +81,7 @@ void FormWidget::add_element_to_layout(FormElement * element)
   }
   if(element->hidden())
   {
+    element->hide();
     return;
   }
   auto label_text = element->name();
