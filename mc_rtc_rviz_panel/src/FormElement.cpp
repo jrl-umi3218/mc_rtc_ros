@@ -25,11 +25,11 @@ bool FormElement::eventFilter(QObject * o, QEvent * e)
   return QWidget::eventFilter(o, e);
 }
 
-bool FormElement::fill(mc_rtc::Configuration & out, std::string & msg)
+bool FormElement::can_fill(std::string & msg)
 {
   if(ready())
   {
-    fill_(out);
+    return true;
   }
   else if(required())
   {
@@ -41,6 +41,19 @@ bool FormElement::fill(mc_rtc::Configuration & out, std::string & msg)
 
 namespace form
 {
+
+namespace details
+{
+
+template<typename T>
+mc_rtc::Configuration serialize(const T & data)
+{
+  mc_rtc::Configuration out;
+  out.add("data", data);
+  return out("data");
+}
+
+} // namespace details
 
 Checkbox::Checkbox(QWidget * parent, const std::string & name, bool required, bool def)
 : FormElement(parent, name, required), def_(def)
@@ -62,9 +75,9 @@ void Checkbox::toggled(bool)
   ready_ = true;
 }
 
-void Checkbox::fill_(mc_rtc::Configuration & out)
+mc_rtc::Configuration Checkbox::serialize() const
 {
-  out.add(name(), cbox_->isChecked());
+  return details::serialize(cbox_->isChecked());
 }
 
 CommonInput::CommonInput(QWidget * parent, const std::string & name, bool required)
@@ -95,9 +108,9 @@ bool IntegerInput::changed(bool required, int def)
   return changed_(required) || def_ != def;
 }
 
-void IntegerInput::fill_(mc_rtc::Configuration & out)
+mc_rtc::Configuration IntegerInput::serialize() const
 {
-  out.add(name(), edit_->text().toInt());
+  return details::serialize(edit_->text().toInt());
 }
 
 NumberInput::NumberInput(QWidget * parent, const std::string & name, bool required, double def)
@@ -115,9 +128,9 @@ bool NumberInput::changed(bool required, double def)
   return changed_(required) || def_ != def;
 }
 
-void NumberInput::fill_(mc_rtc::Configuration & out)
+mc_rtc::Configuration NumberInput::serialize() const
 {
-  out.add(name(), edit_->text().toDouble());
+  return details::serialize(edit_->text().toDouble());
 }
 
 StringInput::StringInput(QWidget * parent, const std::string & name, bool required, const std::string & def)
@@ -132,9 +145,9 @@ bool StringInput::changed(bool required, const std::string & def)
   return changed_(required) || def_ != def;
 }
 
-void StringInput::fill_(mc_rtc::Configuration & out)
+mc_rtc::Configuration StringInput::serialize() const
 {
-  out.add(name(), edit_->text().toStdString());
+  return details::serialize(edit_->text().toStdString());
 }
 
 CommonArrayInput::CommonArrayInput(QWidget * parent, const std::string & name, bool required)
@@ -167,7 +180,7 @@ void ArrayInput<int>::data2edit(const int & value, QLineEdit * edit)
   edit->setText(QString::number(value));
 }
 template<>
-int ArrayInput<int>::edit2data(QLineEdit * edit)
+int ArrayInput<int>::edit2data(QLineEdit * edit) const
 {
   return edit->text().toInt();
 }
@@ -177,7 +190,7 @@ void ArrayInput<double>::data2edit(const double & value, QLineEdit * edit)
   edit->setText(QString::number(value));
 }
 template<>
-double ArrayInput<double>::edit2data(QLineEdit * edit)
+double ArrayInput<double>::edit2data(QLineEdit * edit) const
 {
   return edit->text().toDouble();
 }
@@ -191,7 +204,7 @@ void ArrayInput<std::string>::data2edit(const std::string & value, QLineEdit * e
   edit->setText(value.c_str());
 }
 template<>
-std::string ArrayInput<std::string>::edit2data(QLineEdit * edit)
+std::string ArrayInput<std::string>::edit2data(QLineEdit * edit) const
 {
   return edit->text().toStdString();
 }
@@ -259,15 +272,15 @@ void ComboInput::currentIndexChanged(int idx)
   ready_ = idx != -1;
 }
 
-void ComboInput::fill_(mc_rtc::Configuration & out)
+mc_rtc::Configuration ComboInput::serialize() const
 {
   if(send_index_)
   {
-    out.add(name(), combo_->currentIndex());
+    return details::serialize(combo_->currentIndex());
   }
   else
   {
-    out.add(name(), combo_->currentText().toStdString());
+    return details::serialize(combo_->currentText().toStdString());
   }
 }
 
@@ -339,15 +352,15 @@ void DataComboInput::currentIndexChanged(const QString & text)
   update_field(source->name(), text.toStdString());
 }
 
-void DataComboInput::fill_(mc_rtc::Configuration & out)
+mc_rtc::Configuration DataComboInput::serialize() const
 {
   if(send_index_)
   {
-    out.add(rename_, combo_->currentIndex());
+    return details::serialize(combo_->currentIndex());
   }
   else
   {
-    out.add(rename_, combo_->currentText().toStdString());
+    return details::serialize(combo_->currentText().toStdString());
   }
 }
 
@@ -409,17 +422,22 @@ void DataComboInput::update_values()
   }
 }
 
-Form::Form(QWidget * parent, const std::string & name, bool required, const std::vector<FormElement *> elements)
+Form::Form(QWidget * parent,
+           const std::string & name,
+           bool required,
+           const std::vector<FormElement *> elements,
+           bool checkable,
+           bool use_group_name)
 : FormElement(parent, name, required), elements_(elements)
 {
   spanning_ = true;
   show_name_ = false;
   auto title = required ? name + "*" : name;
   auto m_layout = new QVBoxLayout(this);
-  auto group = new QGroupBox(title.c_str(), parent);
-  group->setStyleSheet("QGroupBox {border: 1px solid gray;border-radius: 9px;margin-top: 0.5em;} QGroupBox::title { "
-                       "subcontrol-origin: margin; left: 10px; margin-bottom: 2em; padding: 0 3px 0 3px;}");
-  auto layout = new QFormLayout(group);
+  group_ = new QGroupBox(use_group_name ? title.c_str() : "", parent);
+  group_->setStyleSheet("QGroupBox {border: 1px solid gray;border-radius: 9px;margin-top: 0.5em;} QGroupBox::title { "
+                        "subcontrol-origin: margin; left: 10px; margin-bottom: 2em; padding: 0 3px 0 3px;}");
+  auto layout = new QFormLayout(group_);
   for(auto & el : elements_)
   {
     for(auto & other : elements_)
@@ -440,7 +458,13 @@ Form::Form(QWidget * parent, const std::string & name, bool required, const std:
       layout->addRow(el);
     }
   }
-  m_layout->addWidget(group);
+  m_layout->addWidget(group_);
+  group_->setCheckable(checkable);
+  if(checkable)
+  {
+    group_->setChecked(true);
+    connect(group_, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
+  }
 }
 
 bool Form::ready() const
@@ -460,16 +484,38 @@ bool Form::ready() const
   return ok;
 }
 
-void Form::fill_(mc_rtc::Configuration & out)
+mc_rtc::Configuration Form::serialize() const
 {
-  auto self = out.add(name());
+  return serialize(false);
+}
+
+mc_rtc::Configuration Form::serialize(bool asTuple) const
+{
+  mc_rtc::Configuration out;
+  if(asTuple)
+  {
+    out = out.array("data", elements_.size());
+  }
   for(auto & el : elements_)
   {
     if(el->ready())
     {
-      el->fill_(self);
+      if(asTuple)
+      {
+        out.push(el->serialize());
+      }
+      else
+      {
+        out.add(el->name(), el->serialize());
+      }
     }
   }
+  return out;
+}
+
+void Form::rejectUncheck()
+{
+  group_->setChecked(true);
 }
 
 } // namespace form

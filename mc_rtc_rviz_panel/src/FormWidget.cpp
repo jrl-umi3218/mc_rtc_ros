@@ -44,10 +44,14 @@ void FormWidget::released()
   bool ok = true;
   for(auto & el : elements_)
   {
-    bool ret = el->fill(out, msg);
-    if(!ret)
+    bool ret = el->can_fill(msg);
+    if(!ok)
     {
       msg += '\n';
+    }
+    else if(el->ready())
+    {
+      out.add(el->name(), el->serialize());
     }
     ok = ret && ok;
   }
