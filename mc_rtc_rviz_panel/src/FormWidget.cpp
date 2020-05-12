@@ -44,10 +44,14 @@ void FormWidget::released()
   bool ok = true;
   for(auto & el : elements_)
   {
-    bool ret = el->fill(out, msg);
+    bool ret = el->can_fill(msg);
     if(!ret)
     {
       msg += '\n';
+    }
+    else if(el->ready())
+    {
+      out.add(el->name(), el->serialize());
     }
     ok = ret && ok;
   }
@@ -77,6 +81,7 @@ void FormWidget::add_element_to_layout(FormElement * element)
   }
   if(element->hidden())
   {
+    element->hide();
     return;
   }
   auto label_text = element->name();

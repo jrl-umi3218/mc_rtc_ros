@@ -33,7 +33,9 @@ public:
 
   bool eventFilter(QObject * o, QEvent * e) override;
 
-  bool fill(mc_rtc::Configuration & out, std::string & msg);
+  bool can_fill(std::string & msg);
+
+  virtual mc_rtc::Configuration serialize() const = 0;
 
   virtual bool ready() const
   {
@@ -88,8 +90,6 @@ public:
   virtual void update_dependencies(FormElement *) {}
 
 protected:
-  virtual void fill_(mc_rtc::Configuration & out) = 0;
-
   bool changed_(bool required)
   {
     return required_ != required;
@@ -119,8 +119,7 @@ public:
 
   bool changed(bool required, bool def);
 
-protected:
-  void fill_(mc_rtc::Configuration & out) override;
+  mc_rtc::Configuration serialize() const override;
 
 private:
   QCheckBox * cbox_;
@@ -146,8 +145,7 @@ struct IntegerInput : public CommonInput
 
   bool changed(bool required, int def);
 
-protected:
-  void fill_(mc_rtc::Configuration & out) override;
+  mc_rtc::Configuration serialize() const override;
 
 private:
   int def_;
@@ -159,8 +157,7 @@ struct NumberInput : public CommonInput
 
   bool changed(bool required, double def);
 
-protected:
-  void fill_(mc_rtc::Configuration & out) override;
+  mc_rtc::Configuration serialize() const override;
 
 private:
   double def_;
@@ -172,8 +169,7 @@ struct StringInput : public CommonInput
 
   bool changed(bool required, const std::string & def);
 
-protected:
-  void fill_(mc_rtc::Configuration & out) override;
+  mc_rtc::Configuration serialize() const override;
 
 private:
   std::string def_;
@@ -200,14 +196,15 @@ struct ArrayInput : public CommonArrayInput
              int min_size = 0,
              int max_size = 256);
 
+  mc_rtc::Configuration serialize() const override;
+
 protected:
-  void fill_(mc_rtc::Configuration & out) override;
   void add_edit(const T & def);
 
 private:
   void add_validator(QLineEdit * edit);
   void data2edit(const T & value, QLineEdit * edit);
-  T edit2data(QLineEdit * edit);
+  T edit2data(QLineEdit * edit) const;
 
 protected:
   bool fixed_size_;
@@ -234,17 +231,17 @@ void ArrayInput<double>::add_validator(QLineEdit * edit);
 template<>
 void ArrayInput<int>::data2edit(const int & value, QLineEdit * edit);
 template<>
-int ArrayInput<int>::edit2data(QLineEdit * edit);
+int ArrayInput<int>::edit2data(QLineEdit * edit) const;
 template<>
 void ArrayInput<double>::data2edit(const double & value, QLineEdit * edit);
 template<>
-double ArrayInput<double>::edit2data(QLineEdit * edit);
+double ArrayInput<double>::edit2data(QLineEdit * edit) const;
 template<>
 void ArrayInput<std::string>::add_validator(QLineEdit *);
 template<>
 void ArrayInput<std::string>::data2edit(const std::string & value, QLineEdit * edit);
 template<>
-std::string ArrayInput<std::string>::edit2data(QLineEdit * edit);
+std::string ArrayInput<std::string>::edit2data(QLineEdit * edit) const;
 
 template<typename T>
 ArrayInput<T>::ArrayInput(QWidget * parent,
@@ -255,9 +252,32 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
                           int max_size)
 : CommonArrayInput(parent, name, required), fixed_size_(fixed_size), min_size_(min_size), max_size_(max_size)
 {
-  if(min_size == max_size && (min_size == 9 || min_size == 36))
+  bool is_square = false;
+  if(min_size == max_size)
   {
-    stride_ = min_size == 9 ? 3 : 6;
+    if(min_size < 6)
+    {
+      stride_ = min_size;
+    }
+    else if(min_size == 9)
+    {
+      is_square = true;
+      stride_ = 3;
+    }
+    else if(min_size == 16)
+    {
+      is_square = true;
+      stride_ = 4;
+    }
+    else if(min_size == 36)
+    {
+      is_square = true;
+      stride_ = 6;
+    }
+    else
+    {
+      stride_ = 6;
+    }
   }
   spanning_ = true;
   auto mainLayout = new QVBoxLayout(this);
@@ -266,13 +286,13 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
   layout_ = new QGridLayout(w);
   for(int i = 0; i < min_size; ++i)
   {
-    if(stride_ == 1)
+    if(is_square)
     {
-      add_edit(T{});
+      add_edit(i % stride_ == next_row_ ? T{1} : T{0});
     }
     else
     {
-      add_edit(i % stride_ == next_row_ ? T{1} : T{0});
+      add_edit(T{});
     }
   }
   if(!fixed_size)
@@ -295,15 +315,15 @@ void ArrayInput<T>::plusReleased()
 }
 
 template<typename T>
-void ArrayInput<T>::fill_(mc_rtc::Configuration & out)
+mc_rtc::Configuration ArrayInput<T>::serialize() const
 {
-  std::vector<T> data;
-  data.reserve(edits_.size());
+  mc_rtc::Configuration c;
+  auto out = c.array("DATA", edits_.size());
   for(auto e : edits_)
   {
-    data.push_back(edit2data(e));
+    out.push(edit2data(e));
   }
-  out.add(name(), data);
+  return out;
 }
 
 template<typename T>
@@ -396,8 +416,7 @@ public:
 
   bool changed(bool required, const std::vector<std::string> & values, bool send_index);
 
-protected:
-  void fill_(mc_rtc::Configuration & out) override;
+  mc_rtc::Configuration serialize() const override;
 
 private:
   std::vector<std::string> values_;
@@ -426,8 +445,7 @@ public:
 
   void update_dependencies(FormElement * other) override;
 
-protected:
-  void fill_(mc_rtc::Configuration & out) override;
+  mc_rtc::Configuration serialize() const override;
 
 private:
   bool send_index_;
@@ -453,15 +471,32 @@ private slots:
 
 struct Form : public FormElement
 {
-  Form(QWidget * parent, const std::string & name, bool required, const std::vector<FormElement *> elements);
+  Q_OBJECT
+public:
+  Form(QWidget * parent,
+       const std::string & name,
+       bool required,
+       const std::vector<FormElement *> elements,
+       bool checkable = false,
+       bool use_group_name = true,
+       bool tuple = false);
 
   bool ready() const override;
 
-protected:
-  void fill_(mc_rtc::Configuration & out) override;
+  void rejectUncheck();
+
+  mc_rtc::Configuration serialize() const override;
+
+  mc_rtc::Configuration serialize(bool asTuple) const;
 
 private:
   std::vector<FormElement *> elements_;
+  QGroupBox * group_;
+  bool tuple_;
+
+signals:
+  /** Emitted if the Form is checkable and the users unchecks it */
+  void toggled(bool);
 };
 
 } // namespace form
