@@ -6,6 +6,24 @@ namespace mc_rtc_rviz
 namespace form
 {
 
+namespace
+{
+
+struct RemoveArrayEntryButton : public QPushButton
+{
+  RemoveArrayEntryButton(const char * text, FormElement * element) : QPushButton(text), element_(element) {}
+
+  FormElement * element()
+  {
+    return element_;
+  }
+
+private:
+  FormElement * element_;
+};
+
+} // namespace
+
 SchemaArrayInput::SchemaArrayInput(QWidget * parent,
                                    const std::string & name,
                                    bool required,
@@ -49,10 +67,10 @@ mc_rtc::Configuration SchemaArrayInput::serialize() const
 void SchemaArrayInput::addItem()
 {
   FormElement * form;
-  if(schema_.is_object())
+  if(schema_.is_object() || schema_.is_tuple())
   {
     form = new form::Form(this, std::to_string(items_.size()), false, schema_.create_form(this, data_), !fixed_size_,
-                          false);
+                          false, schema_.is_tuple());
     connect(form, SIGNAL(toggled(bool)), this, SLOT(formToggled(bool)));
   }
   else
@@ -60,9 +78,9 @@ void SchemaArrayInput::addItem()
     form = schema_.create_form(this, data_).at(0);
   }
   layout_->addWidget(form);
-  if(!schema_.is_object())
+  if(!schema_.is_object() && !schema_.is_tuple())
   {
-    auto minus = new QPushButton("-");
+    auto minus = new RemoveArrayEntryButton("-", form);
     layout_->addWidget(minus, layout_->rowCount() - 1, 1);
     connect(minus, SIGNAL(released()), this, SLOT(minusReleased()));
   }
@@ -97,7 +115,7 @@ void SchemaArrayInput::formToggled(bool)
 
 void SchemaArrayInput::minusReleased()
 {
-  auto sender = dynamic_cast<FormElement *>(this->sender());
+  auto sender = dynamic_cast<RemoveArrayEntryButton *>(this->sender());
   if(!sender)
   {
     qDebug() << "SchemaArrayInput::minusReleased unexpected event sender";
@@ -107,7 +125,8 @@ void SchemaArrayInput::minusReleased()
   {
     return;
   }
-  removeItem(sender);
+  removeItem(sender->element());
+  sender->deleteLater();
 }
 
 void SchemaArrayInput::removeItem(FormElement * itm)

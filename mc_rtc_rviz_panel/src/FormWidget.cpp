@@ -45,7 +45,7 @@ void FormWidget::released()
   for(auto & el : elements_)
   {
     bool ret = el->can_fill(msg);
-    if(!ok)
+    if(!ret)
     {
       msg += '\n';
     }

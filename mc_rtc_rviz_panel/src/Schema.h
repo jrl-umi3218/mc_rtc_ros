@@ -24,6 +24,9 @@ struct Schema
 {
   Schema() = default;
 
+  /** Create a tuple from a collection of schemas */
+  Schema(const std::vector<Schema> & schemas);
+
   /** Load a schema from a file on-disk */
   Schema(const std::string & file);
 
@@ -45,6 +48,12 @@ struct Schema
     return is_object_;
   }
 
+  /** True if the schema represents a tuple, false otherwise */
+  inline bool is_tuple() const
+  {
+    return is_tuple_;
+  }
+
   /** A callback to create form elements from the schema */
   FormMaker create_form = [](QWidget *, const mc_rtc::Configuration &) -> FormElements { return {}; };
 
@@ -53,6 +62,7 @@ struct Schema
 private:
   std::string title_;
   bool is_object_ = false;
+  bool is_tuple_ = false;
 };
 
 } // namespace mc_rtc_rviz

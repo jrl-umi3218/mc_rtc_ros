@@ -12,6 +12,22 @@ namespace mc_rtc_rviz
 
 Schema::Schema(const std::string & file) : Schema(mc_rtc::Configuration{file}, file) {}
 
+Schema::Schema(const std::vector<Schema> & schemas)
+{
+  is_tuple_ = true;
+  create_form = [schemas](QWidget * parent, const mc_rtc::Configuration & data) {
+    std::vector<FormElement *> elems;
+    for(const auto & s : schemas)
+    {
+      for(auto & el : s.create_form(parent, data))
+      {
+        elems.push_back(el);
+      }
+    }
+    return elems;
+  };
+}
+
 Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, const std::string & title, bool required_in)
 {
   title_ = s("title", title.size() ? title : "No title property in " + source);
@@ -178,8 +194,8 @@ Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, cons
       return v;
     };
   };
-  auto handle_array = [&source, &handle_type_array, &handle_ref_array](const char * desc, const std::string & k,
-                                                                       bool required, const mc_rtc::Configuration & c) {
+  auto handle_array = [this, &source, &handle_type_array, &handle_ref_array](
+                          const char * desc, const std::string & k, bool required, const mc_rtc::Configuration & c) {
     if(!c.has("items"))
     {
       LOG_WARNING(desc << k << " in " << source << " is an array but items are not specified")
@@ -194,6 +210,23 @@ Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, cons
     else if(items.has("$ref"))
     {
       handle_ref_array(k, required, items("$ref"), minItems, maxItems);
+    }
+    else if(items.size())
+    {
+      std::vector<Schema> schemas;
+      for(size_t i = 0; i < items.size(); ++i)
+      {
+        schemas.emplace_back(items[i], source, std::to_string(i), required);
+      }
+      Schema schema(schemas);
+      auto cf = create_form;
+      create_form = [cf, k, required, minItems, maxItems, schema](QWidget * parent,
+                                                                  const mc_rtc::Configuration & data) {
+        auto v = cf(parent, data);
+        v.emplace_back(
+            new form::SchemaArrayInput(parent, k, required, schema, data, minItems == maxItems, minItems, maxItems));
+        return v;
+      };
     }
     else
     {
@@ -252,6 +285,11 @@ Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, cons
       }
     }
   };
+  if(s.has("$ref"))
+  {
+    *this = resolve_ref(source, s("$ref"));
+    return;
+  }
   if(!s.has("type"))
   {
     LOG_ERROR("No type entry for " << title_ << " in " << source)

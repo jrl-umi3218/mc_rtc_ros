@@ -478,7 +478,8 @@ public:
        bool required,
        const std::vector<FormElement *> elements,
        bool checkable = false,
-       bool use_group_name = true);
+       bool use_group_name = true,
+       bool tuple = false);
 
   bool ready() const override;
 
@@ -491,6 +492,7 @@ public:
 private:
   std::vector<FormElement *> elements_;
   QGroupBox * group_;
+  bool tuple_;
 
 signals:
   /** Emitted if the Form is checkable and the users unchecks it */

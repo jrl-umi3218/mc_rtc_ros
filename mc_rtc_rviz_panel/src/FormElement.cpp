@@ -438,8 +438,9 @@ Form::Form(QWidget * parent,
            bool required,
            const std::vector<FormElement *> elements,
            bool checkable,
-           bool use_group_name)
-: FormElement(parent, name, required), elements_(elements)
+           bool use_group_name,
+           bool tuple)
+: FormElement(parent, name, required), elements_(elements), tuple_(tuple)
 {
   spanning_ = true;
   show_name_ = false;
@@ -448,25 +449,40 @@ Form::Form(QWidget * parent,
   group_ = new QGroupBox(use_group_name ? title.c_str() : "", parent);
   group_->setStyleSheet("QGroupBox {border: 1px solid gray;border-radius: 9px;margin-top: 0.5em;} QGroupBox::title { "
                         "subcontrol-origin: margin; left: 10px; margin-bottom: 2em; padding: 0 3px 0 3px;}");
-  auto layout = new QFormLayout(group_);
-  for(auto & el : elements_)
+  if(tuple_)
   {
-    for(auto & other : elements_)
+    auto layout = new QHBoxLayout(group_);
+    for(auto & el : elements_)
     {
-      el->update_dependencies(other);
-    }
-    auto el_name = el->required() ? el->name() + "*" : el->name();
-    if(!el->spanning())
-    {
-      layout->addRow(el_name.c_str(), el);
-    }
-    else
-    {
-      if(el->show_name())
+      for(auto & other : elements_)
       {
-        layout->addRow(new QLabel(el_name.c_str(), this));
+        el->update_dependencies(other);
       }
-      layout->addRow(el);
+      layout->addWidget(el);
+    }
+  }
+  else
+  {
+    auto layout = new QFormLayout(group_);
+    for(auto & el : elements_)
+    {
+      for(auto & other : elements_)
+      {
+        el->update_dependencies(other);
+      }
+      auto el_name = el->required() ? el->name() + "*" : el->name();
+      if(!el->spanning())
+      {
+        layout->addRow(el_name.c_str(), el);
+      }
+      else
+      {
+        if(el->show_name())
+        {
+          layout->addRow(new QLabel(el_name.c_str(), this));
+        }
+        layout->addRow(el);
+      }
     }
   }
   m_layout->addWidget(group_);
@@ -497,7 +513,7 @@ bool Form::ready() const
 
 mc_rtc::Configuration Form::serialize() const
 {
-  return serialize(false);
+  return serialize(tuple_);
 }
 
 mc_rtc::Configuration Form::serialize(bool asTuple) const
