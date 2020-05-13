@@ -7,6 +7,8 @@
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
 
+#include <unordered_map>
+
 namespace mc_rtc_rviz
 {
 
@@ -158,11 +160,13 @@ void Schema::init(const mc_rtc::Configuration & s,
         LOG_WARNING("Property " << k << " in " << source << " has unknown or missing type (value: " << type
                                 << "), treating as string")
       }
-      if(k == "robot")
+      static const std::unordered_map<std::string, std::string> surface_keys = {
+          {"surface", "$robot"}, {"r1Surface", "$r1"}, {"r2Surface", "$r2"}};
+      if(k == "robot" || k == "r1" || k == "r2")
       {
-        create_form = [cf, required](QWidget * parent, const mc_rtc::Configuration & data) {
+        create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
-          v.emplace_back(new form::DataComboInput(parent, "robot", required, data, {"robots"}, false));
+          v.emplace_back(new form::DataComboInput(parent, k, required, data, {"robots"}, false));
           return v;
         };
       }
@@ -174,11 +178,12 @@ void Schema::init(const mc_rtc::Configuration & s,
           return v;
         };
       }
-      else if(k == "surface")
+      else if(surface_keys.count(k))
       {
-        create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
+        const auto & robot = surface_keys.at(k);
+        create_form = [cf, k, robot, required](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
-          v.emplace_back(new form::DataComboInput(parent, "surface", required, data, {"surfaces", "$robot"}, false));
+          v.emplace_back(new form::DataComboInput(parent, k, required, data, {"surfaces", robot}, false));
           return v;
         };
       }
