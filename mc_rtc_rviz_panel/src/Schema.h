@@ -30,6 +30,9 @@ struct Schema
   /** Load a schema from a file on-disk */
   Schema(const std::string & file);
 
+  /** Load a schema from a file on disk with a specific title */
+  Schema(const std::string & file, const std::string & title);
+
   /** Load a schema from data, source is the on-disk location of the schema */
   Schema(const mc_rtc::Configuration & data,
          const std::string & source,
@@ -63,6 +66,8 @@ private:
   std::string title_;
   bool is_object_ = false;
   bool is_tuple_ = false;
+
+  void init(const mc_rtc::Configuration & data, const std::string & source, const std::string & title, bool required);
 };
 
 } // namespace mc_rtc_rviz
