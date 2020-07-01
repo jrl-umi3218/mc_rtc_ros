@@ -41,8 +41,8 @@ void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d> & points
   {
     if(!is_in_range(p))
     {
-      LOG_ERROR("Could not display trajectory " << id2name(id()) << ": invalid value in coordinates (" << p.transpose()
-                                                << ")");
+      mc_rtc::log::error("Could not display trajectory {}: invalid value in coordinates ({})", id2name(id()),
+                         p.transpose());
       return;
     }
     geometry_msgs::Point pose;
@@ -64,8 +64,8 @@ void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd> & point
     const auto & p = point.translation();
     if(!is_in_range(p))
     {
-      LOG_ERROR("Could not display trajectory " << id2name(id()) << ": invalid value in coordinates (" << p.transpose()
-                                                << ")");
+      mc_rtc::log::error("Could not display trajectory {}: invalid value in coordinates ({})", id2name(id()),
+                         p.transpose());
       return;
     }
     geometry_msgs::Point pose;
@@ -82,8 +82,8 @@ void DisplayTrajectoryWidget::update(const Eigen::Vector3d & point, const mc_rtc
 {
   if(!is_in_range(point))
   {
-    LOG_ERROR("Could not display trajectory " << id2name(id()) << ": invalid value in coordinates ("
-                                              << point.transpose() << ")");
+    mc_rtc::log::error("Could not display trajectory {}: invalid value in coordinates ({})", id2name(id()),
+                       point.transpose());
     return;
   }
   geometry_msgs::Point pose;
@@ -100,8 +100,8 @@ void DisplayTrajectoryWidget::update(const sva::PTransformd & point, const mc_rt
   const auto & p = point.translation();
   if(!is_in_range(p))
   {
-    LOG_ERROR("Could not display trajectory " << id2name(id()) << ": invalid value in coordinates (" << p.transpose()
-                                              << ")");
+    mc_rtc::log::error("Could not display trajectory {}: invalid value in coordinates ({})", id2name(id()),
+                       p.transpose());
     return;
   }
   configure(config);

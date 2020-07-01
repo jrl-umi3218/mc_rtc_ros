@@ -66,7 +66,7 @@ void PolygonMarkerWidget::update(const std::string & ns,
   {
     if(!is_in_range(point))
     {
-      LOG_ERROR("Could not display polygon " << ns << ": invalid value in coordinates (" << point.transpose() << ")");
+      mc_rtc::log::error("Could not display polygon {}: invalid value in coordinates ({})", ns, point.transpose());
       return;
     }
     geometry_msgs::Point p;
