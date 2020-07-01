@@ -13,7 +13,7 @@ TMP = $(CURDIR)/debian/tmp
 	dh $@
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DCMAKE_INSTALL_PREFIX=/opt/ros/@ROS_DISTRO@ -DBUILD_ROS_FREE_GUI:BOOL=ON
+	dh_auto_configure -- -DCMAKE_INSTALL_PREFIX=/opt/ros/@ROS_DISTRO@ -DBUILD_ROS_FREE_GUI:BOOL=ON -DPYTHON_EXECUTABLE=@PYTHON_EXECUTABLE@
 
 override_dh_auto_install:
 	dh_auto_install --destdir=$(TMP)

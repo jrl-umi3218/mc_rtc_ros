@@ -71,8 +71,6 @@ jobs:
         - i386
         - amd64
         exclude:
-        - dist: bionic
-          arch: i386
         - dist: focal
           arch: i386
     runs-on: ubuntu-18.04
@@ -122,19 +120,22 @@ jobs:
         set -x
         export PACKAGES_OUT=/tmp/packages-${{ matrix.dist }}-${{ matrix.arch }}
         export ROS_DISTRO=""
+        export PYTHON_EXECUTABLE=/usr/bin/python
         if [ "${{ matrix.dist }}" = "xenial" ]
         then
           export ROS_DISTRO="kinetic"
           export PACKAGES_OUT=${PACKAGES_OUT}-${ROS_DISTRO}
         fi
-        if [ "${{ matrix.dist }}" = "bionic" ]
+        if [ "${{ matrix.dist }}" = "bionic" -a "${{ matrix.arch }}" = "amd64" ]
         then
           export ROS_DISTRO="melodic"
           export PACKAGES_OUT=${PACKAGES_OUT}-${ROS_DISTRO}
         fi
         if [ "${{ matrix.dist }}" = "focal" ]
         then
+          export PYTHON_EXECUTABLE=/usr/bin/python3
           export ROS_DISTRO="noetic"
+          sed -i -e"s/python2.7/python3/" debian/rules.ros
           export PACKAGES_OUT=${PACKAGES_OUT}-${ROS_DISTRO}
         fi
         echo "::set-env name=ROS_DISTRO::${ROS_DISTRO}"
@@ -147,6 +148,7 @@ jobs:
           cat debian/control
           mv debian/rules.ros debian/rules
           sed -i -e"s/@ROS_DISTRO@/${ROS_DISTRO}/" debian/rules
+          sed -i -e"s#@PYTHON_EXECUTABLE@#${PYTHON_EXECUTABLE}#" debian/rules
           cat debian/rules
           sed -e"s/@ROS_DISTRO@/${ROS_DISTRO}/" debian/ros-ROS_DISTRO-mc-convex-visualization.install | tee -a debian/ros-${ROS_DISTRO}-mc-convex-visualization.install
           sed -e"s/@ROS_DISTRO@/${ROS_DISTRO}/" debian/ros-ROS_DISTRO-mc-log-visualization.install | tee -a debian/ros-${ROS_DISTRO}-mc-log-visualization.install
@@ -182,8 +184,6 @@ jobs:
         - i386
         - amd64
         exclude:
-        - dist: bionic
-          arch: i386
         - dist: focal
           arch: i386
     runs-on: ubuntu-18.04
