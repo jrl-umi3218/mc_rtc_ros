@@ -51,14 +51,14 @@ int main()
   if(nh.hasParam("mc_rtc_ticker/conf"))
   {
     conf = getParam<std::string>(nh, "mc_rtc_ticker/conf");
-    LOG_INFO("Configuring mc_rtc with " << conf)
+    mc_rtc::log::info("Configuring mc_rtc with {}", conf);
   }
 
   if(mc_rtc::MC_RTC_VERSION != mc_rtc::version())
   {
-    LOG_ERROR("mc_rtc_ticker was compiled with "
-              << mc_rtc::MC_RTC_VERSION << " but mc_rtc is at version " << mc_rtc::version()
-              << ", you might face subtle issues or unexpected crashes, please recompile mc_rtc_ticker")
+    mc_rtc::log::error("mc_rtc_ticker was compiled with {} but mc_rtc is at version {}, you might face subtle issues "
+                       "or unexpected crashes, please recompile mc_rtc_ticker",
+                       mc_rtc::MC_RTC_VERSION, mc_rtc::version());
   }
 
   mc_control::MCGlobalController controller(conf);
@@ -93,7 +93,7 @@ int main()
   controller.setEncoderValues(q);
   if(nh.hasParam("mc_rtc_ticker/init_pos"))
   {
-    LOG_INFO("Using initial pos from ROS param")
+    mc_rtc::log::info("Using initial pos from ROS param");
     std::vector<double> pos = getParam<std::vector<double>>(nh, "mc_rtc_ticker/init_pos");
     for(const auto & pi : pos)
     {

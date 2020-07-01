@@ -157,8 +157,8 @@ void Schema::init(const mc_rtc::Configuration & s,
     {
       if(type != "string")
       {
-        LOG_WARNING("Property " << k << " in " << source << " has unknown or missing type (value: " << type
-                                << "), treating as string")
+        mc_rtc::log::warning("Property {} in {} has unknown or missing type (value: {}), treating as string", k, source,
+                             type);
       }
       static const std::unordered_map<std::string, std::string> surface_keys = {
           {"surface", "$robot"}, {"r1Surface", "$r1"}, {"r2Surface", "$r2"}};
@@ -225,8 +225,9 @@ void Schema::init(const mc_rtc::Configuration & s,
     {
       if(type != "string")
       {
-        LOG_WARNING("Property " << k << " in " << source << " has unknonw or missing array items' type (value: " << type
-                                << "), treating as string")
+        mc_rtc::log::warning(
+            "Property {} in {} has unknown or missing array items' type (value: {}), treating as string", k, source,
+            type);
       }
       create_form = [cf, k, required, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
@@ -249,7 +250,7 @@ void Schema::init(const mc_rtc::Configuration & s,
                           const char * desc, const std::string & k, bool required, const mc_rtc::Configuration & c) {
     if(!c.has("items"))
     {
-      LOG_WARNING(desc << k << " in " << source << " is an array but items are not specified")
+      mc_rtc::log::warning("{}{} in {} is an array but items are not specified", desc, k, source);
     }
     auto items = c("items");
     int minItems = c("minItems", 0);
@@ -281,13 +282,13 @@ void Schema::init(const mc_rtc::Configuration & s,
     }
     else
     {
-      LOG_WARNING(desc << k << " in " << source << " is an array but items' type is not specified")
+      mc_rtc::log::warning("{}{} in {} is an array but items' type is not specified", desc, k, source);
     }
   };
   auto handle_object = [&](const std::string & title, const mc_rtc::Configuration & schema) {
     if(!schema.has("properties"))
     {
-      LOG_WARNING(title << " in " << source << " is an object without properties")
+      mc_rtc::log::warning("{} in {} is an object without properties", title, source);
       return;
     }
     auto properties = schema("properties");
@@ -332,7 +333,7 @@ void Schema::init(const mc_rtc::Configuration & s,
       }
       else
       {
-        LOG_ERROR("Cannot handle property " << k << " in " << source << ": " << prop.dump())
+        mc_rtc::log::error("Cannot handle property {} in {}: {}", k, source, prop.dump());
       }
     }
   };
@@ -343,7 +344,7 @@ void Schema::init(const mc_rtc::Configuration & s,
   }
   if(!s.has("type"))
   {
-    LOG_ERROR("No type entry for " << title_ << " in " << source)
+    mc_rtc::log::error("No type entry for {} in {}", title, source);
   }
   std::string type = s("type");
   if(type == "object")

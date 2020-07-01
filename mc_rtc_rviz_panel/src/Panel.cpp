@@ -85,13 +85,13 @@ void savePanelConfiguration(const mc_rtc::Configuration & config)
   }
   if(!bfs::is_directory(config_directory))
   {
-    LOG_ERROR("Cannot save configuration to " << config_directory << ", " << config_directory << " is not a directory")
+    mc_rtc::log::error("Cannot save configuration to {}, {} is not a directory", config_directory, config_directory);
     return;
   }
   auto config_path = getConfigPath();
   if(bfs::exists(config_path) && !bfs::is_regular(config_path))
   {
-    LOG_ERROR("Cannot save configuration to " << config_path << ", " << config_path << " is not a regular file")
+    mc_rtc::log::error("Cannot save configuration to {}, {} is not a regular file", config_path, config_path);
     return;
   }
   config.save(config_path.string());
@@ -991,7 +991,7 @@ void Panel::contextMenu_editConnection()
     }
     catch(std::runtime_error & exc)
     {
-      LOG_ERROR("Reconnection failed with provided URIs")
+      mc_rtc::log::error("Reconnection failed with provided URIs");
       exc.what();
       return;
     }

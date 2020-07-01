@@ -49,7 +49,7 @@ int main(int argc, char * argv[])
   auto nh = mc_rtc::ROSBridge::get_node_handle();
   if(!nh)
   {
-    LOG_ERROR_AND_THROW(std::runtime_error, "Failed to initialized node handle")
+    mc_rtc::log::error_and_throw<std::runtime_error>("Failed to initialized node handle");
   }
 
   ros::NodeHandle nh_private("~");
@@ -74,13 +74,13 @@ int main(int argc, char * argv[])
     }
     else
     {
-      LOG_ERROR_AND_THROW(std::runtime_error, "log_visualization cannot handle the robot_params it was given")
+      mc_rtc::log::error_and_throw<std::runtime_error>("log_visualization cannot handle the robot_params it was given");
     }
   }
   double dt = 0.005;
   getParam(nh_private, "dt", dt);
 
-  LOG_INFO("Replaying log: " << log)
+  mc_rtc::log::info("Replaying log: {}", log);
   LogPublisher appli(*nh, log, mod, dt);
   appli.run();
 

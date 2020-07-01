@@ -26,7 +26,7 @@ SchemaWidget::SchemaWidget(const ClientWidgetParam & params,
   schema_path /= schema;
   if(!bfs::exists(schema_path))
   {
-    LOG_ERROR("Schema path: " << schema_path.string() << " does not exist in this machine")
+    mc_rtc::log::error("Schema path: {} does not exist in this machine", schema_path.string());
     return;
   }
   bfs::directory_iterator dit(schema_path), endit;
