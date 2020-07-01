@@ -110,6 +110,37 @@ int main()
   }
   controller.running = true;
 
+  bool stepByStep = getParam(nh, "mc_rtc_ticker/stepByStep", false);
+  size_t nextStep = 0;
+  auto gui = controller.controller().gui();
+  auto toogleStepByStep = [&]() {
+    if(stepByStep)
+    {
+      stepByStep = false;
+    }
+    else
+    {
+      nextStep = 0;
+      stepByStep = true;
+    }
+  };
+  if(gui)
+  {
+    gui->addElement({"mc_rtc_ticker"},
+                    mc_rtc::gui::Checkbox("Step by step", [&]() { return stepByStep; }, [&]() { toogleStepByStep(); }));
+    auto dt = controller.timestep();
+    auto buttonText = [&](size_t n) {
+      size_t n_ms = std::ceil(n * 1000 * dt);
+      return "+" + std::to_string(n_ms) + "ms";
+    };
+    gui->addElement({"mc_rtc_ticker"}, mc_rtc::gui::ElementsStacking::Horizontal,
+                    mc_rtc::gui::Button(buttonText(1), [&]() { nextStep = 1; }),
+                    mc_rtc::gui::Button(buttonText(5), [&]() { nextStep = 5; }),
+                    mc_rtc::gui::Button(buttonText(10), [&]() { nextStep = 10; }),
+                    mc_rtc::gui::Button(buttonText(50), [&]() { nextStep = 20; }),
+                    mc_rtc::gui::Button(buttonText(100), [&]() { nextStep = 100; }));
+  }
+
   const bool bench = getParam(nh, "mc_rtc_ticker/bench", false);
   std::chrono::time_point<std::chrono::system_clock> begin, end;
   std::vector<std::chrono::duration<double>> solve_dt(0);
@@ -170,6 +201,21 @@ int main()
       }
     });
   }
+
+  auto runController = [&]() {
+    controller.setEncoderValues(q);
+    if(controller.run() && cfp_ptr)
+    {
+      cfp_ptr->update();
+    }
+  };
+
+  auto updateGUI = [&]() {
+    controller.running = false;
+    controller.run();
+    controller.running = true;
+  };
+
   while(ros::ok())
   {
     if(bench)
@@ -191,10 +237,21 @@ int main()
         }
       }
     }
-    controller.setEncoderValues(q);
-    if(controller.run() && cfp_ptr)
+    if(stepByStep)
     {
-      cfp_ptr->update();
+      if(nextStep > 0)
+      {
+        nextStep--;
+        runController();
+      }
+      else
+      {
+        updateGUI();
+      }
+    }
+    else
+    {
+      runController();
     }
     if(bench)
     {
