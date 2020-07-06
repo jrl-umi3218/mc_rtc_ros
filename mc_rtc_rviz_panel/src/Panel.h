@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+ * Copyright 2016-2020 CNRS-UM LIRMM, CNRS-AIST JRL
  */
 
 #pragma once
@@ -136,6 +136,12 @@ protected:
                double altitude) override;
 
   void schema(const WidgetId & id, const std::string & schema) override;
+
+  void table_start(const WidgetId & id, const std::vector<std::string> & header) override;
+
+  void table_row(const WidgetId & id, const std::vector<std::string> & data) override;
+
+  void table_end(const WidgetId & id) override;
 
   void form(const WidgetId & id) override;
 
@@ -279,6 +285,9 @@ private slots:
                  const mc_rtc::gui::ArrowConfig & config,
                  bool ro);
   void got_schema(const WidgetId & id, const std::string & schema);
+  void got_table_start(const WidgetId & id, const std::vector<std::string> & header);
+  void got_table_row(const WidgetId & id, const std::vector<std::string> & data);
+  void got_table_end(const WidgetId & id);
   void got_form(const WidgetId & id);
   void got_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
   void got_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def);
@@ -373,6 +382,9 @@ signals:
                       const Eigen::Vector3d & vec,
                       double altitude);
   void signal_schema(const WidgetId & id, const std::string & schema);
+  void signal_table_start(const WidgetId & id, const std::vector<std::string> & header);
+  void signal_table_row(const WidgetId & id, const std::vector<std::string> & data);
+  void signal_table_end(const WidgetId & id);
   void signal_form(const WidgetId & id);
   void signal_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
   void signal_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def);

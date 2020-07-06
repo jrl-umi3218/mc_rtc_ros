@@ -17,7 +17,9 @@ set(MOC_HEADERS
   PlotWidget.h
   PlotTabWidget.h
   SchemaArrayInput.h
-  SchemaWidget.h)
+  SchemaWidget.h
+  TableWidget.h
+)
 
 if(NOT ${DISABLE_ROS})
   set(ROS_MOC_HEADERS
@@ -95,6 +97,7 @@ set(SOURCE_FILES
   Schema.cpp
   SchemaArrayInput.cpp
   SchemaWidget.cpp
+  TableWidget.cpp
   ${MOC_FILES}
   ${QRC_FILES})
 
