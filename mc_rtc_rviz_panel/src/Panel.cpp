@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+ * Copyright 2016-2020 CNRS-UM LIRMM, CNRS-AIST JRL
  */
 
 #include "Panel.h"
@@ -27,6 +27,7 @@
 #include "NumberSliderWidget.h"
 #include "PlotTabWidget.h"
 #include "SchemaWidget.h"
+#include "TableWidget.h"
 
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
@@ -243,6 +244,11 @@ Panel::Panel(QWidget * parent)
           SLOT(got_xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, double)));
   connect(this, SIGNAL(signal_schema(const WidgetId &, const std::string &)), this,
           SLOT(got_schema(const WidgetId &, const std::string &)));
+  connect(this, SIGNAL(signal_table_start(const WidgetId &, const std::vector<std::string> &)), this,
+          SLOT(got_table_start(const WidgetId &, const std::vector<std::string> &)));
+  connect(this, SIGNAL(signal_table_row(const WidgetId &, const std::vector<std::string> &)), this,
+          SLOT(got_table_row(const WidgetId &, const std::vector<std::string> &)));
+  connect(this, SIGNAL(signal_table_end(const WidgetId &)), this, SLOT(got_table_end(const WidgetId &)));
   connect(this, SIGNAL(signal_form(const WidgetId &)), this, SLOT(got_form(const WidgetId &)));
   connect(this, SIGNAL(signal_form_checkbox(const WidgetId &, const std::string &, bool, bool)), this,
           SLOT(got_form_checkbox(const WidgetId &, const std::string &, bool, bool)));
@@ -477,6 +483,21 @@ void Panel::xytheta(const WidgetId & id,
 void Panel::schema(const WidgetId & id, const std::string & schema)
 {
   Q_EMIT signal_schema(id, schema);
+}
+
+void Panel::table_start(const WidgetId & id, const std::vector<std::string> & header)
+{
+  Q_EMIT signal_table_start(id, header);
+}
+
+void Panel::table_row(const WidgetId & id, const std::vector<std::string> & data)
+{
+  Q_EMIT signal_table_row(id, data);
+}
+
+void Panel::table_end(const WidgetId & id)
+{
+  Q_EMIT signal_table_end(id);
 }
 
 void Panel::form(const WidgetId & id)
@@ -787,6 +808,24 @@ void Panel::got_arrow(const WidgetId & id,
 void Panel::got_schema(const WidgetId & id, const std::string & schema)
 {
   get_widget<SchemaWidget>(id, schema, data_);
+}
+
+void Panel::got_table_start(const WidgetId & id, const std::vector<std::string> & header)
+{
+  auto & w = get_widget<TableWidget>(id);
+  w.header(header);
+}
+
+void Panel::got_table_row(const WidgetId & id, const std::vector<std::string> & data)
+{
+  auto & w = get_widget<TableWidget>(id);
+  w.row(data);
+}
+
+void Panel::got_table_end(const WidgetId & id)
+{
+  auto & w = get_widget<TableWidget>(id);
+  w.finalize();
 }
 
 void Panel::got_form(const WidgetId & id)
