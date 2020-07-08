@@ -56,6 +56,18 @@ void TableWidget::finalize()
   {
     table_->removeRow(table_->rowCount() - 1);
   }
+  auto height = table_->horizontalHeader()->height() + 2;
+  for(int i = 0; i < table_->rowCount(); ++i)
+  {
+    height += table_->rowHeight(i);
+  }
+  auto scrollbar = table_->horizontalScrollBar();
+  if(scrollbar && scrollbar->isVisible())
+  {
+    height += table_->horizontalScrollBar()->height();
+  }
+  table_->setMinimumHeight(height);
+  table_->setMaximumHeight(height);
 }
 
 void TableWidget::updateItem(int row, int column, const std::string & text)
