@@ -4,10 +4,21 @@
 
 #include "LogPublisher.h"
 
-LogPublisher::LogPublisher(ros::NodeHandle & nh, const std::string & logfile, mc_rbdyn::RobotModulePtr mod, double dt)
-: nh(nh), mod(mod), dt(dt), rate(1 / dt), rt(rate)
+LogPublisher::LogPublisher(ros::NodeHandle & nh, const std::string & logfile, mc_rbdyn::RobotModulePtr mod, double dt_)
+: nh(nh), mod(mod), dt(dt_), rate(1 / dt), rt(rate)
 {
   log.load(logfile);
+  if(log.has("t"))
+  {
+    const auto & t = log.getRaw<double>("t");
+    if(t.size() > 2 && t[0] && t[1])
+    {
+      dt = *t[1] - *t[0];
+      rate = 1 / dt;
+      rt = rate;
+      mc_rtc::log::info("[LogPublisher] Log timestep: {}", dt);
+    }
+  }
   LogRobot::Configuration conf;
   conf.rm = mod;
   conf.dt = dt;
