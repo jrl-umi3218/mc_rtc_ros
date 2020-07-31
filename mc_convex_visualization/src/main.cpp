@@ -54,6 +54,67 @@ std::vector<std::string> robotParam(ros::NodeHandle & n)
   return {robot_str};
 }
 
+visualization_msgs::Marker fromPolyhedron(const std::string & frame_id,
+                                          const std::string & name,
+                                          size_t id,
+                                          sch::S_Polyhedron & poly,
+                                          const sva::PTransformd & colTrans)
+{
+  visualization_msgs::Marker marker;
+  auto & pa = *poly.getPolyhedronAlgorithm();
+  marker.header.frame_id = frame_id;
+  marker.header.stamp = ros::Time();
+  marker.ns = name;
+  marker.id = ++id;
+  marker.type = visualization_msgs::Marker::TRIANGLE_LIST;
+  marker.action = visualization_msgs::Marker::ADD;
+  marker.pose.position.x = 0;
+  marker.pose.position.y = 0;
+  marker.pose.position.z = 0;
+  marker.pose.orientation.x = 0.0;
+  marker.pose.orientation.y = 0.0;
+  marker.pose.orientation.z = 0.0;
+  marker.pose.orientation.w = 1.0;
+  marker.scale.x = 1;
+  marker.scale.y = 1.0;
+  marker.scale.z = 1.0;
+  marker.color.a = 1.0; // Don't forget to set the alpha!
+  marker.color.r = 0.0;
+  marker.color.g = 1.0;
+  marker.color.b = 0.0;
+  marker.lifetime = ros::Duration(0.5);
+  const auto triangles = pa.triangles_;
+  const auto vertexes = pa.vertexes_;
+  for(unsigned int i = 0; i < triangles.size(); i++)
+  {
+    const auto a = vertexes[triangles[i].a]->getCoordinates();
+    const auto b = vertexes[triangles[i].b]->getCoordinates();
+    const auto c = vertexes[triangles[i].c]->getCoordinates();
+    sva::PTransformd va(Eigen::Vector3d(a[0], a[1], a[2]));
+    sva::PTransformd vb(Eigen::Vector3d(b[0], b[1], b[2]));
+    sva::PTransformd vc(Eigen::Vector3d(c[0], c[1], c[2]));
+    const auto normal = triangles[i].normal;
+    auto cross = (a - b) ^ (a - c);
+    auto dot = normal * (cross / cross.norm());
+    bool reversePointOrder = dot < 0;
+    std::vector<sva::PTransformd> vertexOrder = {va, vb, vc};
+    if(reversePointOrder)
+    {
+      vertexOrder = {vc, vb, va};
+    }
+    for(size_t i = 0; i < vertexOrder.size(); i++)
+    {
+      vertexOrder[i] = vertexOrder[i] * colTrans;
+      geometry_msgs::Point p;
+      p.x = vertexOrder[i].translation().x();
+      p.y = vertexOrder[i].translation().y();
+      p.z = vertexOrder[i].translation().z();
+      marker.points.push_back(p);
+    }
+  }
+  return marker;
+}
+
 visualization_msgs::MarkerArray convexMarkers(const std::string & tf_prefix,
                                               const mc_rbdyn::RobotModulePtr & robotModule,
                                               const std::vector<std::string> & filtered_convexes)
@@ -73,59 +134,7 @@ visualization_msgs::MarkerArray convexMarkers(const std::string & tf_prefix,
     {
       colTrans = robotModule->collisionTransforms().at(frame);
     }
-    auto & pa = *(poly->getPolyhedronAlgorithm());
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = tf_prefix + frame;
-    marker.header.stamp = ros::Time();
-    marker.ns = col.first;
-    marker.id = ++id;
-    marker.type = visualization_msgs::Marker::TRIANGLE_LIST;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = 0;
-    marker.pose.position.y = 0;
-    marker.pose.position.z = 0;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
-    marker.scale.x = 1;
-    marker.scale.y = 1.0;
-    marker.scale.z = 1.0;
-    marker.color.a = 1.0; // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 1.0;
-    marker.color.b = 0.0;
-    marker.lifetime = ros::Duration(0.5);
-    const auto triangles = pa.triangles_;
-    const auto vertexes = pa.vertexes_;
-    for(unsigned int i = 0; i < triangles.size(); i++)
-    {
-      const auto a = vertexes[triangles[i].a]->getCoordinates();
-      const auto b = vertexes[triangles[i].b]->getCoordinates();
-      const auto c = vertexes[triangles[i].c]->getCoordinates();
-      sva::PTransformd va(Eigen::Vector3d(a[0], a[1], a[2]));
-      sva::PTransformd vb(Eigen::Vector3d(b[0], b[1], b[2]));
-      sva::PTransformd vc(Eigen::Vector3d(c[0], c[1], c[2]));
-      const auto normal = triangles[i].normal;
-      auto cross = (a - b) ^ (a - c);
-      auto dot = normal * (cross / cross.norm());
-      bool reversePointOrder = dot < 0;
-      std::vector<sva::PTransformd> vertexOrder = {va, vb, vc};
-      if(reversePointOrder)
-      {
-        vertexOrder = {vc, vb, va};
-      }
-      for(size_t i = 0; i < vertexOrder.size(); i++)
-      {
-        vertexOrder[i] = vertexOrder[i] * colTrans;
-        geometry_msgs::Point p;
-        p.x = vertexOrder[i].translation().x();
-        p.y = vertexOrder[i].translation().y();
-        p.z = vertexOrder[i].translation().z();
-        marker.points.push_back(p);
-      }
-    }
-    markers.markers.push_back(marker);
+    markers.markers.push_back(fromPolyhedron(tf_prefix + frame, col.first, ++id, *poly, colTrans));
   }
   return markers;
 }
