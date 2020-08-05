@@ -8,6 +8,9 @@
 
 #include <mc_rtc/ros.h>
 
+#include <sch/S_Object/S_Box.h>
+#include <sch/S_Object/S_Cylinder.h>
+#include <sch/S_Object/S_Sphere.h>
 #include <sch/S_Polyhedron/S_Polyhedron.h>
 
 #include <geometry_msgs/Point.h>
@@ -54,78 +57,162 @@ std::vector<std::string> robotParam(ros::NodeHandle & n)
   return {robot_str};
 }
 
+visualization_msgs::Marker initMarker(const std::string & frame_id, const std::string & name, size_t id, int32_t t)
+{
+  visualization_msgs::Marker marker;
+  marker.header.frame_id = frame_id;
+  marker.header.stamp = ros::Time();
+  marker.ns = name;
+  marker.id = id;
+  marker.type = t;
+  marker.action = visualization_msgs::Marker::ADD;
+  marker.pose.position.x = 0;
+  marker.pose.position.y = 0;
+  marker.pose.position.z = 0;
+  marker.pose.orientation.x = 0.0;
+  marker.pose.orientation.y = 0.0;
+  marker.pose.orientation.z = 0.0;
+  marker.pose.orientation.w = 1.0;
+  marker.scale.x = 1;
+  marker.scale.y = 1.0;
+  marker.scale.z = 1.0;
+  marker.color.a = 1.0; // Don't forget to set the alpha!
+  marker.color.r = 0.0;
+  marker.color.g = 1.0;
+  marker.color.b = 0.0;
+  marker.lifetime = ros::Duration(0.5);
+  return marker;
+}
+
+void setMarkerPose(visualization_msgs::Marker & marker, const sva::PTransformd & pt)
+{
+  auto q = Eigen::Quaterniond(pt.rotation().transpose());
+  const auto & t = pt.translation();
+  marker.pose.orientation.w = q.w();
+  marker.pose.orientation.x = q.x();
+  marker.pose.orientation.y = q.y();
+  marker.pose.orientation.z = q.z();
+  marker.pose.position.x = t.x();
+  marker.pose.position.y = t.y();
+  marker.pose.position.z = t.z();
+}
+
+visualization_msgs::Marker fromPolyhedron(const std::string & frame_id,
+                                          const std::string & name,
+                                          size_t id,
+                                          sch::S_Polyhedron & poly,
+                                          const sva::PTransformd & colTrans)
+{
+  auto marker = initMarker(frame_id, name, id, visualization_msgs::Marker::TRIANGLE_LIST);
+  auto & pa = *poly.getPolyhedronAlgorithm();
+  const auto triangles = pa.triangles_;
+  const auto vertexes = pa.vertexes_;
+  for(unsigned int i = 0; i < triangles.size(); i++)
+  {
+    const auto a = vertexes[triangles[i].a]->getCoordinates();
+    const auto b = vertexes[triangles[i].b]->getCoordinates();
+    const auto c = vertexes[triangles[i].c]->getCoordinates();
+    sva::PTransformd va(Eigen::Vector3d(a[0], a[1], a[2]));
+    sva::PTransformd vb(Eigen::Vector3d(b[0], b[1], b[2]));
+    sva::PTransformd vc(Eigen::Vector3d(c[0], c[1], c[2]));
+    const auto normal = triangles[i].normal;
+    auto cross = (a - b) ^ (a - c);
+    auto dot = normal * (cross / cross.norm());
+    bool reversePointOrder = dot < 0;
+    std::vector<sva::PTransformd> vertexOrder = {va, vb, vc};
+    if(reversePointOrder)
+    {
+      vertexOrder = {vc, vb, va};
+    }
+    for(size_t i = 0; i < vertexOrder.size(); i++)
+    {
+      vertexOrder[i] = vertexOrder[i] * colTrans;
+      geometry_msgs::Point p;
+      p.x = vertexOrder[i].translation().x();
+      p.y = vertexOrder[i].translation().y();
+      p.z = vertexOrder[i].translation().z();
+      marker.points.push_back(p);
+    }
+  }
+  return marker;
+}
+
+visualization_msgs::Marker fromBox(const std::string & frame_id,
+                                   const std::string & name,
+                                   size_t id,
+                                   sch::S_Box & box,
+                                   const sva::PTransformd & colTrans)
+{
+  auto marker = initMarker(frame_id, name, id, visualization_msgs::Marker::CUBE);
+  auto & scale = marker.scale;
+  box.getBoxParameters(scale.x, scale.y, scale.z);
+  setMarkerPose(marker, colTrans);
+  return marker;
+}
+
+visualization_msgs::Marker fromCylinder(const std::string & frame_id,
+                                        const std::string & name,
+                                        size_t id,
+                                        sch::S_Cylinder & cylinder,
+                                        const sva::PTransformd & colTrans)
+{
+  auto marker = initMarker(frame_id, name, id, visualization_msgs::Marker::CYLINDER);
+  marker.scale.x = 2 * cylinder.getRadius();
+  marker.scale.y = 2 * cylinder.getRadius();
+  marker.scale.z = (cylinder.getP2() - cylinder.getP1()).norm();
+  setMarkerPose(marker, colTrans);
+  return marker;
+}
+
+visualization_msgs::Marker fromSphere(const std::string & frame_id,
+                                      const std::string & name,
+                                      size_t id,
+                                      sch::S_Sphere & sphere,
+                                      const sva::PTransformd & colTrans)
+{
+  auto marker = initMarker(frame_id, name, id, visualization_msgs::Marker::SPHERE);
+  marker.scale.x = 2 * sphere.getRadius();
+  marker.scale.y = 2 * sphere.getRadius();
+  marker.scale.z = 2 * sphere.getRadius();
+  setMarkerPose(marker, colTrans);
+  return marker;
+}
+
 visualization_msgs::MarkerArray convexMarkers(const std::string & tf_prefix,
-                                              const mc_rbdyn::RobotModulePtr & robotModule,
+                                              const mc_rbdyn::Robot & robot,
                                               const std::vector<std::string> & filtered_convexes)
 {
   visualization_msgs::MarkerArray markers;
   unsigned id = 0;
-  for(const auto & col : robotModule->convexHull())
+  for(const auto & col : robot.convexes())
   {
     if(std::find(filtered_convexes.begin(), filtered_convexes.end(), col.first) != filtered_convexes.end())
     {
       continue;
     }
-    const std::string & frame = col.second.first;
-    sch::S_Polyhedron * poly = sch::mc_rbdyn::Polyhedron(col.second.second);
-    sva::PTransformd colTrans = sva::PTransformd::Identity();
-    if(robotModule->collisionTransforms().count(frame))
+    const auto & frame = col.second.first;
+    sch::S_Object * object = col.second.second.get();
+    const auto & colTrans = robot.collisionTransform(col.first);
+    if(sch::S_Polyhedron * poly = dynamic_cast<sch::S_Polyhedron *>(object))
     {
-      colTrans = robotModule->collisionTransforms().at(frame);
+      markers.markers.push_back(fromPolyhedron(tf_prefix + frame, col.first, ++id, *poly, colTrans));
     }
-    auto & pa = *(poly->getPolyhedronAlgorithm());
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = tf_prefix + frame;
-    marker.header.stamp = ros::Time();
-    marker.ns = col.first;
-    marker.id = ++id;
-    marker.type = visualization_msgs::Marker::TRIANGLE_LIST;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = 0;
-    marker.pose.position.y = 0;
-    marker.pose.position.z = 0;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
-    marker.scale.x = 1;
-    marker.scale.y = 1.0;
-    marker.scale.z = 1.0;
-    marker.color.a = 1.0; // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 1.0;
-    marker.color.b = 0.0;
-    marker.lifetime = ros::Duration(0.5);
-    const auto triangles = pa.triangles_;
-    const auto vertexes = pa.vertexes_;
-    for(unsigned int i = 0; i < triangles.size(); i++)
+    else if(sch::S_Box * box = dynamic_cast<sch::S_Box *>(object))
     {
-      const auto a = vertexes[triangles[i].a]->getCoordinates();
-      const auto b = vertexes[triangles[i].b]->getCoordinates();
-      const auto c = vertexes[triangles[i].c]->getCoordinates();
-      sva::PTransformd va(Eigen::Vector3d(a[0], a[1], a[2]));
-      sva::PTransformd vb(Eigen::Vector3d(b[0], b[1], b[2]));
-      sva::PTransformd vc(Eigen::Vector3d(c[0], c[1], c[2]));
-      const auto normal = triangles[i].normal;
-      auto cross = (a - b) ^ (a - c);
-      auto dot = normal * (cross / cross.norm());
-      bool reversePointOrder = dot < 0;
-      std::vector<sva::PTransformd> vertexOrder = {va, vb, vc};
-      if(reversePointOrder)
-      {
-        vertexOrder = {vc, vb, va};
-      }
-      for(size_t i = 0; i < vertexOrder.size(); i++)
-      {
-        vertexOrder[i] = vertexOrder[i] * colTrans;
-        geometry_msgs::Point p;
-        p.x = vertexOrder[i].translation().x();
-        p.y = vertexOrder[i].translation().y();
-        p.z = vertexOrder[i].translation().z();
-        marker.points.push_back(p);
-      }
+      markers.markers.push_back(fromBox(tf_prefix + frame, col.first, ++id, *box, colTrans));
     }
-    markers.markers.push_back(marker);
+    else if(sch::S_Cylinder * cylinder = dynamic_cast<sch::S_Cylinder *>(object))
+    {
+      markers.markers.push_back(fromCylinder(tf_prefix + frame, col.first, ++id, *cylinder, colTrans));
+    }
+    else if(sch::S_Sphere * sphere = dynamic_cast<sch::S_Sphere *>(object))
+    {
+      markers.markers.push_back(fromSphere(tf_prefix + frame, col.first, ++id, *sphere, colTrans));
+    }
+    else
+    {
+      mc_rtc::log::warning("Cannot display {} collision object", col.first);
+    }
   }
   return markers;
 }
@@ -193,7 +280,7 @@ int main(int argc, char ** argv)
     }
     robots.reset(new mc_rbdyn::Robots());
     robots->load(*robotModule);
-    markers = convexMarkers(tf_prefix, robotModule, filtered_convexes);
+    markers = convexMarkers(tf_prefix, robots->robot(), filtered_convexes);
     if(publish)
     {
       robot_pub.reset(new mc_rtc::RobotPublisher(tf_prefix, 50, 0.01));
