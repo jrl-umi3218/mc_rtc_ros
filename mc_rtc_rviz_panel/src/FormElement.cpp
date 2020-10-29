@@ -254,7 +254,7 @@ ComboInput::ComboInput(QWidget * parent,
     combo_->addItem(v.c_str());
   }
   combo_->setCurrentIndex(-1);
-  if(values.size() == 1 && required)
+  if(values.size() > 0 && required)
   {
     combo_->setCurrentIndex(0);
     ready_ = true;
@@ -302,6 +302,12 @@ DataComboInput::DataComboInput(QWidget * parent,
   if(resolve_ref())
   {
     update_values();
+  }
+  combo_->setCurrentIndex(-1);
+  if(combo_->count() > 0 && required)
+  {
+    combo_->setCurrentIndex(0);
+    ready_ = true;
   }
   connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
 }
