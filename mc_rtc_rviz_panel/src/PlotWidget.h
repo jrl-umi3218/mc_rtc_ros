@@ -133,7 +133,7 @@ private:
   double show_duration_ = 10;
   QPushButton * pause_button_;
   bool paused_ = false;
-  
+
   QPushButton * options_button_;
   QGroupBox * options_widget_;
   double line_width_ = 1.;

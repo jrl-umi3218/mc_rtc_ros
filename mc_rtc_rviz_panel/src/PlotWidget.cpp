@@ -96,7 +96,11 @@ PlotWidget::Curve & PlotWidget::Curve::operator=(Curve && rhs)
   return *this;
 }
 
-QRectF PlotWidget::Curve::update(double x, double y, mc_rtc::gui::Color color, mc_rtc::gui::plot::Style style, double line_width)
+QRectF PlotWidget::Curve::update(double x,
+                                 double y,
+                                 mc_rtc::gui::Color color,
+                                 mc_rtc::gui::plot::Style style,
+                                 double line_width)
 {
   if(samples_.size() == 0)
   {
@@ -308,7 +312,7 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   connect(options_button_, SIGNAL(clicked()), this, SLOT(toggle_options_widget()));
   hlayout->addWidget(options_button_);
   layout->addLayout(hlayout);
-  
+
   // Additional options group (line width, etc), hidden by default
   options_widget_ = new QGroupBox("Style Options", this);
   options_widget_->setVisible(false);
