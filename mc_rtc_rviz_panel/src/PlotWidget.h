@@ -130,9 +130,14 @@ private:
   mc_rtc::gui::plot::Range yLeftRange_;
   mc_rtc::gui::plot::Range yRightRange_;
   bool limit_xrange_ = false;
+  double show_duration_ = 10;
+  QPushButton * pause_button_;
+  bool paused_ = false;
 private slots:
   void limit_xrange_cbox_changed(int);
-  void save_button_released();
+  void show_duration_changed(double);
+  void save_button_clicked();
+  void pause_button_clicked();
 };
 
 } // namespace mc_rtc_rviz

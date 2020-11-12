@@ -286,12 +286,26 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   grid_->setPen(QColor::fromRgbF(0.0, 0.0, 0.0, 0.5), 0.0, Qt::DashLine);
   grid_->attach(plot_);
   layout->addWidget(plot_);
-  auto limit_xrange_cbox = new QCheckBox("Only show the last 10 seconds", this);
-  layout->addWidget(limit_xrange_cbox);
+  auto show_layout = new QHBoxLayout(this);
+  auto limit_xrange_cbox = new QCheckBox("Only show the last ", this);
   connect(limit_xrange_cbox, SIGNAL(stateChanged(int)), this, SLOT(limit_xrange_cbox_changed(int)));
+  show_layout->addWidget(limit_xrange_cbox);
+  auto duration_input = new QDoubleSpinBox(this);
+  duration_input->setSingleStep(1);
+  duration_input->setMinimum(0);
+  duration_input->setSuffix("s");
+  duration_input->setValue(show_duration_);
+  connect(duration_input, SIGNAL(valueChanged(double)), this, SLOT(show_duration_changed(double)));
+  show_layout->addWidget(duration_input);
+  layout->addLayout(show_layout);
+  auto hlayout = new QHBoxLayout(this);
+  pause_button_ = new QPushButton("Pause", this);
+  hlayout->addWidget(pause_button_);
+  connect(pause_button_, SIGNAL(clicked()), this, SLOT(pause_button_clicked()));
   auto save_button = new QPushButton("Save as...", this);
-  layout->addWidget(save_button);
-  connect(save_button, SIGNAL(released()), this, SLOT(save_button_released()));
+  hlayout->addWidget(save_button);
+  connect(save_button, SIGNAL(clicked()), this, SLOT(save_button_clicked()));
+  layout->addLayout(hlayout);
   show();
 }
 
@@ -390,6 +404,7 @@ void PlotWidget::update(Side side, QRectF rect)
 
 void PlotWidget::refresh()
 {
+  if(paused_) return;
   if(!has_left_plot_)
   {
     plot_->enableAxis(QwtPlot::yLeft, false);
@@ -412,9 +427,9 @@ void PlotWidget::refresh()
       max = min + 0.1;
     }
     double r = max - min;
-    if(limit && r > 10)
+    if(limit && r > show_duration_)
     {
-      min = max - 10;
+      min = max - show_duration_;
     }
     plot_->setAxisScale(id, min, max);
   };
@@ -440,7 +455,25 @@ void PlotWidget::limit_xrange_cbox_changed(int state)
   limit_xrange_ = (state == Qt::Checked);
 }
 
-void PlotWidget::save_button_released()
+void PlotWidget::show_duration_changed(double value)
+{
+  show_duration_ = value;
+}
+
+void PlotWidget::pause_button_clicked()
+{
+  paused_ = !paused_;
+  if(paused_)
+  {
+    pause_button_->setText("Resume");
+  }
+  else
+  {
+    pause_button_->setText("Pause");
+  }
+}
+
+void PlotWidget::save_button_clicked()
 {
   QwtPlotRenderer renderer(this);
   renderer.exportTo(plot_, (title_ + ".svg").c_str());
