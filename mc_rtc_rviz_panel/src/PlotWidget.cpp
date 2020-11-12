@@ -26,7 +26,7 @@ QColor convert(const Color & color)
 }
 
 template<typename T>
-bool setPen(T * curve, Color color, Style style)
+bool setPen(T * curve, Color color, Style style, double width = 0.)
 {
   if(style == Style::Point)
   {
@@ -43,7 +43,7 @@ bool setPen(T * curve, Color color, Style style)
   {
     pstyle = Qt::DotLine;
   }
-  curve->setPen(qc, 0.0, pstyle);
+  curve->setPen(qc, width, pstyle);
   return true;
 }
 
@@ -96,7 +96,7 @@ PlotWidget::Curve & PlotWidget::Curve::operator=(Curve && rhs)
   return *this;
 }
 
-QRectF PlotWidget::Curve::update(double x, double y, mc_rtc::gui::Color color, mc_rtc::gui::plot::Style style)
+QRectF PlotWidget::Curve::update(double x, double y, mc_rtc::gui::Color color, mc_rtc::gui::plot::Style style, double line_width)
 {
   if(samples_.size() == 0)
   {
@@ -105,7 +105,7 @@ QRectF PlotWidget::Curve::update(double x, double y, mc_rtc::gui::Color color, m
     rect_.setBottom(y);
     rect_.setTop(y);
   }
-  if(setPen(curve_, color, style))
+  if(setPen(curve_, color, style, line_width))
   {
     curve_->setStyle(QwtPlotCurve::Lines);
   }
@@ -291,7 +291,6 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   connect(limit_xrange_cbox, SIGNAL(stateChanged(int)), this, SLOT(limit_xrange_cbox_changed(int)));
   show_layout->addWidget(limit_xrange_cbox);
   auto duration_input = new QDoubleSpinBox(this);
-  duration_input->setSingleStep(1);
   duration_input->setMinimum(0);
   duration_input->setSuffix("s");
   duration_input->setValue(show_duration_);
@@ -305,7 +304,26 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   auto save_button = new QPushButton("Save as...", this);
   hlayout->addWidget(save_button);
   connect(save_button, SIGNAL(clicked()), this, SLOT(save_button_clicked()));
+  options_button_ = new QPushButton("More");
+  connect(options_button_, SIGNAL(clicked()), this, SLOT(toggle_options_widget()));
+  hlayout->addWidget(options_button_);
   layout->addLayout(hlayout);
+  
+  // Additional options group (line width, etc), hidden by default
+  options_widget_ = new QGroupBox("Style Options", this);
+  options_widget_->setVisible(false);
+  auto options_layout = new QVBoxLayout(this);
+  auto line_width_layout = new QHBoxLayout(this);
+  auto line_width_label = new QLabel("Line width");
+  line_width_layout->addWidget(line_width_label);
+  auto line_width_input = new QDoubleSpinBox(this);
+  line_width_input->setValue(line_width_);
+  line_width_input->setMinimum(0);
+  line_width_layout->addWidget(line_width_input);
+  connect(line_width_input, SIGNAL(valueChanged(double)), this, SLOT(line_width_changed(double)));
+  options_layout->addLayout(line_width_layout);
+  options_widget_->setLayout(options_layout);
+  layout->addWidget(options_widget_);
   show();
 }
 
@@ -353,7 +371,7 @@ void PlotWidget::plot(uint64_t id,
   {
     curves_[id] = Curve(plot_, legend, side);
   }
-  update(side, curves_[id].update(x, y, color, style));
+  update(side, curves_[id].update(x, y, color, style, line_width_));
 }
 
 void PlotWidget::plot(uint64_t id,
@@ -477,6 +495,24 @@ void PlotWidget::save_button_clicked()
 {
   QwtPlotRenderer renderer(this);
   renderer.exportTo(plot_, (title_ + ".svg").c_str());
+}
+
+void PlotWidget::toggle_options_widget()
+{
+  options_widget_->setVisible(!options_widget_->isVisible());
+  if(options_widget_->isVisible())
+  {
+    options_button_->setText("Less");
+  }
+  else
+  {
+    options_button_->setText("More");
+  }
+}
+
+void PlotWidget::line_width_changed(double width)
+{
+  line_width_ = width;
 }
 
 } // namespace mc_rtc_rviz

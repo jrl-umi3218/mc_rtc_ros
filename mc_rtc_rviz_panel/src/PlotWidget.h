@@ -67,7 +67,7 @@ private:
     Curve(Curve && rhs);
     Curve & operator=(Curve && rhs);
     ~Curve();
-    QRectF update(double x, double y, mc_rtc::gui::Color color, mc_rtc::gui::plot::Style style);
+    QRectF update(double x, double y, mc_rtc::gui::Color color, mc_rtc::gui::plot::Style style, double line_width);
 
   private:
     QwtPlotCurve * curve_ = nullptr;
@@ -133,11 +133,17 @@ private:
   double show_duration_ = 10;
   QPushButton * pause_button_;
   bool paused_ = false;
+  
+  QPushButton * options_button_;
+  QGroupBox * options_widget_;
+  double line_width_ = 1.;
 private slots:
   void limit_xrange_cbox_changed(int);
   void show_duration_changed(double);
   void save_button_clicked();
   void pause_button_clicked();
+  void toggle_options_widget();
+  void line_width_changed(double);
 };
 
 } // namespace mc_rtc_rviz
