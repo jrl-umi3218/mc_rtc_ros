@@ -39,6 +39,8 @@ public:
 
   ~Panel();
 
+  using CategoryWidget::connect;
+
   /** Returns true if the provided widget should be visible
    *
    * If the widget has never been seen, returns true
@@ -142,6 +144,11 @@ protected:
   void table_row(const WidgetId & id, const std::vector<std::string> & data) override;
 
   void table_end(const WidgetId & id) override;
+
+  void robot(const WidgetId & id,
+             const std::vector<std::string> & parameters,
+             const std::vector<std::vector<double>> & q,
+             const sva::PTransformd & posW) override;
 
   void form(const WidgetId & id) override;
 
@@ -288,6 +295,10 @@ private slots:
   void got_table_start(const WidgetId & id, const std::vector<std::string> & header);
   void got_table_row(const WidgetId & id, const std::vector<std::string> & data);
   void got_table_end(const WidgetId & id);
+  void got_robot(const WidgetId & id,
+                 const std::vector<std::string> & parameters,
+                 const std::vector<std::vector<double>> & q,
+                 const sva::PTransformd & posW);
   void got_form(const WidgetId & id);
   void got_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
   void got_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def);
@@ -385,6 +396,10 @@ signals:
   void signal_table_start(const WidgetId & id, const std::vector<std::string> & header);
   void signal_table_row(const WidgetId & id, const std::vector<std::string> & data);
   void signal_table_end(const WidgetId & id);
+  void signal_robot(const WidgetId & id,
+                    const std::vector<std::string> & parameters,
+                    const std::vector<std::vector<double>> & q,
+                    const sva::PTransformd & posW);
   void signal_form(const WidgetId & id);
   void signal_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
   void signal_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def);
