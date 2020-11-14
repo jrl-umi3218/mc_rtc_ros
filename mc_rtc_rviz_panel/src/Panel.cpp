@@ -168,6 +168,7 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   qRegisterMetaType<std::vector<std::vector<Eigen::Vector3d>>>("std::vector<std::vector<Eigen::Vector3d>>");
+  qRegisterMetaType<std::vector<std::vector<double>>>("std::vector<std::vector<double>>");
   tree_.parent = this;
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
@@ -249,6 +250,12 @@ Panel::Panel(QWidget * parent)
   connect(this, SIGNAL(signal_table_row(const WidgetId &, const std::vector<std::string> &)), this,
           SLOT(got_table_row(const WidgetId &, const std::vector<std::string> &)));
   connect(this, SIGNAL(signal_table_end(const WidgetId &)), this, SLOT(got_table_end(const WidgetId &)));
+  connect(this,
+          SIGNAL(signal_robot(const WidgetId &, const std::vector<std::string> &,
+                              const std::vector<std::vector<double>> &, const sva::PTransformd &)),
+          this,
+          SLOT(got_robot(const WidgetId &, const std::vector<std::string> &, const std::vector<std::vector<double>> &,
+                         const sva::PTransformd &)));
   connect(this, SIGNAL(signal_form(const WidgetId &)), this, SLOT(got_form(const WidgetId &)));
   connect(this, SIGNAL(signal_form_checkbox(const WidgetId &, const std::string &, bool, bool)), this,
           SLOT(got_form_checkbox(const WidgetId &, const std::string &, bool, bool)));
@@ -498,6 +505,14 @@ void Panel::table_row(const WidgetId & id, const std::vector<std::string> & data
 void Panel::table_end(const WidgetId & id)
 {
   Q_EMIT signal_table_end(id);
+}
+
+void Panel::robot(const WidgetId & id,
+                  const std::vector<std::string> & parameters,
+                  const std::vector<std::vector<double>> & q,
+                  const sva::PTransformd & posW)
+{
+  Q_EMIT signal_robot(id, parameters, q, posW);
 }
 
 void Panel::form(const WidgetId & id)
@@ -826,6 +841,13 @@ void Panel::got_table_end(const WidgetId & id)
 {
   auto & w = get_widget<TableWidget>(id);
   w.finalize();
+}
+
+void Panel::got_robot(const WidgetId & /*id*/,
+                      const std::vector<std::string> & /*parameters*/,
+                      const std::vector<std::vector<double>> & /*q*/,
+                      const sva::PTransformd & /*posW*/)
+{
 }
 
 void Panel::got_form(const WidgetId & id)
