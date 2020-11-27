@@ -52,6 +52,8 @@ bool setPen(T * curve, Color color, Style style, double width = 0.)
 PlotWidget::Curve::Curve(QwtPlot * plot, const std::string & legend, mc_rtc::gui::plot::Side side)
 {
   curve_ = new QwtPlotCurve(QwtText(legend.c_str()));
+  curve_->setLegendAttribute(QwtPlotCurve::LegendShowLine);
+  curve_->setLegendIconSize({40, 8});
   curve_->attach(plot);
   curve_->setRenderHint(QwtPlotItem::RenderAntialiased);
   curve_->setSamples(samples_);
