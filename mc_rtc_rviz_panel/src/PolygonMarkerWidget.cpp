@@ -62,6 +62,13 @@ void PolygonMarkerWidget::update(const std::string & ns,
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::LINE_STRIP;
   m.action = visualization_msgs::Marker::ADD;
+  m.pose.position.x = 0;
+  m.pose.position.y = 0;
+  m.pose.position.z = 0;
+  m.pose.orientation.w = 1;
+  m.pose.orientation.x = 0;
+  m.pose.orientation.y = 0;
+  m.pose.orientation.z = 0;
   for(const auto & point : points)
   {
     if(!is_in_range(point))
