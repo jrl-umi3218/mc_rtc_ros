@@ -216,6 +216,10 @@ NumberArrayInput::NumberArrayInput(QWidget * parent,
                                    bool fixed_size)
 : ArrayInput<double>(parent, name, required, fixed_size), def_(def)
 {
+  if(fixed_size)
+  {
+    updateStride(def.size());
+  }
   for(int i = 0; i < def.size(); ++i)
   {
     add_edit(def(i));

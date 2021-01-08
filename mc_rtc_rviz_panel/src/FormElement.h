@@ -212,6 +212,7 @@ protected:
 private:
   int min_size_;
   int max_size_;
+  bool is_square_ = false;
   int stride_ = 1;
   int next_row_ = 0;
   int next_column_ = 0;
@@ -222,6 +223,7 @@ private:
 protected: // Implement virtual slots
   void plusReleased() override;
   void minusReleased() override;
+  void updateStride(size_t size);
 };
 
 template<>
@@ -252,32 +254,9 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
                           int max_size)
 : CommonArrayInput(parent, name, required), fixed_size_(fixed_size), min_size_(min_size), max_size_(max_size)
 {
-  bool is_square = false;
   if(min_size == max_size)
   {
-    if(min_size < 6)
-    {
-      stride_ = min_size;
-    }
-    else if(min_size == 9)
-    {
-      is_square = true;
-      stride_ = 3;
-    }
-    else if(min_size == 16)
-    {
-      is_square = true;
-      stride_ = 4;
-    }
-    else if(min_size == 36)
-    {
-      is_square = true;
-      stride_ = 6;
-    }
-    else
-    {
-      stride_ = 6;
-    }
+    updateStride(min_size);
   }
   spanning_ = true;
   auto mainLayout = new QVBoxLayout(this);
@@ -286,7 +265,7 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
   layout_ = new QGridLayout(w);
   for(int i = 0; i < min_size; ++i)
   {
-    if(is_square)
+    if(is_square_)
     {
       add_edit(i % stride_ == next_row_ ? T{1} : T{0});
     }
@@ -304,6 +283,34 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
     {
       add_button_->hide();
     }
+  }
+}
+
+template<typename T>
+void ArrayInput<T>::updateStride(size_t size)
+{
+  if(size < 6)
+  {
+    stride_ = size;
+  }
+  else if(size == 9)
+  {
+    is_square_ = true;
+    stride_ = 3;
+  }
+  else if(size == 16)
+  {
+    is_square_ = true;
+    stride_ = 4;
+  }
+  else if(size == 36)
+  {
+    is_square_ = true;
+    stride_ = 6;
+  }
+  else
+  {
+    stride_ = 6;
   }
 }
 
