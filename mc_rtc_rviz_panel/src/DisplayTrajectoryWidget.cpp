@@ -118,7 +118,7 @@ void DisplayTrajectoryWidget::configure(const mc_rtc::gui::LineConfig & config)
 {
   path_.type = config.style == mc_rtc::gui::LineStyle::Dotted ? visualization_msgs::Marker::POINTS
                                                               : visualization_msgs::Marker::LINE_STRIP;
-  path_.header.frame_id = "/robot_map";
+  path_.header.frame_id = "robot_map";
   path_.header.stamp = ros::Time::now();
   path_.scale.x = config.width;
   path_.scale.y = config.width;
