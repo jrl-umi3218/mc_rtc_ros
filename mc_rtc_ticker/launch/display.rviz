@@ -54,7 +54,7 @@ Visualization Manager:
           Value: true
       Name: Env
       Robot Description: /control/env_1/robot_description
-      TF Prefix: /control/env_1
+      TF Prefix: control/env_1
       Update Interval: 0
       Value: true
       Visual Enabled: true
@@ -70,7 +70,7 @@ Visualization Manager:
         Link Tree Style: Links in Alphabetic Order
       Name: ControlRobot
       Robot Description: /control/robot_description
-      TF Prefix: /control
+      TF Prefix: control
       Update Interval: 0
       Value: true
       Visual Enabled: true
@@ -86,7 +86,7 @@ Visualization Manager:
         Link Tree Style: Links in Alphabetic Order
       Name: RealRobot
       Robot Description: /real/robot_description
-      TF Prefix: /real
+      TF Prefix: real
       Update Interval: 0
       Value: false
       Visual Enabled: true
