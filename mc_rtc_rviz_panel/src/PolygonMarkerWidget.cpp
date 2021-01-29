@@ -38,7 +38,7 @@ PolygonMarkerWidget::~PolygonMarkerWidget()
 }
 
 void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>> & polygons,
-                                 const mc_rtc::gui::Color & c)
+                                 const mc_rtc::gui::LineConfig & c)
 {
   currPolygonNum_ = polygons.size();
   if(prevPolygonNum_ > currPolygonNum_)
@@ -57,7 +57,7 @@ void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>>
 void PolygonMarkerWidget::update(const std::string & ns,
                                  const unsigned id,
                                  const std::vector<Eigen::Vector3d> & points,
-                                 const mc_rtc::gui::Color & c)
+                                 const mc_rtc::gui::LineConfig & c)
 {
   visualization_msgs::Marker m;
   m.type = visualization_msgs::Marker::LINE_STRIP;
@@ -83,11 +83,11 @@ void PolygonMarkerWidget::update(const std::string & ns,
     m.points.push_back(p);
   }
   m.points.push_back(m.points.front());
-  m.scale.x = 0.005;
-  m.color.r = c.r;
-  m.color.g = c.g;
-  m.color.b = c.b;
-  m.color.a = c.a;
+  m.scale.x = c.width;
+  m.color.r = c.color.r;
+  m.color.g = c.color.g;
+  m.color.b = c.color.b;
+  m.color.a = c.color.a;
   m.header.stamp = ros::Time::now();
   m.header.frame_id = "robot_map";
   m.ns = ns;

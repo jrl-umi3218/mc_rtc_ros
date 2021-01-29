@@ -21,7 +21,7 @@ struct PolygonMarkerWidget : public ClientWidget
 public:
   PolygonMarkerWidget(const ClientWidgetParam & params, visualization_msgs::MarkerArray & markers);
 
-  void update(const std::vector<std::vector<Eigen::Vector3d>> & polygons, const mc_rtc::gui::Color & c);
+  void update(const std::vector<std::vector<Eigen::Vector3d>> & polygons, const mc_rtc::gui::LineConfig & c);
 
   ~PolygonMarkerWidget() override;
 
@@ -29,7 +29,7 @@ private:
   void update(const std::string & ns,
               const unsigned id,
               const std::vector<Eigen::Vector3d> & points,
-              const mc_rtc::gui::Color & c);
+              const mc_rtc::gui::LineConfig & c);
   void clear();
 
 private:

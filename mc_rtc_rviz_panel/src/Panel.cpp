@@ -221,10 +221,10 @@ Panel::Panel(QWidget * parent)
           this, SLOT(got_trajectory(const WidgetId &, const sva::PTransformd &, const mc_rtc::gui::LineConfig &)));
   connect(this,
           SIGNAL(signal_polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &,
-                                const mc_rtc::gui::Color &)),
+                                const mc_rtc::gui::LineConfig &)),
           this,
           SLOT(got_polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &,
-                           const mc_rtc::gui::Color &)));
+                           const mc_rtc::gui::LineConfig &)));
   connect(this,
           SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
                               const mc_rtc::gui::ForceConfig &, bool)),
@@ -445,7 +445,14 @@ void Panel::polygon(const WidgetId & id,
                     const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                     const mc_rtc::gui::Color & color)
 {
-  Q_EMIT signal_polygon(id, polygons, color);
+  polygon(id, polygons, mc_rtc::gui::LineConfig{color});
+}
+
+void Panel::polygon(const WidgetId & id,
+                    const std::vector<std::vector<Eigen::Vector3d>> & polygons,
+                    const mc_rtc::gui::LineConfig & config)
+{
+  Q_EMIT signal_polygon(id, polygons, config);
 }
 
 void Panel::force(const WidgetId & id,
@@ -782,7 +789,7 @@ void Panel::got_trajectory(const WidgetId & id, const sva::PTransformd & point, 
 
 void Panel::got_polygon(const WidgetId & id,
                         const std::vector<std::vector<Eigen::Vector3d>> & polygons,
-                        const mc_rtc::gui::Color & c)
+                        const mc_rtc::gui::LineConfig & c)
 {
 #ifndef DISABLE_ROS
   auto & w = get_widget<PolygonMarkerWidget>(id, impl_->marker_array_);
