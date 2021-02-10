@@ -292,7 +292,7 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   grid_->setPen(QColor::fromRgbF(0.0, 0.0, 0.0, 0.5), 0.0, Qt::DashLine);
   grid_->attach(plot_);
   layout->addWidget(plot_);
-  auto show_layout = new QHBoxLayout(this);
+  auto show_layout = new QHBoxLayout();
   auto limit_xrange_cbox = new QCheckBox("Only show the last ", this);
   connect(limit_xrange_cbox, SIGNAL(stateChanged(int)), this, SLOT(limit_xrange_cbox_changed(int)));
   show_layout->addWidget(limit_xrange_cbox);
@@ -303,7 +303,7 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   connect(duration_input, SIGNAL(valueChanged(double)), this, SLOT(show_duration_changed(double)));
   show_layout->addWidget(duration_input);
   layout->addLayout(show_layout);
-  auto hlayout = new QHBoxLayout(this);
+  auto hlayout = new QHBoxLayout();
   pause_button_ = new QPushButton("Pause", this);
   hlayout->addWidget(pause_button_);
   connect(pause_button_, SIGNAL(clicked()), this, SLOT(pause_button_clicked()));
@@ -318,8 +318,8 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   // Additional options group (line width, etc), hidden by default
   options_widget_ = new QGroupBox("Style Options", this);
   options_widget_->setVisible(false);
-  auto options_layout = new QVBoxLayout(this);
-  auto line_width_layout = new QHBoxLayout(this);
+  auto options_layout = new QVBoxLayout();
+  auto line_width_layout = new QHBoxLayout();
   auto line_width_label = new QLabel("Line width");
   line_width_layout->addWidget(line_width_label);
   auto line_width_input = new QDoubleSpinBox(this);
