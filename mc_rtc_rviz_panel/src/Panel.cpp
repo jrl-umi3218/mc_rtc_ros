@@ -631,6 +631,7 @@ void Panel::end_plot(uint64_t id)
 
 void Panel::got_category(const std::vector<std::string> & parent, const std::string & category)
 {
+  if(category == "Robots") return;
   auto & tree = get_category(parent);
   if(tree.sub_trees_.count(category) == 0)
   {
