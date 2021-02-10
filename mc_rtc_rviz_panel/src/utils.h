@@ -43,7 +43,7 @@ vm::InteractiveMarker make3DMarker(const std::string & name,
                                    bool move_x = true,
                                    bool move_y = true,
                                    bool move_z = true);
-vm::InteractiveMarker makeXYThetaMarker(const std::string & name);
+vm::InteractiveMarker makeXYThetaMarker(const std::string & name, bool readonly = false);
 std::vector<vm::Marker> makeArrowMarker(const Eigen::Vector3d & start,
                                         const Eigen::Vector3d & end,
                                         const mc_rtc::gui::ArrowConfig & c);

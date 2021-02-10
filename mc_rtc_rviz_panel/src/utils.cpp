@@ -208,7 +208,7 @@ vm::InteractiveMarker make3DMarker(const std::string & name,
   return make6DMarker(name, visual_markers, control_position, false);
 }
 
-vm::InteractiveMarker makeXYThetaMarker(const std::string & name)
+vm::InteractiveMarker makeXYThetaMarker(const std::string & name, bool readonly)
 {
   vm::InteractiveMarker int_marker;
   int_marker.header.frame_id = "robot_map";
@@ -217,13 +217,16 @@ vm::InteractiveMarker makeXYThetaMarker(const std::string & name)
   int_marker.description = "";
   makeVisualControl(makeAxisMarker(0.15 * 0.9), int_marker);
 
-  vm::InteractiveMarkerControl control;
-  control.orientation.w = 1;
-  control.orientation.x = 0;
-  control.orientation.y = 1;
-  control.orientation.z = 0;
-  control.interaction_mode = vm::InteractiveMarkerControl::MOVE_ROTATE;
-  int_marker.controls.push_back(control);
+  if(!readonly)
+  {
+    vm::InteractiveMarkerControl control;
+    control.orientation.w = 1;
+    control.orientation.x = 0;
+    control.orientation.y = 1;
+    control.orientation.z = 0;
+    control.interaction_mode = vm::InteractiveMarkerControl::MOVE_ROTATE;
+    int_marker.controls.push_back(control);
+  }
   return int_marker;
 }
 
