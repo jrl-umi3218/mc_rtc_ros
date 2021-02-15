@@ -10,6 +10,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_grid.h>
+#include <qwt_plot_panner.h>
+#include <qwt_plot_zoomer.h>
 
 #include <map>
 #include <unordered_map>
@@ -136,12 +138,22 @@ private:
 
   QPushButton * options_button_;
   QGroupBox * options_widget_;
+  QWidget * controls_widget_;
+  QwtPlotZoomer * zoom_;
+  QwtPlotPanner * pan_;
+  QPushButton * zoom_button_;
+  QPushButton * pan_button_;
   double line_width_ = 1.;
 private slots:
   void limit_xrange_cbox_changed(int);
   void show_duration_changed(double);
   void save_button_clicked();
   void pause_button_clicked();
+  void zoom_button_clicked();
+  void zoom_reset_button_clicked();
+  void zoom_prev_button_clicked();
+  void zoom_next_button_clicked();
+  void pan_button_clicked();
   void toggle_options_widget();
   void line_width_changed(double);
 };

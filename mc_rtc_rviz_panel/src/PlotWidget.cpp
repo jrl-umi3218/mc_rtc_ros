@@ -303,14 +303,59 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   connect(duration_input, SIGNAL(valueChanged(double)), this, SLOT(show_duration_changed(double)));
   show_layout->addWidget(duration_input);
   layout->addLayout(show_layout);
+
+  // Controls when paused (zoom, scroll, etc)
+  auto setIcon = [](QPushButton * button, const QString & iconName, const QString & fallbackText) {
+    if(QIcon::hasThemeIcon(iconName))
+    {
+      button->setIcon(QIcon::fromTheme(iconName));
+      button->setToolTip(fallbackText);
+    }
+    else
+    {
+      button->setText(fallbackText);
+    }
+  };
+  controls_widget_ = new QWidget();
+  controls_widget_->setVisible(false);
+  layout->addWidget(controls_widget_);
+  auto clayout = new QHBoxLayout(controls_widget_);
+  zoom_button_ = new QPushButton();
+  setIcon(zoom_button_, "zoom-in", "Zoom");
+  zoom_button_->setCheckable(true);
+  connect(zoom_button_, SIGNAL(clicked()), this, SLOT(zoom_button_clicked()));
+  auto reset_zoom_button = new QPushButton();
+  setIcon(reset_zoom_button, "go-home", "Reset");
+  connect(reset_zoom_button, SIGNAL(clicked()), this, SLOT(zoom_reset_button_clicked()));
+  auto prev_zoom_button = new QPushButton();
+  setIcon(prev_zoom_button, "edit-undo", "Undo zoom");
+  connect(prev_zoom_button, SIGNAL(clicked()), this, SLOT(zoom_prev_button_clicked()));
+  auto next_zoom_button = new QPushButton();
+  setIcon(next_zoom_button, "edit-redo", "Redo zoom");
+  connect(next_zoom_button, SIGNAL(clicked()), this, SLOT(zoom_next_button_clicked()));
+  pan_button_ = new QPushButton();
+  setIcon(pan_button_, "transform-move", "Move");
+  pan_button_->setCheckable(true);
+  connect(pan_button_, SIGNAL(clicked()), this, SLOT(pan_button_clicked()));
+  clayout->addWidget(reset_zoom_button);
+  clayout->addWidget(zoom_button_);
+  clayout->addWidget(prev_zoom_button);
+  clayout->addWidget(next_zoom_button);
+  clayout->addWidget(pan_button_);
+
   auto hlayout = new QHBoxLayout();
-  pause_button_ = new QPushButton("Pause", this);
+  pause_button_ = new QPushButton();
+  pause_button_->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+  pause_button_->setCheckable(true);
+  pause_button_->setChecked(true);
   hlayout->addWidget(pause_button_);
   connect(pause_button_, SIGNAL(clicked()), this, SLOT(pause_button_clicked()));
-  auto save_button = new QPushButton("Save as...", this);
+  auto save_button = new QPushButton(this);
+  setIcon(save_button, "document-save-as", "Save as...");
   hlayout->addWidget(save_button);
   connect(save_button, SIGNAL(clicked()), this, SLOT(save_button_clicked()));
   options_button_ = new QPushButton("More");
+  options_button_->setCheckable(true);
   connect(options_button_, SIGNAL(clicked()), this, SLOT(toggle_options_widget()));
   hlayout->addWidget(options_button_);
   layout->addLayout(hlayout);
@@ -331,6 +376,11 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   options_widget_->setLayout(options_layout);
   layout->addWidget(options_widget_);
   show();
+
+  zoom_ = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, plot_->canvas());
+  zoom_->setEnabled(false);
+  pan_ = new QwtPlotPanner(plot_->canvas());
+  pan_->setEnabled(false);
 }
 
 const std::string & PlotWidget::title() const
@@ -428,7 +478,11 @@ void PlotWidget::update(Side side, QRectF rect)
 
 void PlotWidget::refresh()
 {
-  if(paused_) return;
+  if(paused_)
+  {
+    plot_->replot();
+    return;
+  }
   if(!has_left_plot_)
   {
     plot_->enableAxis(QwtPlot::yLeft, false);
@@ -489,11 +543,59 @@ void PlotWidget::pause_button_clicked()
   paused_ = !paused_;
   if(paused_)
   {
-    pause_button_->setText("Resume");
+    pause_button_->setChecked(false);
+    pause_button_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    controls_widget_->setVisible(true);
+    zoom_->setZoomBase(true);
   }
   else
   {
-    pause_button_->setText("Pause");
+    pause_button_->setChecked(true);
+    pause_button_->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+    controls_widget_->setVisible(false);
+  }
+}
+
+void PlotWidget::zoom_button_clicked()
+{
+  if(zoom_button_->isChecked())
+  {
+    pan_->setEnabled(false);
+    pan_button_->setChecked(false);
+    zoom_->setEnabled(true);
+  }
+  else
+  {
+    zoom_->setEnabled(false);
+  }
+}
+
+void PlotWidget::zoom_reset_button_clicked()
+{
+  zoom_->zoom(0);
+}
+
+void PlotWidget::zoom_prev_button_clicked()
+{
+  zoom_->zoom(-1);
+}
+
+void PlotWidget::zoom_next_button_clicked()
+{
+  zoom_->zoom(1);
+}
+
+void PlotWidget::pan_button_clicked()
+{
+  if(pan_button_->isChecked())
+  {
+    zoom_->setEnabled(false);
+    zoom_button_->setChecked(false);
+    pan_->setEnabled(true);
+  }
+  else
+  {
+    pan_->setEnabled(false);
   }
 }
 
