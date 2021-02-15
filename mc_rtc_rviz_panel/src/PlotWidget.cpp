@@ -321,7 +321,7 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   layout->addWidget(controls_widget_);
   auto clayout = new QHBoxLayout(controls_widget_);
   zoom_button_ = new QPushButton();
-  setIcon(zoom_button_, "system-search", "Zoom");
+  setIcon(zoom_button_, "zoom-in", "Zoom");
   zoom_button_->setCheckable(true);
   connect(zoom_button_, SIGNAL(clicked()), this, SLOT(zoom_button_clicked()));
   auto reset_zoom_button = new QPushButton();
@@ -333,7 +333,8 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   auto next_zoom_button = new QPushButton();
   setIcon(next_zoom_button, "edit-redo", "Redo zoom");
   connect(next_zoom_button, SIGNAL(clicked()), this, SLOT(zoom_next_button_clicked()));
-  pan_button_ = new QPushButton("Move");
+  pan_button_ = new QPushButton();
+  setIcon(pan_button_, "transform-move", "Move");
   pan_button_->setCheckable(true);
   connect(pan_button_, SIGNAL(clicked()), this, SLOT(pan_button_clicked()));
   clayout->addWidget(reset_zoom_button);
@@ -346,6 +347,7 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
   pause_button_ = new QPushButton();
   pause_button_->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
   pause_button_->setCheckable(true);
+  pause_button_->setChecked(true);
   hlayout->addWidget(pause_button_);
   connect(pause_button_, SIGNAL(clicked()), this, SLOT(pause_button_clicked()));
   auto save_button = new QPushButton(this);
@@ -541,14 +543,14 @@ void PlotWidget::pause_button_clicked()
   paused_ = !paused_;
   if(paused_)
   {
-    pause_button_->setChecked(true);
+    pause_button_->setChecked(false);
     pause_button_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     controls_widget_->setVisible(true);
     zoom_->setZoomBase(true);
   }
   else
   {
-    pause_button_->setChecked(false);
+    pause_button_->setChecked(true);
     pause_button_->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
     controls_widget_->setVisible(false);
   }
