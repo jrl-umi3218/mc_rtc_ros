@@ -47,7 +47,7 @@ Schema::Schema(const std::vector<Schema> & schemas)
   };
 }
 
-Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, const std::string & title, bool required_in)
+mc_rtc::Configuration Schema::resolveAllOf(const mc_rtc::Configuration & s, const std::string & source) const
 {
   if(s.has("allOf"))
   {
@@ -57,7 +57,11 @@ Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, cons
       auto si = s("allOf")[i];
       if(si.has("$ref"))
       {
-        schema.load(mc_rtc::Configuration{ref_path(source, si("$ref"))});
+        schema.load(resolveAllOf(mc_rtc::Configuration{ref_path(source, si("$ref"))}, source));
+      }
+      else if(si.has("allOf"))
+      {
+        schema.load(resolveAllOf(si, source));
       }
       else
       {
@@ -65,12 +69,17 @@ Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, cons
       }
     }
     schema.remove("allOf");
-    init(schema, source, title, required_in);
+    return schema;
   }
   else
   {
-    init(s, source, title, required_in);
+    return s;
   }
+}
+
+Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, const std::string & title, bool required_in)
+{
+  init(resolveAllOf(s, source), source, title, required_in);
 }
 
 void Schema::init(const mc_rtc::Configuration & s,

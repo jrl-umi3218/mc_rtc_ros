@@ -63,6 +63,10 @@ struct Schema
   static SchemaStore & store();
 
 private:
+  /** Recursively resolve allOf property */
+  mc_rtc::Configuration resolveAllOf(const mc_rtc::Configuration & s, const std::string & source) const;
+
+private:
   std::string title_;
   bool is_object_ = false;
   bool is_tuple_ = false;
