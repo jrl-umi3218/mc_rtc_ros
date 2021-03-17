@@ -84,7 +84,7 @@ jobs:
       run: |
         export PATH=/usr/local/opt/qt/bin:$PATH
         echo "PATH=${PATH}" >> $GITHUB_ENV
-        export CMAKE_PREFIX_PATH=/usr/local/opt/qt:${CMAKE_PREFIX_PATH}
+        export CMAKE_PREFIX_PATH=/usr/local/opt/qt@5:${CMAKE_PREFIX_PATH}
         echo "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" >> $GITHUB_ENV
     - name: Install dependencies
       uses: jrl-umi3218/github-actions/install-dependencies@master
@@ -94,7 +94,7 @@ jobs:
         ubuntu: |
           apt: cython cython3 python-nose python3-nose python-numpy python3-numpy python-coverage python3-coverage python-setuptools python3-setuptools libeigen3-dev doxygen doxygen-latex libboost-all-dev libtinyxml2-dev libgeos++-dev libnanomsg-dev libyaml-cpp-dev libltdl-dev qt5-default libqwt-qt5-dev
         macos: |
-          brew: eigen boost tinyxml2 geos nanomsg yaml-cpp pkg-config libtool qt qwt gcc
+          brew: eigen boost tinyxml2 geos nanomsg yaml-cpp pkg-config libtool qt5 qwt gcc
           pip: Cython coverage nose numpy
           github:
             - path: jrl-umi3218/mc_rtc_data
