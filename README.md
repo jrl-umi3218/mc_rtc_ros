@@ -2,6 +2,7 @@ mc_rtc_ros
 ==========
 
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-green.svg)](https://opensource.org/licenses/BSD-2-Clause)
+[![Hosted By: Cloudsmith](https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith)](https://cloudsmith.com)
 
 This ROS stack aims at providing various tools to use along mc\_rtc. The GUI (mc\_rtc\_rviz\_panel) can be built without ROS.
 
@@ -20,3 +21,31 @@ This stack requires:
 - [mc\_rtc\_msgs](https://github.com/jrl-umi3218/mc_rtc_msgs): required when building with ROS
 - [Qt](https://www.qt.io/): if building with ROS and RViz then the version that RViZ was built with; otherwise Qt4 and Qt5 are supported
 - [QWT](https://qwt.sourceforge.io/) version 6.1 or later for the corresponding Qt version
+
+Installing
+------
+
+## Ubuntu LTS (16.04, 18.04, 20.04)
+
+You must first setup our package mirror:
+
+```
+curl -1sLf \
+  'https://dl.cloudsmith.io/public/mc-rtc/stable/setup.deb.sh' \
+  | sudo -E bash
+```
+
+You can also choose the head mirror which will have the latest version of this package:
+
+```
+curl -1sLf \
+  'https://dl.cloudsmith.io/public/mc-rtc/head/setup.deb.sh' \
+  | sudo -E bash
+```
+
+You can then install the package:
+
+```bash
+sudo apt install ros-${ROS_DISTRO}-mc-rtc-tools
+```
+
