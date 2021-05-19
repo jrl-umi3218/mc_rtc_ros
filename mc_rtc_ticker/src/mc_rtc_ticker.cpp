@@ -224,6 +224,7 @@ int main()
     }
     auto & mbc = controller.robot().mbc();
     const auto & rjo = controller.ref_joint_order();
+    q.resize(rjo.size());
     size_t index = 0;
     for(size_t i = 0; i < rjo.size(); ++i)
     {
