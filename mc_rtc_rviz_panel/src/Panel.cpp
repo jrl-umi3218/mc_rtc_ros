@@ -656,7 +656,6 @@ void Panel::end_plot(uint64_t id)
 
 void Panel::got_category(const std::vector<std::string> & parent, const std::string & category)
 {
-  if(category == "Robots") return;
   auto & tree = get_category(parent);
   if(tree.sub_trees_.count(category) == 0)
   {
@@ -876,11 +875,22 @@ void Panel::got_table_end(const WidgetId & id)
   w.finalize();
 }
 
-void Panel::got_robot(const WidgetId & /*id*/,
-                      const std::vector<std::string> & /*parameters*/,
+void Panel::got_robot(const WidgetId & id,
+                      const std::vector<std::string> & parameters,
                       const std::vector<std::vector<double>> & /*q*/,
                       const sva::PTransformd & /*posW*/)
 {
+  std::string params = "[ ";
+  for(size_t i = 0; i < parameters.size(); ++i)
+  {
+    params += parameters[i];
+    if(i != parameters.size() - 1)
+    {
+      params += ", ";
+    }
+  }
+  params += "]";
+  got_label(id, params);
 }
 
 void Panel::got_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose)
