@@ -154,6 +154,8 @@ protected:
              const std::vector<std::vector<double>> & q,
              const sva::PTransformd & posW) override;
 
+  void visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose) override;
+
   void form(const WidgetId & id) override;
 
   void form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def) override;
@@ -303,6 +305,7 @@ private slots:
                  const std::vector<std::string> & parameters,
                  const std::vector<std::vector<double>> & q,
                  const sva::PTransformd & posW);
+  void got_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose);
   void got_form(const WidgetId & id);
   void got_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
   void got_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def);
@@ -404,6 +407,7 @@ signals:
                     const std::vector<std::string> & parameters,
                     const std::vector<std::vector<double>> & q,
                     const sva::PTransformd & posW);
+  void signal_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose);
   void signal_form(const WidgetId & id);
   void signal_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
   void signal_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def);

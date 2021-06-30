@@ -28,6 +28,7 @@ if(NOT ${DISABLE_ROS})
     ForceInteractiveMarkerWidget.h
     Point3DInteractiveMarkerWidget.h
     TransformInteractiveMarkerWidget.h
+    VisualWidget.h
     XYThetaInteractiveMarkerWidget.h
     DisplayTrajectoryWidget.h
     PolygonMarkerWidget.h
@@ -137,6 +138,7 @@ if(NOT ${DISABLE_ROS})
     ForceInteractiveMarkerWidget.cpp
     Point3DInteractiveMarkerWidget.cpp
     TransformInteractiveMarkerWidget.cpp
+    VisualWidget.cpp
     XYThetaInteractiveMarkerWidget.cpp
     DisplayTrajectoryWidget.cpp
     PolygonMarkerWidget.cpp
