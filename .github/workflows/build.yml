@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-16.04, ubuntu-18.04, macos-latest]
+        os: [ubuntu-18.04, ubuntu-20.04, macos-latest]
         compiler: [gcc]
     runs-on: ${{ matrix.os }}
     steps:
@@ -46,8 +46,14 @@ jobs:
       run: |
         set -e
         sudo rm -f /etc/apt/sources.list.d/dotnetdev.list /etc/apt/sources.list.d/microsoft-prod.list
+    - name: Setup extra APT mirror
+      if: startsWith(runner.os, 'Linux')
+      run: |
+        set -x
+        set -e
+        curl -1sLf 'https://dl.cloudsmith.io/public/mc-rtc/head/setup.deb.sh' | sudo -E bash
     - name: Install ROS
-      if: (matrix.os == 'ubuntu-16.04' || matrix.os == 'ubuntu-18.04')
+      if: startsWith(runner.os, 'Linux')
       run: |
         set -e
         set -x
@@ -55,29 +61,22 @@ jobs:
         if [ "${{ matrix.os }}" = "ubuntu-16.04" ]
         then
           export ROS_DISTRO="kinetic"
-        else
+        elif [ "${{ matrix.os }}" = "ubuntu-18.04" ]
+        then
           export ROS_DISTRO="melodic"
+        else
+          export ROS_DISTRO="noetic"
         fi
         sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
         wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
         sudo apt-get update -qq
-        sudo apt-get install -qq ros-${ROS_DISTRO}-ros-base ros-${ROS_DISTRO}-tf2-ros ros-${ROS_DISTRO}-tf ros-${ROS_DISTRO}-rviz
+        sudo apt-get install -qq ros-${ROS_DISTRO}-ros-base ros-${ROS_DISTRO}-tf2-ros ros-${ROS_DISTRO}-tf ros-${ROS_DISTRO}-rviz ros-${ROS_DISTRO}-mc-rtc-plugin
         . /opt/ros/${ROS_DISTRO}/setup.bash
         mkdir -p /tmp/_ci/catkin_ws/src/
         cd /tmp/_ci/catkin_ws/src
         catkin_init_workspace
-        git clone --recursive https://github.com/jrl-umi3218/mc_rtc_msgs
-        git clone --recursive https://github.com/jrl-umi3218/mc_rtc_data
         cd ../
         catkin_make || exit 1
-        . devel/setup.bash
-        echo "ROS_DISTRO=${ROS_DISTRO}" >> $GITHUB_ENV
-        echo "PKG_CONFIG_PATH=${PKG_CONFIG_PATH}" >> $GITHUB_ENV
-        echo "ROS_MASTER_URI=${ROS_MASTER_URI}" >> $GITHUB_ENV
-        echo "PYTHONPATH=${PYTHONPATH}" >> $GITHUB_ENV
-        echo "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" >> $GITHUB_ENV
-        echo "PATH=${PATH}" >> $GITHUB_ENV
-        echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
         popd
     - name: Setup env
       if: matrix.os == 'macos-latest'
@@ -92,30 +91,13 @@ jobs:
         compiler: gcc
         build-type: RelWithDebInfo
         ubuntu: |
-          apt: cython cython3 python-nose python3-nose python-numpy python3-numpy python-coverage python3-coverage python-setuptools python3-setuptools libeigen3-dev doxygen doxygen-latex libboost-all-dev libtinyxml2-dev libgeos++-dev libnanomsg-dev libyaml-cpp-dev libltdl-dev qt5-default libqwt-qt5-dev
+          apt: libltdl-dev qt5-default libqwt-qt5-dev libmc-rtc-dev
         macos: |
-          brew: eigen boost tinyxml2 geos nanomsg yaml-cpp pkg-config libtool qt5 qwt gcc
-          pip: Cython coverage nose numpy
-          github:
-            - path: jrl-umi3218/mc_rtc_data
-        github: |
-          - path: gabime/spdlog
-            ref: v1.6.1
-            options: -DSPDLOG_BUILD_EXAMPLE:BOOL=OFF -DSPDLOG_BUILD_SHARED:BOOL=ON
-          - path: humanoid-path-planner/hpp-spline
-            ref: v4.7.0
-            options: -DBUILD_PYTHON_INTERFACE:BOOL=OFF
-          - path: jrl-umi3218/Eigen3ToPython
-          - path: jrl-umi3218/SpaceVecAlg
-          - path: jrl-umi3218/sch-core
-          - path: jrl-umi3218/eigen-qld
-          - path: jrl-umi3218/eigen-quadprog
-          - path: jrl-umi3218/sch-core-python
-          - path: jrl-umi3218/RBDyn
-          - path: jrl-umi3218/Tasks
-          - path: jrl-umi3218/mc_rbdyn_urdf
-          - path: jrl-umi3218/state-observation
-          - path: jrl-umi3218/mc_rtc
+          brew-taps: mc-rtc/mc-rtc
+          brew: qt5 qwt mc_rtc
+          github: # Get the head version of mc_rtc
+            - path: jrl-umi3218/mc_rtc
+              options: -DPYTHON_BINDING:BOOL=OFF
     - name: Build and test
       if: matrix.os == 'macos-latest'
       uses: jrl-umi3218/github-actions/build-cmake-project@master
@@ -123,13 +105,14 @@ jobs:
         compiler: gcc
         build-type: RelWithDebInfo
     - name: Build with catkin
-      if: (matrix.os == 'ubuntu-16.04' || matrix.os == 'ubuntu-18.04')
+      if: startsWith(runner.os, 'Linux')
       run: |
         set -e
         set -x
         PROJECT_DIR=`pwd`
         cd /tmp/_ci/catkin_ws
         cp -r $PROJECT_DIR src/
+        . devel/setup.bash
         catkin_make || exit 1
     - name: Slack Notification
       if: failure()
@@ -138,4 +121,4 @@ jobs:
         slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_TOKEN }}
         slack-channel: '#ci'
         slack-text: >
-          [mc_rtc] Build *${{ matrix.os }}/${{ matrix.build-type }} (${{ matrix.compiler }})* failed on ${{ github.ref }}
+          [mc_rtc_ros] Build *${{ matrix.os }}/${{ matrix.build-type }} (${{ matrix.compiler }})* failed on ${{ github.ref }}

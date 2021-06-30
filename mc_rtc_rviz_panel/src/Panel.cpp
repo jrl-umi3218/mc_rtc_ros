@@ -20,6 +20,7 @@
 #  include "Point3DInteractiveMarkerWidget.h"
 #  include "PolygonMarkerWidget.h"
 #  include "TransformInteractiveMarkerWidget.h"
+#  include "VisualWidget.h"
 #  include "XYThetaInteractiveMarkerWidget.h"
 #endif
 #include "ConnectionDialog.h"
@@ -169,6 +170,7 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   qRegisterMetaType<std::vector<std::vector<Eigen::Vector3d>>>("std::vector<std::vector<Eigen::Vector3d>>");
   qRegisterMetaType<std::vector<std::vector<double>>>("std::vector<std::vector<double>>");
+  qRegisterMetaType<rbd::parsers::Visual>("rbd::parsers::Visual");
   tree_.parent = this;
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
@@ -256,6 +258,8 @@ Panel::Panel(QWidget * parent)
           this,
           SLOT(got_robot(const WidgetId &, const std::vector<std::string> &, const std::vector<std::vector<double>> &,
                          const sva::PTransformd &)));
+  connect(this, SIGNAL(signal_visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &)), this,
+          SLOT(got_visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &)));
   connect(this, SIGNAL(signal_form(const WidgetId &)), this, SLOT(got_form(const WidgetId &)));
   connect(this, SIGNAL(signal_form_checkbox(const WidgetId &, const std::string &, bool, bool)), this,
           SLOT(got_form_checkbox(const WidgetId &, const std::string &, bool, bool)));
@@ -520,6 +524,11 @@ void Panel::robot(const WidgetId & id,
                   const sva::PTransformd & posW)
 {
   Q_EMIT signal_robot(id, parameters, q, posW);
+}
+
+void Panel::visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pos)
+{
+  Q_EMIT signal_visual(id, visual, pos);
 }
 
 void Panel::form(const WidgetId & id)
@@ -856,6 +865,14 @@ void Panel::got_robot(const WidgetId & /*id*/,
                       const std::vector<std::vector<double>> & /*q*/,
                       const sva::PTransformd & /*posW*/)
 {
+}
+
+void Panel::got_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose)
+{
+#ifndef DISABLE_ROS
+  auto & w = get_widget<VisualWidget>(id, impl_->marker_array_);
+  w.update(visual, pose);
+#endif
 }
 
 void Panel::got_form(const WidgetId & id)
