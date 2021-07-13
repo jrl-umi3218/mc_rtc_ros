@@ -158,22 +158,36 @@ protected:
 
   void form(const WidgetId & id) override;
 
-  void form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def) override;
+  void form_checkbox(const WidgetId & formId,
+                     const std::string & name,
+                     bool required,
+                     bool def,
+                     bool def_from_user) override;
 
-  void form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def) override;
+  void form_integer_input(const WidgetId & formId,
+                          const std::string & name,
+                          bool required,
+                          int def,
+                          bool def_from_user) override;
 
-  void form_number_input(const WidgetId & formId, const std::string & name, bool required, double def) override;
+  void form_number_input(const WidgetId & formId,
+                         const std::string & name,
+                         bool required,
+                         double def,
+                         bool def_from_user) override;
 
   void form_string_input(const WidgetId & formId,
                          const std::string & name,
                          bool required,
-                         const std::string & def) override;
+                         const std::string & def,
+                         bool def_from_user) override;
 
   void form_array_input(const WidgetId & formId,
                         const std::string & name,
                         bool required,
                         const Eigen::VectorXd & def,
-                        bool fixed_size) override;
+                        bool fixed_size,
+                        bool def_from_user) override;
 
   void form_combo_input(const WidgetId & formId,
                         const std::string & name,
@@ -307,15 +321,28 @@ private slots:
                  const sva::PTransformd & posW);
   void got_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose);
   void got_form(const WidgetId & id);
-  void got_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
-  void got_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def);
-  void got_form_number_input(const WidgetId & formId, const std::string & name, bool required, double def);
-  void got_form_string_input(const WidgetId & formId, const std::string & name, bool required, const std::string & def);
+  void got_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def, bool def_from_user);
+  void got_form_integer_input(const WidgetId & formId,
+                              const std::string & name,
+                              bool required,
+                              int def,
+                              bool def_from_user);
+  void got_form_number_input(const WidgetId & formId,
+                             const std::string & name,
+                             bool required,
+                             double def,
+                             bool def_from_user);
+  void got_form_string_input(const WidgetId & formId,
+                             const std::string & name,
+                             bool required,
+                             const std::string & def,
+                             bool def_from_user);
   void got_form_array_input(const WidgetId & formId,
                             const std::string & name,
                             bool required,
                             const Eigen::VectorXd & def,
-                            bool fixed_size);
+                            bool fixed_size,
+                            bool def_from_user);
   void got_form_combo_input(const WidgetId & formId,
                             const std::string & name,
                             bool required,
@@ -409,18 +436,32 @@ signals:
                     const sva::PTransformd & posW);
   void signal_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose);
   void signal_form(const WidgetId & id);
-  void signal_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def);
-  void signal_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def);
-  void signal_form_number_input(const WidgetId & formId, const std::string & name, bool required, double def);
+  void signal_form_checkbox(const WidgetId & formId,
+                            const std::string & name,
+                            bool required,
+                            bool def,
+                            bool def_from_user);
+  void signal_form_integer_input(const WidgetId & formId,
+                                 const std::string & name,
+                                 bool required,
+                                 int def,
+                                 bool def_from_user);
+  void signal_form_number_input(const WidgetId & formId,
+                                const std::string & name,
+                                bool required,
+                                double def,
+                                bool def_from_user);
   void signal_form_string_input(const WidgetId & formId,
                                 const std::string & name,
                                 bool required,
-                                const std::string & def);
+                                const std::string & def,
+                                bool def_from_user);
   void signal_form_array_input(const WidgetId & formId,
                                const std::string & name,
                                bool required,
                                const Eigen::VectorXd & def,
-                               bool fixed_size);
+                               bool fixed_size,
+                               bool def_from_user);
   void signal_form_combo_input(const WidgetId & formId,
                                const std::string & name,
                                bool required,

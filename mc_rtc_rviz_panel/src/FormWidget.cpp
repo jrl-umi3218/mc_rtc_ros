@@ -58,6 +58,10 @@ void FormWidget::released()
   if(ok)
   {
     client().send_request(id(), out);
+    for(auto & el : elements_)
+    {
+      el->reset();
+    }
   }
   else
   {

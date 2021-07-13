@@ -55,24 +55,48 @@ mc_rtc::Configuration serialize(const T & data)
 
 } // namespace details
 
-Checkbox::Checkbox(QWidget * parent, const std::string & name, bool required, bool def)
-: FormElement(parent, name, required), def_(def)
+Checkbox::Checkbox(QWidget * parent, const std::string & name, bool required, bool def, bool user_def)
+: FormElement(parent, name, required), def_(def), user_def_(user_def)
 {
   auto layout = new QVBoxLayout(this);
   cbox_ = new QCheckBox(this);
-  cbox_->setChecked(def);
   connect(cbox_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
+  connect(cbox_, SIGNAL(stateChanged(int)), this, SLOT(stateChanged(int)));
   layout->addWidget(cbox_);
+  reset();
 }
 
-bool Checkbox::changed(bool required, bool def)
+bool Checkbox::changed(bool required, bool def, bool user_def)
 {
-  return changed_(required) || def_ != def;
+  return changed_(required) || def_ != def || user_def_ != user_def;
 }
 
 void Checkbox::toggled(bool)
 {
   ready_ = true;
+}
+
+void Checkbox::reset()
+{
+  if(user_def_)
+  {
+    cbox_->setChecked(def_);
+  }
+  else
+  {
+    cbox_->setTristate(true);
+    cbox_->setCheckState(Qt::CheckState::PartiallyChecked);
+  }
+  ready_ = user_def_;
+}
+
+void Checkbox::stateChanged(int s)
+{
+  if(s != Qt::CheckState::PartiallyChecked)
+  {
+    ready_ = true;
+    cbox_->setTristate(false);
+  }
 }
 
 mc_rtc::Configuration Checkbox::serialize() const
@@ -93,19 +117,19 @@ void CommonInput::textChanged(const QString &)
   ready_ = true;
 }
 
-IntegerInput::IntegerInput(QWidget * parent, const std::string & name, bool required, int def)
-: CommonInput(parent, name, required), def_(def)
+IntegerInput::IntegerInput(QWidget * parent, const std::string & name, bool required, int def, bool user_def)
+: CommonInput(parent, name, required), def_(def), user_def_(user_def)
 {
   auto validator = new QIntValidator(this);
   validator->setLocale(QLocale::C);
   edit_->setValidator(validator);
-  edit_->setText(QString::number(def));
+  reset();
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
-bool IntegerInput::changed(bool required, int def)
+bool IntegerInput::changed(bool required, int def, bool user_def)
 {
-  return changed_(required) || def_ != def;
+  return changed_(required) || def_ != def || user_def != user_def_;
 }
 
 mc_rtc::Configuration IntegerInput::serialize() const
@@ -113,19 +137,32 @@ mc_rtc::Configuration IntegerInput::serialize() const
   return details::serialize(edit_->text().toInt());
 }
 
-NumberInput::NumberInput(QWidget * parent, const std::string & name, bool required, double def)
-: CommonInput(parent, name, required), def_(def)
+void IntegerInput::reset()
+{
+  if(user_def_)
+  {
+    edit_->setText(QString::number(def_));
+  }
+  else
+  {
+    edit_->setText("");
+  }
+  ready_ = user_def_;
+}
+
+NumberInput::NumberInput(QWidget * parent, const std::string & name, bool required, double def, bool user_def)
+: CommonInput(parent, name, required), def_(def), user_def_(user_def)
 {
   auto validator = new QDoubleValidator(this);
   validator->setLocale(QLocale::C);
   edit_->setValidator(validator);
-  edit_->setText(QString::number(def));
+  reset();
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
-bool NumberInput::changed(bool required, double def)
+bool NumberInput::changed(bool required, double def, bool user_def)
 {
-  return changed_(required) || def_ != def;
+  return changed_(required) || def_ != def || user_def_ != user_def;
 }
 
 mc_rtc::Configuration NumberInput::serialize() const
@@ -133,16 +170,46 @@ mc_rtc::Configuration NumberInput::serialize() const
   return details::serialize(edit_->text().toDouble());
 }
 
-StringInput::StringInput(QWidget * parent, const std::string & name, bool required, const std::string & def)
-: CommonInput(parent, name, required), def_(def)
+void NumberInput::reset()
 {
-  edit_->setText(def.c_str());
+  if(user_def_)
+  {
+    edit_->setText(QString::number(def_));
+  }
+  else
+  {
+    edit_->setText("");
+  }
+  ready_ = user_def_;
+}
+
+StringInput::StringInput(QWidget * parent,
+                         const std::string & name,
+                         bool required,
+                         const std::string & def,
+                         bool user_def)
+: CommonInput(parent, name, required), def_(def), user_def_(user_def)
+{
+  reset();
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
-bool StringInput::changed(bool required, const std::string & def)
+bool StringInput::changed(bool required, const std::string & def, bool user_def)
 {
-  return changed_(required) || def_ != def;
+  return changed_(required) || def_ != def || user_def_ != user_def;
+}
+
+void StringInput::reset()
+{
+  if(user_def_)
+  {
+    edit_->setText(def_.c_str());
+  }
+  else
+  {
+    edit_->setText("");
+  }
+  ready_ = user_def_;
 }
 
 mc_rtc::Configuration StringInput::serialize() const
@@ -213,17 +280,15 @@ NumberArrayInput::NumberArrayInput(QWidget * parent,
                                    const std::string & name,
                                    bool required,
                                    const Eigen::VectorXd & def,
-                                   bool fixed_size)
-: ArrayInput<double>(parent, name, required, fixed_size), def_(def)
+                                   bool fixed_size,
+                                   bool user_def)
+: ArrayInput<double>(parent, name, required, fixed_size), def_(def), user_def_(user_def)
 {
   if(fixed_size)
   {
     updateStride(def.size());
   }
-  for(int i = 0; i < def.size(); ++i)
-  {
-    add_edit(def(i));
-  }
+  reset();
 }
 
 NumberArrayInput::NumberArrayInput(QWidget * parent,
@@ -236,9 +301,19 @@ NumberArrayInput::NumberArrayInput(QWidget * parent,
 {
 }
 
-bool NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool fixed_size)
+bool NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool fixed_size, bool user_def)
 {
-  return changed_(required) || def_ != def || fixed_size_ != fixed_size;
+  return changed_(required) || def_ != def || user_def_ != user_def || fixed_size_ != fixed_size;
+}
+
+void NumberArrayInput::reset()
+{
+  ArrayInput<double>::reset();
+  for(int i = 0; i < def_.size(); ++i)
+  {
+    add_edit(def_(i));
+  }
+  ready_ = user_def_;
 }
 
 ComboInput::ComboInput(QWidget * parent,
@@ -257,13 +332,14 @@ ComboInput::ComboInput(QWidget * parent,
   {
     combo_->addItem(v.c_str());
   }
-  combo_->setCurrentIndex(-1);
-  if(values.size() > 0 && required)
-  {
-    combo_->setCurrentIndex(0);
-    ready_ = true;
-  }
+  reset();
   connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
+}
+
+void ComboInput::reset()
+{
+  combo_->setCurrentIndex(-1);
+  ready_ = false;
 }
 
 bool ComboInput::changed(bool required, const std::vector<std::string> & values, bool send_index)
@@ -303,17 +379,21 @@ DataComboInput::DataComboInput(QWidget * parent,
   combo_->installEventFilter(this);
   combo_->setFocusPolicy(Qt::StrongFocus);
   layout->addWidget(combo_);
+  reset();
+  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
+}
+
+void DataComboInput::reset()
+{
+  combo_->clear();
+  values_.clear();
+  resolved_ref_ = ref_;
   if(resolve_ref())
   {
     update_values();
   }
   combo_->setCurrentIndex(-1);
-  if(combo_->count() > 0 && required)
-  {
-    combo_->setCurrentIndex(0);
-    ready_ = true;
-  }
-  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
+  ready_ = false;
 }
 
 bool DataComboInput::changed(bool required,
@@ -553,6 +633,14 @@ mc_rtc::Configuration Form::serialize(bool asTuple) const
 void Form::rejectUncheck()
 {
   group_->setChecked(true);
+}
+
+void Form::reset()
+{
+  for(auto & el : elements_)
+  {
+    el->reset();
+  }
 }
 
 } // namespace form

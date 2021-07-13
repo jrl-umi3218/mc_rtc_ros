@@ -124,7 +124,7 @@ void Schema::init(const mc_rtc::Configuration & s,
     {
       create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::Checkbox(parent, k, required, true));
+        v.emplace_back(new form::Checkbox(parent, k, required, true, false));
         return v;
       };
     }
@@ -141,7 +141,7 @@ void Schema::init(const mc_rtc::Configuration & s,
       }
       create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::IntegerInput(parent, k, required, 0));
+        v.emplace_back(new form::IntegerInput(parent, k, required, 0, false));
         return v;
       };
     }
@@ -149,7 +149,7 @@ void Schema::init(const mc_rtc::Configuration & s,
     {
       create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::NumberInput(parent, k, required, 0));
+        v.emplace_back(new form::NumberInput(parent, k, required, 0, false));
         return v;
       };
     }
@@ -200,7 +200,7 @@ void Schema::init(const mc_rtc::Configuration & s,
       {
         create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
-          v.emplace_back(new form::StringInput(parent, k, required, ""));
+          v.emplace_back(new form::StringInput(parent, k, required, "", false));
           return v;
         };
       }

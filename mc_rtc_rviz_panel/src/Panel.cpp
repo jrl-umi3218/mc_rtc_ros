@@ -261,17 +261,20 @@ Panel::Panel(QWidget * parent)
   connect(this, SIGNAL(signal_visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &)), this,
           SLOT(got_visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &)));
   connect(this, SIGNAL(signal_form(const WidgetId &)), this, SLOT(got_form(const WidgetId &)));
-  connect(this, SIGNAL(signal_form_checkbox(const WidgetId &, const std::string &, bool, bool)), this,
-          SLOT(got_form_checkbox(const WidgetId &, const std::string &, bool, bool)));
-  connect(this, SIGNAL(signal_form_integer_input(const WidgetId &, const std::string &, bool, int)), this,
-          SLOT(got_form_integer_input(const WidgetId &, const std::string &, bool, int)));
-  connect(this, SIGNAL(signal_form_number_input(const WidgetId &, const std::string &, bool, double)), this,
-          SLOT(got_form_number_input(const WidgetId &, const std::string &, bool, double)));
-  connect(this, SIGNAL(signal_form_string_input(const WidgetId &, const std::string &, bool, const std::string &)),
-          this, SLOT(got_form_string_input(const WidgetId &, const std::string &, bool, const std::string &)));
+  connect(this, SIGNAL(signal_form_checkbox(const WidgetId &, const std::string &, bool, bool, bool)), this,
+          SLOT(got_form_checkbox(const WidgetId &, const std::string &, bool, bool, bool)));
+  connect(this, SIGNAL(signal_form_integer_input(const WidgetId &, const std::string &, bool, int, bool)), this,
+          SLOT(got_form_integer_input(const WidgetId &, const std::string &, bool, int, bool)));
+  connect(this, SIGNAL(signal_form_number_input(const WidgetId &, const std::string &, bool, double, bool)), this,
+          SLOT(got_form_number_input(const WidgetId &, const std::string &, bool, double, bool)));
   connect(this,
-          SIGNAL(signal_form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool)),
-          this, SLOT(got_form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool)));
+          SIGNAL(signal_form_string_input(const WidgetId &, const std::string &, bool, const std::string &, bool)),
+          this, SLOT(got_form_string_input(const WidgetId &, const std::string &, bool, const std::string &, bool)));
+  connect(
+      this,
+      SIGNAL(signal_form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool, bool)),
+      this,
+      SLOT(got_form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool, bool)));
   connect(
       this,
       SIGNAL(
@@ -536,33 +539,46 @@ void Panel::form(const WidgetId & id)
   Q_EMIT signal_form(id);
 }
 
-void Panel::form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def)
+void Panel::form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def, bool def_from_user)
 {
-  Q_EMIT signal_form_checkbox(formId, name, required, def);
+  Q_EMIT signal_form_checkbox(formId, name, required, def, def_from_user);
 }
 
-void Panel::form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def)
+void Panel::form_integer_input(const WidgetId & formId,
+                               const std::string & name,
+                               bool required,
+                               int def,
+                               bool def_from_user)
 {
-  Q_EMIT signal_form_integer_input(formId, name, required, def);
+  Q_EMIT signal_form_integer_input(formId, name, required, def, def_from_user);
 }
 
-void Panel::form_number_input(const WidgetId & formId, const std::string & name, bool required, double def)
+void Panel::form_number_input(const WidgetId & formId,
+                              const std::string & name,
+                              bool required,
+                              double def,
+                              bool def_from_user)
 {
-  Q_EMIT signal_form_number_input(formId, name, required, def);
+  Q_EMIT signal_form_number_input(formId, name, required, def, def_from_user);
 }
 
-void Panel::form_string_input(const WidgetId & formId, const std::string & name, bool required, const std::string & def)
+void Panel::form_string_input(const WidgetId & formId,
+                              const std::string & name,
+                              bool required,
+                              const std::string & def,
+                              bool def_from_user)
 {
-  Q_EMIT signal_form_string_input(formId, name, required, def);
+  Q_EMIT signal_form_string_input(formId, name, required, def, def_from_user);
 }
 
 void Panel::form_array_input(const WidgetId & formId,
                              const std::string & name,
                              bool required,
                              const Eigen::VectorXd & def,
-                             bool fixed_size)
+                             bool fixed_size,
+                             bool def_from_user)
 {
-  Q_EMIT signal_form_array_input(formId, name, required, def, fixed_size);
+  Q_EMIT signal_form_array_input(formId, name, required, def, fixed_size, def_from_user);
 }
 
 void Panel::form_combo_input(const WidgetId & formId,
@@ -881,41 +897,55 @@ void Panel::got_form(const WidgetId & id)
   form.update();
 }
 
-void Panel::got_form_checkbox(const WidgetId & formId, const std::string & name, bool required, bool def)
+void Panel::got_form_checkbox(const WidgetId & formId,
+                              const std::string & name,
+                              bool required,
+                              bool def,
+                              bool def_from_user)
 {
   auto & form = get_widget<FormWidget>(formId);
-  form.element<form::Checkbox>(name, required, def);
+  form.element<form::Checkbox>(name, required, def, def_from_user);
 }
 
-void Panel::got_form_integer_input(const WidgetId & formId, const std::string & name, bool required, int def)
+void Panel::got_form_integer_input(const WidgetId & formId,
+                                   const std::string & name,
+                                   bool required,
+                                   int def,
+                                   bool def_from_user)
 {
   auto & form = get_widget<FormWidget>(formId);
-  form.element<form::IntegerInput>(name, required, def);
+  form.element<form::IntegerInput>(name, required, def, def_from_user);
 }
 
-void Panel::got_form_number_input(const WidgetId & formId, const std::string & name, bool required, double def)
+void Panel::got_form_number_input(const WidgetId & formId,
+                                  const std::string & name,
+                                  bool required,
+                                  double def,
+                                  bool def_from_user)
 {
   auto & form = get_widget<FormWidget>(formId);
-  form.element<form::NumberInput>(name, required, def);
+  form.element<form::NumberInput>(name, required, def, def_from_user);
 }
 
 void Panel::got_form_string_input(const WidgetId & formId,
                                   const std::string & name,
                                   bool required,
-                                  const std::string & def)
+                                  const std::string & def,
+                                  bool def_from_user)
 {
   auto & form = get_widget<FormWidget>(formId);
-  form.element<form::StringInput>(name, required, def);
+  form.element<form::StringInput>(name, required, def, def_from_user);
 }
 
 void Panel::got_form_array_input(const WidgetId & formId,
                                  const std::string & name,
                                  bool required,
                                  const Eigen::VectorXd & def,
-                                 bool fixed_size)
+                                 bool fixed_size,
+                                 bool def_from_user)
 {
   auto & form = get_widget<FormWidget>(formId);
-  form.element<form::NumberArrayInput>(name, required, def, fixed_size);
+  form.element<form::NumberArrayInput>(name, required, def, fixed_size, def_from_user);
 }
 
 void Panel::got_form_combo_input(const WidgetId & formId,
