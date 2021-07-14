@@ -47,6 +47,23 @@ SchemaArrayInput::SchemaArrayInput(QWidget * parent,
   {
     add_button_->hide();
   }
+  reset();
+}
+
+void SchemaArrayInput::reset()
+{
+  for(int i = 0; i < layout_->rowCount(); ++i)
+  {
+    for(int j = 0; j < layout_->columnCount(); ++j)
+    {
+      auto itm = layout_->itemAtPosition(i, j);
+      if(itm)
+      {
+        itm->widget()->deleteLater();
+      }
+    }
+  }
+  items_.clear();
   for(int i = 0; i < min_size_; ++i)
   {
     addItem();

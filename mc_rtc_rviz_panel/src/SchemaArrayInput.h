@@ -28,6 +28,8 @@ public:
 
   mc_rtc::Configuration serialize() const override;
 
+  void reset() override;
+
 private:
   Schema schema_;
   mc_rtc::Configuration data_;

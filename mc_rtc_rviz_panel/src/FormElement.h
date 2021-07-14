@@ -37,6 +37,8 @@ public:
 
   virtual mc_rtc::Configuration serialize() const = 0;
 
+  virtual void reset() = 0;
+
   virtual bool ready() const
   {
     return ready_;
@@ -115,17 +117,21 @@ struct Checkbox : public FormElement
 {
   Q_OBJECT
 public:
-  Checkbox(QWidget * parent, const std::string & name, bool required, bool def);
+  Checkbox(QWidget * parent, const std::string & name, bool required, bool def, bool user_def);
 
-  bool changed(bool required, bool def);
+  bool changed(bool required, bool def, bool user_def);
 
   mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
 
 private:
   QCheckBox * cbox_;
   bool def_;
+  bool user_def_;
 private slots:
   void toggled(bool);
+  void stateChanged(int);
 };
 
 struct CommonInput : public FormElement
@@ -141,38 +147,47 @@ private slots:
 
 struct IntegerInput : public CommonInput
 {
-  IntegerInput(QWidget * parent, const std::string & name, bool required, int def);
+  IntegerInput(QWidget * parent, const std::string & name, bool required, int def, bool user_def);
 
-  bool changed(bool required, int def);
+  bool changed(bool required, int def, bool user_def);
 
   mc_rtc::Configuration serialize() const override;
 
+  void reset() override;
+
 private:
   int def_;
+  bool user_def_;
 };
 
 struct NumberInput : public CommonInput
 {
-  NumberInput(QWidget * parent, const std::string & name, bool required, double def);
+  NumberInput(QWidget * parent, const std::string & name, bool required, double def, bool user_def);
 
-  bool changed(bool required, double def);
+  bool changed(bool required, double def, bool user_def);
 
   mc_rtc::Configuration serialize() const override;
 
+  void reset() override;
+
 private:
   double def_;
+  bool user_def_;
 };
 
 struct StringInput : public CommonInput
 {
-  StringInput(QWidget * parent, const std::string & name, bool required, const std::string & def);
+  StringInput(QWidget * parent, const std::string & name, bool required, const std::string & def, bool user_def);
 
-  bool changed(bool required, const std::string & def);
+  bool changed(bool required, const std::string & def, bool user_def);
 
   mc_rtc::Configuration serialize() const override;
 
+  void reset() override;
+
 private:
   std::string def_;
+  bool user_def_;
 };
 
 struct CommonArrayInput : public FormElement
@@ -197,6 +212,8 @@ struct ArrayInput : public CommonArrayInput
              int max_size = 256);
 
   mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
 
 protected:
   void add_edit(const T & def);
@@ -263,17 +280,7 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
   auto w = new QWidget(this);
   mainLayout->QLayout::addWidget(w);
   layout_ = new QGridLayout(w);
-  for(int i = 0; i < min_size; ++i)
-  {
-    if(is_square_)
-    {
-      add_edit(i % stride_ == next_row_ ? T{1} : T{0});
-    }
-    else
-    {
-      add_edit(T{});
-    }
-  }
+  reset();
   if(!fixed_size)
   {
     add_button_ = new QPushButton("+");
@@ -282,6 +289,34 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
     if(edits_.size() == max_size_)
     {
       add_button_->hide();
+    }
+  }
+}
+
+template<typename T>
+void ArrayInput<T>::reset()
+{
+  for(int i = 0; i < layout_->rowCount(); ++i)
+  {
+    for(int j = 0; j < layout_->columnCount(); ++j)
+    {
+      auto itm = layout_->itemAtPosition(i, j);
+      if(itm)
+      {
+        itm->widget()->deleteLater();
+      }
+    }
+  }
+  edits_.clear();
+  for(int i = 0; i < min_size_; ++i)
+  {
+    if(is_square_)
+    {
+      add_edit(i % stride_ == next_row_ ? T{1} : T{0});
+    }
+    else
+    {
+      add_edit(T{});
     }
   }
 }
@@ -397,7 +432,8 @@ struct NumberArrayInput : public ArrayInput<double>
                    const std::string & name,
                    bool required,
                    const Eigen::VectorXd & def,
-                   bool fixed_size);
+                   bool fixed_size,
+                   bool user_def);
   NumberArrayInput(QWidget * parent,
                    const std::string & name,
                    bool required,
@@ -405,10 +441,13 @@ struct NumberArrayInput : public ArrayInput<double>
                    int min_size,
                    int max_size);
 
-  bool changed(bool required, const Eigen::VectorXd & def, bool fixed_size);
+  bool changed(bool required, const Eigen::VectorXd & def, bool fixed_size, bool user_def);
+
+  void reset() override;
 
 private:
   Eigen::VectorXd def_;
+  bool user_def_;
 };
 
 struct ComboInput : public FormElement
@@ -424,6 +463,8 @@ public:
   bool changed(bool required, const std::vector<std::string> & values, bool send_index);
 
   mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
 
 private:
   std::vector<std::string> values_;
@@ -453,6 +494,8 @@ public:
   void update_dependencies(FormElement * other) override;
 
   mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
 
 private:
   bool send_index_;
@@ -495,6 +538,8 @@ public:
   mc_rtc::Configuration serialize() const override;
 
   mc_rtc::Configuration serialize(bool asTuple) const;
+
+  void reset() override;
 
 private:
   std::vector<FormElement *> elements_;
