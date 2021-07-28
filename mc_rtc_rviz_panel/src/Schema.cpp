@@ -108,7 +108,7 @@ void Schema::init(const mc_rtc::Configuration & s,
     auto cf = create_form;
     create_form = [cf, k, required, values](QWidget * parent, const mc_rtc::Configuration & data) {
       auto v = cf(parent, data);
-      v.emplace_back(new form::ComboInput(parent, k, required, values, false));
+      v.emplace_back(new form::ComboInput(parent, k, required, values, -1, false, false));
       if(values.size() == 1 && required)
       {
         v.back()->hidden(true);
