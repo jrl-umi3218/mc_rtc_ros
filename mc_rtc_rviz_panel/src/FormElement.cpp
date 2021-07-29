@@ -320,10 +320,9 @@ ComboInput::ComboInput(QWidget * parent,
                        const std::string & name,
                        bool required,
                        const std::vector<std::string> & values,
-                       int def,
                        bool send_index,
-                       bool user_def)
-: FormElement(parent, name, required), values_(values), def_(def), send_index_(send_index), user_def_(user_def)
+                       int def)
+: FormElement(parent, name, required), values_(values), send_index_(send_index), def_(def)
 {
   auto layout = new QVBoxLayout(this);
   combo_ = new QComboBox(this);
@@ -340,20 +339,13 @@ ComboInput::ComboInput(QWidget * parent,
 
 void ComboInput::reset()
 {
-  if(user_def_)
-  {
-    combo_->setCurrentIndex(def_);
-  }
-  else
-  {
-    combo_->setCurrentIndex(-1);
-  }
-  ready_ = user_def_;
+  combo_->setCurrentIndex(def_);
+  ready_ = (def_ != -1);
 }
 
-bool ComboInput::changed(bool required, const std::vector<std::string> & values, int def, bool send_index, bool user_def)
+bool ComboInput::changed(bool required, const std::vector<std::string> & values, bool send_index, int def)
 {
-  return changed_(required) || values_ != values || def_ != def || send_index_ != send_index || user_def_ != user_def;
+  return changed_(required) || values_ != values || send_index_ != send_index || def_ != def;
 }
 
 void ComboInput::currentIndexChanged(int idx)
