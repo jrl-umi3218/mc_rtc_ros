@@ -340,7 +340,7 @@ ComboInput::ComboInput(QWidget * parent,
 void ComboInput::reset()
 {
   combo_->setCurrentIndex(def_);
-  ready_ = (def_ != -1);
+  ready_ = (def_ >= 0);
 }
 
 bool ComboInput::changed(bool required, const std::vector<std::string> & values, bool send_index, int def)
