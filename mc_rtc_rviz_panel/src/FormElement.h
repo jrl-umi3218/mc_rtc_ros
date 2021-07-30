@@ -458,9 +458,10 @@ public:
              const std::string & name,
              bool required,
              const std::vector<std::string> & values,
-             bool send_index);
+             bool send_index,
+             int def);
 
-  bool changed(bool required, const std::vector<std::string> & values, bool send_index);
+  bool changed(bool required, const std::vector<std::string> & values, bool send_index, int def);
 
   mc_rtc::Configuration serialize() const override;
 
@@ -469,6 +470,7 @@ public:
 private:
   std::vector<std::string> values_;
   bool send_index_;
+  int def_;
   QComboBox * combo_;
 private slots:
   void currentIndexChanged(int);

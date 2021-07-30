@@ -193,7 +193,8 @@ protected:
                         const std::string & name,
                         bool required,
                         const std::vector<std::string> & values,
-                        bool send_index) override;
+                        bool send_index,
+                        int def) override;
 
   void form_data_combo_input(const WidgetId & formId,
                              const std::string & name,
@@ -347,7 +348,8 @@ private slots:
                             const std::string & name,
                             bool required,
                             const std::vector<std::string> & values,
-                            bool send_index);
+                            bool send_index,
+                            int def);
   void got_form_data_combo_input(const WidgetId & formId,
                                  const std::string & name,
                                  bool required,
@@ -466,7 +468,8 @@ signals:
                                const std::string & name,
                                bool required,
                                const std::vector<std::string> & values,
-                               bool send_index);
+                               bool send_index,
+                               int def);
   void signal_form_data_combo_input(const WidgetId & formId,
                                     const std::string & name,
                                     bool required,

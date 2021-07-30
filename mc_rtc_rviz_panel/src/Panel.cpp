@@ -275,12 +275,12 @@ Panel::Panel(QWidget * parent)
       SIGNAL(signal_form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool, bool)),
       this,
       SLOT(got_form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool, bool)));
-  connect(
-      this,
-      SIGNAL(
-          signal_form_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &, bool)),
-      this,
-      SLOT(got_form_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &, bool)));
+  connect(this,
+          SIGNAL(signal_form_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &,
+                                         bool, int)),
+          this,
+          SLOT(got_form_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &, bool,
+                                    int)));
   connect(this,
           SIGNAL(signal_form_data_combo_input(const WidgetId &, const std::string &, bool,
                                               const std::vector<std::string> &, bool)),
@@ -585,9 +585,10 @@ void Panel::form_combo_input(const WidgetId & formId,
                              const std::string & name,
                              bool required,
                              const std::vector<std::string> & values,
-                             bool send_index)
+                             bool send_index,
+                             int def)
 {
-  Q_EMIT signal_form_combo_input(formId, name, required, values, send_index);
+  Q_EMIT signal_form_combo_input(formId, name, required, values, send_index, def);
 }
 
 void Panel::form_data_combo_input(const WidgetId & formId,
@@ -962,10 +963,11 @@ void Panel::got_form_combo_input(const WidgetId & formId,
                                  const std::string & name,
                                  bool required,
                                  const std::vector<std::string> & values,
-                                 bool send_index)
+                                 bool send_index,
+                                 int def)
 {
   auto & form = get_widget<FormWidget>(formId);
-  form.element<form::ComboInput>(name, required, values, send_index);
+  form.element<form::ComboInput>(name, required, values, send_index, def);
 }
 
 void Panel::got_form_data_combo_input(const WidgetId & formId,
