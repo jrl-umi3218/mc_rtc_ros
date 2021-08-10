@@ -8,6 +8,7 @@
 #include <qwt_plot_renderer.h>
 #include <qwt_plot_shapeitem.h>
 #include <qwt_symbol.h>
+#include <qwt_text.h>
 
 namespace mc_rtc_rviz
 {
