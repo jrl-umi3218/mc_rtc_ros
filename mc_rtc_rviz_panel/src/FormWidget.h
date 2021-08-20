@@ -34,9 +34,13 @@ public:
 private:
   void add_element_to_layout(FormElement * element);
 
+  void make_form_layout();
+
   QVBoxLayout * vlayout_;
   QWidget * form_;
-  QFormLayout * layout_;
+  QFormLayout * requiredLayout_;
+  QToolBox * optionalToolBox_;
+  QFormLayout * optionalLayout_;
   bool changed_ = true;
   size_t idx_;
   std::vector<FormElement *> elements_;
