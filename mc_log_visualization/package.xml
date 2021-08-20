@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>mc_log_visualization</name>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <description>Visualize logs obtained from mc_rtc in RViz</description>
 
   <maintainer email="pierre.gergondet@gmail.com">Pierre Gergondet</maintainer>
