@@ -10,12 +10,31 @@ namespace mc_rtc_rviz
 FormWidget::FormWidget(const ClientWidgetParam & param) : ClientWidget(param)
 {
   vlayout_ = new QVBoxLayout(this);
-  form_ = new QWidget();
-  layout_ = new QFormLayout(form_);
+  make_form_layout();
   auto button = new QPushButton(name().c_str());
   connect(button, SIGNAL(released()), this, SLOT(released()));
   vlayout_->addWidget(form_);
   vlayout_->addWidget(button);
+}
+
+void FormWidget::make_form_layout()
+{
+  form_ = new QWidget();
+  auto formLayout = new QVBoxLayout(form_);
+  auto requiredWidget = new QWidget(form_);
+  requiredLayout_ = new QFormLayout(requiredWidget);
+  formLayout->addWidget(requiredWidget);
+  optionalToolBox_ = new QToolBox(form_);
+  formLayout->addWidget(optionalToolBox_);
+  auto optionalWidget = new QWidget(form_);
+  optionalLayout_ = new QFormLayout(optionalWidget);
+  optionalToolBox_->addItem(optionalWidget, "Optional fields");
+  vlayout_->insertWidget(0, form_);
+  for(auto el : elements_)
+  {
+    el->setParent(form_);
+    add_element_to_layout(el);
+  }
 }
 
 void FormWidget::update()
@@ -24,14 +43,7 @@ void FormWidget::update()
   if(changed_)
   {
     auto item = vlayout_->takeAt(0);
-    form_ = new QWidget();
-    layout_ = new QFormLayout(form_);
-    vlayout_->insertWidget(0, form_);
-    for(auto el : elements_)
-    {
-      el->setParent(form_);
-      add_element_to_layout(el);
-    }
+    make_form_layout();
     changed_ = false;
     item->widget()->deleteLater();
   }
@@ -89,6 +101,10 @@ void FormWidget::add_element_to_layout(FormElement * element)
     return;
   }
   auto label_text = element->name();
+  auto is_robot_or_required = [&label_text, element]() {
+    return element->required() || label_text == "robot" || label_text == "r1" || label_text == "r2";
+  };
+  QFormLayout * layout_ = is_robot_or_required() ? requiredLayout_ : optionalLayout_;
   if(element->required())
   {
     label_text += "*";
@@ -104,6 +120,14 @@ void FormWidget::add_element_to_layout(FormElement * element)
       layout_->addRow(new QLabel(label_text.c_str(), form_));
     }
     layout_->addRow(element);
+  }
+  if(optionalLayout_->rowCount() == 0)
+  {
+    optionalToolBox_->hide();
+  }
+  else
+  {
+    optionalToolBox_->show();
   }
 }
 
