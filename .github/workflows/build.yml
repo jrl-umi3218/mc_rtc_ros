@@ -104,6 +104,7 @@ jobs:
       with:
         compiler: gcc
         build-type: RelWithDebInfo
+        macos-options: '-DCMAKE_CXX_STANDARD=17'
     - name: Build with catkin
       if: startsWith(runner.os, 'Linux')
       run: |
