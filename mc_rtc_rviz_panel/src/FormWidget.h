@@ -9,6 +9,7 @@
 namespace mc_rtc_rviz
 {
 struct FormElement;
+struct FormElementHeader;
 
 struct FormWidget;
 
@@ -43,6 +44,7 @@ private:
   QFormLayout * optionalLayout_;
   bool changed_ = true;
   size_t idx_;
+  std::vector<FormElementHeader *> elements_header_;
   std::vector<FormElement *> elements_;
 private slots:
   void released();
@@ -65,14 +67,17 @@ void FormWidget::element(const std::string & name, Args &&... args)
   else
   {
     auto & el = elements_[idx_];
-    if(el->type() != typeid(T).hash_code() || el->name() != name
-       || static_cast<T *>(el)->changed(std::forward<Args>(args)...))
+    if(el->type() != typeid(T).hash_code() || el->name() != name)
     {
       changed_ = true;
       elements_.resize(idx_);
     }
     else
     {
+      if(!el->locked())
+      {
+        static_cast<T *>(el)->changed(std::forward<Args>(args)...);
+      }
       idx_ += 1;
       return;
     }

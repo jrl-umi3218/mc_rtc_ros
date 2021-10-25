@@ -44,6 +44,16 @@ public:
     return ready_;
   }
 
+  inline bool locked() const
+  {
+    return locked_;
+  }
+
+  inline void unlock()
+  {
+    locked_ = false;
+  }
+
   bool required() const
   {
     return required_;
@@ -91,16 +101,23 @@ public:
 
   virtual void update_dependencies(FormElement *) {}
 
-protected:
-  bool changed_(bool required)
+public slots:
+  inline void unlocked()
   {
-    return required_ != required;
+    locked_ = false;
+  }
+
+protected:
+  void changed_(bool required)
+  {
+    required_ = required;
   }
 
   bool ready_ = false;
   bool spanning_ = false;
   bool show_name_ = true;
   bool hidden_ = false;
+  bool locked_ = false;
 
   bool seen_ = true;
   bool required_;
@@ -119,7 +136,7 @@ struct Checkbox : public FormElement
 public:
   Checkbox(QWidget * parent, const std::string & name, bool required, bool def, bool user_def);
 
-  bool changed(bool required, bool def, bool user_def);
+  void changed(bool required, bool def, bool user_def);
 
   mc_rtc::Configuration serialize() const override;
 
@@ -149,7 +166,7 @@ struct IntegerInput : public CommonInput
 {
   IntegerInput(QWidget * parent, const std::string & name, bool required, int def, bool user_def);
 
-  bool changed(bool required, int def, bool user_def);
+  void changed(bool required, int def, bool user_def);
 
   mc_rtc::Configuration serialize() const override;
 
@@ -164,7 +181,7 @@ struct NumberInput : public CommonInput
 {
   NumberInput(QWidget * parent, const std::string & name, bool required, double def, bool user_def);
 
-  bool changed(bool required, double def, bool user_def);
+  void changed(bool required, double def, bool user_def);
 
   mc_rtc::Configuration serialize() const override;
 
@@ -179,7 +196,7 @@ struct StringInput : public CommonInput
 {
   StringInput(QWidget * parent, const std::string & name, bool required, const std::string & def, bool user_def);
 
-  bool changed(bool required, const std::string & def, bool user_def);
+  void changed(bool required, const std::string & def, bool user_def);
 
   mc_rtc::Configuration serialize() const override;
 
@@ -217,10 +234,10 @@ struct ArrayInput : public CommonArrayInput
 
 protected:
   void add_edit(const T & def);
+  void data2edit(const T & value, QLineEdit * edit);
 
 private:
   void add_validator(QLineEdit * edit);
-  void data2edit(const T & value, QLineEdit * edit);
   T edit2data(QLineEdit * edit) const;
 
 protected:
@@ -235,12 +252,12 @@ private:
   int next_column_ = 0;
   QGridLayout * layout_;
   QPushButton * add_button_ = nullptr;
-  std::vector<QLineEdit *> edits_;
 
 protected: // Implement virtual slots
   void plusReleased() override;
   void minusReleased() override;
   void updateStride(size_t size);
+  std::vector<QLineEdit *> edits_;
 };
 
 template<>
@@ -441,7 +458,7 @@ struct NumberArrayInput : public ArrayInput<double>
                    int min_size,
                    int max_size);
 
-  bool changed(bool required, const Eigen::VectorXd & def, bool fixed_size, bool user_def);
+  void changed(bool required, const Eigen::VectorXd & def, bool fixed_size, bool user_def);
 
   void reset() override;
 
@@ -461,7 +478,7 @@ public:
              bool send_index,
              int def);
 
-  bool changed(bool required, const std::vector<std::string> & values, bool send_index, int def);
+  void changed(bool required, const std::vector<std::string> & values, bool send_index, int def);
 
   mc_rtc::Configuration serialize() const override;
 
@@ -488,7 +505,7 @@ public:
                  bool send_index,
                  const std::string & rename = "");
 
-  bool changed(bool required,
+  void changed(bool required,
                const mc_rtc::Configuration & data,
                const std::vector<std::string> & ref,
                bool send_index);

@@ -7,6 +7,38 @@
 namespace mc_rtc_rviz
 {
 
+struct FormElementHeader : public QWidget
+{
+  FormElementHeader(const char * name, FormElement * element, QWidget * parent) : QWidget(parent), element_(element)
+  {
+    layout_ = new QHBoxLayout(this);
+    label_ = new QLabel(name);
+    layout_->addWidget(label_);
+    button_ = new QPushButton("Reset");
+    layout_->addWidget(button_);
+    button_->hide();
+    connect(button_, SIGNAL(clicked(bool)), element, SLOT(unlocked()));
+  }
+
+  void update()
+  {
+    if(element_->locked())
+    {
+      button_->show();
+    }
+    else
+    {
+      button_->hide();
+    }
+  }
+
+private:
+  FormElement * element_;
+  QHBoxLayout * layout_;
+  QLabel * label_;
+  QPushButton * button_;
+};
+
 FormWidget::FormWidget(const ClientWidgetParam & param) : ClientWidget(param)
 {
   vlayout_ = new QVBoxLayout(this);
@@ -19,6 +51,13 @@ FormWidget::FormWidget(const ClientWidgetParam & param) : ClientWidget(param)
 
 void FormWidget::make_form_layout()
 {
+  for(auto & el : elements_header_)
+  {
+    if(el)
+    {
+      el->deleteLater();
+    }
+  }
   form_ = new QWidget();
   auto formLayout = new QVBoxLayout(form_);
   auto requiredWidget = new QWidget(form_);
@@ -47,6 +86,13 @@ void FormWidget::update()
     changed_ = false;
     item->widget()->deleteLater();
   }
+  else
+  {
+    for(auto & h : elements_header_)
+    {
+      h->update();
+    }
+  }
 }
 
 void FormWidget::released()
@@ -72,6 +118,7 @@ void FormWidget::released()
     client().send_request(id(), out);
     for(auto & el : elements_)
     {
+      el->unlock();
       el->reset();
     }
   }
@@ -97,6 +144,7 @@ void FormWidget::add_element_to_layout(FormElement * element)
   }
   if(element->hidden())
   {
+    elements_header_.push_back(nullptr);
     element->hide();
     return;
   }
@@ -109,15 +157,17 @@ void FormWidget::add_element_to_layout(FormElement * element)
   {
     label_text += "*";
   }
+  auto header = new FormElementHeader(label_text.c_str(), element, form_);
+  elements_header_.push_back(header);
   if(!element->spanning())
   {
-    layout_->addRow(label_text.c_str(), element);
+    layout_->addRow(header, element);
   }
   else
   {
     if(element->show_name())
     {
-      layout_->addRow(new QLabel(label_text.c_str(), form_));
+      layout_->addRow(header);
     }
     layout_->addRow(element);
   }

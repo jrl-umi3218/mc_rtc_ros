@@ -60,24 +60,31 @@ Checkbox::Checkbox(QWidget * parent, const std::string & name, bool required, bo
 {
   auto layout = new QVBoxLayout(this);
   cbox_ = new QCheckBox(this);
-  connect(cbox_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
-  connect(cbox_, SIGNAL(stateChanged(int)), this, SLOT(stateChanged(int)));
   layout->addWidget(cbox_);
   reset();
 }
 
-bool Checkbox::changed(bool required, bool def, bool user_def)
+void Checkbox::changed(bool required, bool def, bool user_def)
 {
-  return changed_(required) || def_ != def || user_def_ != user_def;
+  if(cbox_->hasFocus())
+  {
+    return;
+  }
+  changed_(required);
+  def_ = def;
+  user_def_ = user_def;
+  reset();
 }
 
 void Checkbox::toggled(bool)
 {
   ready_ = true;
+  locked_ = true;
 }
 
 void Checkbox::reset()
 {
+  cbox_->disconnect();
   if(user_def_)
   {
     cbox_->setChecked(def_);
@@ -88,6 +95,8 @@ void Checkbox::reset()
     cbox_->setCheckState(Qt::CheckState::PartiallyChecked);
   }
   ready_ = user_def_;
+  connect(cbox_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
+  connect(cbox_, SIGNAL(stateChanged(int)), this, SLOT(stateChanged(int)));
 }
 
 void Checkbox::stateChanged(int s)
@@ -95,6 +104,7 @@ void Checkbox::stateChanged(int s)
   if(s != Qt::CheckState::PartiallyChecked)
   {
     ready_ = true;
+    locked_ = true;
     cbox_->setTristate(false);
   }
 }
@@ -114,6 +124,7 @@ CommonInput::CommonInput(QWidget * parent, const std::string & name, bool requir
 
 void CommonInput::textChanged(const QString &)
 {
+  locked_ = true;
   ready_ = true;
 }
 
@@ -124,12 +135,18 @@ IntegerInput::IntegerInput(QWidget * parent, const std::string & name, bool requ
   validator->setLocale(QLocale::C);
   edit_->setValidator(validator);
   reset();
-  connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
-bool IntegerInput::changed(bool required, int def, bool user_def)
+void IntegerInput::changed(bool required, int def, bool user_def)
 {
-  return changed_(required) || def_ != def || user_def != user_def_;
+  if(edit_->hasFocus())
+  {
+    return;
+  }
+  changed_(required);
+  def_ = def;
+  user_def_ = user_def;
+  reset();
 }
 
 mc_rtc::Configuration IntegerInput::serialize() const
@@ -139,6 +156,7 @@ mc_rtc::Configuration IntegerInput::serialize() const
 
 void IntegerInput::reset()
 {
+  edit_->disconnect();
   if(user_def_)
   {
     edit_->setText(QString::number(def_));
@@ -148,6 +166,7 @@ void IntegerInput::reset()
     edit_->setText("");
   }
   ready_ = user_def_;
+  connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
 NumberInput::NumberInput(QWidget * parent, const std::string & name, bool required, double def, bool user_def)
@@ -157,12 +176,18 @@ NumberInput::NumberInput(QWidget * parent, const std::string & name, bool requir
   validator->setLocale(QLocale::C);
   edit_->setValidator(validator);
   reset();
-  connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
-bool NumberInput::changed(bool required, double def, bool user_def)
+void NumberInput::changed(bool required, double def, bool user_def)
 {
-  return changed_(required) || def_ != def || user_def_ != user_def;
+  if(edit_->hasFocus())
+  {
+    return;
+  }
+  changed_(required);
+  def_ = def;
+  user_def_ = user_def;
+  reset();
 }
 
 mc_rtc::Configuration NumberInput::serialize() const
@@ -172,6 +197,7 @@ mc_rtc::Configuration NumberInput::serialize() const
 
 void NumberInput::reset()
 {
+  edit_->disconnect();
   if(user_def_)
   {
     edit_->setText(QString::number(def_));
@@ -181,6 +207,7 @@ void NumberInput::reset()
     edit_->setText("");
   }
   ready_ = user_def_;
+  connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
 StringInput::StringInput(QWidget * parent,
@@ -191,16 +218,23 @@ StringInput::StringInput(QWidget * parent,
 : CommonInput(parent, name, required), def_(def), user_def_(user_def)
 {
   reset();
-  connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
-bool StringInput::changed(bool required, const std::string & def, bool user_def)
+void StringInput::changed(bool required, const std::string & def, bool user_def)
 {
-  return changed_(required) || def_ != def || user_def_ != user_def;
+  if(edit_->hasFocus())
+  {
+    return;
+  }
+  changed_(required);
+  def_ = def;
+  user_def_ = user_def;
+  reset();
 }
 
 void StringInput::reset()
 {
+  edit_->disconnect();
   if(user_def_)
   {
     edit_->setText(def_.c_str());
@@ -210,6 +244,7 @@ void StringInput::reset()
     edit_->setText("");
   }
   ready_ = user_def_;
+  connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
 mc_rtc::Configuration StringInput::serialize() const
@@ -225,6 +260,7 @@ CommonArrayInput::CommonArrayInput(QWidget * parent, const std::string & name, b
 void CommonArrayInput::textChanged(const QString &)
 {
   ready_ = true;
+  locked_ = true;
 }
 
 template<>
@@ -301,9 +337,32 @@ NumberArrayInput::NumberArrayInput(QWidget * parent,
 {
 }
 
-bool NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool fixed_size, bool user_def)
+void NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool fixed_size, bool user_def)
 {
-  return changed_(required) || def_ != def || user_def_ != user_def || fixed_size_ != fixed_size;
+  for(const auto & e : edits_)
+  {
+    if(e->hasFocus())
+    {
+      return;
+    }
+  }
+  changed_(required);
+  bool should_reset = def_.size() != def.size();
+  def_ = def;
+  user_def_ = user_def;
+  fixed_size_ = fixed_size_;
+  if(should_reset)
+  {
+    reset();
+  }
+  size_t i = 0;
+  for(auto & e : edits_)
+  {
+    e->disconnect();
+    data2edit(def(i), e);
+    connect(e, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
+    i += 1;
+  }
 }
 
 void NumberArrayInput::reset()
@@ -334,23 +393,33 @@ ComboInput::ComboInput(QWidget * parent,
     combo_->addItem(v.c_str());
   }
   reset();
-  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
 }
 
 void ComboInput::reset()
 {
+  combo_->disconnect();
   combo_->setCurrentIndex(def_);
   ready_ = (def_ >= 0);
+  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
 }
 
-bool ComboInput::changed(bool required, const std::vector<std::string> & values, bool send_index, int def)
+void ComboInput::changed(bool required, const std::vector<std::string> & values, bool send_index, int def)
 {
-  return changed_(required) || values_ != values || send_index_ != send_index || def_ != def;
+  if(combo_->hasFocus())
+  {
+    return;
+  }
+  changed_(required);
+  def_ = def;
+  values_ = values;
+  send_index_ = send_index;
+  reset();
 }
 
 void ComboInput::currentIndexChanged(int idx)
 {
   ready_ = idx != -1;
+  locked_ = true;
 }
 
 mc_rtc::Configuration ComboInput::serialize() const
@@ -381,11 +450,11 @@ DataComboInput::DataComboInput(QWidget * parent,
   combo_->setFocusPolicy(Qt::StrongFocus);
   layout->addWidget(combo_);
   reset();
-  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
 }
 
 void DataComboInput::reset()
 {
+  combo_->disconnect();
   combo_->clear();
   values_.clear();
   resolved_ref_ = ref_;
@@ -395,28 +464,31 @@ void DataComboInput::reset()
   }
   combo_->setCurrentIndex(-1);
   ready_ = false;
+  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
 }
 
-bool DataComboInput::changed(bool required,
+void DataComboInput::changed(bool required,
                              const mc_rtc::Configuration &,
                              const std::vector<std::string> & ref,
                              bool send_index)
 {
-  bool c = changed_(required) || ref_ != ref || send_index_ != send_index;
-  if(c)
+  if(combo_->hasFocus())
   {
-    return c;
+    return;
   }
+  changed_(required);
+  ref_ = ref;
+  send_index_ = send_index;
   if(resolve_ref())
   {
     update_values();
   }
-  return c;
 }
 
 void DataComboInput::currentIndexChanged(int idx)
 {
   ready_ = idx != -1;
+  locked_ = true;
 }
 
 void DataComboInput::update_dependencies(FormElement * other)
