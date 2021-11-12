@@ -340,7 +340,8 @@ template<typename T>
 void addLabel(LogPublisher & log, const std::string & entry, const T & def, const std::vector<std::string> & labels)
 {
   log.gui.addElement(log.extraDataCategory, mc_rtc::gui::ArrayLabel(entry, labels, [&log, entry, def]() -> const T & {
-                       return log.log.get<T>(entry, log.cur_i, def);
+                       auto data_ptr = log.log.getRaw<T>(entry, log.cur_i);
+                       return data_ptr ? *data_ptr : def;
                      }));
   log.addRemoveExtraDataButton("labels", entry);
 }
