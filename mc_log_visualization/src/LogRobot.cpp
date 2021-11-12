@@ -9,16 +9,8 @@
 #include <fstream>
 
 LogRobot::LogRobot(const LogRobot::Configuration & config)
-: config_(config), publisher_(config.id + "/", 1 / config.dt, config.dt)
+: config_(config), publisher_(config.id + "/", 1 / config.dt, config.dt), robots_(mc_rbdyn::loadRobot(*config.rm))
 {
-  robots_ = mc_rbdyn::loadRobot(*config.rm);
-  std::string urdfPath = config.rm->urdf_path;
-  std::ifstream ifs(urdfPath);
-  std::stringstream urdf;
-  if(ifs.is_open())
-  {
-    urdf << ifs.rdbuf();
-  }
 }
 
 void LogRobot::update(const mc_rtc::log::FlatLog & log, size_t i)

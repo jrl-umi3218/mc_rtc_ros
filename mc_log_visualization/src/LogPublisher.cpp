@@ -107,6 +107,15 @@ void LogPublisher::rebuildGUI()
   std::vector<std::string> category = {"Log visualizer"};
   gui.removeCategory(category);
 
+  std::vector<std::string> robots_category = {"Log visualizer - Robots"};
+  gui.removeCategory(robots_category);
+  gui.addElement(robots_category, mc_rtc::gui::Robot(robot->robot().name(),
+                                                     [this]() -> const mc_rbdyn::Robot & { return robot->robot(); }));
+  robots_category.push_back("Real");
+  gui.addElement(robots_category, mc_rtc::gui::Robot(real_robot->robot().name(), [this]() -> const mc_rbdyn::Robot & {
+                   return real_robot->robot();
+                 }));
+
   auto makeTimeElement = [this]() {
     return mc_rtc::gui::NumberSlider("#Time", [this]() { return cur_t; },
                                      [this](double time) {
