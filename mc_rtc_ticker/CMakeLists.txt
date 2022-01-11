@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 3.1)
 set(CMAKE_CXX_STANDARD 11)
 set(PROJECT_NAME mc_rtc_ticker)
-project(${PROJECT_NAME} LANGUAGES CXX VERSION 1.2.1)
+project(${PROJECT_NAME} LANGUAGES CXX VERSION 1.2.2)
 
 find_package(catkin REQUIRED)
 catkin_package()
