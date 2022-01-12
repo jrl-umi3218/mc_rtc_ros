@@ -102,6 +102,9 @@ set(SOURCE_FILES
   ${MOC_FILES}
   ${QRC_FILES})
 
+if(NOT DEFINED MC_RTC_DOCDIR)
+  set(MC_RTC_DOCDIR "${mc_rtc_DIR}/../../../share/doc/mc_rtc")
+endif()
 get_filename_component(MC_RTC_DOCDIR "${MC_RTC_DOCDIR}" ABSOLUTE)
 if(NOT EXISTS "${MC_RTC_DOCDIR}")
   message(SEND_ERROR "Provided mc_rtc documentation directory (${MC_RTC_DOCDIR}) does not exist")
