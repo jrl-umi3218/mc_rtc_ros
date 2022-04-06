@@ -58,6 +58,7 @@ void FormWidget::make_form_layout()
       el->deleteLater();
     }
   }
+  elements_header_.clear();
   form_ = new QWidget();
   auto formLayout = new QVBoxLayout(form_);
   auto requiredWidget = new QWidget(form_);
@@ -90,7 +91,10 @@ void FormWidget::update()
   {
     for(auto & h : elements_header_)
     {
-      h->update();
+      if(h)
+      {
+        h->update();
+      }
     }
   }
 }
