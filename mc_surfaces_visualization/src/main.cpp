@@ -228,7 +228,7 @@ int main(int argc, char ** argv)
 
   std::shared_ptr<mc_rbdyn::RobotModule> robotModule = nullptr;
   std::unique_ptr<mc_rtc::RobotPublisher> robot_pub;
-  std::unique_ptr<mc_rbdyn::Robots> robots;
+  std::shared_ptr<mc_rbdyn::Robots> robots;
   visualization_msgs::MarkerArray markers;
   auto init = [&]() {
     robotModule = rmFromParam(robot_params);
@@ -236,8 +236,7 @@ int main(int argc, char ** argv)
     {
       return;
     }
-    robots.reset(new mc_rbdyn::Robots());
-    robots->load(*robotModule);
+    robots = mc_rbdyn::loadRobot(*robotModule);
     markers = surfaceMarkers(tf_prefix, robots->robot());
     if(publish)
     {
