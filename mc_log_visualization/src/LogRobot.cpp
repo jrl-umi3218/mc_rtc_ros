@@ -43,9 +43,9 @@ void LogRobot::update(const mc_rtc::log::FlatLog & log, size_t i)
     }
   }
   auto & robot = robots_->robot();
-  for(size_t i = 0; i < robot.refJointOrder().size(); ++i)
+  for(size_t refIdx = 0; refIdx < robot.refJointOrder().size(); ++refIdx)
   {
-    const auto & jN = robot.refJointOrder()[i];
+    const auto & jN = robot.refJointOrder()[refIdx];
     if(robot.hasJoint(jN))
     {
       auto jIndex = robot.jointIndexByName(jN);
