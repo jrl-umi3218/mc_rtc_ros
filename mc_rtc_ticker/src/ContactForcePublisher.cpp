@@ -28,7 +28,7 @@ visualization_msgs::Marker makeForceMarker(const std::string & ns,
   marker.header.stamp = time;
   marker.ns = ns;
   marker.action = visualization_msgs::Marker::ADD;
-  marker.id = id;
+  marker.id = static_cast<int>(id);
   marker.lifetime = ros::Duration(0.5);
   marker.scale.x = 0.02;
   marker.scale.y = 0.02;
@@ -59,7 +59,7 @@ visualization_msgs::Marker makeForceNormMarker(const std::string & ns,
   marker.ns = ns;
   marker.action = visualization_msgs::Marker::ADD;
   marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-  marker.id = id;
+  marker.id = static_cast<int>(id);
   marker.lifetime = ros::Duration(0.5);
   marker.scale.x = 1.0;
   marker.scale.y = 1.0;
@@ -82,10 +82,11 @@ visualization_msgs::Marker makeForceNormMarker(const std::string & ns,
 namespace mc_rtc_ros
 {
 
-ContactForcePublisher::ContactForcePublisher(ros::NodeHandle & nh, mc_control::MCGlobalController & gc) : nh(nh), gc(gc)
+ContactForcePublisher::ContactForcePublisher(ros::NodeHandle & nh_, mc_control::MCGlobalController & gc_)
+: nh(nh_), gc(gc_)
 {
-  rate = floor(0.5 / this->gc.configuration().timestep);
-  skip = floor(1 / (rate * this->gc.configuration().timestep));
+  rate = static_cast<unsigned int>(floor(0.5 / this->gc.configuration().timestep));
+  skip = static_cast<unsigned int>(floor(1 / (rate * this->gc.configuration().timestep)));
   update_th = std::thread([this]() {
     ros::Rate rt(2 * rate);
     while(running)
@@ -128,7 +129,7 @@ void ContactForcePublisher::update()
     }
     return mass == 0 ? 1 : mass;
   };
-  auto get_tf_prefix = [](const mc_rbdyn::Robots & robots, unsigned int idx) {
+  auto get_tf_prefix = [](const mc_rbdyn::Robots & robots, size_t idx) {
     if(robots.robotIndex() == idx)
     {
       return std::string("control");
@@ -137,7 +138,7 @@ void ContactForcePublisher::update()
     ss << "control/env_" << idx;
     return ss.str();
   };
-  auto get_pub_key = [this, &get_tf_prefix](const mc_rbdyn::Robots & robots, unsigned int idx) {
+  auto get_pub_key = [&get_tf_prefix](const mc_rbdyn::Robots & robots, size_t idx) {
     std::stringstream ss;
     ss << get_tf_prefix(robots, idx) << "/contact_force";
     return ss.str();
@@ -177,12 +178,12 @@ void ContactForcePublisher::update()
       auto pos = res.contacts_lambda_begin[ci];
       std::string r1_tf_prefix = get_tf_prefix(robots, c.r1_index);
       std::string r2_tf_prefix = get_tf_prefix(robots, c.r2_index);
-      for(unsigned int i = 0; i < r1Points.size(); ++i)
+      for(size_t i = 0; i < r1Points.size(); ++i)
       {
-        auto lambda = res.lambdaVec.segment(pos, qp_c.nrLambda(i));
-        auto r1Dir = qp_c.force(lambda, i, qp_c.r1Cones);
-        auto r2Dir = qp_c.force(lambda, i, qp_c.r2Cones);
-        pos += qp_c.nrLambda(i);
+        auto lambda = res.lambdaVec.segment(pos, qp_c.nrLambda(static_cast<int>(i)));
+        auto r1Dir = qp_c.force(lambda, static_cast<int>(i), qp_c.r1Cones);
+        auto r2Dir = qp_c.force(lambda, static_cast<int>(i), qp_c.r2Cones);
+        pos += qp_c.nrLambda(static_cast<int>(i));
         r1F += r1Dir;
         r2F += r2Dir;
         auto r1Start = r1Points[i];

@@ -27,15 +27,15 @@ public:
 
 private:
   void update(const std::string & ns,
-              const unsigned id,
+              const size_t id,
               const std::vector<Eigen::Vector3d> & points,
               const mc_rtc::gui::LineConfig & c);
   void clear();
 
 private:
   visualization_msgs::MarkerArray & markers_;
-  unsigned prevPolygonNum_ = 0;
-  unsigned currPolygonNum_ = 0;
+  size_t prevPolygonNum_ = 0;
+  size_t currPolygonNum_ = 0;
   bool visible_;
   bool was_visible_;
   QPushButton * button_;

@@ -25,16 +25,16 @@ NumberSliderWidget::NumberSliderWidget(const ClientWidgetParam & param, double m
   connect(slider_, SIGNAL(sliderReleased()), this, SLOT(sliderReleased()));
 }
 
-void NumberSliderWidget::update(double data, double min, double max)
+void NumberSliderWidget::update(double dataIn, double min, double max)
 {
   if(locked_)
   {
     return;
   }
-  value_ = data;
+  value_ = dataIn;
   min_ = min;
   max_ = max;
-  int slide_value = std::floor(100 * (value_ - min_) / (max_ - min_));
+  int slide_value = static_cast<int>(std::floor(100 * (value_ - min_) / (max_ - min_)));
   slider_->setValue(slide_value);
   valueLabel_->setText(QString::number(value_));
 }

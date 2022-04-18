@@ -93,10 +93,10 @@ std::vector<vm::Marker> makeArrowMarker(const Eigen::Vector3d & start,
   m.scale.x = c.shaft_diam;
   m.scale.y = c.head_diam;
   m.scale.z = c.head_len;
-  m.color.a = c.color.a;
-  m.color.r = c.color.r;
-  m.color.g = c.color.g;
-  m.color.b = c.color.b;
+  m.color.a = static_cast<float>(c.color.a);
+  m.color.r = static_cast<float>(c.color.r);
+  m.color.g = static_cast<float>(c.color.g);
+  m.color.b = static_cast<float>(c.color.b);
   markers.push_back(m);
   return markers;
 }
@@ -138,7 +138,7 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
 {
   vm::InteractiveMarker ret;
   ret.header.frame_id = "robot_map";
-  ret.scale = 0.15;
+  ret.scale = 0.15f;
   ret.name = name;
   ret.description = "";
   makeVisualControl(visual_markers, ret);
@@ -201,9 +201,9 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
 vm::InteractiveMarker make3DMarker(const std::string & name,
                                    const std::vector<vm::Marker> & visual_markers,
                                    bool control_position,
-                                   bool move_x,
-                                   bool move_y,
-                                   bool move_z)
+                                   bool /*move_x*/,
+                                   bool /*move_y*/,
+                                   bool /*move_z*/)
 {
   return make6DMarker(name, visual_markers, control_position, false);
 }
@@ -230,7 +230,7 @@ vm::InteractiveMarker makeXYThetaMarker(const std::string & name, bool readonly)
   return int_marker;
 }
 
-visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos,
+visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & /*pos*/,
                                           const mc_rtc::gui::Color & color,
                                           double scale = 0.02)
 {
@@ -240,15 +240,15 @@ visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos,
   m.scale.x = scale;
   m.scale.y = scale;
   m.scale.z = scale;
-  m.color.a = color.a;
-  m.color.r = color.r;
-  m.color.g = color.g;
-  m.color.b = color.b;
+  m.color.a = static_cast<float>(color.a);
+  m.color.r = static_cast<float>(color.r);
+  m.color.g = static_cast<float>(color.g);
+  m.color.b = static_cast<float>(color.b);
   return m;
 }
 
 SharedMarker::SharedMarker(std::shared_ptr<interactive_markers::InteractiveMarkerServer> server,
-                           const std::string & name,
+                           const std::string & /*name*/,
                            const vm::InteractiveMarker & marker,
                            interactive_markers::InteractiveMarkerServer::FeedbackCallback callback)
 : server_(server), marker_(marker), callback_(callback)

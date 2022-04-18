@@ -12,7 +12,7 @@
 
 QApplication * app_ = nullptr;
 
-void signal_handler(int sig)
+void signal_handler(int)
 {
   if(app_)
   {

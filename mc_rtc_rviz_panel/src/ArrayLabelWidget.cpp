@@ -21,31 +21,31 @@ ArrayLabelWidget::ArrayLabelWidget(const ClientWidgetParam & param, const std::v
   }
 }
 
-void ArrayLabelWidget::update(const Eigen::VectorXd & data)
+void ArrayLabelWidget::update(const Eigen::VectorXd & dataIn)
 {
   if(normLabel_)
   {
     std::stringstream ss;
     ss << "<font>";
-    for(size_t i = 0; i < data.size(); ++i)
+    for(Eigen::DenseIndex i = 0; i < dataIn.size(); ++i)
     {
-      ss << data(i);
-      if(i < data.size() - 1)
+      ss << dataIn(i);
+      if(i < dataIn.size() - 1)
       {
         ss << ", ";
       }
     }
     ss << "</font>";
     normLabel_->setToolTip(ss.str().c_str());
-    normLabel_->setText("norm = " + QString::number(data.norm()));
-    if(data.size() <= 6)
+    normLabel_->setText("norm = " + QString::number(dataIn.norm()));
+    if(dataIn.size() <= 6)
     {
-      ArrayInputWidget::update(data);
+      ArrayInputWidget::update(dataIn);
     }
   }
   else
   {
-    ArrayInputWidget::update(data);
+    ArrayInputWidget::update(dataIn);
   }
 }
 

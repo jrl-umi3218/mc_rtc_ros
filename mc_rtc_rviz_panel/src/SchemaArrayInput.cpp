@@ -28,11 +28,11 @@ SchemaArrayInput::SchemaArrayInput(QWidget * parent,
                                    const std::string & name,
                                    bool required,
                                    Schema schema,
-                                   const mc_rtc::Configuration & data,
+                                   const mc_rtc::Configuration & dataIn,
                                    bool fixed_size,
                                    int min_size,
                                    int max_size)
-: FormElement(parent, name, required), schema_(schema), data_(data), fixed_size_(fixed_size), min_size_(min_size),
+: FormElement(parent, name, required), schema_(schema), data_(dataIn), fixed_size_(fixed_size), min_size_(min_size),
   max_size_(max_size)
 {
   spanning_ = true;

@@ -19,7 +19,7 @@ static const std::string schema_dir = std::string(MC_RTC_DOCDIR) + "/json/schema
 
 SchemaWidget::SchemaWidget(const ClientWidgetParam & params,
                            const std::string & schema,
-                           const mc_rtc::Configuration & data)
+                           const mc_rtc::Configuration & dataIn)
 : ClientWidget(params)
 {
   bfs::path schema_path = schema_dir;
@@ -44,7 +44,7 @@ SchemaWidget::SchemaWidget(const ClientWidgetParam & params,
     Schema s{path.string()};
     Schema::store()[path.string()] = s;
     auto form = new FormWidget(params);
-    for(auto el : s.create_form(this, data))
+    for(auto el : s.create_form(this, dataIn))
     {
       form->add_element(el);
     }

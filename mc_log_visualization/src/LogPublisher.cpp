@@ -4,8 +4,11 @@
 
 #include "LogPublisher.h"
 
-LogPublisher::LogPublisher(ros::NodeHandle & nh, const std::string & logfile, mc_rbdyn::RobotModulePtr mod, double dt_)
-: nh(nh), mod(mod), dt(dt_), rate(1 / dt), rt(rate)
+LogPublisher::LogPublisher(ros::NodeHandle & nh_,
+                           const std::string & logfile,
+                           mc_rbdyn::RobotModulePtr mod_,
+                           double dt_)
+: nh(nh_), mod(mod_), dt(dt_), rate(1 / dt), rt(rate)
 {
   log.load(logfile);
   if(log.has("t"))
@@ -172,7 +175,7 @@ void LogPublisher::rebuildGUI()
                  }));
 
   auto makeStepButton = [this](int mul) {
-    int dt_ms = mul * 1000 * dt;
+    int dt_ms = static_cast<int>(std::floor(mul * 1000 * dt));
     std::stringstream ss;
     if(dt_ms > 0)
     {
@@ -181,7 +184,8 @@ void LogPublisher::rebuildGUI()
     ss << dt_ms << " ms";
     return mc_rtc::gui::Button(ss.str(), [this, mul]() {
       paused = true;
-      cur_i = std::max(min_i, std::min(max_i, cur_i + mul));
+      cur_i = static_cast<size_t>(
+          std::max(static_cast<int>(min_i), std::min(static_cast<int>(max_i), static_cast<int>(cur_i) + mul)));
     });
   };
   gui.addElement(category, mc_rtc::gui::ElementsStacking::Horizontal, makeStepButton(-100), makeStepButton(-10),
@@ -477,11 +481,11 @@ void LogPublisher::loadConfig()
       addLabel(e, mc_rtc::log::LogType(type));
     }
   }
-  for(const auto & p : config("points").keys())
+  for(const auto & pt : config("points").keys())
   {
-    if(log.has(p))
+    if(log.has(pt))
     {
-      addVector3dAsPoint3D(p);
+      addVector3dAsPoint3D(pt);
     }
   }
   for(const auto & f : config("forces").keys())
@@ -492,11 +496,11 @@ void LogPublisher::loadConfig()
       addForce(f, surface);
     }
   }
-  for(const auto & p : config("transforms").keys())
+  for(const auto & t : config("transforms").keys())
   {
-    if(log.has(p))
+    if(log.has(t))
     {
-      addPTransformdAsTransform(p);
+      addPTransformdAsTransform(t);
     }
   }
 }

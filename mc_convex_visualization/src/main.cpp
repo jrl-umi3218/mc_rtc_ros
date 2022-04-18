@@ -63,7 +63,7 @@ visualization_msgs::Marker initMarker(const std::string & frame_id, const std::s
   marker.header.frame_id = frame_id;
   marker.header.stamp = ros::Time();
   marker.ns = name;
-  marker.id = id;
+  marker.id = static_cast<int>(id);
   marker.type = t;
   marker.action = visualization_msgs::Marker::ADD;
   marker.pose.position.x = 0;
@@ -124,13 +124,13 @@ visualization_msgs::Marker fromPolyhedron(const std::string & frame_id,
     {
       vertexOrder = {vc, vb, va};
     }
-    for(size_t i = 0; i < vertexOrder.size(); i++)
+    for(size_t j = 0; j < vertexOrder.size(); j++)
     {
-      vertexOrder[i] = vertexOrder[i] * colTrans;
+      vertexOrder[j] = vertexOrder[j] * colTrans;
       geometry_msgs::Point p;
-      p.x = vertexOrder[i].translation().x();
-      p.y = vertexOrder[i].translation().y();
-      p.z = vertexOrder[i].translation().z();
+      p.x = vertexOrder[j].translation().x();
+      p.y = vertexOrder[j].translation().y();
+      p.z = vertexOrder[j].translation().z();
       marker.points.push_back(p);
     }
   }

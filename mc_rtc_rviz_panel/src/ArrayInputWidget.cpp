@@ -35,16 +35,16 @@ ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param, const std::v
   }
 }
 
-void ArrayInputWidget::update(const Eigen::VectorXd & data)
+void ArrayInputWidget::update(const Eigen::VectorXd & dataIn)
 {
   if(lock_button_ && lock_button_->isChecked())
   {
     return;
   }
-  if(data.size() != edits_.size())
+  if(static_cast<size_t>(dataIn.size()) != edits_.size())
   {
     auto old_size = edits_.size();
-    edits_.resize(data.size());
+    edits_.resize(static_cast<size_t>(dataIn.size()));
     for(size_t i = old_size; i < edits_.size(); ++i)
     {
       edits_[i] = new QLineEdit(this);
@@ -53,12 +53,12 @@ void ArrayInputWidget::update(const Eigen::VectorXd & data)
       validator->setLocale(QLocale::C);
       edits_[i]->setValidator(validator);
       connect(edits_[i], SIGNAL(returnPressed()), this, SLOT(edit_return_pressed()));
-      edits_layout_->addWidget(edits_[i], edits_row_, i);
+      edits_layout_->addWidget(edits_[i], edits_row_, static_cast<int>(i));
     }
   }
   for(size_t i = 0; i < edits_.size(); ++i)
   {
-    edits_[i]->setText(QString::number(data(i)));
+    edits_[i]->setText(QString::number(dataIn(static_cast<Eigen::DenseIndex>(i))));
     edits_[i]->setCursorPosition(0);
   }
 }

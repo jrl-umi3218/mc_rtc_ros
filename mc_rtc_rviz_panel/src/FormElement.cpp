@@ -322,7 +322,7 @@ NumberArrayInput::NumberArrayInput(QWidget * parent,
 {
   if(fixed_size)
   {
-    updateStride(def.size());
+    updateStride(static_cast<size_t>(def.size()));
   }
   reset();
 }
@@ -337,7 +337,7 @@ NumberArrayInput::NumberArrayInput(QWidget * parent,
 {
 }
 
-void NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool fixed_size, bool user_def)
+void NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool /*fixed_size*/, bool user_def)
 {
   for(const auto & e : edits_)
   {
@@ -359,7 +359,7 @@ void NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool 
   for(auto & e : edits_)
   {
     e->disconnect();
-    data2edit(def(i), e);
+    data2edit(def(static_cast<Eigen::DenseIndex>(i)), e);
     connect(e, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
     i += 1;
   }
@@ -437,11 +437,11 @@ mc_rtc::Configuration ComboInput::serialize() const
 DataComboInput::DataComboInput(QWidget * parent,
                                const std::string & name,
                                bool required,
-                               const mc_rtc::Configuration & data,
+                               const mc_rtc::Configuration & dataIn,
                                const std::vector<std::string> & ref,
                                bool send_index,
                                const std::string & rename)
-: FormElement(parent, name, required), send_index_(send_index), data_(data), ref_(ref), resolved_ref_(ref),
+: FormElement(parent, name, required), send_index_(send_index), data_(dataIn), ref_(ref), resolved_ref_(ref),
   rename_(rename.size() ? rename : name)
 {
   auto layout = new QVBoxLayout(this);
@@ -564,12 +564,12 @@ void DataComboInput::update_field(const std::string & name, const std::string & 
 
 void DataComboInput::update_values()
 {
-  auto data = data_;
+  auto dataIn = data_;
   for(const auto & k : resolved_ref_)
   {
-    data = data(k, mc_rtc::Configuration{});
+    dataIn = dataIn(k, mc_rtc::Configuration{});
   }
-  auto values = data.size() ? data : std::vector<std::string>{};
+  auto values = dataIn.size() ? dataIn : std::vector<std::string>{};
   if(values_ != values)
   {
     auto selected = combo_->currentText().toStdString();

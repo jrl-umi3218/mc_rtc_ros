@@ -4,12 +4,7 @@
 
 #pragma once
 
-#include <QtGlobal>
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#  include <QtGui>
-#else
-#  include <QtWidgets>
-#endif
+#include "Qt.h"
 
 #include <mc_control/ControllerClient.h>
 

@@ -4,12 +4,7 @@
 
 #pragma once
 
-#include <QtGlobal>
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#  include <QtGui>
-#else
-#  include <QtWidgets>
-#endif
+#include "Qt.h"
 
 #include <mc_rtc/Configuration.h>
 
@@ -303,7 +298,7 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
     add_button_ = new QPushButton("+");
     connect(add_button_, SIGNAL(released()), this, SLOT(plusReleased()));
     mainLayout->addWidget(add_button_);
-    if(edits_.size() == max_size_)
+    if(edits_.size() == static_cast<size_t>(max_size_))
     {
       add_button_->hide();
     }
@@ -343,7 +338,7 @@ void ArrayInput<T>::updateStride(size_t size)
 {
   if(size < 6)
   {
-    stride_ = size;
+    stride_ = static_cast<int>(size);
   }
   else if(size == 9)
   {
@@ -394,11 +389,11 @@ void ArrayInput<T>::add_edit(const T & def)
   connect(edit, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
   layout_->addWidget(edit, next_row_, next_column_++);
   edits_.push_back(edit);
-  if(edits_.size() == max_size_ && add_button_)
+  if(edits_.size() == static_cast<size_t>(max_size_) && add_button_)
   {
     add_button_->hide();
   }
-  if(!fixed_size_ && edits_.size() > min_size_)
+  if(!fixed_size_ && static_cast<int>(edits_.size()) > min_size_)
   {
     auto button = new QPushButton("-");
     connect(button, SIGNAL(released()), this, SLOT(minusReleased()));
@@ -432,7 +427,7 @@ void ArrayInput<T>::minusReleased()
     }
   }
   edits_.erase(std::find(edits_.begin(), edits_.end(), edit));
-  if(edits_.size() < max_size_ && add_button_)
+  if(edits_.size() < static_cast<size_t>(max_size_) && add_button_)
   {
     add_button_->show();
   }

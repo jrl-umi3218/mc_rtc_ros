@@ -36,7 +36,7 @@ if(${catkin_FOUND})
     roslib
   )
 
-  include_directories(${catkin_INCLUDE_DIRS})
+  include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
   link_directories(${catkin_LIBRARY_DIRS})
 
   if(NOT ${DISABLE_ROS})

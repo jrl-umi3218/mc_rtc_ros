@@ -26,9 +26,9 @@ void GenericInputWidget<int>::set_validator()
 }
 
 template<>
-void GenericInputWidget<std::string>::to_edit(const std::string & data)
+void GenericInputWidget<std::string>::to_edit(const std::string & dataIn)
 {
-  edit_->setText(data.c_str());
+  edit_->setText(dataIn.c_str());
 }
 
 template<>

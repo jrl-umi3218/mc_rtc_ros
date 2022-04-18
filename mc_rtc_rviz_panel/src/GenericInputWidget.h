@@ -90,18 +90,18 @@ void GenericInputWidget<T>::returnPressed()
 }
 
 template<typename T>
-void GenericInputWidget<T>::update(const T & data)
+void GenericInputWidget<T>::update(const T & dataIn)
 {
   if(!lock_button_->isChecked())
   {
-    to_edit(data);
+    to_edit(dataIn);
   }
 }
 
 template<typename T>
-void GenericInputWidget<T>::to_edit(const T & data)
+void GenericInputWidget<T>::to_edit(const T & dataIn)
 {
-  edit_->setText(QVariant(data).toString());
+  edit_->setText(QVariant(dataIn).toString());
 }
 
 template<>

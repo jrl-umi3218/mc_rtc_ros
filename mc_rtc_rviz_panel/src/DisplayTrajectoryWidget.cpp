@@ -122,10 +122,10 @@ void DisplayTrajectoryWidget::configure(const mc_rtc::gui::LineConfig & config)
   path_.header.stamp = ros::Time::now();
   path_.scale.x = config.width;
   path_.scale.y = config.width;
-  path_.color.r = config.color.r;
-  path_.color.g = config.color.g;
-  path_.color.b = config.color.b;
-  path_.color.a = config.color.a;
+  path_.color.r = static_cast<float>(config.color.r);
+  path_.color.g = static_cast<float>(config.color.g);
+  path_.color.b = static_cast<float>(config.color.b);
+  path_.color.a = static_cast<float>(config.color.a);
   path_.action = visualization_msgs::Marker::ADD;
   path_.ns = id2name(id());
 }

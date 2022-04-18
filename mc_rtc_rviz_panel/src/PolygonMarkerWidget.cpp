@@ -32,7 +32,7 @@ PolygonMarkerWidget::~PolygonMarkerWidget()
   m.ns = id2name(id());
   for(size_t i = 0; i < currPolygonNum_; ++i)
   {
-    m.id = i;
+    m.id = static_cast<int>(i);
     markers_.markers.push_back(m);
   }
 }
@@ -55,7 +55,7 @@ void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>>
 }
 
 void PolygonMarkerWidget::update(const std::string & ns,
-                                 const unsigned id,
+                                 const size_t id,
                                  const std::vector<Eigen::Vector3d> & points,
                                  const mc_rtc::gui::LineConfig & c)
 {
@@ -84,14 +84,14 @@ void PolygonMarkerWidget::update(const std::string & ns,
   }
   m.points.push_back(m.points.front());
   m.scale.x = c.width;
-  m.color.r = c.color.r;
-  m.color.g = c.color.g;
-  m.color.b = c.color.b;
-  m.color.a = c.color.a;
+  m.color.r = static_cast<float>(c.color.r);
+  m.color.g = static_cast<float>(c.color.g);
+  m.color.b = static_cast<float>(c.color.b);
+  m.color.a = static_cast<float>(c.color.a);
   m.header.stamp = ros::Time::now();
   m.header.frame_id = "robot_map";
   m.ns = ns;
-  m.id = id;
+  m.id = static_cast<int>(id);
   if(visible_ || was_visible_)
   {
     markers_.markers.push_back(m);
@@ -105,12 +105,12 @@ void PolygonMarkerWidget::update(const std::string & ns,
 
 void PolygonMarkerWidget::clear()
 {
-  for(unsigned i = currPolygonNum_; i < prevPolygonNum_; ++i)
+  for(size_t i = currPolygonNum_; i < prevPolygonNum_; ++i)
   {
     visualization_msgs::Marker m;
     m.action = visualization_msgs::Marker::DELETE;
     m.ns = id2name(id());
-    m.id = i;
+    m.id = static_cast<int>(i);
     markers_.markers.push_back(m);
   }
 }

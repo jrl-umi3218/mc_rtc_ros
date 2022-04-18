@@ -93,23 +93,23 @@ void Schema::init(const mc_rtc::Configuration & s,
     return std::find(required.begin(), required.end(), label) != required.end();
   };
   /** Resolve a $ref entry into a Schema */
-  auto resolve_ref = [](const std::string & source, const std::string & ref_,
-                        const std::string & title) -> const Schema & {
-    auto ref_schema = ref_path(source, ref_);
-    auto key = ref_schema + "::" + title;
+  auto resolve_ref = [](const std::string & sourceIn, const std::string & ref_,
+                        const std::string & titleIn) -> const Schema & {
+    auto ref_schema = ref_path(sourceIn, ref_);
+    auto key = ref_schema + "::" + titleIn;
     if(!store().count(key))
     {
-      store()[key] = Schema{ref_schema, title};
+      store()[key] = Schema{ref_schema, titleIn};
     }
     return store().at(key);
   };
   /** Handle enum entries */
-  auto handle_enum = [this](const std::string & k, bool required, const std::vector<std::string> & values) {
+  auto handle_enum = [this](const std::string & k, bool requiredIn, const std::vector<std::string> & values) {
     auto cf = create_form;
-    create_form = [cf, k, required, values](QWidget * parent, const mc_rtc::Configuration & data) {
+    create_form = [cf, k, requiredIn, values](QWidget * parent, const mc_rtc::Configuration & data) {
       auto v = cf(parent, data);
-      v.emplace_back(new form::ComboInput(parent, k, required, values, false, values.size() == 1 ? 0 : -1));
-      if(values.size() == 1 && required)
+      v.emplace_back(new form::ComboInput(parent, k, requiredIn, values, false, values.size() == 1 ? 0 : -1));
+      if(values.size() == 1 && requiredIn)
       {
         v.back()->hidden(true);
       }
@@ -117,14 +117,14 @@ void Schema::init(const mc_rtc::Configuration & s,
     };
   };
   /** Handle: boolean/integer/number/string */
-  auto handle_type = [this, &source](const std::string & k, bool required, const std::string & type,
+  auto handle_type = [this, &source](const std::string & k, bool requiredIn, const std::string & type,
                                      const mc_rtc::Configuration & schema) {
     auto cf = create_form;
     if(type == "boolean")
     {
-      create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
+      create_form = [cf, k, requiredIn](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::Checkbox(parent, k, required, true, false));
+        v.emplace_back(new form::Checkbox(parent, k, requiredIn, true, false));
         return v;
       };
     }
@@ -132,33 +132,33 @@ void Schema::init(const mc_rtc::Configuration & s,
     {
       if(k == "robotIndex")
       {
-        create_form = [cf, required](QWidget * parent, const mc_rtc::Configuration & data) {
+        create_form = [cf, requiredIn](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
-          v.emplace_back(new form::DataComboInput(parent, "robot", required, data, {"robots"}, true, "robotIndex"));
+          v.emplace_back(new form::DataComboInput(parent, "robot", requiredIn, data, {"robots"}, true, "robotIndex"));
           return v;
         };
         return;
       }
-      create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
+      create_form = [cf, k, requiredIn](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::IntegerInput(parent, k, required, 0, false));
+        v.emplace_back(new form::IntegerInput(parent, k, requiredIn, 0, false));
         return v;
       };
     }
     else if(type == "number")
     {
-      create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
+      create_form = [cf, k, requiredIn](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::NumberInput(parent, k, required, 0, false));
+        v.emplace_back(new form::NumberInput(parent, k, requiredIn, 0, false));
         return v;
       };
     }
     else if(type == "object")
     {
-      Schema s(schema, source, k, required);
-      create_form = [cf, k, required, s](QWidget * parent, const mc_rtc::Configuration & data) {
+      Schema next(schema, source, k, requiredIn);
+      create_form = [cf, k, requiredIn, next](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::Form(parent, k, required, s.create_form(parent, data)));
+        v.emplace_back(new form::Form(parent, k, requiredIn, next.create_form(parent, data)));
         return v;
       };
     }
@@ -173,56 +173,58 @@ void Schema::init(const mc_rtc::Configuration & s,
           {"surface", "$robot"}, {"r1Surface", "$r1"}, {"r2Surface", "$r2"}};
       if(k == "robot" || k == "r1" || k == "r2")
       {
-        create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
+        create_form = [cf, k, requiredIn](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
-          v.emplace_back(new form::DataComboInput(parent, k, required, data, {"robots"}, false));
+          v.emplace_back(new form::DataComboInput(parent, k, requiredIn, data, {"robots"}, false));
           return v;
         };
       }
       else if(k == "body")
       {
-        create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
+        create_form = [cf, k, requiredIn](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
-          v.emplace_back(new form::DataComboInput(parent, "body", required, data, {"bodies", "$robot"}, false));
+          v.emplace_back(new form::DataComboInput(parent, "body", requiredIn, data, {"bodies", "$robot"}, false));
           return v;
         };
       }
       else if(surface_keys.count(k))
       {
         const auto & robot = surface_keys.at(k);
-        create_form = [cf, k, robot, required](QWidget * parent, const mc_rtc::Configuration & data) {
+        create_form = [cf, k, robot, requiredIn](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
-          v.emplace_back(new form::DataComboInput(parent, k, required, data, {"surfaces", robot}, false));
+          v.emplace_back(new form::DataComboInput(parent, k, requiredIn, data, {"surfaces", robot}, false));
           return v;
         };
       }
       else
       {
-        create_form = [cf, k, required](QWidget * parent, const mc_rtc::Configuration & data) {
+        create_form = [cf, k, requiredIn](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
-          v.emplace_back(new form::StringInput(parent, k, required, "", false));
+          v.emplace_back(new form::StringInput(parent, k, requiredIn, "", false));
           return v;
         };
       }
     }
   };
   /** Handle an array */
-  auto handle_type_array = [this, &source](const std::string & k, bool required, const std::string & type, size_t min,
+  auto handle_type_array = [this, &source](const std::string & k, bool requiredIn, const std::string & type, size_t min,
                                            size_t max) {
     auto cf = create_form;
     if(type == "integer")
     {
-      create_form = [cf, k, required, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
+      create_form = [cf, k, requiredIn, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::IntegerArrayInput(parent, k, required, min == max, min, max));
+        v.emplace_back(new form::IntegerArrayInput(parent, k, requiredIn, min == max, static_cast<int>(min),
+                                                   static_cast<int>(max)));
         return v;
       };
     }
     else if(type == "number")
     {
-      create_form = [cf, k, required, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
+      create_form = [cf, k, requiredIn, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::NumberArrayInput(parent, k, required, min == max, min, max));
+        v.emplace_back(new form::NumberArrayInput(parent, k, requiredIn, min == max, static_cast<int>(min),
+                                                  static_cast<int>(max)));
         return v;
       };
     }
@@ -238,54 +240,56 @@ void Schema::init(const mc_rtc::Configuration & s,
             "Property {} in {} has unknown or missing array items' type (value: {}), treating as string", k, source,
             type);
       }
-      create_form = [cf, k, required, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
+      create_form = [cf, k, requiredIn, min, max](QWidget * parent, const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(new form::StringArrayInput(parent, k, required, min == max, min, max));
+        v.emplace_back(new form::StringArrayInput(parent, k, requiredIn, min == max, static_cast<int>(min),
+                                                  static_cast<int>(max)));
         return v;
       };
     }
   };
-  auto handle_ref_array = [this, &source, &resolve_ref](const std::string & k, bool required, const std::string & ref,
+  auto handle_ref_array = [this, &source, &resolve_ref](const std::string & k, bool requiredIn, const std::string & ref,
                                                         size_t min, size_t max) {
     const auto & schema = resolve_ref(source, ref, "");
     auto cf = create_form;
-    create_form = [cf, k, required, min, max, &schema](QWidget * parent, const mc_rtc::Configuration & data) {
+    create_form = [cf, k, requiredIn, min, max, &schema](QWidget * parent, const mc_rtc::Configuration & data) {
       auto v = cf(parent, data);
-      v.emplace_back(new form::SchemaArrayInput(parent, k, required, schema, data, min == max, min, max));
+      v.emplace_back(new form::SchemaArrayInput(parent, k, requiredIn, schema, data, min == max, static_cast<int>(min),
+                                                static_cast<int>(max)));
       return v;
     };
   };
   auto handle_array = [this, &source, &handle_type_array, &handle_ref_array](
-                          const char * desc, const std::string & k, bool required, const mc_rtc::Configuration & c) {
+                          const char * desc, const std::string & k, bool requiredIn, const mc_rtc::Configuration & c) {
     if(!c.has("items"))
     {
       mc_rtc::log::warning("{}{} in {} is an array but items are not specified", desc, k, source);
     }
     auto items = c("items");
-    int minItems = c("minItems", 0);
-    int maxItems = c("maxItems", 256);
+    size_t minItems = c("minItems", size_t{0});
+    size_t maxItems = c("maxItems", size_t{256});
     if(items.has("type"))
     {
-      handle_type_array(k, required, items("type"), minItems, maxItems);
+      handle_type_array(k, requiredIn, items("type"), minItems, maxItems);
     }
     else if(items.has("$ref"))
     {
-      handle_ref_array(k, required, items("$ref"), minItems, maxItems);
+      handle_ref_array(k, requiredIn, items("$ref"), minItems, maxItems);
     }
     else if(items.size())
     {
       std::vector<Schema> schemas;
       for(size_t i = 0; i < items.size(); ++i)
       {
-        schemas.emplace_back(items[i], source, std::to_string(i), required);
+        schemas.emplace_back(items[i], source, std::to_string(i), requiredIn);
       }
       Schema schema(schemas);
       auto cf = create_form;
-      create_form = [cf, k, required, minItems, maxItems, schema](QWidget * parent,
-                                                                  const mc_rtc::Configuration & data) {
+      create_form = [cf, k, requiredIn, minItems, maxItems, schema](QWidget * parent,
+                                                                    const mc_rtc::Configuration & data) {
         auto v = cf(parent, data);
-        v.emplace_back(
-            new form::SchemaArrayInput(parent, k, required, schema, data, minItems == maxItems, minItems, maxItems));
+        v.emplace_back(new form::SchemaArrayInput(parent, k, requiredIn, schema, data, minItems == maxItems,
+                                                  static_cast<int>(minItems), static_cast<int>(maxItems)));
         return v;
       };
     }
@@ -294,13 +298,13 @@ void Schema::init(const mc_rtc::Configuration & s,
       mc_rtc::log::warning("{}{} in {} is an array but items' type is not specified", desc, k, source);
     }
   };
-  auto handle_object = [&](const std::string & title, const mc_rtc::Configuration & schema) {
-    if(!schema.has("properties"))
+  auto handle_object = [&](const std::string & titleIn, const mc_rtc::Configuration & schemaIn) {
+    if(!schemaIn.has("properties"))
     {
-      mc_rtc::log::warning("{} in {} is an object without properties", title, source);
+      mc_rtc::log::warning("{} in {} is an object without properties", titleIn, source);
       return;
     }
-    auto properties = schema("properties");
+    auto properties = schemaIn("properties");
     for(const auto & k : properties.keys())
     {
       auto prop = properties(k);
@@ -324,12 +328,12 @@ void Schema::init(const mc_rtc::Configuration & s,
       {
         const auto & schema = resolve_ref(source, prop("$ref"), k);
         auto cf = create_form;
-        bool required = is_required(k);
-        create_form = [cf, k, required, &schema](QWidget * parent, const mc_rtc::Configuration & data) {
+        bool requiredIn = is_required(k);
+        create_form = [cf, k, requiredIn, &schema](QWidget * parent, const mc_rtc::Configuration & data) {
           auto v = cf(parent, data);
           if(schema.is_object())
           {
-            v.emplace_back(new form::Form(parent, k, required, schema.create_form(parent, data)));
+            v.emplace_back(new form::Form(parent, k, requiredIn, schema.create_form(parent, data)));
           }
           else
           {

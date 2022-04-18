@@ -28,24 +28,24 @@ void TableWidget::header(const std::vector<std::string> & header)
     return;
   }
   header_ = header;
-  table_->setColumnCount(header_.size());
+  table_->setColumnCount(static_cast<int>(header_.size()));
   for(size_t j = 0; j < header_.size(); ++j)
   {
-    auto item = table_->horizontalHeaderItem(j);
+    auto item = table_->horizontalHeaderItem(static_cast<int>(j));
     if(!item)
     {
       item = new QTableWidgetItem();
-      table_->setHorizontalHeaderItem(j, item);
+      table_->setHorizontalHeaderItem(static_cast<int>(j), item);
     }
     item->setText(header_[j].c_str());
   }
 }
 
-void TableWidget::row(const std::vector<std::string> & data)
+void TableWidget::row(const std::vector<std::string> & dataIn)
 {
-  for(size_t j = 0; j < data.size(); ++j)
+  for(size_t j = 0; j < dataIn.size(); ++j)
   {
-    updateItem(rowCount_, j, data[j]);
+    updateItem(rowCount_, static_cast<int>(j), dataIn[j]);
   }
   rowCount_ += 1;
 }

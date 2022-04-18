@@ -86,7 +86,7 @@ void ConnectionDialog::accept()
                                      pushPortEdit_->text().toUInt());
     }
   };
-  if(connectionCombo_->currentIndex() < configs_.size())
+  if(connectionCombo_->currentIndex() < static_cast<int>(configs_.size()))
   {
     configs_.erase(configs_.begin() + connectionCombo_->currentIndex());
   }
@@ -98,7 +98,7 @@ void ConnectionDialog::accept()
 void ConnectionDialog::connectionChanged(int idx)
 {
   using Protocol = ConnectionConfiguration::Protocol;
-  const auto & cfg = idx < configs_.size() ? configs_[idx] : ConnectionConfiguration();
+  const auto & cfg = idx < static_cast<int>(configs_.size()) ? configs_[idx] : ConnectionConfiguration();
   auto txtIdx = protocolCombo_->findText(cfg.protocol() == Protocol::IPC ? "IPC" : "TCP");
   protocolCombo_->setCurrentIndex(txtIdx);
   hostEdit_->setText(cfg.host().c_str());

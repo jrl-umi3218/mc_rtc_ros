@@ -56,10 +56,10 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     if(visual.material.type == rbd::parsers::Material::Type::COLOR)
     {
       auto & c = boost::get<rbd::parsers::Material::Color>(visual.material.data);
-      marker_.color.r = c.r;
-      marker_.color.g = c.g;
-      marker_.color.b = c.b;
-      marker_.color.a = c.a;
+      marker_.color.r = static_cast<float>(c.r);
+      marker_.color.g = static_cast<float>(c.g);
+      marker_.color.b = static_cast<float>(c.b);
+      marker_.color.a = static_cast<float>(c.a);
     }
     else
     {
@@ -74,10 +74,10 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     using Geometry = rbd::parsers::Geometry;
     using Type = Geometry::Type;
     auto & type = visual.geometry.type;
-    auto & data = visual.geometry.data;
+    auto & geom_data = visual.geometry.data;
     if(type == Type::BOX)
     {
-      auto & b = boost::get<Geometry::Box>(data);
+      auto & b = boost::get<Geometry::Box>(geom_data);
       marker_.type = visualization_msgs::Marker::CUBE;
       marker_.scale.x = b.size.x();
       marker_.scale.y = b.size.y();
@@ -85,7 +85,7 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     }
     else if(type == Type::CYLINDER)
     {
-      auto & c = boost::get<Geometry::Cylinder>(data);
+      auto & c = boost::get<Geometry::Cylinder>(geom_data);
       marker_.type = visualization_msgs::Marker::CYLINDER;
       marker_.scale.x = 2 * c.radius;
       marker_.scale.y = 2 * c.radius;
@@ -93,7 +93,7 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     }
     else if(type == Type::SPHERE)
     {
-      auto & s = boost::get<Geometry::Sphere>(data);
+      auto & s = boost::get<Geometry::Sphere>(geom_data);
       marker_.type = visualization_msgs::Marker::SPHERE;
       marker_.scale.x = 2 * s.radius;
       marker_.scale.y = 2 * s.radius;
@@ -101,7 +101,7 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     }
     else if(type == Type::MESH)
     {
-      auto & m = boost::get<Geometry::Mesh>(data);
+      auto & m = boost::get<Geometry::Mesh>(geom_data);
       marker_.type = visualization_msgs::Marker::MESH_RESOURCE;
       marker_.scale.x = m.scale;
       marker_.scale.y = m.scale;

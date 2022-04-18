@@ -23,11 +23,11 @@ namespace mc_rtc_rviz
 {
 
 ComboInputWidget::ComboInputWidget(const ClientWidgetParam & param,
-                                   const mc_rtc::Configuration & data,
+                                   const mc_rtc::Configuration & dataIn,
                                    const std::vector<std::string> & ref)
 : ComboInputWidget(param, {})
 {
-  update(data, ref);
+  update(dataIn, ref);
 }
 
 ComboInputWidget::ComboInputWidget(const ClientWidgetParam & param, const std::vector<std::string> & values)
@@ -46,23 +46,23 @@ void ComboInputWidget::currentIndexChanged(int idx)
   client().send_request(id(), combo_->currentText().toStdString());
 }
 
-void ComboInputWidget::update(const std::string & data, const std::vector<std::string> & values)
+void ComboInputWidget::update(const std::string & dataIn, const std::vector<std::string> & values)
 {
   auto blocked = combo_->signalsBlocked();
   combo_->blockSignals(true);
   update(values);
-  auto idx = combo_->findText(data.c_str());
+  auto idx = combo_->findText(dataIn.c_str());
   combo_->setCurrentIndex(idx);
   combo_->blockSignals(blocked);
 }
 
 void ComboInputWidget::update(const std::string & in,
-                              const mc_rtc::Configuration & data,
+                              const mc_rtc::Configuration & dataIn,
                               const std::vector<std::string> & values)
 {
   auto blocked = combo_->signalsBlocked();
   combo_->blockSignals(true);
-  update(data, values);
+  update(dataIn, values);
   auto idx = combo_->findText(in.c_str());
   combo_->setCurrentIndex(idx);
   combo_->blockSignals(blocked);
@@ -81,9 +81,9 @@ void ComboInputWidget::update(const std::vector<std::string> & values)
   }
 }
 
-void ComboInputWidget::update(const mc_rtc::Configuration & data, const std::vector<std::string> & values)
+void ComboInputWidget::update(const mc_rtc::Configuration & dataIn, const std::vector<std::string> & values)
 {
-  update(ref2values(data, values));
+  update(ref2values(dataIn, values));
 }
 
 } // namespace mc_rtc_rviz
