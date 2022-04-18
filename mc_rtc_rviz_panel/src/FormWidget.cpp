@@ -133,47 +133,47 @@ void FormWidget::released()
   }
 }
 
-void FormWidget::add_element(FormElement * element)
+void FormWidget::add_element(FormElement * elementIn)
 {
-  elements_.push_back(element);
-  add_element_to_layout(element);
+  elements_.push_back(elementIn);
+  add_element_to_layout(elementIn);
 }
 
-void FormWidget::add_element_to_layout(FormElement * element)
+void FormWidget::add_element_to_layout(FormElement * elementIn)
 {
   for(const auto & el : elements_)
   {
-    element->update_dependencies(el);
-    el->update_dependencies(element);
+    elementIn->update_dependencies(el);
+    el->update_dependencies(elementIn);
   }
-  if(element->hidden())
+  if(elementIn->hidden())
   {
     elements_header_.push_back(nullptr);
-    element->hide();
+    elementIn->hide();
     return;
   }
-  auto label_text = element->name();
-  auto is_robot_or_required = [&label_text, element]() {
-    return element->required() || label_text == "robot" || label_text == "r1" || label_text == "r2";
+  auto label_text = elementIn->name();
+  auto is_robot_or_required = [&label_text, elementIn]() {
+    return elementIn->required() || label_text == "robot" || label_text == "r1" || label_text == "r2";
   };
   QFormLayout * layout_ = is_robot_or_required() ? requiredLayout_ : optionalLayout_;
-  if(element->required())
+  if(elementIn->required())
   {
     label_text += "*";
   }
-  auto header = new FormElementHeader(label_text.c_str(), element, form_);
+  auto header = new FormElementHeader(label_text.c_str(), elementIn, form_);
   elements_header_.push_back(header);
-  if(!element->spanning())
+  if(!elementIn->spanning())
   {
-    layout_->addRow(header, element);
+    layout_->addRow(header, elementIn);
   }
   else
   {
-    if(element->show_name())
+    if(elementIn->show_name())
     {
       layout_->addRow(header);
     }
-    layout_->addRow(element);
+    layout_->addRow(elementIn);
   }
   if(optionalLayout_->rowCount() == 0)
   {
