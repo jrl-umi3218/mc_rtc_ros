@@ -196,6 +196,14 @@ void Schema::init(const mc_rtc::Configuration & s,
           return v;
         };
       }
+      else if(k == "frame")
+      {
+        create_form = [cf, k, requiredIn](QWidget * parent, const mc_rtc::Configuration & data) {
+          auto v = cf(parent, data);
+          v.emplace_back(new form::DataComboInput(parent, "frame", requiredIn, data, {"frames", "$robot"}, false));
+          return v;
+        };
+      }
       else
       {
         create_form = [cf, k, requiredIn](QWidget * parent, const mc_rtc::Configuration & data) {
