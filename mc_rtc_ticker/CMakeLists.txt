@@ -16,11 +16,9 @@ include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 
 set(MC_RTC_TICKER_SRC
       src/mc_rtc_ticker.cpp
-      src/ContactForcePublisher.cpp
 )
 
 set(MC_RTC_TICKER_HDR
-      src/ContactForcePublisher.h
 )
 
 add_executable(mc_rtc_ticker ${MC_RTC_TICKER_SRC} ${MC_RTC_TICKER_HDR})

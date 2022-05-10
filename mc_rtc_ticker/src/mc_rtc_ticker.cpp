@@ -1,8 +1,6 @@
 /*
- * Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+ * Copyright 2016-2022 CNRS-UM LIRMM, CNRS-AIST JRL
  */
-
-#include "ContactForcePublisher.h"
 
 #include <mc_control/mc_global_controller.h>
 #include <mc_rtc/config.h>
@@ -181,13 +179,6 @@ int main()
               << "ms, max: " << max_t.count() * 1000 << "ms, second max: " << second_max_t.count() * 1000 << std::endl;
   };
 
-  const bool publish_contact_forces = getParam(nh, "mc_rtc_ticker/publish_contact_forces", true);
-  std::unique_ptr<mc_rtc_ros::ContactForcePublisher> cfp_ptr = nullptr;
-  if(publish_contact_forces)
-  {
-    cfp_ptr.reset(new mc_rtc_ros::ContactForcePublisher(nh, controller));
-  }
-
   ros::Rate rt(1 / dt);
   std::thread spin_th;
   if(bench)
@@ -203,10 +194,7 @@ int main()
 
   auto runController = [&]() {
     controller.setEncoderValues(q);
-    if(controller.run() && cfp_ptr)
-    {
-      cfp_ptr->update();
-    }
+    controller.run();
   };
 
   auto updateGUI = [&]() {
@@ -273,10 +261,6 @@ int main()
   {
     report_dt(false);
     spin_th.join();
-  }
-  if(cfp_ptr)
-  {
-    cfp_ptr->stop();
   }
 
   return 0;
