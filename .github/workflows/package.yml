@@ -64,7 +64,6 @@ jobs:
       fail-fast: false
       matrix:
         dist:
-        - xenial
         - bionic
         - focal
         arch:
@@ -167,7 +166,6 @@ jobs:
       fail-fast: false
       matrix:
         dist:
-        - xenial
         - bionic
         - focal
         arch:

@@ -87,7 +87,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: &package-matrix
-        dist: [xenial, bionic, focal]
+        dist: [bionic, focal]
         arch: [i386, amd64]
         exclude:
           - dist: focal
