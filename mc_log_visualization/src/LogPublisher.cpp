@@ -120,26 +120,29 @@ void LogPublisher::rebuildGUI()
                  }));
 
   auto makeTimeElement = [this]() {
-    return mc_rtc::gui::NumberSlider("#Time", [this]() { return cur_t; },
-                                     [this](double time) {
-                                       size_t i = min_i;
-                                       double t_i = log.get<double>("t", i, 0);
-                                       double t_ii = log.get<double>("t", i + 1, 0);
-                                       while(t_ii < time && i < max_i - 1)
-                                       {
-                                         i++;
-                                         t_i = t_ii;
-                                         t_ii = log.get<double>("t", i + 1, t_i);
-                                       }
-                                       cur_i = i;
-                                       cur_t = t_i;
-                                     },
-                                     min_t, max_t);
+    return mc_rtc::gui::NumberSlider(
+        "#Time", [this]() { return cur_t; },
+        [this](double time) {
+          size_t i = min_i;
+          double t_i = log.get<double>("t", i, 0);
+          double t_ii = log.get<double>("t", i + 1, 0);
+          while(t_ii < time && i < max_i - 1)
+          {
+            i++;
+            t_i = t_ii;
+            t_ii = log.get<double>("t", i + 1, t_i);
+          }
+          cur_i = i;
+          cur_t = t_i;
+        },
+        min_t, max_t);
   };
   gui.addElement(category, mc_rtc::gui::ElementsStacking::Horizontal,
-                 mc_rtc::gui::Checkbox("Paused", [this]() { return paused; }, [this]() { paused = !paused; }),
+                 mc_rtc::gui::Checkbox(
+                     "Paused", [this]() { return paused; }, [this]() { paused = !paused; }),
                  makeTimeElement(),
-                 mc_rtc::gui::Checkbox("Reverse", [this]() { return reversed; }, [this]() { reversed = !reversed; }));
+                 mc_rtc::gui::Checkbox(
+                     "Reverse", [this]() { return reversed; }, [this]() { reversed = !reversed; }));
 
   gui.addElement(category, mc_rtc::gui::ElementsStacking::Horizontal,
                  mc_rtc::gui::Button("-",
@@ -199,8 +202,9 @@ void LogPublisher::rebuildGUI()
       keys.push_back(k);
     }
   }
-  gui.addElement(category, mc_rtc::gui::ComboInput("Time range", keys, [this]() { return t_data; },
-                                                   [this](const std::string & t) { selectTime(t); }));
+  gui.addElement(
+      category, mc_rtc::gui::ComboInput(
+                    "Time range", keys, [this]() { return t_data; }, [this](const std::string & t) { selectTime(t); }));
   gui.addElement(category, mc_rtc::gui::Button("Stop log replay", [this]() { running = false; }));
 
   category.push_back("Add extra information");
@@ -210,11 +214,12 @@ void LogPublisher::rebuildGUI()
   {
     extra_selected = entries[0];
   }
-  gui.addElement(category, mc_rtc::gui::ComboInput("Entry", entries, [this]() { return extra_selected; },
-                                                   [this](const std::string & selected) {
-                                                     extra_selected = selected;
-                                                     rebuildGUI();
-                                                   }));
+  gui.addElement(category, mc_rtc::gui::ComboInput(
+                               "Entry", entries, [this]() { return extra_selected; },
+                               [this](const std::string & selected) {
+                                 extra_selected = selected;
+                                 rebuildGUI();
+                               }));
   std::string entry = extra_selected;
   auto types = log.types(entry);
   bool added_something = false;
@@ -257,15 +262,16 @@ void LogPublisher::rebuildGUI()
         break;
       case mc_rtc::log::LogType::ForceVecd:
         added_something = true;
-        gui.addElement(category, mc_rtc::gui::Form("Add " + entry + " as Force",
-                                                   [this, entry](const mc_rtc::Configuration & form) {
-                                                     std::string surface = form("Surface");
-                                                     auto c = config("forces").add(entry);
-                                                     c.add("surface", surface);
-                                                     saveConfig();
-                                                     addForce(entry, surface);
-                                                   },
-                                                   mc_rtc::gui::FormComboInput("Surface", true, robot->surfaces())));
+        gui.addElement(category, mc_rtc::gui::Form(
+                                     "Add " + entry + " as Force",
+                                     [this, entry](const mc_rtc::Configuration & form) {
+                                       std::string surface = form("Surface");
+                                       auto c = config("forces").add(entry);
+                                       c.add("surface", surface);
+                                       saveConfig();
+                                       addForce(entry, surface);
+                                     },
+                                     mc_rtc::gui::FormComboInput("Surface", true, robot->surfaces())));
         break;
       case mc_rtc::log::LogType::PTransformd:
         added_something = true;
