@@ -62,6 +62,34 @@ int main()
   mc_control::MCGlobalController controller(conf);
   double dt = controller.timestep();
 
+  auto set_encoder = [&controller](mc_rbdyn::Robot & robot, mc_rbdyn::Robot & realRobot)
+  {
+    auto q = robot.encoderValues();
+    if(q.size() != controller.ref_joint_order().size())
+    {
+      q.resize(controller.ref_joint_order().size());
+    }
+    auto & mbc = controller.robot().mbc();
+    const auto & rjo = controller.ref_joint_order();
+    unsigned i = 0;
+    for(const auto & jn : rjo)
+    {
+      if(controller.robot().hasJoint(jn))
+      {
+        for(auto & qj : mbc.q[controller.robot().jointIndexByName(jn)])
+        {
+          q[i++] = qj;
+        }
+      }
+      else
+      {
+        mc_rtc::log::error_and_throw("[mc_rtc_ticker] Joint {} is in ref_joint_order but not in robot {}", jn, controller.robot().name());
+      }
+    }
+    robot.encoderValues(q);
+    realRobot.encoderValues(q);
+  };
+
   std::vector<double> q;
   if(nh.hasParam("mc_rtc_ticker/init_state"))
   {
@@ -69,26 +97,11 @@ int main()
   }
   else
   {
-    auto & mbc = controller.robot().mbc();
-    const auto & rjo = controller.ref_joint_order();
-    for(const auto & jn : rjo)
+    for(auto & robot : controller.robots())
     {
-      if(controller.robot().hasJoint(jn))
-      {
-        for(auto & qj : mbc.q[controller.robot().jointIndexByName(jn)])
-        {
-          q.push_back(qj);
-        }
-      }
-      else
-      {
-        // FIXME This assumes that a joint that is in ref_joint_order but missing from the robot is of size 1 (very
-        // likely to be true)
-        q.push_back(0);
-      }
+      set_encoder(robot, controller.realRobot(robot.name()));
     }
   }
-  controller.setEncoderValues(q);
   if(nh.hasParam("mc_rtc_ticker/init_pos"))
   {
     mc_rtc::log::info("Using initial pos from ROS param");
@@ -104,7 +117,7 @@ int main()
   }
   else
   {
-    controller.init(q);
+    controller.init(controller.robot().encoderValues());
   }
   controller.running = true;
 
@@ -192,8 +205,11 @@ int main()
     });
   }
 
-  auto runController = [&]() {
-    controller.setEncoderValues(q);
+  auto runController = [&, set_encoder]() {
+    for(auto & robot : controller.robots())
+    {
+      set_encoder(robot, controller.realRobot(robot.name()));
+    }
     controller.run();
   };
 
