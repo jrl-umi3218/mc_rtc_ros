@@ -225,7 +225,7 @@ int main(int argc, char ** argv)
   bool publish = false;
   getParam(n_private, "publish", publish);
   getParam(n_private, "rate", publish_rate);
-  double dt = 1/publish_rate;
+  double dt = 1 / publish_rate;
 
   ros::Publisher surface_pub = n.advertise<visualization_msgs::MarkerArray>("surfaces", 1000);
 

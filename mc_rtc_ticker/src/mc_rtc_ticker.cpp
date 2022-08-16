@@ -125,7 +125,8 @@ int main()
   if(gui)
   {
     gui->addElement({"mc_rtc_ticker"},
-                    mc_rtc::gui::Checkbox("Step by step", [&]() { return stepByStep; }, [&]() { toogleStepByStep(); }));
+                    mc_rtc::gui::Checkbox(
+                        "Step by step", [&]() { return stepByStep; }, [&]() { toogleStepByStep(); }));
     auto buttonText = [&](size_t n) {
       size_t n_ms = static_cast<size_t>(std::ceil(static_cast<double>(n) * 1000.0 * dt));
       return "+" + std::to_string(n_ms) + "ms";
