@@ -81,7 +81,7 @@ visualization_msgs::MarkerArray surfaceMarkers(const std::string & tf_prefix, co
     marker.color.r = 0.0;
     marker.color.g = 1.0;
     marker.color.b = 0.0;
-    marker.lifetime = ros::Duration(0.5);
+    marker.lifetime = ros::Duration(1);
 
     if(surf->type() == "cylindrical")
     {
@@ -213,6 +213,7 @@ int main(int argc, char ** argv)
   std::vector<std::string> robot_param = robotParam(n_private);
   std::vector<std::string> robot_params = robot_param.size() ? robot_param : robot_module;
   bool robot_set = robot_param.size() != 0;
+  double publish_rate = 100.;
 
   std::string tf_prefix = "";
   getParam(n, "tf_prefix", tf_prefix);
@@ -223,6 +224,8 @@ int main(int argc, char ** argv)
 
   bool publish = false;
   getParam(n_private, "publish", publish);
+  getParam(n_private, "rate", publish_rate);
+  double dt = 1/publish_rate;
 
   ros::Publisher surface_pub = n.advertise<visualization_msgs::MarkerArray>("surfaces", 1000);
 
@@ -240,26 +243,26 @@ int main(int argc, char ** argv)
     markers = surfaceMarkers(tf_prefix, robots->robot());
     if(publish)
     {
-      robot_pub.reset(new mc_rtc::RobotPublisher(tf_prefix, 50, 0.01));
+      robot_pub.reset(new mc_rtc::RobotPublisher(tf_prefix, publish_rate, dt));
       robot_pub->init(robots->robot());
     }
   };
 
   init();
 
-  ros::Rate rate(10);
+  ros::Rate rate(publish_rate);
   while(ros::ok())
   {
+    if(robot_pub)
+    {
+      robot_pub->update(dt, robots->robot());
+    }
     auto now = ros::Time::now();
     for(auto & m : markers.markers)
     {
       m.header.stamp = now;
     }
     surface_pub.publish(markers);
-    if(robot_pub)
-    {
-      robot_pub->update(0.01, robots->robot());
-    }
     ros::spinOnce();
     getParam(n, "robot_module", robot_module);
     if(!robot_set && robot_module.size() && robot_module != robot_params)

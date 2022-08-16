@@ -59,7 +59,7 @@ Visualization Manager:
       Namespaces:
         Door: true
         Handle: true
-      Queue Size: 100
+      Queue Size: 1000
       Value: true
     - Alpha: 0.5
       Class: rviz/RobotModel

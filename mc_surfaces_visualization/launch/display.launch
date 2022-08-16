@@ -1,10 +1,12 @@
 <launch>
   <arg name="robot" default=""/>
   <arg name="publish" default="true"/>
+  <arg name="rate" default="100" />
 
   <include file="$(find mc_surfaces_visualization)/launch/surfaces_publisher.launch">
     <arg name="robot" value="$(arg robot)" />
     <arg name="publish" value="$(arg publish)" />
+    <arg name="rate" value="$(arg rate)" />
   </include>
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mc_surfaces_visualization)/launch/surfaces.rviz"/>
