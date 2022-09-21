@@ -19,6 +19,7 @@
 #  include "InteractiveMarkerWidget.h"
 #  include "Point3DInteractiveMarkerWidget.h"
 #  include "PolygonMarkerWidget.h"
+#  include "PolyhedronMarkerWidget.h"
 #  include "TransformInteractiveMarkerWidget.h"
 #  include "VisualWidget.h"
 #  include "XYThetaInteractiveMarkerWidget.h"
@@ -152,6 +153,7 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
   qRegisterMetaType<WidgetId>("WidgetId");
   qRegisterMetaType<Eigen::Vector3d>("Eigen::Vector3d");
+  qRegisterMetaType<Eigen::Vector4d>("Eigen::Vector4d");
   qRegisterMetaType<Eigen::VectorXd>("Eigen::VectorXd");
   qRegisterMetaType<sva::PTransformd>("sva::PTransformd");
   qRegisterMetaType<sva::ForceVecd>("sva::ForceVecd");
@@ -159,6 +161,7 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<mc_rtc::gui::Color>("mc_rtc::gui::Color");
   qRegisterMetaType<mc_rtc::gui::ForceConfig>("mc_rtc::gui::ForceConfig");
   qRegisterMetaType<mc_rtc::gui::LineConfig>("mc_rtc::gui::LineConfig");
+  qRegisterMetaType<mc_rtc::gui::PolyhedronConfig>("mc_rtc::gui::PolyhedronConfig");
   qRegisterMetaType<mc_rtc::gui::PointConfig>("mc_rtc::gui::PointConfig");
   qRegisterMetaType<mc_rtc::gui::plot::Range>("mc_rtc::gui::plot::Range");
   qRegisterMetaType<mc_rtc::gui::plot::Side>("mc_rtc::gui::plot::Side");
@@ -167,8 +170,10 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::vector<mc_rtc::gui::plot::PolygonDescription>>(
       "std::vector<mc_rtc::gui::plot::PolygonDescription>");
   qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
+  qRegisterMetaType<std::vector<Eigen::Vector4d>>("std::vector<Eigen::Vector4d>");
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   qRegisterMetaType<std::vector<std::vector<Eigen::Vector3d>>>("std::vector<std::vector<Eigen::Vector3d>>");
+  qRegisterMetaType<std::vector<std::array<Eigen::Vector3d, 3>>>("std::vector<std::array<Eigen::Vector3d, 3>>");
   qRegisterMetaType<std::vector<std::vector<double>>>("std::vector<std::vector<double>>");
   qRegisterMetaType<rbd::parsers::Visual>("rbd::parsers::Visual");
   tree_.parent = this;
@@ -227,6 +232,16 @@ Panel::Panel(QWidget * parent)
           this,
           SLOT(got_polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &,
                            const mc_rtc::gui::LineConfig &)));
+  connect(this,
+          SIGNAL(signal_polyhedron(const WidgetId &,
+                                   const std::vector<Eigen::Vector3d> &,
+                                   const std::vector<Eigen::Vector4d> &,
+                                   const mc_rtc::gui::PolyhedronConfig &)),
+          this,
+          SLOT(got_polyhedron(const WidgetId &,
+                              const std::vector<Eigen::Vector3d> &,
+                              const std::vector<Eigen::Vector4d> &,
+                              const mc_rtc::gui::PolyhedronConfig &)));
   connect(this,
           SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
                               const mc_rtc::gui::ForceConfig &, bool)),
@@ -460,6 +475,14 @@ void Panel::polygon(const WidgetId & id,
                     const mc_rtc::gui::LineConfig & config)
 {
   Q_EMIT signal_polygon(id, polygons, config);
+}
+
+void Panel::polyhedron(const WidgetId & id,
+                    const std::vector<Eigen::Vector3d> & triangles,
+                    const std::vector<Eigen::Vector4d> & colors,
+                    const mc_rtc::gui::PolyhedronConfig & c)
+{
+  Q_EMIT signal_polyhedron(id, triangles, colors, c);
 }
 
 void Panel::force(const WidgetId & id,
@@ -826,6 +849,17 @@ void Panel::got_polygon(const WidgetId & id,
 #ifndef DISABLE_ROS
   auto & w = get_widget<PolygonMarkerWidget>(id, impl_->marker_array_);
   w.update(polygons, c);
+#endif
+}
+
+void Panel::got_polyhedron(const WidgetId & id,
+                        const std::vector<Eigen::Vector3d> & triangles,
+                        const std::vector<Eigen::Vector4d> & colors,
+                        const mc_rtc::gui::PolyhedronConfig & c)
+{
+#ifndef DISABLE_ROS
+  auto & w = get_widget<PolyhedronMarkerWidget>(id, impl_->marker_array_);
+  w.update(triangles, colors, c);
 #endif
 }
 
