@@ -118,8 +118,8 @@ protected:
                const mc_rtc::gui::LineConfig & config) override;
 
   void polyhedron(const WidgetId & id,
-               const std::vector<Eigen::Vector3d> & triangles,
-               const std::vector<Eigen::Vector4d> & colors,
+               const std::vector<std::array<Eigen::Vector3d,3>> & triangles,
+               const std::vector<std::array<mc_rtc::gui::Color,3>> & colors,
                const mc_rtc::gui::PolyhedronConfig & c) override;
 
   void force(const WidgetId & id,
@@ -306,8 +306,8 @@ private slots:
                    const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                    const mc_rtc::gui::LineConfig & c);
   void got_polyhedron(const WidgetId & id,
-                   const std::vector<Eigen::Vector3d> & triangles,
-                   const std::vector<Eigen::Vector4d> & colors,
+                   const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                   const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
                    const mc_rtc::gui::PolyhedronConfig & c);
   void got_force(const WidgetId & id,
                  const WidgetId & requestId,
@@ -419,8 +419,8 @@ signals:
                       const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                       const mc_rtc::gui::LineConfig & c);
   void signal_polyhedron(const WidgetId & id,
-                   const std::vector<Eigen::Vector3d> & triangles,
-                   const std::vector<Eigen::Vector4d> & colors,
+                   const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                   const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
                    const mc_rtc::gui::PolyhedronConfig & c);
   void signal_force(const WidgetId & id,
                     const WidgetId & requestId,

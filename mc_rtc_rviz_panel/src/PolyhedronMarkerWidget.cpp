@@ -90,8 +90,8 @@ PolyhedronMarkerWidget::~PolyhedronMarkerWidget()
   clear();
 }
 
-void PolyhedronMarkerWidget::update_triangles(const std::vector<Eigen::Vector3d> & triangles,
-                                              const std::vector<Eigen::Vector4d> & colors)
+void PolyhedronMarkerWidget::update_triangles(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                                              const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors)
 {
   triangles_.points.clear();
   triangles_.colors.clear();
@@ -99,30 +99,36 @@ void PolyhedronMarkerWidget::update_triangles(const std::vector<Eigen::Vector3d>
   triangles_.action = visualization_msgs::Marker::ADD;
   triangles_.header.stamp = ros::Time::now();
   auto set_triangles = [&]() {
-    for(const auto & point : triangles)
+    for(const auto & triangle : triangles)
     {
-      if(!is_in_range(point))
+      for(const auto & point : triangle)
       {
-        mc_rtc::log::error("Could not display point {}: invalid value in coordinates ({})", triangles_.ns, point.transpose());
-        clear();
-        return;
+        if(!is_in_range(point))
+        {
+          mc_rtc::log::error("Could not display point {}: invalid value in coordinates ({})", triangles_.ns, point.transpose());
+          clear();
+          return;
+        }
+        geometry_msgs::Point p;
+        p.x = point.x();
+        p.y = point.y();
+        p.z = point.z();
+        triangles_.points.push_back(p);
       }
-      geometry_msgs::Point p;
-      p.x = point.x();
-      p.y = point.y();
-      p.z = point.z();
-      triangles_.points.push_back(p);
     }
   };
   auto set_colors = [&]() {
-    for(const auto & color : colors)
+    for(const auto & triangle_colors : colors)
     {
-      std_msgs::ColorRGBA c;
-      c.r = color.x();
-      c.g = color.y();
-      c.b = color.z();
-      c.a = color[3];
-      triangles_.colors.push_back(c);
+      for(const auto & color : triangle_colors)
+      {
+        std_msgs::ColorRGBA c;
+        c.r = color.r;
+        c.g = color.g;
+        c.b = color.b;
+        c.a = color.a;
+        triangles_.colors.push_back(c);
+      }
     }
   };
   set_triangles();
@@ -150,8 +156,8 @@ void PolyhedronMarkerWidget::update_triangles(const std::vector<Eigen::Vector3d>
   was_visible_triangles_ = visible_ && visible_triangles_;
 }
 
-void PolyhedronMarkerWidget::update_edges(const std::vector<Eigen::Vector3d> & triangles,
-                                          const std::vector<Eigen::Vector4d> & colors)
+void PolyhedronMarkerWidget::update_edges(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                                          const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors)
 {
   edges_.points.clear();
   edges_.colors.clear();
@@ -185,8 +191,8 @@ void PolyhedronMarkerWidget::update_edges(const std::vector<Eigen::Vector3d> & t
   was_visible_edges_ = visible_ && visible_edges_;
 }
 
-void PolyhedronMarkerWidget::update_vertices(const std::vector<Eigen::Vector3d> & triangles,
-                                             const std::vector<Eigen::Vector4d> & colors)
+void PolyhedronMarkerWidget::update_vertices(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                                             const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors)
 {
   vertices_.points.clear();
   vertices_.colors.clear();
@@ -221,8 +227,8 @@ void PolyhedronMarkerWidget::update_vertices(const std::vector<Eigen::Vector3d> 
   was_visible_vertices_ = visible_ && visible_vertices_;
 }
 
-void PolyhedronMarkerWidget::update(const std::vector<Eigen::Vector3d> & triangles,
-                                    const std::vector<Eigen::Vector4d> & colors)
+void PolyhedronMarkerWidget::update(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                                    const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors)
 {
   currPolyhedronNum_ = triangles.size();
   if(prevPolyhedronNum_ > currPolyhedronNum_)

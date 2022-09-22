@@ -153,7 +153,6 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
   qRegisterMetaType<WidgetId>("WidgetId");
   qRegisterMetaType<Eigen::Vector3d>("Eigen::Vector3d");
-  qRegisterMetaType<Eigen::Vector4d>("Eigen::Vector4d");
   qRegisterMetaType<Eigen::VectorXd>("Eigen::VectorXd");
   qRegisterMetaType<sva::PTransformd>("sva::PTransformd");
   qRegisterMetaType<sva::ForceVecd>("sva::ForceVecd");
@@ -170,7 +169,9 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::vector<mc_rtc::gui::plot::PolygonDescription>>(
       "std::vector<mc_rtc::gui::plot::PolygonDescription>");
   qRegisterMetaType<std::vector<Eigen::Vector3d>>("std::vector<Eigen::Vector3d>");
-  qRegisterMetaType<std::vector<Eigen::Vector4d>>("std::vector<Eigen::Vector4d>");
+  qRegisterMetaType<std::vector<mc_rtc::gui::Color>>("std::vector<mc_rtc::gui::Color>");
+  qRegisterMetaType<std::vector<std::array<Eigen::Vector3d, 3>>>("std::vector<std::array<Eigen::Vector3d, 3>>");
+  qRegisterMetaType<std::vector<std::array<mc_rtc::gui::Color, 3>>>("std::vector<std::array<mc_rtc::gui::Color, 3>>");
   qRegisterMetaType<std::vector<sva::PTransformd>>("std::vector<sva::PTransformd>");
   qRegisterMetaType<std::vector<std::vector<Eigen::Vector3d>>>("std::vector<std::vector<Eigen::Vector3d>>");
   qRegisterMetaType<std::vector<std::array<Eigen::Vector3d, 3>>>("std::vector<std::array<Eigen::Vector3d, 3>>");
@@ -234,13 +235,13 @@ Panel::Panel(QWidget * parent)
                            const mc_rtc::gui::LineConfig &)));
   connect(this,
           SIGNAL(signal_polyhedron(const WidgetId &,
-                                   const std::vector<Eigen::Vector3d> &,
-                                   const std::vector<Eigen::Vector4d> &,
+                                   const std::vector<std::array<Eigen::Vector3d, 3>> &,
+                                   const std::vector<std::array<mc_rtc::gui::Color, 3>> &,
                                    const mc_rtc::gui::PolyhedronConfig &)),
           this,
           SLOT(got_polyhedron(const WidgetId &,
-                              const std::vector<Eigen::Vector3d> &,
-                              const std::vector<Eigen::Vector4d> &,
+                              const std::vector<std::array<Eigen::Vector3d, 3>> &,
+                              const std::vector<std::array<mc_rtc::gui::Color, 3>> &,
                               const mc_rtc::gui::PolyhedronConfig &)));
   connect(this,
           SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
@@ -478,8 +479,8 @@ void Panel::polygon(const WidgetId & id,
 }
 
 void Panel::polyhedron(const WidgetId & id,
-                    const std::vector<Eigen::Vector3d> & triangles,
-                    const std::vector<Eigen::Vector4d> & colors,
+                    const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                    const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
                     const mc_rtc::gui::PolyhedronConfig & c)
 {
   Q_EMIT signal_polyhedron(id, triangles, colors, c);
@@ -853,8 +854,8 @@ void Panel::got_polygon(const WidgetId & id,
 }
 
 void Panel::got_polyhedron(const WidgetId & id,
-                        const std::vector<Eigen::Vector3d> & triangles,
-                        const std::vector<Eigen::Vector4d> & colors,
+                        const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                        const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
                         const mc_rtc::gui::PolyhedronConfig & c)
 {
 #ifndef DISABLE_ROS

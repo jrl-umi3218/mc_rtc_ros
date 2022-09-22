@@ -21,18 +21,18 @@ struct PolyhedronMarkerWidget : public ClientWidget
 public:
   PolyhedronMarkerWidget(const ClientWidgetParam & params, visualization_msgs::MarkerArray & markers, const mc_rtc::gui::PolyhedronConfig & config);
 
-  void update(const std::vector<Eigen::Vector3d> & triangles,
-              const std::vector<Eigen::Vector4d> & colors);
+  void update(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+              const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors);
 
   ~PolyhedronMarkerWidget() override;
 
 private:
-  void update_triangles(const std::vector<Eigen::Vector3d> & triangles,
-                        const std::vector<Eigen::Vector4d> & colors);
-  void update_edges(const std::vector<Eigen::Vector3d> & triangles,
-                    const std::vector<Eigen::Vector4d> & colors);
-  void update_vertices(const std::vector<Eigen::Vector3d> & triangles,
-                       const std::vector<Eigen::Vector4d> & colors);
+  void update_triangles(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                        const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors);
+  void update_edges(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                    const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors);
+  void update_vertices(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                       const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors);
   void clear();
 
 private slots:
