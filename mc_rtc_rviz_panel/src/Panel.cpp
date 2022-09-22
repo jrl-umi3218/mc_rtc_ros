@@ -858,8 +858,8 @@ void Panel::got_polyhedron(const WidgetId & id,
                         const mc_rtc::gui::PolyhedronConfig & c)
 {
 #ifndef DISABLE_ROS
-  auto & w = get_widget<PolyhedronMarkerWidget>(id, impl_->marker_array_);
-  w.update(triangles, colors, c);
+  auto & w = get_widget<PolyhedronMarkerWidget>(id, impl_->marker_array_, c);
+  w.update(triangles, colors);
 #endif
 }
 
