@@ -51,7 +51,7 @@ void LogRobot::update(const mc_rtc::log::FlatLog & log, size_t i)
       auto jIndex = robot.jointIndexByName(jN);
       if(robot.mbc().q[jIndex].size() == 1)
       {
-        robot.mbc().q[jIndex][0] = q[i];
+        robot.mbc().q[jIndex][0] = q[refIdx];
       }
     }
   }
