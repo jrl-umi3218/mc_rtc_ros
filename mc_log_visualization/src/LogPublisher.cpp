@@ -38,14 +38,19 @@ LogPublisher::LogPublisher(ros::NodeHandle & nh_,
     if(log.has("realRobot_posW"))
     {
       conf.base = "realRobot_posW";
+      real_robot.reset(new LogRobot(conf));
     }
-    else
+    else if(log.has("rpyIn"))
     {
       conf.base = "ff";
       conf.base_rotation = "rpyIn";
       conf.base_rotation_is_imu = true;
+      real_robot.reset(new LogRobot(conf));
     }
-    real_robot.reset(new LogRobot(conf));
+    else
+    {
+      real_robot.reset(nullptr);
+    }
   }
 }
 
@@ -57,7 +62,10 @@ void LogPublisher::pubThread()
   while(running)
   {
     robot->update(log, cur_i);
-    real_robot->update(log, cur_i);
+    if(real_robot)
+    {
+      real_robot->update(log, cur_i);
+    }
 
     /* Playback speed logic */
     pub_i++;
@@ -115,9 +123,12 @@ void LogPublisher::rebuildGUI()
   gui.addElement(robots_category, mc_rtc::gui::Robot(robot->robot().name(),
                                                      [this]() -> const mc_rbdyn::Robot & { return robot->robot(); }));
   robots_category.push_back("Real");
-  gui.addElement(robots_category, mc_rtc::gui::Robot(real_robot->robot().name(), [this]() -> const mc_rbdyn::Robot & {
-                   return real_robot->robot();
-                 }));
+  if(real_robot)
+  {
+    gui.addElement(robots_category, mc_rtc::gui::Robot(real_robot->robot().name(), [this]() -> const mc_rbdyn::Robot & {
+                     return real_robot->robot();
+                   }));
+  }
 
   auto makeTimeElement = [this]() {
     return mc_rtc::gui::NumberSlider(
