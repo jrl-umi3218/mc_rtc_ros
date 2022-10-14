@@ -75,9 +75,18 @@ int main()
     {
       if(controller.robot().hasJoint(jn))
       {
-        for(auto & qj : mbc.q[controller.robot().jointIndexByName(jn)])
+        auto qIndex = controller.robot().jointIndexByName(jn);
+        const auto & qi = mbc.q[qIndex];
+        if(qi.size())
         {
-          q.push_back(qj);
+          for(auto & qj : qi)
+          {
+            q.push_back(qj);
+          }
+        }
+        else
+        {
+          q.push_back(0.0);
         }
       }
       else
@@ -212,18 +221,30 @@ int main()
     }
     auto & mbc = controller.robot().mbc();
     const auto & rjo = controller.ref_joint_order();
-    q.resize(rjo.size());
     size_t index = 0;
     for(size_t i = 0; i < rjo.size(); ++i)
     {
       const auto & jn = rjo[i];
       if(controller.robot().hasJoint(jn))
       {
-        for(auto & qj : mbc.q[controller.robot().jointIndexByName(jn)])
+        auto qIndex = controller.robot().jointIndexByName(jn);
+        const auto & qi = mbc.q[qIndex];
+        if(qi.size())
         {
-          q[index] = qj;
+          for(const auto & qj : qi)
+          {
+            q[index] = qj;
+            index++;
+          }
+        }
+        else
+        {
           index++;
         }
+      }
+      else
+      {
+        index++;
       }
     }
     if(stepByStep)
