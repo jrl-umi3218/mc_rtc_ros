@@ -13,7 +13,7 @@ PolyhedronMarkerWidget::PolyhedronMarkerWidget(const ClientWidgetParam & params,
                                                visualization_msgs::MarkerArray & markers,
                                                const mc_rtc::gui::PolyhedronConfig & config)
 : ClientWidget(params), markers_(markers), config_(config), visible_(visible()),
-    visible_triangles_(config.show_triangle), visible_edges_(config.show_edges), visible_vertices_(config.show_vertices)
+  visible_triangles_(config.show_triangle), visible_edges_(config.show_edges), visible_vertices_(config.show_vertices)
 {
   auto layout = new QHBoxLayout(this);
   if(!secret())
@@ -105,7 +105,8 @@ void PolyhedronMarkerWidget::update_triangles(const std::vector<std::array<Eigen
       {
         if(!is_in_range(point))
         {
-          mc_rtc::log::error("Could not display point {}: invalid value in coordinates ({})", triangles_.ns, point.transpose());
+          mc_rtc::log::error("Could not display point {}: invalid value in coordinates ({})", triangles_.ns,
+                             point.transpose());
           clear();
           return;
         }

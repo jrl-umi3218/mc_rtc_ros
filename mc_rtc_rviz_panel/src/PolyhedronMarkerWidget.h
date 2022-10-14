@@ -19,7 +19,9 @@ struct PolyhedronMarkerWidget : public ClientWidget
 {
   Q_OBJECT
 public:
-  PolyhedronMarkerWidget(const ClientWidgetParam & params, visualization_msgs::MarkerArray & markers, const mc_rtc::gui::PolyhedronConfig & config);
+  PolyhedronMarkerWidget(const ClientWidgetParam & params,
+                         visualization_msgs::MarkerArray & markers,
+                         const mc_rtc::gui::PolyhedronConfig & config);
 
   void update(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
               const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors);

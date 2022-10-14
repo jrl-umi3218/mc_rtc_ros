@@ -234,13 +234,11 @@ Panel::Panel(QWidget * parent)
           SLOT(got_polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &,
                            const mc_rtc::gui::LineConfig &)));
   connect(this,
-          SIGNAL(signal_polyhedron(const WidgetId &,
-                                   const std::vector<std::array<Eigen::Vector3d, 3>> &,
+          SIGNAL(signal_polyhedron(const WidgetId &, const std::vector<std::array<Eigen::Vector3d, 3>> &,
                                    const std::vector<std::array<mc_rtc::gui::Color, 3>> &,
                                    const mc_rtc::gui::PolyhedronConfig &)),
           this,
-          SLOT(got_polyhedron(const WidgetId &,
-                              const std::vector<std::array<Eigen::Vector3d, 3>> &,
+          SLOT(got_polyhedron(const WidgetId &, const std::vector<std::array<Eigen::Vector3d, 3>> &,
                               const std::vector<std::array<mc_rtc::gui::Color, 3>> &,
                               const mc_rtc::gui::PolyhedronConfig &)));
   connect(this,
@@ -479,9 +477,9 @@ void Panel::polygon(const WidgetId & id,
 }
 
 void Panel::polyhedron(const WidgetId & id,
-                    const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
-                    const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
-                    const mc_rtc::gui::PolyhedronConfig & c)
+                       const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                       const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
+                       const mc_rtc::gui::PolyhedronConfig & c)
 {
   Q_EMIT signal_polyhedron(id, triangles, colors, c);
 }
@@ -854,9 +852,9 @@ void Panel::got_polygon(const WidgetId & id,
 }
 
 void Panel::got_polyhedron(const WidgetId & id,
-                        const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
-                        const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
-                        const mc_rtc::gui::PolyhedronConfig & c)
+                           const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                           const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
+                           const mc_rtc::gui::PolyhedronConfig & c)
 {
 #ifndef DISABLE_ROS
   auto & w = get_widget<PolyhedronMarkerWidget>(id, impl_->marker_array_, c);

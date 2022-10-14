@@ -118,9 +118,9 @@ protected:
                const mc_rtc::gui::LineConfig & config) override;
 
   void polyhedron(const WidgetId & id,
-               const std::vector<std::array<Eigen::Vector3d,3>> & triangles,
-               const std::vector<std::array<mc_rtc::gui::Color,3>> & colors,
-               const mc_rtc::gui::PolyhedronConfig & c) override;
+                  const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                  const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
+                  const mc_rtc::gui::PolyhedronConfig & c) override;
 
   void force(const WidgetId & id,
              const WidgetId & requestId,
@@ -306,9 +306,9 @@ private slots:
                    const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                    const mc_rtc::gui::LineConfig & c);
   void got_polyhedron(const WidgetId & id,
-                   const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
-                   const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
-                   const mc_rtc::gui::PolyhedronConfig & c);
+                      const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                      const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
+                      const mc_rtc::gui::PolyhedronConfig & c);
   void got_force(const WidgetId & id,
                  const WidgetId & requestId,
                  const sva::ForceVecd & force,
@@ -419,9 +419,9 @@ signals:
                       const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                       const mc_rtc::gui::LineConfig & c);
   void signal_polyhedron(const WidgetId & id,
-                   const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
-                   const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
-                   const mc_rtc::gui::PolyhedronConfig & c);
+                         const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
+                         const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
+                         const mc_rtc::gui::PolyhedronConfig & c);
   void signal_force(const WidgetId & id,
                     const WidgetId & requestId,
                     const sva::ForceVecd & force,
