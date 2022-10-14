@@ -32,6 +32,7 @@ if(NOT ${DISABLE_ROS})
     XYThetaInteractiveMarkerWidget.h
     DisplayTrajectoryWidget.h
     PolygonMarkerWidget.h
+    PolyhedronMarkerWidget.h
     plugin.h)
 endif()
 
@@ -145,6 +146,7 @@ if(NOT ${DISABLE_ROS})
     XYThetaInteractiveMarkerWidget.cpp
     DisplayTrajectoryWidget.cpp
     PolygonMarkerWidget.cpp
+    PolyhedronMarkerWidget.cpp
     utils.cpp
     plugin.cpp
     ${ROS_MOC_FILES})
