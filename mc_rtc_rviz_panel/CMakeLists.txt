@@ -9,7 +9,7 @@ set(PROJECT_DESCRIPTION "mc_rtc RVIz panel for prototyping controllers")
 set(PROJECT_URL "")
 set(CMAKE_CXX_STANDARD 17)
 
-project(${PROJECT_NAME} LANGUAGES CXX VERSION 1.3.0)
+project(${PROJECT_NAME} LANGUAGES CXX VERSION 1.3.1)
 
 find_package(mc_rtc REQUIRED)
 
