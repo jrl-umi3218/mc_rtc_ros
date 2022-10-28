@@ -57,7 +57,7 @@ PlotWidget::Curve::Curve(QwtPlot * plot, const std::string & legend, mc_rtc::gui
   curve_->setLegendIconSize({40, 8});
   curve_->attach(plot);
   curve_->setRenderHint(QwtPlotItem::RenderAntialiased);
-  curve_->setSamples(samples_);
+  curve_->setRawSamples(samples_x_.data(), samples_y_.data(), static_cast<int>(samples_x_.size()));
   if(side == Side::Left)
   {
     curve_->setYAxis(QwtPlot::yLeft);
@@ -76,7 +76,9 @@ PlotWidget::Curve::Curve(Curve && rhs)
     delete curve_;
   }
   curve_ = rhs.curve_;
-  samples_ = rhs.samples_;
+  samples_x_ = rhs.samples_x_;
+  samples_y_ = rhs.samples_y_;
+  rect_ = rhs.rect_;
   rect_ = rhs.rect_;
   rhs.curve_ = nullptr;
 }
@@ -93,7 +95,8 @@ PlotWidget::Curve & PlotWidget::Curve::operator=(Curve && rhs)
     delete curve_;
   }
   curve_ = rhs.curve_;
-  samples_ = rhs.samples_;
+  samples_x_ = rhs.samples_x_;
+  samples_y_ = rhs.samples_y_;
   rect_ = rhs.rect_;
   rhs.curve_ = nullptr;
   return *this;
@@ -103,9 +106,10 @@ QRectF PlotWidget::Curve::update(double x,
                                  double y,
                                  mc_rtc::gui::Color color,
                                  mc_rtc::gui::plot::Style style,
-                                 double line_width)
+                                 double line_width,
+                                 double show_duration)
 {
-  if(samples_.size() == 0)
+  if(samples_x_.size() == 0)
   {
     rect_.setLeft(x);
     rect_.setRight(x);
@@ -118,7 +122,8 @@ QRectF PlotWidget::Curve::update(double x,
   }
   else
   {
-    samples_.resize(0);
+    samples_x_.resize(0);
+    samples_y_.resize(0);
     auto symbol = new QwtSymbol(QwtSymbol::XCross);
     auto qc = convert(color);
     symbol->setColor(qc);
@@ -127,8 +132,21 @@ QRectF PlotWidget::Curve::update(double x,
     curve_->setSymbol(symbol);
     curve_->setStyle(QwtPlotCurve::NoCurve);
   }
-  samples_.push_back({x, y});
-  curve_->setSamples(samples_);
+  samples_x_.push_back(x);
+  samples_y_.push_back(y);
+  size_t data_offset = 0;
+  size_t data_size = samples_x_.size();
+  if(show_duration > 0 && samples_x_.size() > 1)
+  {
+    double dt = samples_x_[1] - samples_x_[0];
+    size_t n_points = std::ceil(show_duration / dt);
+    if(samples_x_.size() > n_points)
+    {
+      data_offset = samples_x_.size() - n_points - 1;
+      data_size = n_points;
+    }
+  }
+  curve_->setRawSamples(&samples_x_[data_offset], &samples_y_[data_offset], static_cast<int>(data_size));
   rect_.setLeft(std::min(x, rect_.left()));
   rect_.setRight(std::max(x, rect_.right()));
   rect_.setBottom(std::max(y, rect_.bottom()));
@@ -428,7 +446,7 @@ void PlotWidget::plot(uint64_t id,
   {
     curves_[id] = Curve(plot_, legend, side);
   }
-  update(side, curves_[id].update(x, y, color, style, line_width_));
+  update(side, curves_[id].update(x, y, color, style, line_width_, limit_xrange_ ? show_duration_ : -1));
 }
 
 void PlotWidget::plot(uint64_t id,

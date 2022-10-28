@@ -69,11 +69,17 @@ private:
     Curve(Curve && rhs);
     Curve & operator=(Curve && rhs);
     ~Curve();
-    QRectF update(double x, double y, mc_rtc::gui::Color color, mc_rtc::gui::plot::Style style, double line_width);
+    QRectF update(double x,
+                  double y,
+                  mc_rtc::gui::Color color,
+                  mc_rtc::gui::plot::Style style,
+                  double line_width,
+                  double x_limit);
 
   private:
     QwtPlotCurve * curve_ = nullptr;
-    QVector<QPointF> samples_;
+    std::vector<double> samples_x_;
+    std::vector<double> samples_y_;
     QRectF rect_;
   };
   struct Polygon
