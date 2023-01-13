@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 3.1)
 set(CMAKE_CXX_STANDARD 17)
 set(PROJECT_NAME mc_convex_visualization)
-project(${PROJECT_NAME} LANGUAGES CXX VERSION 1.3.1)
+project(${PROJECT_NAME} LANGUAGES CXX VERSION 1.3.2)
 
 find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(CATKIN_DEPENDS roscpp)
 
-find_package(mc_rtc 1.3.1 REQUIRED)
+find_package(mc_rtc REQUIRED)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
