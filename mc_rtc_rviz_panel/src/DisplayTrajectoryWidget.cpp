@@ -120,6 +120,10 @@ void DisplayTrajectoryWidget::configure(const mc_rtc::gui::LineConfig & config)
                                                               : visualization_msgs::Marker::LINE_STRIP;
   path_.header.frame_id = "robot_map";
   path_.header.stamp = ros::Time::now();
+  path_.pose.orientation.w = 1.0;
+  path_.pose.orientation.x = 0.0;
+  path_.pose.orientation.y = 0.0;
+  path_.pose.orientation.z = 0.0;
   path_.scale.x = config.width;
   path_.scale.y = config.width;
   path_.color.r = static_cast<float>(config.color.r);
@@ -135,7 +139,7 @@ void DisplayTrajectoryWidget::publish()
   if(visible_ || was_visible_)
   {
     markers_.markers.push_back(path_);
-    if(!visible_)
+    if(!visible_ || path_.points.size() == 0)
     {
       markers_.markers.back().action = visualization_msgs::Marker::DELETE;
     }
