@@ -109,6 +109,27 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
       marker_.mesh_resource = m.filename;
       marker_.mesh_use_embedded_materials = true;
     }
+    else if(type == Type::SUPERELLIPSOID)
+    {
+      auto & se = boost::get<Geometry::Superellipsoid>(geom_data);
+      if(se.epsilon1 != 1.0 || se.epsilon2 != 1.0)
+      {
+        static bool show_error_once = false;
+        if(!show_error_once)
+        {
+          mc_rtc::log::error(
+              "mc_rtc RViZ panel cannot handle Superellispoid visual if epsilon1 != 1.0 or epsilon2 != 1.0");
+          show_error_once = true;
+        }
+      }
+      else
+      {
+        marker_.type = visualization_msgs::Marker::SPHERE;
+        marker_.scale.x = se.size.x();
+        marker_.scale.y = se.size.y();
+        marker_.scale.z = se.size.z();
+      }
+    }
   }
   if(visible_ || was_visible_)
   {
