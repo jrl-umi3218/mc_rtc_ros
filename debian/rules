@@ -5,6 +5,9 @@ TMP:=$(CURDIR)/debian/tmp
 
 export ROS_DISTRO=@ROS_DISTRO@
 ifeq (${ROS_DISTRO},)
+	export CMAKE_OPTIONS=
+	export EXTRA_STEPS=
+else
 	export ROS_PYTHON_VERSION:=$(shell . /opt/ros/${ROS_DISTRO}/setup.sh && echo $$ROS_PYTHON_VERSION)
 	ifeq (${ROS_PYTHON_VERSION}, 3)
 		export PYTHONPATH:=/opt/ros/${ROS_DISTRO}/lib/python3/dist-packages:${PYTHONPATH}
@@ -19,9 +22,6 @@ ifeq (${ROS_DISTRO},)
 	export CMAKE_PREFIX_PATH=/opt/ros/${ROS_DISTRO}:$CMAKE_PREFIX_PATH
 	export CMAKE_OPTIONS=-DCMAKE_INSTALL_PREFIX=/opt/ros/${ROS_DISTRO} -DBUILD_ROS_FREE_GUI:BOOL=ON -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 	export EXTRA_STEPS=mkdir -p $(TMP) && mv $(TMP)/opt/ros/${ROS_DISTRO}/lib/mc_rtc_rviz_panel/mc_rtc_gui_noros $(TMP)/usr/bin/mc_rtc_gui
-else
-	export CMAKE_OPTIONS=
-	export EXTRA_STEPS=
 endif
 
 
