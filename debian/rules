@@ -11,10 +11,10 @@ else
 	export ROS_PYTHON_VERSION:=$(shell . /opt/ros/${ROS_DISTRO}/setup.sh && echo $$ROS_PYTHON_VERSION)
 	ifeq (${ROS_PYTHON_VERSION}, 3)
 		export PYTHONPATH:=/opt/ros/${ROS_DISTRO}/lib/python3/dist-packages:${PYTHONPATH}
-		export PYTHON_EXECUTABLE=python3
+		export PYTHON_EXECUTABLE=/usr/bin/python3
 	else
 		export PYTHONPATH:=/opt/ros/${ROS_DISTRO}/lib/python2.7/dist-packages:${PYTHONPATH}
-		export PYTHON_EXECUTABLE=python2
+		export PYTHON_EXECUTABLE=/usr/bin/python
 	endif
 	export PKG_CONFIG_PATH=/opt/ros/${ROS_DISTRO}/lib/pkgconfig:$PKG_CONFIG_PATH
 	export ROS_MASTER_URI=http://localhost:11311
