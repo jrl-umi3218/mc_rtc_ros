@@ -21,7 +21,7 @@ else
 	export ROS_PACKAGE_PATH=/opt/ros/${ROS_DISTRO}/share
 	export CMAKE_PREFIX_PATH=/opt/ros/${ROS_DISTRO}:$CMAKE_PREFIX_PATH
 	export CMAKE_OPTIONS=-DCMAKE_INSTALL_PREFIX=/opt/ros/${ROS_DISTRO} -DBUILD_ROS_FREE_GUI:BOOL=ON -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
-	export EXTRA_STEPS=mkdir -p $(TMP) && mv $(TMP)/opt/ros/${ROS_DISTRO}/lib/mc_rtc_rviz_panel/mc_rtc_gui_noros $(TMP)/usr/bin/mc_rtc_gui
+	export EXTRA_STEPS=mkdir -p $(TMP)/usr/bin/ && mv $(TMP)/opt/ros/${ROS_DISTRO}/lib/mc_rtc_rviz_panel/mc_rtc_gui_noros $(TMP)/usr/bin/mc_rtc_gui
 endif
 
 
