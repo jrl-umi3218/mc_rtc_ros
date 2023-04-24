@@ -160,7 +160,7 @@ visualization_msgs::Marker fromCylinder(const std::string & frame_id,
   marker.scale.x = 2 * cylinder.getRadius();
   marker.scale.y = 2 * cylinder.getRadius();
   marker.scale.z = (cylinder.getP2() - cylinder.getP1()).norm();
-  auto midP = cylinder.getP1() + (cylinder.getP2() - cylinder.getP1()) * marker.scale.z / 2;
+  auto midP = cylinder.getP1() + (cylinder.getP2() - cylinder.getP1()) / 2;
   Eigen::Vector3d midPV3{midP.m_x, midP.m_y, midP.m_z};
   sva::PTransformd cylinderCenter{Eigen::Matrix3d::Identity(), midPV3};
   setMarkerPose(marker, colTrans * cylinderCenter);
