@@ -590,6 +590,99 @@ void Form::reset()
   for(auto & el : elements_) { el->reset(); }
 }
 
+std::string formId2name(const WidgetId & id, const std::string & name)
+{
+  std::string ret;
+  for(const auto c : id.category) { ret += c + "/"; }
+  ret += id.name;
+  ret += "/";
+  ret += name;
+  return ret;
+}
+
+Point3DInput::Point3DInput(QWidget * parent,
+                           const std::string & name,
+                           bool required,
+                           const WidgetId & formId,
+                           const Eigen::Vector3d & default_,
+                           bool default_from_user,
+                           bool interactive,
+                           std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server)
+: FormElement(parent, name, required),
+  marker_(int_server,
+          formId2name(formId, name),
+          make3DMarker(formId2name(formId, name), makeAxisMarker(0.15 * 0.9), interactive),
+
+          [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) { handleRequest(feedback); }),
+  data_(default_)
+{
+  auto layout = new QGridLayout(this);
+  int column = 0;
+  for(const auto & l : {"x", "y", "z"})
+  {
+    layout->addWidget(new QLabel(l), 0, column);
+    auto edit = new QLineEdit(QString::number(data_(column)), this);
+    edits_[static_cast<size_t>(column)] = edit;
+    layout->addWidget(edit, 1, column);
+    this->connect(edit, &QLineEdit::textChanged, this,
+                  [this, column](const QString & txt)
+                  {
+                    ready_ = true;
+                    locked_ = true;
+                    data_(column) = txt.toDouble();
+                    marker_.update(data_);
+                  });
+    column++;
+  }
+  changed(required, formId, default_, default_from_user, interactive, int_server);
+}
+
+void Point3DInput::changed(bool required,
+                           const WidgetId & formId,
+                           const Eigen::Vector3d & default_,
+                           bool default_from_user,
+                           bool interactive,
+                           std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server)
+{
+  if(std::any_of(edits_.begin(), edits_.end(), [](const auto * edit) { return edit->hasFocus(); })) { return; }
+  changed_(required);
+  data_ = default_;
+  user_default_ = default_from_user;
+  reset();
+}
+
+void Point3DInput::handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+{
+  locked_ = true;
+  ready_ = true;
+  data_.x() = feedback->pose.position.x;
+  data_.y() = feedback->pose.position.y;
+  data_.z() = feedback->pose.position.z;
+  for(size_t i = 0; i < 3; ++i) { edits_[i]->setText(QString::number(data_(static_cast<Eigen::DenseIndex>(i)))); }
+}
+
+mc_rtc::Configuration Point3DInput::serialize() const
+{
+  mc_rtc::Configuration out;
+  out.add("data", data_);
+  return out("data");
+}
+
+void Point3DInput::reset()
+{
+  ready_ = user_default_;
+  if(user_default_)
+  {
+    for(size_t i = 0; i < 3; ++i) { edits_[i]->setText(QString::number(data_(static_cast<Eigen::DenseIndex>(i)))); }
+  }
+  else
+  {
+    for(size_t i = 0; i < 3; ++i) { edits_[i]->setText(""); }
+    data_.setZero();
+  }
+  marker_.update(data_);
+}
+
 } // namespace form
 
 } // namespace mc_rtc_rviz

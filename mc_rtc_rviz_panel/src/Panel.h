@@ -207,6 +207,13 @@ protected:
                              const std::vector<std::string> & ref,
                              bool send_index) override;
 
+  void form_point3d_input(const WidgetId & formId,
+                          const std::string & name,
+                          bool required,
+                          const Eigen::Vector3d & default_,
+                          bool default_from_user,
+                          bool interactive) override;
+
   void start_plot(uint64_t id, const std::string & title) override;
   void plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range) override;
   void plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range) override;
@@ -364,6 +371,12 @@ private slots:
                                  bool required,
                                  const std::vector<std::string> & ref,
                                  bool send_index);
+  void got_form_point3d_input(const WidgetId & formId,
+                              const std::string & name,
+                              bool required,
+                              const Eigen::Vector3d & default_,
+                              bool default_from_user,
+                              bool interactive);
   void got_start_plot(uint64_t id, const std::string & title);
   void got_plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range);
   void got_plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range);
@@ -488,6 +501,12 @@ signals:
                                     bool required,
                                     const std::vector<std::string> & ref,
                                     bool send_index);
+  void signal_form_point3d_input(const WidgetId & formId,
+                                 const std::string & name,
+                                 bool required,
+                                 const Eigen::Vector3d & default_,
+                                 bool default_from_user,
+                                 bool interactive);
   void signal_start_plot(uint64_t id, const std::string & title);
   void signal_plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range);
   void signal_plot_setup_yaxis_left(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range);

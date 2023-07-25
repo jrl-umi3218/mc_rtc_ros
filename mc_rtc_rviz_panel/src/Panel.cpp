@@ -293,6 +293,12 @@ Panel::Panel(QWidget * parent)
           this,
           SLOT(got_form_data_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &,
                                          bool)));
+  connect(
+      this,
+      SIGNAL(
+          signal_form_point3d_input(const WidgetId &, const std::string &, bool, const Eigen::Vector3d &, bool, bool)),
+      this,
+      SLOT(got_form_point3d_input(const WidgetId &, const std::string &, bool, const Eigen::Vector3d &, bool, bool)));
   connect(this, SIGNAL(signal_start_plot(uint64_t, const std::string &)), this,
           SLOT(got_start_plot(uint64_t, const std::string &)));
   connect(this, SIGNAL(signal_plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)), this,
@@ -609,6 +615,16 @@ void Panel::form_data_combo_input(const WidgetId & formId,
                                   bool send_index)
 {
   Q_EMIT signal_form_data_combo_input(formId, name, required, ref, send_index);
+}
+
+void Panel::form_point3d_input(const WidgetId & formId,
+                               const std::string & name,
+                               bool required,
+                               const Eigen::Vector3d & default_,
+                               bool default_from_user,
+                               bool interactive)
+{
+  Q_EMIT signal_form_point3d_input(formId, name, required, default_, default_from_user, interactive);
 }
 
 void Panel::start_plot(uint64_t id, const std::string & title)
@@ -1003,6 +1019,18 @@ void Panel::got_form_data_combo_input(const WidgetId & formId,
 {
   auto & form = get_widget<FormWidget>(formId);
   form.element<form::DataComboInput>(name, required, data_, ref, send_index);
+}
+
+void Panel::got_form_point3d_input(const WidgetId & formId,
+                                   const std::string & name,
+                                   bool required,
+                                   const Eigen::Vector3d & default_,
+                                   bool default_from_user,
+                                   bool interactive)
+{
+  auto & form = get_widget<FormWidget>(formId);
+  form.element<form::Point3DInput>(name, required, formId, default_, default_from_user, interactive,
+                                   impl_->int_server_);
 }
 
 void Panel::got_start_plot(uint64_t id, const std::string & title)

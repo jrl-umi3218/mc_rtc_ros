@@ -8,6 +8,9 @@
 
 #include <mc_rtc/Configuration.h>
 
+#include "ClientWidget.h"
+#include "utils.h"
+
 namespace mc_rtc_rviz
 {
 
@@ -488,6 +491,39 @@ private:
 signals:
   /** Emitted if the Form is checkable and the users unchecks it */
   void toggled(bool);
+};
+
+struct Point3DInput : public FormElement
+{
+  Q_OBJECT
+public:
+  Point3DInput(QWidget * parent,
+               const std::string & name,
+               bool required,
+               const WidgetId & formId,
+               const Eigen::Vector3d & default_,
+               bool default_from_user,
+               bool interactive,
+               std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server);
+
+  void changed(bool required,
+               const WidgetId & formId,
+               const Eigen::Vector3d & default_,
+               bool default_from_user,
+               bool interactive,
+               std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server);
+
+  mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
+
+private:
+  std::array<QLineEdit *, 3> edits_;
+  SharedMarker marker_;
+  Eigen::Vector3d data_;
+  bool user_default_;
+
+  void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback);
 };
 
 } // namespace form
