@@ -522,6 +522,7 @@ public:
 
 private:
   SharedMarker marker_;
+  DataT default_data_;
   DataT data_;
   bool user_default_;
 

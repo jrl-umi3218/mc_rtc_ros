@@ -625,6 +625,8 @@ InteractiveMarkerInput<DataT, rotation_only>::InteractiveMarkerInput(
   data_(default_)
 {
   auto layout = new QGridLayout(this);
+  auto validator = new QDoubleValidator(this);
+  validator->setLocale(QLocale::C);
   int row = 0;
   if constexpr(!rotation_only)
   {
@@ -638,6 +640,7 @@ InteractiveMarkerInput<DataT, rotation_only>::InteractiveMarkerInput(
     {
       layout->addWidget(new QLabel(l), 0, column);
       auto edit = new QLineEdit(QString::number(data(column)), this);
+      edit->setValidator(validator);
       edits_[static_cast<size_t>(column)] = edit;
       layout->addWidget(edit, 1, column);
       this->connect(edit, &QLineEdit::textChanged, this,
@@ -669,6 +672,7 @@ InteractiveMarkerInput<DataT, rotation_only>::InteractiveMarkerInput(
     {
       layout->addWidget(new QLabel(QString(l)), 2 * row, column);
       auto edit = new QLineEdit(QString::number(get_value(data, l)), this);
+      edit->setValidator(validator);
       edits_[static_cast<size_t>(3 * row + column)] = edit;
       layout->addWidget(edit, 2 * row + 1, column);
       column++;
@@ -699,6 +703,7 @@ void InteractiveMarkerInput<DataT, rotation_only>::changed(
   if(std::any_of(edits_.begin(), edits_.end(), [](const auto * edit) { return edit->hasFocus(); })) { return; }
   changed_(required);
   data_ = default_;
+  default_data_ = data_;
   user_default_ = default_from_user;
   reset();
 }
@@ -715,6 +720,7 @@ mc_rtc::Configuration InteractiveMarkerInput<DataT, rotation_only>::serialize() 
 template<typename DataT, bool rotation_only>
 void InteractiveMarkerInput<DataT, rotation_only>::reset()
 {
+  data_ = default_data_;
   ready_ = user_default_;
   reset_edits();
   marker_.update(data_);
@@ -739,6 +745,12 @@ template<typename DataT, bool rotation_only>
 void InteractiveMarkerInput<DataT, rotation_only>::reset_edits()
 {
   size_t idx = 0;
+  auto setText = [](QLineEdit * edit, double number)
+  {
+    edit->blockSignals(true);
+    edit->setText(QString::number(number));
+    edit->blockSignals(false);
+  };
   if constexpr(!rotation_only)
   {
     auto & data = [this]() -> Eigen::Vector3d &
@@ -746,18 +758,18 @@ void InteractiveMarkerInput<DataT, rotation_only>::reset_edits()
       if constexpr(std::is_same_v<Eigen::Vector3d, DataT>) { return data_; }
       else { return data_.translation(); }
     }();
-    edits_[0]->setText(QString::number(data(0)));
-    edits_[1]->setText(QString::number(data(1)));
-    edits_[2]->setText(QString::number(data(2)));
+    setText(edits_[0], data(0));
+    setText(edits_[1], data(1));
+    setText(edits_[2], data(2));
     idx = 3;
   }
   if constexpr(std::is_same_v<DataT, sva::PTransformd>)
   {
     auto data = Eigen::Quaterniond(data_.rotation());
-    edits_[idx]->setText(QString::number(data.w()));
-    edits_[idx + 1]->setText(QString::number(data.x()));
-    edits_[idx + 2]->setText(QString::number(data.y()));
-    edits_[idx + 3]->setText(QString::number(data.z()));
+    setText(edits_[idx], data.w());
+    setText(edits_[idx + 1], data.x());
+    setText(edits_[idx + 2], data.y());
+    setText(edits_[idx + 3], data.z());
   }
 }
 
