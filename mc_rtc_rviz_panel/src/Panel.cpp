@@ -174,159 +174,72 @@ Panel::Panel(QWidget * parent)
   connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
   connect(this, SIGNAL(signal_start()), this, SLOT(got_start()));
   connect(this, SIGNAL(signal_stop()), this, SLOT(got_stop()));
-  connect(this, SIGNAL(signal_category(const std::vector<std::string> &, const std::string &)), this,
-          SLOT(got_category(const std::vector<std::string> &, const std::string &)));
-  connect(this, SIGNAL(signal_label(const WidgetId &, const std::string &)), this,
-          SLOT(got_label(const WidgetId &, const std::string &)));
-  connect(this, SIGNAL(signal_array_label(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &)),
-          this, SLOT(got_array_label(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &)));
-  connect(this, SIGNAL(signal_button(const WidgetId &)), this, SLOT(got_button(const WidgetId &)));
-  connect(this, SIGNAL(signal_checkbox(const WidgetId &, bool)), this, SLOT(got_checkbox(const WidgetId &, bool)));
-  connect(this, SIGNAL(signal_string_input(const WidgetId &, const std::string &)), this,
-          SLOT(got_string_input(const WidgetId &, const std::string &)));
-  connect(this, SIGNAL(signal_integer_input(const WidgetId &, int)), this,
-          SLOT(got_integer_input(const WidgetId &, int)));
-  connect(this, SIGNAL(signal_number_input(const WidgetId &, double)), this,
-          SLOT(got_number_input(const WidgetId &, double)));
-  connect(this, SIGNAL(signal_number_slider(const WidgetId &, double, double, double)), this,
-          SLOT(got_number_slider(const WidgetId &, double, double, double)));
-  connect(this, SIGNAL(signal_array_input(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &)),
-          this, SLOT(got_array_input(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &)));
-  connect(this, SIGNAL(signal_combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &)),
-          this, SLOT(got_combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &)));
-  connect(this,
-          SIGNAL(signal_data_combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &)),
-          this, SLOT(got_data_combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &)));
-  connect(this,
-          SIGNAL(signal_point3d(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &,
-                                const mc_rtc::gui::PointConfig &)),
-          this,
-          SLOT(got_point3d(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &,
-                           const mc_rtc::gui::PointConfig &)));
-  connect(
-      this,
-      SIGNAL(
-          signal_trajectory(const WidgetId &, const std::vector<Eigen::Vector3d> &, const mc_rtc::gui::LineConfig &)),
-      this,
-      SLOT(got_trajectory(const WidgetId &, const std::vector<Eigen::Vector3d> &, const mc_rtc::gui::LineConfig &)));
-  connect(
-      this,
-      SIGNAL(
-          signal_trajectory(const WidgetId &, const std::vector<sva::PTransformd> &, const mc_rtc::gui::LineConfig &)),
-      this,
-      SLOT(got_trajectory(const WidgetId &, const std::vector<sva::PTransformd> &, const mc_rtc::gui::LineConfig &)));
-  connect(this, SIGNAL(signal_trajectory(const WidgetId &, const Eigen::Vector3d &, const mc_rtc::gui::LineConfig &)),
-          this, SLOT(got_trajectory(const WidgetId &, const Eigen::Vector3d &, const mc_rtc::gui::LineConfig &)));
-  connect(this, SIGNAL(signal_trajectory(const WidgetId &, const sva::PTransformd &, const mc_rtc::gui::LineConfig &)),
-          this, SLOT(got_trajectory(const WidgetId &, const sva::PTransformd &, const mc_rtc::gui::LineConfig &)));
-  connect(this,
-          SIGNAL(signal_polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &,
-                                const mc_rtc::gui::LineConfig &)),
-          this,
-          SLOT(got_polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &,
-                           const mc_rtc::gui::LineConfig &)));
-  connect(this,
-          SIGNAL(signal_polyhedron(const WidgetId &, const std::vector<std::array<Eigen::Vector3d, 3>> &,
-                                   const std::vector<std::array<mc_rtc::gui::Color, 3>> &,
-                                   const mc_rtc::gui::PolyhedronConfig &)),
-          this,
-          SLOT(got_polyhedron(const WidgetId &, const std::vector<std::array<Eigen::Vector3d, 3>> &,
-                              const std::vector<std::array<mc_rtc::gui::Color, 3>> &,
-                              const mc_rtc::gui::PolyhedronConfig &)));
-  connect(this,
-          SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
-                              const mc_rtc::gui::ForceConfig &, bool)),
-          this,
-          SLOT(got_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
-                         const mc_rtc::gui::ForceConfig &, bool)));
-  connect(this,
-          SIGNAL(signal_arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
-                              const mc_rtc::gui::ArrowConfig &, bool)),
-          this,
-          SLOT(got_arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
-                         const mc_rtc::gui::ArrowConfig &, bool)));
-  connect(this, SIGNAL(signal_rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)), this,
-          SLOT(got_rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)));
-  connect(this, SIGNAL(signal_transform(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)), this,
-          SLOT(got_transform(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)));
-  connect(this, SIGNAL(signal_xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, double)), this,
-          SLOT(got_xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, double)));
-  connect(this, SIGNAL(signal_schema(const WidgetId &, const std::string &)), this,
-          SLOT(got_schema(const WidgetId &, const std::string &)));
-  connect(this, SIGNAL(signal_table_start(const WidgetId &, const std::vector<std::string> &)), this,
-          SLOT(got_table_start(const WidgetId &, const std::vector<std::string> &)));
-  connect(this, SIGNAL(signal_table_row(const WidgetId &, const std::vector<std::string> &)), this,
-          SLOT(got_table_row(const WidgetId &, const std::vector<std::string> &)));
-  connect(this, SIGNAL(signal_table_end(const WidgetId &)), this, SLOT(got_table_end(const WidgetId &)));
-  connect(this,
-          SIGNAL(signal_robot(const WidgetId &, const std::vector<std::string> &,
-                              const std::vector<std::vector<double>> &, const sva::PTransformd &)),
-          this,
-          SLOT(got_robot(const WidgetId &, const std::vector<std::string> &, const std::vector<std::vector<double>> &,
-                         const sva::PTransformd &)));
-  connect(this, SIGNAL(signal_visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &)), this,
-          SLOT(got_visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &)));
-  connect(this, SIGNAL(signal_form(const WidgetId &)), this, SLOT(got_form(const WidgetId &)));
-  connect(this, SIGNAL(signal_form_checkbox(const WidgetId &, const std::string &, bool, bool, bool)), this,
-          SLOT(got_form_checkbox(const WidgetId &, const std::string &, bool, bool, bool)));
-  connect(this, SIGNAL(signal_form_integer_input(const WidgetId &, const std::string &, bool, int, bool)), this,
-          SLOT(got_form_integer_input(const WidgetId &, const std::string &, bool, int, bool)));
-  connect(this, SIGNAL(signal_form_number_input(const WidgetId &, const std::string &, bool, double, bool)), this,
-          SLOT(got_form_number_input(const WidgetId &, const std::string &, bool, double, bool)));
-  connect(this,
-          SIGNAL(signal_form_string_input(const WidgetId &, const std::string &, bool, const std::string &, bool)),
-          this, SLOT(got_form_string_input(const WidgetId &, const std::string &, bool, const std::string &, bool)));
-  connect(
-      this,
-      SIGNAL(signal_form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool, bool)),
-      this,
-      SLOT(got_form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool, bool)));
-  connect(this,
-          SIGNAL(signal_form_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &,
-                                         bool, int)),
-          this,
-          SLOT(got_form_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &, bool,
-                                    int)));
-  connect(this,
-          SIGNAL(signal_form_data_combo_input(const WidgetId &, const std::string &, bool,
-                                              const std::vector<std::string> &, bool)),
-          this,
-          SLOT(got_form_data_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &,
-                                         bool)));
-  connect(
-      this,
-      SIGNAL(
-          signal_form_point3d_input(const WidgetId &, const std::string &, bool, const Eigen::Vector3d &, bool, bool)),
-      this,
-      SLOT(got_form_point3d_input(const WidgetId &, const std::string &, bool, const Eigen::Vector3d &, bool, bool)));
-  connect(this, SIGNAL(signal_start_plot(uint64_t, const std::string &)), this,
-          SLOT(got_start_plot(uint64_t, const std::string &)));
-  connect(this, SIGNAL(signal_plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)), this,
-          SLOT(got_plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
-  connect(this, SIGNAL(signal_plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)),
-          this, SLOT(got_plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
-  connect(this, SIGNAL(signal_plot_setup_yaxis_right(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)),
-          this, SLOT(got_plot_setup_yaxis_right(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
-  connect(this,
-          SIGNAL(signal_plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
-                                   mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side)),
-          this,
-          SLOT(got_plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
-                              mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side)));
-  connect(this,
-          SIGNAL(signal_plot_polygon(uint64_t, uint64_t, const std::string &,
-                                     const mc_rtc::gui::plot::PolygonDescription &, mc_rtc::gui::plot::Side)),
-          this,
-          SLOT(got_plot_polygon(uint64_t, uint64_t, const std::string &, const mc_rtc::gui::plot::PolygonDescription &,
-                                mc_rtc::gui::plot::Side)));
-  connect(
-      this,
-      SIGNAL(signal_plot_polygons(uint64_t, uint64_t, const std::string &,
-                                  const std::vector<mc_rtc::gui::plot::PolygonDescription> &, mc_rtc::gui::plot::Side)),
-      this,
-      SLOT(got_plot_polygons(uint64_t, uint64_t, const std::string &,
-                             const std::vector<mc_rtc::gui::plot::PolygonDescription> &, mc_rtc::gui::plot::Side)));
-  connect(this, SIGNAL(signal_end_plot(uint64_t)), this, SLOT(got_end_plot(uint64_t)));
+#define CONNECT_SIGNAL_SLOT(...) connect(this, SIGNAL(signal_##__VA_ARGS__), this, SLOT(got_##__VA_ARGS__))
+  CONNECT_SIGNAL_SLOT(category(const std::vector<std::string> &, const std::string &));
+  CONNECT_SIGNAL_SLOT(label(const WidgetId &, const std::string &));
+  CONNECT_SIGNAL_SLOT(array_label(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &));
+  CONNECT_SIGNAL_SLOT(button(const WidgetId &));
+  CONNECT_SIGNAL_SLOT(checkbox(const WidgetId &, bool));
+  CONNECT_SIGNAL_SLOT(string_input(const WidgetId &, const std::string &));
+  CONNECT_SIGNAL_SLOT(integer_input(const WidgetId &, int));
+  CONNECT_SIGNAL_SLOT(number_input(const WidgetId &, double));
+  CONNECT_SIGNAL_SLOT(number_slider(const WidgetId &, double, double, double));
+  CONNECT_SIGNAL_SLOT(array_input(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &));
+  CONNECT_SIGNAL_SLOT(combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &));
+  CONNECT_SIGNAL_SLOT(data_combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &));
+  CONNECT_SIGNAL_SLOT(
+      point3d(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, const mc_rtc::gui::PointConfig &));
+  CONNECT_SIGNAL_SLOT(
+      trajectory(const WidgetId &, const std::vector<Eigen::Vector3d> &, const mc_rtc::gui::LineConfig &));
+  CONNECT_SIGNAL_SLOT(
+      trajectory(const WidgetId &, const std::vector<sva::PTransformd> &, const mc_rtc::gui::LineConfig &));
+  CONNECT_SIGNAL_SLOT(trajectory(const WidgetId &, const Eigen::Vector3d &, const mc_rtc::gui::LineConfig &));
+  CONNECT_SIGNAL_SLOT(trajectory(const WidgetId &, const sva::PTransformd &, const mc_rtc::gui::LineConfig &));
+  CONNECT_SIGNAL_SLOT(
+      polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &, const mc_rtc::gui::LineConfig &));
+  CONNECT_SIGNAL_SLOT(polyhedron(const WidgetId &, const std::vector<std::array<Eigen::Vector3d, 3>> &,
+                                 const std::vector<std::array<mc_rtc::gui::Color, 3>> &,
+                                 const mc_rtc::gui::PolyhedronConfig &));
+  CONNECT_SIGNAL_SLOT(force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
+                            const mc_rtc::gui::ForceConfig &, bool));
+  CONNECT_SIGNAL_SLOT(arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
+                            const mc_rtc::gui::ArrowConfig &, bool));
+  CONNECT_SIGNAL_SLOT(rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &));
+  CONNECT_SIGNAL_SLOT(transform(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &));
+  CONNECT_SIGNAL_SLOT(xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, double));
+  CONNECT_SIGNAL_SLOT(schema(const WidgetId &, const std::string &));
+  CONNECT_SIGNAL_SLOT(table_start(const WidgetId &, const std::vector<std::string> &));
+  CONNECT_SIGNAL_SLOT(table_row(const WidgetId &, const std::vector<std::string> &));
+  CONNECT_SIGNAL_SLOT(table_end(const WidgetId &));
+  CONNECT_SIGNAL_SLOT(robot(const WidgetId &, const std::vector<std::string> &,
+                            const std::vector<std::vector<double>> &, const sva::PTransformd &));
+  CONNECT_SIGNAL_SLOT(visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &));
+  CONNECT_SIGNAL_SLOT(form(const WidgetId &));
+  CONNECT_SIGNAL_SLOT(form_checkbox(const WidgetId &, const std::string &, bool, bool, bool));
+  CONNECT_SIGNAL_SLOT(form_integer_input(const WidgetId &, const std::string &, bool, int, bool));
+  CONNECT_SIGNAL_SLOT(form_number_input(const WidgetId &, const std::string &, bool, double, bool));
+  CONNECT_SIGNAL_SLOT(form_string_input(const WidgetId &, const std::string &, bool, const std::string &, bool));
+  CONNECT_SIGNAL_SLOT(
+      form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool, bool));
+  CONNECT_SIGNAL_SLOT(
+      form_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &, bool, int));
+  CONNECT_SIGNAL_SLOT(
+      form_data_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &, bool));
+  CONNECT_SIGNAL_SLOT(
+      form_point3d_input(const WidgetId &, const std::string &, bool, const Eigen::Vector3d &, bool, bool));
+  CONNECT_SIGNAL_SLOT(start_plot(uint64_t, const std::string &));
+  CONNECT_SIGNAL_SLOT(plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
+  CONNECT_SIGNAL_SLOT(plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
+  CONNECT_SIGNAL_SLOT(plot_setup_yaxis_right(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
+  CONNECT_SIGNAL_SLOT(plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
+                                 mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side));
+  CONNECT_SIGNAL_SLOT(plot_polygon(uint64_t, uint64_t, const std::string &,
+                                   const mc_rtc::gui::plot::PolygonDescription &, mc_rtc::gui::plot::Side));
+  CONNECT_SIGNAL_SLOT(plot_polygons(uint64_t, uint64_t, const std::string &,
+                                    const std::vector<mc_rtc::gui::plot::PolygonDescription> &,
+                                    mc_rtc::gui::plot::Side));
+  CONNECT_SIGNAL_SLOT(end_plot(uint64_t));
+#undef CONNECT_SIGNAL_SLOT
   mc_control::ControllerClient::start();
 }
 
