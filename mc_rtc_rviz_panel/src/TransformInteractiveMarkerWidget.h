@@ -25,14 +25,8 @@ public:
 
   void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;
 
-  void update(const Eigen::Vector3d & t)
-  {
-    marker_.update(t);
-  }
-  void update(const sva::PTransformd & pos)
-  {
-    marker_.update(pos);
-  }
+  void update(const Eigen::Vector3d & t) { marker_.update(t); }
+  void update(const sva::PTransformd & pos) { marker_.update(pos); }
 
 protected:
   bool control_orientation_;

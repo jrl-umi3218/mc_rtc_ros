@@ -27,10 +27,7 @@ bool FormElement::eventFilter(QObject * o, QEvent * e)
 
 bool FormElement::can_fill(std::string & msg)
 {
-  if(ready())
-  {
-    return true;
-  }
+  if(ready()) { return true; }
   else if(required())
   {
     msg += name() + " must be completed";
@@ -66,10 +63,7 @@ Checkbox::Checkbox(QWidget * parent, const std::string & name, bool required, bo
 
 void Checkbox::changed(bool required, bool def, bool user_def)
 {
-  if(cbox_->hasFocus())
-  {
-    return;
-  }
+  if(cbox_->hasFocus()) { return; }
   changed_(required);
   def_ = def;
   user_def_ = user_def;
@@ -85,10 +79,7 @@ void Checkbox::toggled(bool)
 void Checkbox::reset()
 {
   cbox_->disconnect();
-  if(user_def_)
-  {
-    cbox_->setChecked(def_);
-  }
+  if(user_def_) { cbox_->setChecked(def_); }
   else
   {
     cbox_->setTristate(true);
@@ -139,10 +130,7 @@ IntegerInput::IntegerInput(QWidget * parent, const std::string & name, bool requ
 
 void IntegerInput::changed(bool required, int def, bool user_def)
 {
-  if(edit_->hasFocus())
-  {
-    return;
-  }
+  if(edit_->hasFocus()) { return; }
   changed_(required);
   def_ = def;
   user_def_ = user_def;
@@ -157,14 +145,8 @@ mc_rtc::Configuration IntegerInput::serialize() const
 void IntegerInput::reset()
 {
   edit_->disconnect();
-  if(user_def_)
-  {
-    edit_->setText(QString::number(def_));
-  }
-  else
-  {
-    edit_->setText("");
-  }
+  if(user_def_) { edit_->setText(QString::number(def_)); }
+  else { edit_->setText(""); }
   ready_ = user_def_;
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
@@ -180,10 +162,7 @@ NumberInput::NumberInput(QWidget * parent, const std::string & name, bool requir
 
 void NumberInput::changed(bool required, double def, bool user_def)
 {
-  if(edit_->hasFocus())
-  {
-    return;
-  }
+  if(edit_->hasFocus()) { return; }
   changed_(required);
   def_ = def;
   user_def_ = user_def;
@@ -198,14 +177,8 @@ mc_rtc::Configuration NumberInput::serialize() const
 void NumberInput::reset()
 {
   edit_->disconnect();
-  if(user_def_)
-  {
-    edit_->setText(QString::number(def_));
-  }
-  else
-  {
-    edit_->setText("");
-  }
+  if(user_def_) { edit_->setText(QString::number(def_)); }
+  else { edit_->setText(""); }
   ready_ = user_def_;
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
@@ -222,10 +195,7 @@ StringInput::StringInput(QWidget * parent,
 
 void StringInput::changed(bool required, const std::string & def, bool user_def)
 {
-  if(edit_->hasFocus())
-  {
-    return;
-  }
+  if(edit_->hasFocus()) { return; }
   changed_(required);
   def_ = def;
   user_def_ = user_def;
@@ -235,14 +205,8 @@ void StringInput::changed(bool required, const std::string & def, bool user_def)
 void StringInput::reset()
 {
   edit_->disconnect();
-  if(user_def_)
-  {
-    edit_->setText(def_.c_str());
-  }
-  else
-  {
-    edit_->setText("");
-  }
+  if(user_def_) { edit_->setText(def_.c_str()); }
+  else { edit_->setText(""); }
   ready_ = user_def_;
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
@@ -320,10 +284,7 @@ NumberArrayInput::NumberArrayInput(QWidget * parent,
                                    bool user_def)
 : ArrayInput<double>(parent, name, required, fixed_size), def_(def), user_def_(user_def)
 {
-  if(fixed_size)
-  {
-    updateStride(static_cast<size_t>(def.size()));
-  }
+  if(fixed_size) { updateStride(static_cast<size_t>(def.size())); }
   reset();
 }
 
@@ -341,20 +302,14 @@ void NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool 
 {
   for(const auto & e : edits_)
   {
-    if(e->hasFocus())
-    {
-      return;
-    }
+    if(e->hasFocus()) { return; }
   }
   changed_(required);
   bool should_reset = def_.size() != def.size();
   def_ = def;
   user_def_ = user_def;
   fixed_size_ = fixed_size_;
-  if(should_reset)
-  {
-    reset();
-  }
+  if(should_reset) { reset(); }
   size_t i = 0;
   for(auto & e : edits_)
   {
@@ -368,10 +323,7 @@ void NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool 
 void NumberArrayInput::reset()
 {
   ArrayInput<double>::reset();
-  for(int i = 0; i < def_.size(); ++i)
-  {
-    add_edit(def_(i));
-  }
+  for(int i = 0; i < def_.size(); ++i) { add_edit(def_(i)); }
   ready_ = user_def_;
 }
 
@@ -388,10 +340,7 @@ ComboInput::ComboInput(QWidget * parent,
   combo_->installEventFilter(this);
   combo_->setFocusPolicy(Qt::StrongFocus);
   layout->addWidget(combo_);
-  for(const auto & v : values)
-  {
-    combo_->addItem(v.c_str());
-  }
+  for(const auto & v : values) { combo_->addItem(v.c_str()); }
   reset();
 }
 
@@ -405,10 +354,7 @@ void ComboInput::reset()
 
 void ComboInput::changed(bool required, const std::vector<std::string> & values, bool send_index, int def)
 {
-  if(combo_->hasFocus())
-  {
-    return;
-  }
+  if(combo_->hasFocus()) { return; }
   changed_(required);
   def_ = def;
   values_ = values;
@@ -424,14 +370,8 @@ void ComboInput::currentIndexChanged(int idx)
 
 mc_rtc::Configuration ComboInput::serialize() const
 {
-  if(send_index_)
-  {
-    return details::serialize(combo_->currentIndex());
-  }
-  else
-  {
-    return details::serialize(combo_->currentText().toStdString());
-  }
+  if(send_index_) { return details::serialize(combo_->currentIndex()); }
+  else { return details::serialize(combo_->currentText().toStdString()); }
 }
 
 DataComboInput::DataComboInput(QWidget * parent,
@@ -458,10 +398,7 @@ void DataComboInput::reset()
   combo_->clear();
   values_.clear();
   resolved_ref_ = ref_;
-  if(resolve_ref())
-  {
-    update_values();
-  }
+  if(resolve_ref()) { update_values(); }
   combo_->setCurrentIndex(-1);
   ready_ = false;
   connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
@@ -472,17 +409,11 @@ void DataComboInput::changed(bool required,
                              const std::vector<std::string> & ref,
                              bool send_index)
 {
-  if(combo_->hasFocus())
-  {
-    return;
-  }
+  if(combo_->hasFocus()) { return; }
   changed_(required);
   ref_ = ref;
   send_index_ = send_index;
-  if(resolve_ref())
-  {
-    update_values();
-  }
+  if(resolve_ref()) { update_values(); }
 }
 
 void DataComboInput::currentIndexChanged(int idx)
@@ -503,10 +434,7 @@ void DataComboInput::update_dependencies(FormElement * other)
         auto combo = static_cast<QComboBox *>(other->layout()->itemAt(0)->widget());
         connect(combo, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(currentIndexChanged(const QString &)));
         connected_.insert(need);
-        if(combo->currentIndex() != -1)
-        {
-          update_field(other->name(), combo->currentText().toStdString());
-        }
+        if(combo->currentIndex() != -1) { update_field(other->name(), combo->currentText().toStdString()); }
       }
     }
   }
@@ -521,24 +449,15 @@ void DataComboInput::currentIndexChanged(const QString & text)
 
 mc_rtc::Configuration DataComboInput::serialize() const
 {
-  if(send_index_)
-  {
-    return details::serialize(combo_->currentIndex());
-  }
-  else
-  {
-    return details::serialize(combo_->currentText().toStdString());
-  }
+  if(send_index_) { return details::serialize(combo_->currentIndex()); }
+  else { return details::serialize(combo_->currentText().toStdString()); }
 }
 
 bool DataComboInput::resolve_ref()
 {
   for(const auto & k : resolved_ref_)
   {
-    if(k.size() == 0 || k[0] == '$')
-    {
-      return false;
-    }
+    if(k.size() == 0 || k[0] == '$') { return false; }
   }
   return true;
 }
@@ -550,29 +469,20 @@ void DataComboInput::update_field(const std::string & name, const std::string & 
     if(ref_[i].size() && ref_[i][0] == '$')
     {
       auto k = ref_[i].substr(1, ref_[i].size() - 1);
-      if(k == name)
-      {
-        resolved_ref_[i] = value;
-      }
+      if(k == name) { resolved_ref_[i] = value; }
     }
   }
-  if(resolve_ref())
-  {
-    update_values();
-  }
+  if(resolve_ref()) { update_values(); }
 }
 
 void DataComboInput::update_values()
 {
   auto dataIn = data_;
-  for(const auto & k : resolved_ref_)
-  {
-    dataIn = dataIn(k, mc_rtc::Configuration{});
-  }
+  for(const auto & k : resolved_ref_) { dataIn = dataIn(k, mc_rtc::Configuration{}); }
   auto values = dataIn.size() ? dataIn : std::vector<std::string>{};
-  std::sort(values.begin(), values.end(), [](const std::string & lhs, const std::string & rhs) {
-    return QString::compare(lhs.c_str(), rhs.c_str(), Qt::CaseInsensitive) < 0;
-  });
+  std::sort(values.begin(), values.end(),
+            [](const std::string & lhs, const std::string & rhs)
+            { return QString::compare(lhs.c_str(), rhs.c_str(), Qt::CaseInsensitive) < 0; });
   if(values_ != values)
   {
     auto selected = combo_->currentText().toStdString();
@@ -582,20 +492,11 @@ void DataComboInput::update_values()
     for(size_t i = 0; i < values.size(); ++i)
     {
       const auto & v = values[i];
-      if(v == selected)
-      {
-        idx = static_cast<int>(i);
-      }
+      if(v == selected) { idx = static_cast<int>(i); }
       combo_->addItem(v.c_str());
     }
-    if(idx != -1)
-    {
-      combo_->setCurrentIndex(idx);
-    }
-    else if(values.size())
-    {
-      combo_->setCurrentIndex(0);
-    }
+    if(idx != -1) { combo_->setCurrentIndex(idx); }
+    else if(values.size()) { combo_->setCurrentIndex(0); }
   }
 }
 
@@ -620,10 +521,7 @@ Form::Form(QWidget * parent,
     auto layout = new QHBoxLayout(group_);
     for(auto & el : elements_)
     {
-      for(auto & other : elements_)
-      {
-        el->update_dependencies(other);
-      }
+      for(auto & other : elements_) { el->update_dependencies(other); }
       layout->addWidget(el);
     }
   }
@@ -632,21 +530,12 @@ Form::Form(QWidget * parent,
     auto layout = new QFormLayout(group_);
     for(auto & el : elements_)
     {
-      for(auto & other : elements_)
-      {
-        el->update_dependencies(other);
-      }
+      for(auto & other : elements_) { el->update_dependencies(other); }
       auto el_name = el->required() ? el->name() + "*" : el->name();
-      if(!el->spanning())
-      {
-        layout->addRow(el_name.c_str(), el);
-      }
+      if(!el->spanning()) { layout->addRow(el_name.c_str(), el); }
       else
       {
-        if(el->show_name())
-        {
-          layout->addRow(new QLabel(el_name.c_str(), this));
-        }
+        if(el->show_name()) { layout->addRow(new QLabel(el_name.c_str(), this)); }
         layout->addRow(el);
       }
     }
@@ -665,14 +554,8 @@ bool Form::ready() const
   bool ok = false;
   for(const auto & el : elements_)
   {
-    if(el->ready())
-    {
-      ok = true;
-    }
-    if(el->required() && !el->ready())
-    {
-      return false;
-    }
+    if(el->ready()) { ok = true; }
+    if(el->required() && !el->ready()) { return false; }
   }
   return ok;
 }
@@ -685,22 +568,13 @@ mc_rtc::Configuration Form::serialize() const
 mc_rtc::Configuration Form::serialize(bool asTuple) const
 {
   mc_rtc::Configuration out;
-  if(asTuple)
-  {
-    out = out.array("data", elements_.size());
-  }
+  if(asTuple) { out = out.array("data", elements_.size()); }
   for(auto & el : elements_)
   {
     if(el->ready())
     {
-      if(asTuple)
-      {
-        out.push(el->serialize());
-      }
-      else
-      {
-        out.add(el->name(), el->serialize());
-      }
+      if(asTuple) { out.push(el->serialize()); }
+      else { out.add(el->name(), el->serialize()); }
     }
   }
   return out;
@@ -713,10 +587,7 @@ void Form::rejectUncheck()
 
 void Form::reset()
 {
-  for(auto & el : elements_)
-  {
-    el->reset();
-  }
+  for(auto & el : elements_) { el->reset(); }
 }
 
 } // namespace form

@@ -48,4 +48,3 @@ You can then install the package:
 ```bash
 sudo apt install ros-${ROS_DISTRO}-mc-rtc-tools
 ```
-

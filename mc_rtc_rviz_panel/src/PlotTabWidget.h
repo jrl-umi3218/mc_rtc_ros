@@ -84,10 +84,7 @@ public:
 
   void closeEvent(QCloseEvent * event) override;
 
-  PlotWidget * plot()
-  {
-    return plot_;
-  }
+  PlotWidget * plot() { return plot_; }
 
 private:
   PlotWidget * plot_;
@@ -145,10 +142,7 @@ public:
 
   void close_dialog(PlotDialog * dialog);
 
-  PlotTab * tab()
-  {
-    return tab_;
-  }
+  PlotTab * tab() { return tab_; }
 
 private:
   /** Holds plots in tabs */

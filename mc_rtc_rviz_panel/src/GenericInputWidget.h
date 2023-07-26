@@ -49,10 +49,7 @@ template<typename T>
 GenericInputWidget<T>::GenericInputWidget(const ClientWidgetParam & param) : CommonInputWidget(param)
 {
   setLayout(new QHBoxLayout());
-  if(!secret())
-  {
-    layout()->addWidget(new QLabel(name().c_str()));
-  }
+  if(!secret()) { layout()->addWidget(new QLabel(name().c_str())); }
   lock_button_ = new QPushButton("EDIT");
   lock_button_->setCheckable(true);
   connect(lock_button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
@@ -83,19 +80,13 @@ void GenericInputWidget<T>::toggled(bool unlocked)
 template<typename T>
 void GenericInputWidget<T>::returnPressed()
 {
-  if(lock_button_->isChecked())
-  {
-    lock_button_->toggle();
-  }
+  if(lock_button_->isChecked()) { lock_button_->toggle(); }
 }
 
 template<typename T>
 void GenericInputWidget<T>::update(const T & dataIn)
 {
-  if(!lock_button_->isChecked())
-  {
-    to_edit(dataIn);
-  }
+  if(!lock_button_->isChecked()) { to_edit(dataIn); }
 }
 
 template<typename T>

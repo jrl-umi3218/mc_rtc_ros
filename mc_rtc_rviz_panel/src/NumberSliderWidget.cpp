@@ -11,10 +11,7 @@ NumberSliderWidget::NumberSliderWidget(const ClientWidgetParam & param, double m
 : ClientWidget(param), min_(min), max_(max)
 {
   auto layout = new QGridLayout(this);
-  if(!secret())
-  {
-    layout->addWidget(new QLabel(param.id.name.c_str()), 0, 0, 2, 1);
-  }
+  if(!secret()) { layout->addWidget(new QLabel(param.id.name.c_str()), 0, 0, 2, 1); }
   valueLabel_ = new QLabel(this);
   layout->addWidget(valueLabel_, 0, 1, Qt::AlignCenter);
   slider_ = new QSlider(Qt::Horizontal, this);
@@ -27,10 +24,7 @@ NumberSliderWidget::NumberSliderWidget(const ClientWidgetParam & param, double m
 
 void NumberSliderWidget::update(double dataIn, double min, double max)
 {
-  if(locked_)
-  {
-    return;
-  }
+  if(locked_) { return; }
   value_ = dataIn;
   min_ = min;
   max_ = max;

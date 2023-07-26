@@ -93,20 +93,11 @@ private:
     ~Polygon();
     QRectF update(const mc_rtc::gui::plot::PolygonDescription & poly);
 
-    QwtPlotShapeItem * item()
-    {
-      return item_;
-    }
+    QwtPlotShapeItem * item() { return item_; }
 
-    mc_rtc::gui::plot::PolygonDescription poly()
-    {
-      return poly_;
-    }
+    mc_rtc::gui::plot::PolygonDescription poly() { return poly_; }
 
-    const QRectF & rect() const
-    {
-      return rect_;
-    }
+    const QRectF & rect() const { return rect_; }
 
   private:
     mc_rtc::gui::plot::PolygonDescription poly_;

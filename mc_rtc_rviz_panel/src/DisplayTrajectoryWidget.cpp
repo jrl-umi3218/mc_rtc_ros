@@ -14,10 +14,7 @@ DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & param
 : ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
-  if(!secret())
-  {
-    layout->addWidget(new QLabel(id().name.c_str()));
-  }
+  if(!secret()) { layout->addWidget(new QLabel(id().name.c_str())); }
   button_ = new QPushButton(this);
   button_->setCheckable(true);
   button_->setChecked(!visible_);
@@ -139,10 +136,7 @@ void DisplayTrajectoryWidget::publish()
   if(visible_ || was_visible_)
   {
     markers_.markers.push_back(path_);
-    if(!visible_ || path_.points.size() == 0)
-    {
-      markers_.markers.back().action = visualization_msgs::Marker::DELETE;
-    }
+    if(!visible_ || path_.points.size() == 0) { markers_.markers.back().action = visualization_msgs::Marker::DELETE; }
   }
   was_visible_ = visible_;
 }

@@ -16,10 +16,7 @@ ConnectionDialog::ConnectionDialog(std::vector<ConnectionConfiguration> & config
   layout_ = new QFormLayout(this);
   // Connection editor
   connectionCombo_ = new QComboBox(this);
-  for(const auto & c : configs)
-  {
-    connectionCombo_->addItem(c.toText().c_str());
-  }
+  for(const auto & c : configs) { connectionCombo_->addItem(c.toText().c_str()); }
   connectionCombo_->addItem("New connection...");
   connect(connectionCombo_, SIGNAL(currentIndexChanged(int)), this, SLOT(connectionChanged(int)));
   layout_->addRow("Connection", connectionCombo_);
@@ -31,7 +28,8 @@ ConnectionDialog::ConnectionDialog(std::vector<ConnectionConfiguration> & config
   layout_->addRow("Protocol", protocolCombo_);
   hostEdit_ = new QLineEdit(this);
   layout_->addRow("File/Host", hostEdit_);
-  auto makeIntEdit = [this]() {
+  auto makeIntEdit = [this]()
+  {
     auto edit = new QLineEdit(this);
     auto validator = new QIntValidator(this);
     validator->setRange(1, 65535);
@@ -74,7 +72,8 @@ ConnectionConfiguration::Protocol ConnectionDialog::protocol()
 
 void ConnectionDialog::accept()
 {
-  auto configFromForm = [this]() {
+  auto configFromForm = [this]()
+  {
     auto proto = protocol();
     if(proto == ConnectionConfiguration::Protocol::IPC)
     {
@@ -119,16 +118,10 @@ void ConnectionDialog::protocolChanged(int idx)
   {
     subPortLabel_->show();
     subPortEdit_->show();
-    if(!subPortEdit_->hasAcceptableInput())
-    {
-      subPortEdit_->setText("4242");
-    }
+    if(!subPortEdit_->hasAcceptableInput()) { subPortEdit_->setText("4242"); }
     pushPortLabel_->show();
     pushPortEdit_->show();
-    if(!pushPortEdit_->hasAcceptableInput())
-    {
-      pushPortEdit_->setText("4343");
-    }
+    if(!pushPortEdit_->hasAcceptableInput()) { pushPortEdit_->setText("4343"); }
   }
 }
 

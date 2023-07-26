@@ -47,10 +47,7 @@ LogPublisher::LogPublisher(ros::NodeHandle & nh_,
       conf.base_rotation_is_imu = true;
       real_robot.reset(new LogRobot(conf));
     }
-    else
-    {
-      real_robot.reset(nullptr);
-    }
+    else { real_robot.reset(nullptr); }
   }
 }
 
@@ -62,40 +59,22 @@ void LogPublisher::pubThread()
   while(running)
   {
     robot->update(log, cur_i);
-    if(real_robot)
-    {
-      real_robot->update(log, cur_i);
-    }
+    if(real_robot) { real_robot->update(log, cur_i); }
 
     /* Playback speed logic */
     pub_i++;
     if(!paused && pub_i % playback_den == 0)
     {
-      if(!reversed)
-      {
-        cur_i += playback_num;
-      }
-      else
-      {
-        cur_i -= playback_num;
-      }
+      if(!reversed) { cur_i += playback_num; }
+      else { cur_i -= playback_num; }
       pub_i = 0;
     }
     if(cur_i >= max_i)
     {
-      if(reversed)
-      {
-        cur_i = max_i - 1;
-      }
-      else
-      {
-        cur_i = min_i;
-      }
+      if(reversed) { cur_i = max_i - 1; }
+      else { cur_i = min_i; }
     }
-    if(cur_i < min_i)
-    {
-      cur_i = max_i;
-    }
+    if(cur_i < min_i) { cur_i = max_i; }
     cur_t = log.get("t", cur_i, cur_t);
     server->handle_requests(gui);
     server->publish(gui);
@@ -105,12 +84,15 @@ void LogPublisher::pubThread()
 
 void LogPublisher::addRemoveExtraDataButton(const std::string & section, const std::string & entry)
 {
-  gui.addElement(extraDataRemoveCategory, mc_rtc::gui::Button("Remove " + entry, [this, section, entry]() {
-                   gui.removeElement(extraDataCategory, entry);
-                   gui.removeElement(extraDataRemoveCategory, "Remove " + entry);
-                   config(section).remove(entry);
-                   saveConfig();
-                 }));
+  gui.addElement(extraDataRemoveCategory, mc_rtc::gui::Button("Remove " + entry,
+                                                              [this, section, entry]()
+                                                              {
+                                                                gui.removeElement(extraDataCategory, entry);
+                                                                gui.removeElement(extraDataRemoveCategory,
+                                                                                  "Remove " + entry);
+                                                                config(section).remove(entry);
+                                                                saveConfig();
+                                                              }));
 }
 
 void LogPublisher::rebuildGUI()
@@ -125,15 +107,17 @@ void LogPublisher::rebuildGUI()
   robots_category.push_back("Real");
   if(real_robot)
   {
-    gui.addElement(robots_category, mc_rtc::gui::Robot(real_robot->robot().name(), [this]() -> const mc_rbdyn::Robot & {
-                     return real_robot->robot();
-                   }));
+    gui.addElement(robots_category,
+                   mc_rtc::gui::Robot(real_robot->robot().name(),
+                                      [this]() -> const mc_rbdyn::Robot & { return real_robot->robot(); }));
   }
 
-  auto makeTimeElement = [this]() {
+  auto makeTimeElement = [this]()
+  {
     return mc_rtc::gui::NumberSlider(
         "#Time", [this]() { return cur_t; },
-        [this](double time) {
+        [this](double time)
+        {
           size_t i = min_i;
           double t_i = log.get<double>("t", i, 0);
           double t_ii = log.get<double>("t", i + 1, 0);
@@ -157,50 +141,40 @@ void LogPublisher::rebuildGUI()
 
   gui.addElement(category, mc_rtc::gui::ElementsStacking::Horizontal,
                  mc_rtc::gui::Button("-",
-                                     [this]() {
-                                       if(playback_num == 1)
-                                       {
-                                         playback_den *= 2;
-                                       }
-                                       else
-                                       {
-                                         playback_num /= 2;
-                                       }
+                                     [this]()
+                                     {
+                                       if(playback_num == 1) { playback_den *= 2; }
+                                       else { playback_num /= 2; }
                                      }),
                  mc_rtc::gui::Label("Playback speed:",
-                                    [this]() {
+                                    [this]()
+                                    {
                                       std::stringstream ss;
                                       ss << playback_num;
-                                      if(playback_den != 1)
-                                      {
-                                        ss << "/" << playback_den;
-                                      }
+                                      if(playback_den != 1) { ss << "/" << playback_den; }
                                       return ss.str();
                                     }),
-                 mc_rtc::gui::Button("+", [this]() {
-                   if(playback_den == 1)
-                   {
-                     playback_num *= 2;
-                   }
-                   else
-                   {
-                     playback_den /= 2;
-                   }
-                 }));
+                 mc_rtc::gui::Button("+",
+                                     [this]()
+                                     {
+                                       if(playback_den == 1) { playback_num *= 2; }
+                                       else { playback_den /= 2; }
+                                     }));
 
-  auto makeStepButton = [this](int mul) {
+  auto makeStepButton = [this](int mul)
+  {
     int dt_ms = static_cast<int>(std::floor(mul * 1000 * dt));
     std::stringstream ss;
-    if(dt_ms > 0)
-    {
-      ss << "+";
-    }
+    if(dt_ms > 0) { ss << "+"; }
     ss << dt_ms << " ms";
-    return mc_rtc::gui::Button(ss.str(), [this, mul]() {
-      paused = true;
-      cur_i = static_cast<size_t>(
-          std::max(static_cast<int>(min_i), std::min(static_cast<int>(max_i), static_cast<int>(cur_i) + mul)));
-    });
+    return mc_rtc::gui::Button(
+        ss.str(),
+        [this, mul]()
+        {
+          paused = true;
+          cur_i = static_cast<size_t>(
+              std::max(static_cast<int>(min_i), std::min(static_cast<int>(max_i), static_cast<int>(cur_i) + mul)));
+        });
   };
   gui.addElement(category, mc_rtc::gui::ElementsStacking::Horizontal, makeStepButton(-100), makeStepButton(-10),
                  makeStepButton(-1), makeStepButton(1), makeStepButton(10), makeStepButton(100));
@@ -208,10 +182,7 @@ void LogPublisher::rebuildGUI()
   std::vector<std::string> keys;
   for(const auto & k : log.entries())
   {
-    if(k == "t" || (k.size() > 1 && k[0] == 't' && k[1] == '_'))
-    {
-      keys.push_back(k);
-    }
+    if(k == "t" || (k.size() > 1 && k[0] == 't' && k[1] == '_')) { keys.push_back(k); }
   }
   gui.addElement(
       category, mc_rtc::gui::ComboInput(
@@ -221,13 +192,11 @@ void LogPublisher::rebuildGUI()
   category.push_back("Add extra information");
   const auto & log_entries = log.entries();
   std::vector<std::string> entries{log_entries.begin(), log_entries.end()};
-  if(!log.has(extra_selected))
-  {
-    extra_selected = entries[0];
-  }
+  if(!log.has(extra_selected)) { extra_selected = entries[0]; }
   gui.addElement(category, mc_rtc::gui::ComboInput(
                                "Entry", entries, [this]() { return extra_selected; },
-                               [this](const std::string & selected) {
+                               [this](const std::string & selected)
+                               {
                                  extra_selected = selected;
                                  rebuildGUI();
                                }));
@@ -257,25 +226,30 @@ void LogPublisher::rebuildGUI()
       case mc_rtc::log::LogType::MotionVecd:
       case mc_rtc::log::LogType::VectorDouble:
         added_something = true;
-        gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Label", [this, entry, t]() {
-                         config("labels").add(entry, static_cast<unsigned int>(t));
-                         saveConfig();
-                         addLabel(entry, t);
-                       }));
+        gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Label",
+                                                     [this, entry, t]()
+                                                     {
+                                                       config("labels").add(entry, static_cast<unsigned int>(t));
+                                                       saveConfig();
+                                                       addLabel(entry, t);
+                                                     }));
         break;
       case mc_rtc::log::LogType::Vector3d:
         added_something = true;
-        gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Point3D", [this, entry]() {
-                         config("points").add(entry, "point");
-                         saveConfig();
-                         addVector3dAsPoint3D(entry);
-                       }));
+        gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Point3D",
+                                                     [this, entry]()
+                                                     {
+                                                       config("points").add(entry, "point");
+                                                       saveConfig();
+                                                       addVector3dAsPoint3D(entry);
+                                                     }));
         break;
       case mc_rtc::log::LogType::ForceVecd:
         added_something = true;
         gui.addElement(category, mc_rtc::gui::Form(
                                      "Add " + entry + " as Force",
-                                     [this, entry](const mc_rtc::Configuration & form) {
+                                     [this, entry](const mc_rtc::Configuration & form)
+                                     {
                                        std::string surface = form("Surface");
                                        auto c = config("forces").add(entry);
                                        c.add("surface", surface);
@@ -286,11 +260,13 @@ void LogPublisher::rebuildGUI()
         break;
       case mc_rtc::log::LogType::PTransformd:
         added_something = true;
-        gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Transform", [this, entry]() {
-                         config("transforms").add(entry, "ptransformd");
-                         saveConfig();
-                         addPTransformdAsTransform(entry);
-                       }));
+        gui.addElement(category, mc_rtc::gui::Button("Add " + entry + " as Transform",
+                                                     [this, entry]()
+                                                     {
+                                                       config("transforms").add(entry, "ptransformd");
+                                                       saveConfig();
+                                                       addPTransformdAsTransform(entry);
+                                                     }));
         break;
       case mc_rtc::log::LogType::None:
         continue;
@@ -307,29 +283,18 @@ bool LogPublisher::selectTime(const std::string & t)
   size_t i = 0;
   double t_i = 0;
   double t_ii = 0;
-  do
-  {
+  do {
     t_i = log.get<double>(t, i, 0);
     t_ii = log.get<double>(t, i + 1, 0);
   } while(t_i == t_ii && ++i < log.size() - 1);
-  if(i + 1 == log.size())
-  {
-    return false;
-  }
-  if(fabs(t_ii - t_i - dt) > 1e-6)
-  {
-    i = i + 1;
-  }
+  if(i + 1 == log.size()) { return false; }
+  if(fabs(t_ii - t_i - dt) > 1e-6) { i = i + 1; }
   size_t start_i = i;
-  do
-  {
+  do {
     t_i = log.get<double>(t, i, 0);
     t_ii = log.get<double>(t, i + 1, 0);
   } while(fabs(t_ii - t_i - dt) < 1e-6 && ++i < log.size() - 1);
-  if(i == start_i)
-  {
-    return false;
-  }
+  if(i == start_i) { return false; }
   min_i = start_i;
   cur_i = min_i;
   max_i = i;
@@ -360,19 +325,22 @@ namespace details
 template<typename T, typename RetT = T>
 void addLabel(LogPublisher & log, const std::string & entry, const T & def)
 {
-  log.gui.addElement(log.extraDataCategory, mc_rtc::gui::Label(entry, [&log, entry, def]() -> RetT {
-                       return log.log.get<T>(entry, log.cur_i, def);
-                     }));
+  log.gui.addElement(
+      log.extraDataCategory,
+      mc_rtc::gui::Label(entry, [&log, entry, def]() -> RetT { return log.log.get<T>(entry, log.cur_i, def); }));
   log.addRemoveExtraDataButton("labels", entry);
 }
 
 template<typename T>
 void addLabel(LogPublisher & log, const std::string & entry, const T & def, const std::vector<std::string> & labels)
 {
-  log.gui.addElement(log.extraDataCategory, mc_rtc::gui::ArrayLabel(entry, labels, [&log, entry, def]() -> const T & {
-                       auto data_ptr = log.log.getRaw<T>(entry, log.cur_i);
-                       return data_ptr ? *data_ptr : def;
-                     }));
+  log.gui.addElement(log.extraDataCategory, mc_rtc::gui::ArrayLabel(entry, labels,
+                                                                    [&log, entry, def]() -> const T &
+                                                                    {
+                                                                      auto data_ptr =
+                                                                          log.log.getRaw<T>(entry, log.cur_i);
+                                                                      return data_ptr ? *data_ptr : def;
+                                                                    }));
   log.addRemoveExtraDataButton("labels", entry);
 }
 } // namespace details
@@ -442,9 +410,9 @@ void LogPublisher::addLabel(const std::string & entry, mc_rtc::log::LogType t)
 
 void LogPublisher::addVector3dAsPoint3D(const std::string & entry)
 {
-  gui.addElement(extraDataCategory, mc_rtc::gui::Point3D(entry, [this, entry]() {
-                   return log.get<Eigen::Vector3d>(entry, cur_i, Eigen::Vector3d::Zero());
-                 }));
+  gui.addElement(extraDataCategory,
+                 mc_rtc::gui::Point3D(entry, [this, entry]()
+                                      { return log.get<Eigen::Vector3d>(entry, cur_i, Eigen::Vector3d::Zero()); }));
   addRemoveExtraDataButton("points", entry);
 }
 
@@ -459,9 +427,10 @@ void LogPublisher::addForce(const std::string & entry, const std::string & surfa
 
 void LogPublisher::addPTransformdAsTransform(const std::string & entry)
 {
-  gui.addElement(extraDataCategory, mc_rtc::gui::Transform(entry, [this, entry]() {
-                   return log.get<sva::PTransformd>(entry, cur_i, sva::PTransformd::Identity());
-                 }));
+  gui.addElement(
+      extraDataCategory,
+      mc_rtc::gui::Transform(entry, [this, entry]()
+                             { return log.get<sva::PTransformd>(entry, cur_i, sva::PTransformd::Identity()); }));
   addRemoveExtraDataButton("transforms", entry);
 }
 
@@ -478,17 +447,11 @@ bfs::path LogPublisher::configPath() const
 void LogPublisher::loadConfig()
 {
   auto p = configPath();
-  if(bfs::exists(p))
-  {
-    config.load(p.string());
-  }
+  if(bfs::exists(p)) { config.load(p.string()); }
   std::vector<std::string> requiredKeys = {"labels", "forces", "points", "transforms"};
   for(const auto & k : requiredKeys)
   {
-    if(!config.has(k))
-    {
-      config.add(k);
-    }
+    if(!config.has(k)) { config.add(k); }
   }
   for(const auto & e : config("labels").keys())
   {
@@ -500,10 +463,7 @@ void LogPublisher::loadConfig()
   }
   for(const auto & pt : config("points").keys())
   {
-    if(log.has(pt))
-    {
-      addVector3dAsPoint3D(pt);
-    }
+    if(log.has(pt)) { addVector3dAsPoint3D(pt); }
   }
   for(const auto & f : config("forces").keys())
   {
@@ -515,10 +475,7 @@ void LogPublisher::loadConfig()
   }
   for(const auto & t : config("transforms").keys())
   {
-    if(log.has(t))
-    {
-      addPTransformdAsTransform(t);
-    }
+    if(log.has(t)) { addPTransformdAsTransform(t); }
   }
 }
 

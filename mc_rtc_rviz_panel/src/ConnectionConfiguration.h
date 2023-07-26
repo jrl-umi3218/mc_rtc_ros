@@ -25,25 +25,13 @@ struct ConnectionConfiguration
   /** Constructor with provided values */
   ConnectionConfiguration(Protocol proto, const std::string & host, const std::string & sub, const std::string & push);
 
-  inline Protocol protocol() const
-  {
-    return protocol_;
-  }
+  inline Protocol protocol() const { return protocol_; }
 
-  inline const std::string & host() const
-  {
-    return host_;
-  }
+  inline const std::string & host() const { return host_; }
 
-  inline const std::string & sub_suffix() const
-  {
-    return sub_suffix_;
-  }
+  inline const std::string & sub_suffix() const { return sub_suffix_; }
 
-  inline const std::string & push_suffix() const
-  {
-    return push_suffix_;
-  }
+  inline const std::string & push_suffix() const { return push_suffix_; }
 
   std::string toText() const;
 

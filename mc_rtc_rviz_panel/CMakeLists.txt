@@ -9,7 +9,10 @@ set(PROJECT_DESCRIPTION "mc_rtc RVIz panel for prototyping controllers")
 set(PROJECT_URL "")
 set(CMAKE_CXX_STANDARD 17)
 
-project(${PROJECT_NAME} LANGUAGES CXX VERSION 1.3.1)
+project(
+  ${PROJECT_NAME}
+  LANGUAGES CXX
+  VERSION 1.3.1)
 
 find_package(mc_rtc REQUIRED)
 
@@ -21,30 +24,16 @@ find_package(catkin)
 if(${catkin_FOUND})
   option(BUILD_ROS_FREE_GUI "Build a ROS free GUI" OFF)
   set(DISABLE_ROS 0)
-  find_package(catkin REQUIRED COMPONENTS
-    roscpp
-    tf
-    rviz
-    roslib
-  )
+  find_package(catkin REQUIRED COMPONENTS roscpp tf rviz roslib)
 
-  catkin_package(
-    CATKIN_DEPENDS
-    roscpp
-    tf
-    rviz
-    roslib
-  )
+  catkin_package(CATKIN_DEPENDS roscpp tf rviz roslib)
 
   include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
   link_directories(${catkin_LIBRARY_DIRS})
 
   if(NOT ${DISABLE_ROS})
-    install(
-      FILES
-      rviz_plugin.xml
-      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-    )
+    install(FILES rviz_plugin.xml
+            DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
   endif()
 else()
   set(BUILD_ROS_FREE_GUI ON)

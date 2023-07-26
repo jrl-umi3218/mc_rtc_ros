@@ -10,10 +10,7 @@ namespace
 std::vector<std::string> ref2values(const mc_rtc::Configuration & data, const std::vector<std::string> & ref)
 {
   auto d = data;
-  for(const auto & k : ref)
-  {
-    d = d(k, mc_rtc::Configuration{});
-  }
+  for(const auto & k : ref) { d = d(k, mc_rtc::Configuration{}); }
   return d.size() ? d : std::vector<std::string>{};
 }
 
@@ -73,10 +70,7 @@ void ComboInputWidget::update(const std::vector<std::string> & values)
   if(values != values_)
   {
     combo_->clear();
-    for(const auto & v : values)
-    {
-      combo_->addItem(v.c_str());
-    }
+    for(const auto & v : values) { combo_->addItem(v.c_str()); }
     values_ = values;
   }
 }

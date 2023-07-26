@@ -44,10 +44,7 @@ SchemaWidget::SchemaWidget(const ClientWidgetParam & params,
     Schema s{path.string()};
     Schema::store()[path.string()] = s;
     auto form = new FormWidget(params);
-    for(auto el : s.create_form(this, dataIn))
-    {
-      form->add_element(el);
-    }
+    for(auto el : s.create_form(this, dataIn)) { form->add_element(el); }
     form->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     combo->addItem(s.title().c_str());
     stack_->addWidget(form);

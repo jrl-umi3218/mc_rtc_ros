@@ -31,46 +31,25 @@ public:
   virtual ~ClientWidget() = default;
 
   /** Name of the widget */
-  const std::string & name() const
-  {
-    return id_.name;
-  }
+  const std::string & name() const { return id_.name; }
 
   /** If a widget name starts with # then it should be displayed discreetly */
-  bool secret() const
-  {
-    return name().size() == 0 || name()[0] == '#';
-  }
+  bool secret() const { return name().size() == 0 || name()[0] == '#'; }
 
   /** Id of the widget */
-  const WidgetId & id() const
-  {
-    return id_;
-  }
+  const WidgetId & id() const { return id_; }
 
   /** Stack id of the widget */
-  int sid() const
-  {
-    return id().sid;
-  }
+  int sid() const { return id().sid; }
 
   /** Return true if the element was seen this round */
-  virtual bool wasSeen()
-  {
-    return seen_;
-  }
+  virtual bool wasSeen() { return seen_; }
 
   /** Called to set seen status back to false */
-  virtual void resetSeen()
-  {
-    seen_ = false;
-  }
+  virtual void resetSeen() { seen_ = false; }
 
   /** Called to set seen status to true */
-  void seen()
-  {
-    seen_ = true;
-  }
+  void seen() { seen_ = true; }
 
   /** Get the element visibility stored in the configuration */
   bool visible();
@@ -82,10 +61,7 @@ public:
    *
    * To be implemented when relevant, the default implementation does nothing
    */
-  virtual QPushButton * showHideButton()
-  {
-    return nullptr;
-  }
+  virtual QPushButton * showHideButton() { return nullptr; }
 
   /** To be implemented for containers, default implementation throws */
   virtual void addWidget(ClientWidget * w);
@@ -94,22 +70,13 @@ public:
   virtual void removeWidget(ClientWidget * w);
 
   /** To be implemented in containers, returns the number of remaining elements */
-  virtual size_t clean()
-  {
-    return 1;
-  }
+  virtual size_t clean() { return 1; }
 
   /** To be implemented in container, return a widget by its name or a nullptr if the widget does not exist */
-  virtual ClientWidget * widget(const std::string &)
-  {
-    return nullptr;
-  }
+  virtual ClientWidget * widget(const std::string &) { return nullptr; }
 
 protected:
-  mc_control::ControllerClient & client()
-  {
-    return client_;
-  }
+  mc_control::ControllerClient & client() { return client_; }
 
 private:
   mc_control::ControllerClient & client_;

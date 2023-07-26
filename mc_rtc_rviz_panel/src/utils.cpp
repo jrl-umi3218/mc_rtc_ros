@@ -258,10 +258,7 @@ SharedMarker::SharedMarker(std::shared_ptr<interactive_markers::InteractiveMarke
 
 SharedMarker::~SharedMarker()
 {
-  if(!hidden_)
-  {
-    server_->erase(marker_.name);
-  }
+  if(!hidden_) { server_->erase(marker_.name); }
 }
 
 void SharedMarker::toggle()

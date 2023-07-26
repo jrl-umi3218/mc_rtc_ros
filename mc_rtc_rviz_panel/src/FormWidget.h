@@ -60,10 +60,7 @@ namespace mc_rtc_rviz
 template<typename T, typename... Args>
 void FormWidget::element(const std::string & name, Args &&... args)
 {
-  if(elements_.size() <= idx_)
-  {
-    changed_ = true;
-  }
+  if(elements_.size() <= idx_) { changed_ = true; }
   else
   {
     auto & el = elements_[idx_];
@@ -74,10 +71,7 @@ void FormWidget::element(const std::string & name, Args &&... args)
     }
     else
     {
-      if(!el->locked())
-      {
-        static_cast<T *>(el)->changed(std::forward<Args>(args)...);
-      }
+      if(!el->locked()) { static_cast<T *>(el)->changed(std::forward<Args>(args)...); }
       idx_ += 1;
       return;
     }

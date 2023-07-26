@@ -8,9 +8,9 @@ AlignEscapedNewlinesLeft: true
 AlignOperands:   true
 AlignTrailingComments: false
 AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortBlocksOnASingleLine: false
+AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: true
 AlwaysBreakAfterDefinitionReturnType: None
@@ -44,26 +44,24 @@ ForEachMacros:
   - BOOST_FOREACH
 IncludeBlocks: Preserve
 IncludeCategories:
-  - Regex:           '^(".*")'
-    Priority:        1
   - Regex:           '^(<mc_[a-z]*/)'
-    Priority:        2
+    Priority:        1
   - Regex:           '^(<Tasks/)'
-    Priority:        3
+    Priority:        2
   - Regex:           '^(<mc_rbdyn_urdf/)'
-    Priority:        4
+    Priority:        3
   - Regex:           '^(<RBDyn/)'
-    Priority:        5
+    Priority:        4
   - Regex:           '^(<SpaceVecAlg/)'
+    Priority:        5
+  - Regex:           '^(<sch-core/)'
     Priority:        6
-  - Regex:           '^(<(sch-core|sch)/)'
-    Priority:        7
   - Regex:           '^(<boost/)'
-    Priority:        8
+    Priority:        7
   - Regex:           '^(<(nanomsg|geos|.*_msgs|ros|tf2.*)/)'
-    Priority:        9
+    Priority:        8
   - Regex:           '.*'
-    Priority:        10
+    Priority:        9
 IncludeIsMainRegex: '(Test)?$'
 IndentCaseLabels: true
 IndentPPDirectives: AfterHash
@@ -105,4 +103,3 @@ Standard:        Cpp11
 TabWidth:        2
 UseTab:          Never
 ...
-

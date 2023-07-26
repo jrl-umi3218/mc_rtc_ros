@@ -13,10 +13,7 @@ PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params, visua
 : ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
-  if(!secret())
-  {
-    layout->addWidget(new QLabel(id().name.c_str()));
-  }
+  if(!secret()) { layout->addWidget(new QLabel(id().name.c_str())); }
   button_ = new QPushButton(this);
   button_->setCheckable(true);
   button_->setChecked(!visible_);
@@ -41,10 +38,7 @@ void PolygonMarkerWidget::update(const std::vector<std::vector<Eigen::Vector3d>>
                                  const mc_rtc::gui::LineConfig & c)
 {
   currPolygonNum_ = polygons.size();
-  if(prevPolygonNum_ > currPolygonNum_)
-  {
-    clear();
-  }
+  if(prevPolygonNum_ > currPolygonNum_) { clear(); }
 
   for(size_t i = 0; i < polygons.size(); ++i)
   {
@@ -95,10 +89,7 @@ void PolygonMarkerWidget::update(const std::string & ns,
   if(visible_ || was_visible_)
   {
     markers_.markers.push_back(m);
-    if(!visible_)
-    {
-      markers_.markers.back().action = visualization_msgs::Marker::DELETE;
-    }
+    if(!visible_) { markers_.markers.back().action = visualization_msgs::Marker::DELETE; }
   }
   was_visible_ = visible_;
 }

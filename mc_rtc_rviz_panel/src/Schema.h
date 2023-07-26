@@ -40,22 +40,13 @@ struct Schema
          bool required = false);
 
   /** Returns the title of the schema */
-  inline const std::string & title() const
-  {
-    return title_;
-  }
+  inline const std::string & title() const { return title_; }
 
   /** True if the schema represents an object, false otherwise */
-  inline bool is_object() const
-  {
-    return is_object_;
-  }
+  inline bool is_object() const { return is_object_; }
 
   /** True if the schema represents a tuple, false otherwise */
-  inline bool is_tuple() const
-  {
-    return is_tuple_;
-  }
+  inline bool is_tuple() const { return is_tuple_; }
 
   /** A callback to create form elements from the schema */
   FormMaker create_form = [](QWidget *, const mc_rtc::Configuration &) -> FormElements { return {}; };

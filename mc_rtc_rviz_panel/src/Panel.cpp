@@ -58,22 +58,17 @@ bfs::path getConfigDirectory()
 bfs::path getConfigPath()
 {
   bfs::path config = getConfigDirectory() / "rviz_panel.conf";
-  if(bfs::exists(config))
-  {
-    return config;
-  }
+  if(bfs::exists(config)) { return config; }
   return getConfigDirectory() / "rviz_panel.yaml";
 }
 
 const mc_rtc::Configuration & loadPanelConfiguration()
 {
-  static mc_rtc::Configuration config = []() {
+  static mc_rtc::Configuration config = []()
+  {
     mc_rtc::Configuration configOut;
     auto config_path = getConfigPath();
-    if(bfs::exists(config_path) && bfs::is_regular(config_path))
-    {
-      configOut.load(config_path.string());
-    }
+    if(bfs::exists(config_path) && bfs::is_regular(config_path)) { configOut.load(config_path.string()); }
     return configOut;
   }();
   return config;
@@ -82,10 +77,7 @@ const mc_rtc::Configuration & loadPanelConfiguration()
 void savePanelConfiguration(const mc_rtc::Configuration & config)
 {
   auto config_directory = getConfigDirectory();
-  if(!bfs::exists(config_directory))
-  {
-    bfs::create_directories(config_directory);
-  }
+  if(!bfs::exists(config_directory)) { bfs::create_directories(config_directory); }
   if(!bfs::is_directory(config_directory))
   {
     mc_rtc::log::error("Cannot save configuration to {}, {} is not a directory", config_directory, config_directory);
@@ -142,10 +134,10 @@ struct PanelImpl
 #endif
 
 Panel::Panel(QWidget * parent)
-: CategoryWidget(ClientWidgetParam{*this, parent, {{}, "ROOT"}}), mc_control::ControllerClient(
-                                                                      getConnectionConfiguration().sub_uri(),
-                                                                      getConnectionConfiguration().push_uri(),
-                                                                      getTimeout()),
+: CategoryWidget(ClientWidgetParam{*this, parent, {{}, "ROOT"}}),
+  mc_control::ControllerClient(getConnectionConfiguration().sub_uri(),
+                               getConnectionConfiguration().push_uri(),
+                               getTimeout()),
   impl_(new PanelImpl()), config_(loadPanelConfiguration()), connectionConfigs_(getConnectionConfigurations())
 {
   qRegisterMetaType<uint64_t>("uint64_t");
@@ -356,10 +348,7 @@ void Panel::got_stop()
   impl_->int_server_->applyChanges();
   impl_->marker_array_pub_.publish(impl_->marker_array_);
   impl_->marker_array_.markers.clear();
-  if(ros::ok())
-  {
-    ros::spinOnce();
-  }
+  if(ros::ok()) { ros::spinOnce(); }
 #endif
 }
 
@@ -924,10 +913,7 @@ void Panel::got_robot(const WidgetId & id,
   for(size_t i = 0; i < parameters.size(); ++i)
   {
     params += parameters[i];
-    if(i != parameters.size() - 1)
-    {
-      params += ", ";
-    }
+    if(i != parameters.size() - 1) { params += ", "; }
   }
   params += "]";
   got_label(id, params);
@@ -1086,23 +1072,14 @@ void Panel::got_end_plot(uint64_t id)
 Panel::WidgetTree & Panel::get_category(const std::vector<std::string> & category)
 {
   auto ret = &tree_;
-  for(const auto & c : category)
-  {
-    ret = &(ret->sub_trees_[c]);
-  }
+  for(const auto & c : category) { ret = &(ret->sub_trees_[c]); }
   return *ret;
 }
 
 void Panel::WidgetTree::start()
 {
-  if(parent)
-  {
-    parent->resetSeen();
-  }
-  for(auto & st : sub_trees_)
-  {
-    st.second.start();
-  }
+  if(parent) { parent->resetSeen(); }
+  for(auto & st : sub_trees_) { st.second.start(); }
 }
 
 void Panel::WidgetTree::clean()
@@ -1113,22 +1090,13 @@ void Panel::WidgetTree::clean()
     auto & t = it->second;
     t.clean();
     size_t rem = 0;
-    if(t.parent)
-    {
-      rem = t.parent->clean();
-    }
+    if(t.parent) { rem = t.parent->clean(); }
     if(rem == 0 && t.sub_trees_.size() == 0)
     {
-      if(parent && t.parent)
-      {
-        parent->removeWidget(t.parent);
-      }
+      if(parent && t.parent) { parent->removeWidget(t.parent); }
       sub_trees_.erase(it++);
     }
-    else
-    {
-      ++it;
-    }
+    else { ++it; }
   }
 }
 
@@ -1188,23 +1156,14 @@ void Panel::visible(const WidgetId & id, bool visibility)
 
 mc_rtc::Configuration Panel::config(const WidgetId & id) const
 {
-  if(!config_.has("widgets"))
-  {
-    config_.add("widgets");
-  }
+  if(!config_.has("widgets")) { config_.add("widgets"); }
   auto ret = config_("widgets");
   for(const auto & c : id.category)
   {
-    if(!ret.has(c))
-    {
-      ret.add(c);
-    }
+    if(!ret.has(c)) { ret.add(c); }
     ret = ret(c);
   }
-  if(!ret.has(id.name))
-  {
-    ret.add(id.name);
-  }
+  if(!ret.has(id.name)) { ret.add(id.name); }
   return ret(id.name);
 }
 

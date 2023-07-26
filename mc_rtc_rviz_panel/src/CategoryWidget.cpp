@@ -77,10 +77,7 @@ void CategoryWidget::removeWidget(ClientWidget * w)
         break;
       }
     }
-    if(tabs_->count() == 0)
-    {
-      tabs_->hide();
-    }
+    if(tabs_->count() == 0) { tabs_->hide(); }
   }
   else if(w->sid() && stack_layouts_.count(w->sid()))
   {
@@ -92,10 +89,7 @@ void CategoryWidget::removeWidget(ClientWidget * w)
       stack_layouts_.erase(sid);
     }
   }
-  else
-  {
-    main_layout_->removeWidget(w);
-  }
+  else { main_layout_->removeWidget(w); }
   widgets_.erase(std::find(widgets_.begin(), widgets_.end(), w));
   delete w;
 }
@@ -105,14 +99,8 @@ size_t CategoryWidget::clean()
   for(auto it = widgets_.begin(); it != widgets_.end();)
   {
     ClientWidget * w = *it;
-    if(!w->wasSeen())
-    {
-      removeWidget(w);
-    }
-    else
-    {
-      ++it;
-    }
+    if(!w->wasSeen()) { removeWidget(w); }
+    else { ++it; }
   }
   return widgets_.size();
 }
@@ -121,19 +109,13 @@ bool CategoryWidget::wasSeen()
 {
   // A category is seen if at least one element was seen
   bool s = false;
-  for(auto w : widgets_)
-  {
-    s = w->wasSeen() || s;
-  }
+  for(auto w : widgets_) { s = w->wasSeen() || s; }
   return s;
 }
 
 void CategoryWidget::resetSeen()
 {
-  for(auto w : widgets_)
-  {
-    w->resetSeen();
-  }
+  for(auto w : widgets_) { w->resetSeen(); }
 }
 
 ClientWidget * CategoryWidget::widget(const std::string & name)
@@ -155,23 +137,14 @@ void CategoryWidget::updateSizeImpl(bool active)
   {
     static_cast<CategoryWidget *>(tabs_->widget(i))->updateSizeImpl(active && tabs_->currentIndex() == i);
   }
-  if(active)
-  {
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  }
-  else
-  {
-    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-  }
+  if(active) { setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred); }
+  else { setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored); }
 }
 
 void CategoryWidget::updateSize(int)
 {
   auto parent = parent_ ? parent_ : this;
-  while(parent->parent_ != nullptr)
-  {
-    parent = parent->parent_;
-  }
+  while(parent->parent_ != nullptr) { parent = parent->parent_; }
   parent->updateSizeImpl(true);
 }
 

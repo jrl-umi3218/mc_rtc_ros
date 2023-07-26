@@ -34,79 +34,37 @@ public:
 
   virtual void reset() = 0;
 
-  virtual bool ready() const
-  {
-    return ready_;
-  }
+  virtual bool ready() const { return ready_; }
 
-  inline bool locked() const
-  {
-    return locked_;
-  }
+  inline bool locked() const { return locked_; }
 
-  inline void unlock()
-  {
-    locked_ = false;
-  }
+  inline void unlock() { locked_ = false; }
 
-  bool required() const
-  {
-    return required_;
-  }
+  bool required() const { return required_; }
 
-  bool show_name() const
-  {
-    return show_name_;
-  }
+  bool show_name() const { return show_name_; }
 
-  bool spanning() const
-  {
-    return spanning_;
-  }
+  bool spanning() const { return spanning_; }
 
-  bool hidden() const
-  {
-    return hidden_;
-  }
+  bool hidden() const { return hidden_; }
 
-  void hidden(bool h)
-  {
-    hidden_ = h;
-  }
+  void hidden(bool h) { hidden_ = h; }
 
-  const std::string & name() const
-  {
-    return name_;
-  }
+  const std::string & name() const { return name_; }
 
-  void name(const std::string & name)
-  {
-    name_ = name;
-  }
+  void name(const std::string & name) { name_ = name; }
 
-  size_t type()
-  {
-    return type_;
-  }
+  size_t type() { return type_; }
 
-  void type(size_t t)
-  {
-    type_ = t;
-  }
+  void type(size_t t) { type_ = t; }
 
   virtual void update_dependencies(FormElement *) {}
 
 public slots:
-  inline void unlocked()
-  {
-    locked_ = false;
-  }
+  inline void unlocked() { locked_ = false; }
 
 protected:
-  void changed_(bool required)
-  {
-    required_ = required;
-  }
+  void changed_(bool required) { required_ = required; }
 
   bool ready_ = false;
   bool spanning_ = false;
@@ -283,10 +241,7 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
                           int max_size)
 : CommonArrayInput(parent, name, required), fixed_size_(fixed_size), min_size_(min_size), max_size_(max_size)
 {
-  if(min_size == max_size)
-  {
-    updateStride(min_size);
-  }
+  if(min_size == max_size) { updateStride(min_size); }
   spanning_ = true;
   auto mainLayout = new QVBoxLayout(this);
   auto w = new QWidget(this);
@@ -298,10 +253,7 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
     add_button_ = new QPushButton("+");
     connect(add_button_, SIGNAL(released()), this, SLOT(plusReleased()));
     mainLayout->addWidget(add_button_);
-    if(edits_.size() == static_cast<size_t>(max_size_))
-    {
-      add_button_->hide();
-    }
+    if(edits_.size() == static_cast<size_t>(max_size_)) { add_button_->hide(); }
   }
 }
 
@@ -313,33 +265,21 @@ void ArrayInput<T>::reset()
     for(int j = 0; j < layout_->columnCount(); ++j)
     {
       auto itm = layout_->itemAtPosition(i, j);
-      if(itm)
-      {
-        itm->widget()->deleteLater();
-      }
+      if(itm) { itm->widget()->deleteLater(); }
     }
   }
   edits_.clear();
   for(int i = 0; i < min_size_; ++i)
   {
-    if(is_square_)
-    {
-      add_edit(i % stride_ == next_row_ ? T{1} : T{0});
-    }
-    else
-    {
-      add_edit(T{});
-    }
+    if(is_square_) { add_edit(i % stride_ == next_row_ ? T{1} : T{0}); }
+    else { add_edit(T{}); }
   }
 }
 
 template<typename T>
 void ArrayInput<T>::updateStride(size_t size)
 {
-  if(size < 6)
-  {
-    stride_ = static_cast<int>(size);
-  }
+  if(size < 6) { stride_ = static_cast<int>(size); }
   else if(size == 9)
   {
     is_square_ = true;
@@ -355,10 +295,7 @@ void ArrayInput<T>::updateStride(size_t size)
     is_square_ = true;
     stride_ = 6;
   }
-  else
-  {
-    stride_ = 6;
-  }
+  else { stride_ = 6; }
 }
 
 template<typename T>
@@ -373,10 +310,7 @@ mc_rtc::Configuration ArrayInput<T>::serialize() const
 {
   mc_rtc::Configuration c;
   auto out = c.array("DATA", edits_.size());
-  for(auto e : edits_)
-  {
-    out.push(edit2data(e));
-  }
+  for(auto e : edits_) { out.push(edit2data(e)); }
   return out;
 }
 
@@ -389,10 +323,7 @@ void ArrayInput<T>::add_edit(const T & def)
   connect(edit, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
   layout_->addWidget(edit, next_row_, next_column_++);
   edits_.push_back(edit);
-  if(edits_.size() == static_cast<size_t>(max_size_) && add_button_)
-  {
-    add_button_->hide();
-  }
+  if(edits_.size() == static_cast<size_t>(max_size_) && add_button_) { add_button_->hide(); }
   if(!fixed_size_ && static_cast<int>(edits_.size()) > min_size_)
   {
     auto button = new QPushButton("-");
@@ -415,10 +346,7 @@ void ArrayInput<T>::minusReleased()
   for(int i = 0; i < layout_->rowCount(); ++i)
   {
     auto item = layout_->itemAtPosition(i, 1);
-    if(!item)
-    {
-      continue;
-    }
+    if(!item) { continue; }
     auto w = item->widget();
     if(w == button)
     {
@@ -427,10 +355,7 @@ void ArrayInput<T>::minusReleased()
     }
   }
   edits_.erase(std::find(edits_.begin(), edits_.end(), edit));
-  if(edits_.size() < static_cast<size_t>(max_size_) && add_button_)
-  {
-    add_button_->show();
-  }
+  if(edits_.size() < static_cast<size_t>(max_size_) && add_button_) { add_button_->show(); }
   delete edit;
   delete button;
 }

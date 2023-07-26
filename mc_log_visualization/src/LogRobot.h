@@ -41,10 +41,7 @@ struct LogRobot
   void update(const mc_rtc::log::FlatLog & log, size_t i);
 
   /** Access underlying robot */
-  inline const mc_rbdyn::Robot & robot() const
-  {
-    return robots_->robot();
-  }
+  inline const mc_rbdyn::Robot & robot() const { return robots_->robot(); }
 
   /** Access all surfaces in the robot */
   std::vector<std::string> surfaces() const;

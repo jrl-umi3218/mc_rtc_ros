@@ -28,10 +28,7 @@ T getParam(ros::NodeHandle & n, const std::string & param)
 template<typename T>
 T getParam(ros::NodeHandle & n, const std::string & param, const T & def)
 {
-  if(n.hasParam(param))
-  {
-    return getParam<T>(n, param);
-  }
+  if(n.hasParam(param)) { return getParam<T>(n, param); }
   return def;
 }
 } // namespace
@@ -39,10 +36,7 @@ T getParam(ros::NodeHandle & n, const std::string & param, const T & def)
 int main()
 {
   auto nh_p = mc_rtc::ROSBridge::get_node_handle();
-  if(!nh_p)
-  {
-    return 1;
-  }
+  if(!nh_p) { return 1; }
   auto nh = *nh_p;
 
   std::string conf = "";
@@ -63,10 +57,7 @@ int main()
   double dt = controller.timestep();
 
   std::vector<double> q;
-  if(nh.hasParam("mc_rtc_ticker/init_state"))
-  {
-    q = getParam<std::vector<double>>(nh, "mc_rtc_ticker/init_state");
-  }
+  if(nh.hasParam("mc_rtc_ticker/init_state")) { q = getParam<std::vector<double>>(nh, "mc_rtc_ticker/init_state"); }
   else
   {
     auto & mbc = controller.robot().mbc();
@@ -79,15 +70,9 @@ int main()
         const auto & qi = mbc.q[qIndex];
         if(qi.size())
         {
-          for(auto & qj : qi)
-          {
-            q.push_back(qj);
-          }
+          for(auto & qj : qi) { q.push_back(qj); }
         }
-        else
-        {
-          q.push_back(0.0);
-        }
+        else { q.push_back(0.0); }
       }
       else
       {
@@ -102,29 +87,21 @@ int main()
   {
     mc_rtc::log::info("Using initial pos from ROS param");
     std::vector<double> pos = getParam<std::vector<double>>(nh, "mc_rtc_ticker/init_pos");
-    for(const auto & pi : pos)
-    {
-      std::cout << pi << " ";
-    }
+    for(const auto & pi : pos) { std::cout << pi << " "; }
     std::cout << std::endl;
     std::array<double, 7> p;
     std::copy_n(pos.begin(), 7, p.begin());
     controller.init(q, p);
   }
-  else
-  {
-    controller.init(q);
-  }
+  else { controller.init(q); }
   controller.running = true;
 
   bool stepByStep = getParam(nh, "mc_rtc_ticker/stepByStep", false);
   size_t nextStep = 0;
   auto gui = controller.controller().gui();
-  auto toogleStepByStep = [&]() {
-    if(stepByStep)
-    {
-      stepByStep = false;
-    }
+  auto toogleStepByStep = [&]()
+  {
+    if(stepByStep) { stepByStep = false; }
     else
     {
       nextStep = 0;
@@ -136,7 +113,8 @@ int main()
     gui->addElement({"mc_rtc_ticker"},
                     mc_rtc::gui::Checkbox(
                         "Step by step", [&]() { return stepByStep; }, [&]() { toogleStepByStep(); }));
-    auto buttonText = [&](size_t n) {
+    auto buttonText = [&](size_t n)
+    {
       size_t n_ms = static_cast<size_t>(std::ceil(static_cast<double>(n) * 1000.0 * dt));
       return "+" + std::to_string(n_ms) + "ms";
     };
@@ -156,7 +134,8 @@ int main()
     /* Reserve a million entry */
     solve_dt.reserve(1000000);
   }
-  auto report_dt = [&solve_dt](bool partial) {
+  auto report_dt = [&solve_dt](bool partial)
+  {
     std::cout << "Ran for " << solve_dt.size() << " iterations: ";
     size_t start_i = partial ? solve_dt.size() - 1000 : 0;
     auto min_t = solve_dt[start_i];
@@ -171,20 +150,11 @@ int main()
         second_max_t = max_t;
         max_t = t;
       }
-      if(t < min_t)
-      {
-        min_t = t;
-      }
+      if(t < min_t) { min_t = t; }
       average_t += t;
     }
-    if(partial)
-    {
-      average_t = average_t / 1000;
-    }
-    else
-    {
-      average_t = average_t / solve_dt.size();
-    }
+    if(partial) { average_t = average_t / 1000; }
+    else { average_t = average_t / solve_dt.size(); }
     std::cout << " avg: " << average_t.count() * 1000 << "ms, min: " << min_t.count() * 1000
               << "ms, max: " << max_t.count() * 1000 << "ms, second max: " << second_max_t.count() * 1000 << std::endl;
   };
@@ -193,21 +163,25 @@ int main()
   std::thread spin_th;
   if(bench)
   {
-    spin_th = std::thread([&rt]() {
-      while(ros::ok())
-      {
-        ros::spinOnce();
-        rt.sleep();
-      }
-    });
+    spin_th = std::thread(
+        [&rt]()
+        {
+          while(ros::ok())
+          {
+            ros::spinOnce();
+            rt.sleep();
+          }
+        });
   }
 
-  auto runController = [&]() {
+  auto runController = [&]()
+  {
     controller.setEncoderValues(q);
     controller.run();
   };
 
-  auto updateGUI = [&]() {
+  auto updateGUI = [&]()
+  {
     controller.running = false;
     controller.run();
     controller.running = true;
@@ -215,10 +189,7 @@ int main()
 
   while(ros::ok())
   {
-    if(bench)
-    {
-      begin = std::chrono::system_clock::now();
-    }
+    if(bench) { begin = std::chrono::system_clock::now(); }
     auto & mbc = controller.robot().mbc();
     const auto & rjo = controller.ref_joint_order();
     size_t index = 0;
@@ -237,15 +208,9 @@ int main()
             index++;
           }
         }
-        else
-        {
-          index++;
-        }
+        else { index++; }
       }
-      else
-      {
-        index++;
-      }
+      else { index++; }
     }
     if(stepByStep)
     {
@@ -254,23 +219,14 @@ int main()
         nextStep--;
         runController();
       }
-      else
-      {
-        updateGUI();
-      }
+      else { updateGUI(); }
     }
-    else
-    {
-      runController();
-    }
+    else { runController(); }
     if(bench)
     {
       end = std::chrono::system_clock::now();
       solve_dt.push_back(end - begin);
-      if(solve_dt.size() % 1000 == 0)
-      {
-        report_dt(true);
-      }
+      if(solve_dt.size() % 1000 == 0) { report_dt(true); }
     }
     else
     {

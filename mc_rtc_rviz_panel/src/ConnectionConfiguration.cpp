@@ -42,28 +42,19 @@ ConnectionConfiguration::ConnectionConfiguration(Protocol proto,
 
 std::string ConnectionConfiguration::toText() const
 {
-  if(protocol_ == Protocol::IPC)
-  {
-    return "IPC | " + host_;
-  }
+  if(protocol_ == Protocol::IPC) { return "IPC | " + host_; }
   return "TCP | " + host_ + ":" + sub_suffix_ + "|" + push_suffix_;
 }
 
 std::string ConnectionConfiguration::sub_uri() const
 {
-  if(protocol_ == Protocol::IPC)
-  {
-    return "ipc://" + host_ + sub_suffix_;
-  }
+  if(protocol_ == Protocol::IPC) { return "ipc://" + host_ + sub_suffix_; }
   return "tcp://" + host_ + ":" + sub_suffix_;
 }
 
 std::string ConnectionConfiguration::push_uri() const
 {
-  if(protocol_ == Protocol::IPC)
-  {
-    return "ipc://" + host_ + push_suffix_;
-  }
+  if(protocol_ == Protocol::IPC) { return "ipc://" + host_ + push_suffix_; }
   return "tcp://" + host_ + ":" + push_suffix_;
 }
 
@@ -78,14 +69,8 @@ using Protocol = ConnectionConfiguration::Protocol;
 ConnectionConfiguration ConfigurationLoader<ConnectionConfiguration>::load(const Configuration & cfg)
 {
   Protocol proto = static_cast<std::string>(cfg("type")) == "IPC" ? Protocol::IPC : Protocol::TCP;
-  if(proto == Protocol::IPC)
-  {
-    return ConnectionConfiguration(static_cast<std::string>(cfg("host")));
-  }
-  else
-  {
-    return ConnectionConfiguration(cfg("host"), cfg("sub_suffix"), cfg("push_suffix"));
-  }
+  if(proto == Protocol::IPC) { return ConnectionConfiguration(static_cast<std::string>(cfg("host"))); }
+  else { return ConnectionConfiguration(cfg("host"), cfg("sub_suffix"), cfg("push_suffix")); }
 }
 
 Configuration ConfigurationLoader<ConnectionConfiguration>::save(const ConnectionConfiguration & config)

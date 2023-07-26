@@ -30,23 +30,14 @@ void ArrayLabelWidget::update(const Eigen::VectorXd & dataIn)
     for(Eigen::DenseIndex i = 0; i < dataIn.size(); ++i)
     {
       ss << dataIn(i);
-      if(i < dataIn.size() - 1)
-      {
-        ss << ", ";
-      }
+      if(i < dataIn.size() - 1) { ss << ", "; }
     }
     ss << "</font>";
     normLabel_->setToolTip(ss.str().c_str());
     normLabel_->setText("norm = " + QString::number(dataIn.norm()));
-    if(dataIn.size() <= 6)
-    {
-      ArrayInputWidget::update(dataIn);
-    }
+    if(dataIn.size() <= 6) { ArrayInputWidget::update(dataIn); }
   }
-  else
-  {
-    ArrayInputWidget::update(dataIn);
-  }
+  else { ArrayInputWidget::update(dataIn); }
 }
 
 } // namespace mc_rtc_rviz

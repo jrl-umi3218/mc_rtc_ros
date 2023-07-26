@@ -70,15 +70,9 @@ struct SharedMarker
     server_->insert(marker_, callback_);
   }
 
-  vm::InteractiveMarker & marker()
-  {
-    return marker_;
-  }
+  vm::InteractiveMarker & marker() { return marker_; }
 
-  void applyChanges()
-  {
-    server_->applyChanges();
-  }
+  void applyChanges() { server_->applyChanges(); }
 
 private:
   std::shared_ptr<interactive_markers::InteractiveMarkerServer> server_;

@@ -53,14 +53,8 @@ void XYThetaInteractiveMarkerWidget::handleRequest(
 
 void XYThetaInteractiveMarkerWidget::control_state_changed(int)
 {
-  if(coupled_checkbox_->isChecked())
-  {
-    marker_.marker(coupled_marker_);
-  }
-  else
-  {
-    marker_.marker(decoupled_marker_);
-  }
+  if(coupled_checkbox_->isChecked()) { marker_.marker(coupled_marker_); }
+  else { marker_.marker(decoupled_marker_); }
   marker_.applyChanges();
 }
 

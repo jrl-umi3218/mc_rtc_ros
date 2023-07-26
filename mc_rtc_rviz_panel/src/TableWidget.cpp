@@ -23,10 +23,7 @@ TableWidget::TableWidget(const ClientWidgetParam & params) : ClientWidget(params
 void TableWidget::header(const std::vector<std::string> & header)
 {
   rowCount_ = 0;
-  if(header_ == header)
-  {
-    return;
-  }
+  if(header_ == header) { return; }
   header_ = header;
   table_->setColumnCount(static_cast<int>(header_.size()));
   for(size_t j = 0; j < header_.size(); ++j)
@@ -43,43 +40,25 @@ void TableWidget::header(const std::vector<std::string> & header)
 
 void TableWidget::row(const std::vector<std::string> & dataIn)
 {
-  for(size_t j = 0; j < dataIn.size(); ++j)
-  {
-    updateItem(rowCount_, static_cast<int>(j), dataIn[j]);
-  }
+  for(size_t j = 0; j < dataIn.size(); ++j) { updateItem(rowCount_, static_cast<int>(j), dataIn[j]); }
   rowCount_ += 1;
 }
 
 void TableWidget::finalize()
 {
-  while(table_->rowCount() > rowCount_)
-  {
-    table_->removeRow(table_->rowCount() - 1);
-  }
+  while(table_->rowCount() > rowCount_) { table_->removeRow(table_->rowCount() - 1); }
   auto height = table_->horizontalHeader()->height() + 2;
-  for(int i = 0; i < table_->rowCount(); ++i)
-  {
-    height += table_->rowHeight(i);
-  }
+  for(int i = 0; i < table_->rowCount(); ++i) { height += table_->rowHeight(i); }
   auto scrollbar = table_->horizontalScrollBar();
-  if(scrollbar && scrollbar->isVisible())
-  {
-    height += table_->horizontalScrollBar()->height();
-  }
+  if(scrollbar && scrollbar->isVisible()) { height += table_->horizontalScrollBar()->height(); }
   table_->setMinimumHeight(height);
   table_->setMaximumHeight(height);
 }
 
 void TableWidget::updateItem(int row, int column, const std::string & text)
 {
-  if(table_->rowCount() < row + 1)
-  {
-    table_->setRowCount(row + 1);
-  }
-  if(table_->columnCount() < column + 1)
-  {
-    table_->setColumnCount(column + 1);
-  }
+  if(table_->rowCount() < row + 1) { table_->setRowCount(row + 1); }
+  if(table_->columnCount() < column + 1) { table_->setColumnCount(column + 1); }
   auto item = dynamic_cast<QLabel *>(table_->cellWidget(row, column));
   if(!item)
   {

@@ -30,24 +30,15 @@ std::vector<std::string> robotParam(ros::NodeHandle & n)
 {
   std::string robot_str = "";
   getParam(n, "robot", robot_str);
-  if(robot_str.size() == 0)
-  {
-    return {};
-  }
+  if(robot_str.size() == 0) { return {}; }
   if(robot_str[0] == '[')
   {
     std::vector<std::string> ret = {""};
     for(size_t i = 1; i < robot_str.size(); ++i)
     {
       const auto & c = robot_str[i];
-      if(c == ',')
-      {
-        ret.push_back("");
-      }
-      else if(c != ']' && c != ' ')
-      {
-        ret.back() += c;
-      }
+      if(c == ',') { ret.push_back(""); }
+      else if(c != ']' && c != ' ') { ret.back() += c; }
     }
     return ret;
   }
@@ -180,10 +171,7 @@ visualization_msgs::MarkerArray surfaceMarkers(const std::string & tf_prefix, co
 
 mc_rbdyn::RobotModulePtr rmFromParam(const std::vector<std::string> & robot_params)
 {
-  if(robot_params.size() == 1)
-  {
-    return mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]);
-  }
+  if(robot_params.size() == 1) { return mc_rbdyn::RobotLoader::get_robot_module(robot_params[0]); }
   else if(robot_params.size() == 2)
   {
     return mc_rbdyn::RobotLoader::get_robot_module(robot_params[0], robot_params[1]);
@@ -217,10 +205,7 @@ int main(int argc, char ** argv)
 
   std::string tf_prefix = "";
   getParam(n, "tf_prefix", tf_prefix);
-  if(tf_prefix.size() && tf_prefix[tf_prefix.size() - 1] != '/')
-  {
-    tf_prefix += '/';
-  }
+  if(tf_prefix.size() && tf_prefix[tf_prefix.size() - 1] != '/') { tf_prefix += '/'; }
 
   bool publish = false;
   getParam(n_private, "publish", publish);
@@ -233,12 +218,10 @@ int main(int argc, char ** argv)
   std::unique_ptr<mc_rtc::RobotPublisher> robot_pub;
   std::shared_ptr<mc_rbdyn::Robots> robots;
   visualization_msgs::MarkerArray markers;
-  auto init = [&]() {
+  auto init = [&]()
+  {
     robotModule = rmFromParam(robot_params);
-    if(!robotModule)
-    {
-      return;
-    }
+    if(!robotModule) { return; }
     robots = mc_rbdyn::loadRobot(*robotModule);
     markers = surfaceMarkers(tf_prefix, robots->robot());
     if(publish)
@@ -253,15 +236,9 @@ int main(int argc, char ** argv)
   ros::Rate rate(publish_rate);
   while(ros::ok())
   {
-    if(robot_pub)
-    {
-      robot_pub->update(dt, robots->robot());
-    }
+    if(robot_pub) { robot_pub->update(dt, robots->robot()); }
     auto now = ros::Time::now();
-    for(auto & m : markers.markers)
-    {
-      m.header.stamp = now;
-    }
+    for(auto & m : markers.markers) { m.header.stamp = now; }
     surface_pub.publish(markers);
     ros::spinOnce();
     getParam(n, "robot_module", robot_module);

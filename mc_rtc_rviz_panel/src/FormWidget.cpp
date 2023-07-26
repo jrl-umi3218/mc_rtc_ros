@@ -22,14 +22,8 @@ struct FormElementHeader : public QWidget
 
   void update()
   {
-    if(element_->locked())
-    {
-      button_->show();
-    }
-    else
-    {
-      button_->hide();
-    }
+    if(element_->locked()) { button_->show(); }
+    else { button_->hide(); }
   }
 
 private:
@@ -53,10 +47,7 @@ void FormWidget::make_form_layout()
 {
   for(auto & el : elements_header_)
   {
-    if(el)
-    {
-      el->deleteLater();
-    }
+    if(el) { el->deleteLater(); }
   }
   elements_header_.clear();
   form_ = new QWidget();
@@ -91,10 +82,7 @@ void FormWidget::update()
   {
     for(auto & h : elements_header_)
     {
-      if(h)
-      {
-        h->update();
-      }
+      if(h) { h->update(); }
     }
   }
 }
@@ -107,14 +95,8 @@ void FormWidget::released()
   for(auto & el : elements_)
   {
     bool ret = el->can_fill(msg);
-    if(!ret)
-    {
-      msg += '\n';
-    }
-    else if(el->ready())
-    {
-      out.add(el->name(), el->serialize());
-    }
+    if(!ret) { msg += '\n'; }
+    else if(el->ready()) { out.add(el->name(), el->serialize()); }
     ok = ret && ok;
   }
   if(ok)
@@ -153,36 +135,20 @@ void FormWidget::add_element_to_layout(FormElement * elementIn)
     return;
   }
   auto label_text = elementIn->name();
-  auto is_robot_or_required = [&label_text, elementIn]() {
-    return elementIn->required() || label_text == "robot" || label_text == "r1" || label_text == "r2";
-  };
+  auto is_robot_or_required = [&label_text, elementIn]()
+  { return elementIn->required() || label_text == "robot" || label_text == "r1" || label_text == "r2"; };
   QFormLayout * layout_ = is_robot_or_required() ? requiredLayout_ : optionalLayout_;
-  if(elementIn->required())
-  {
-    label_text += "*";
-  }
+  if(elementIn->required()) { label_text += "*"; }
   auto header = new FormElementHeader(label_text.c_str(), elementIn, form_);
   elements_header_.push_back(header);
-  if(!elementIn->spanning())
-  {
-    layout_->addRow(header, elementIn);
-  }
+  if(!elementIn->spanning()) { layout_->addRow(header, elementIn); }
   else
   {
-    if(elementIn->show_name())
-    {
-      layout_->addRow(header);
-    }
+    if(elementIn->show_name()) { layout_->addRow(header); }
     layout_->addRow(elementIn);
   }
-  if(optionalLayout_->rowCount() == 0)
-  {
-    optionalToolBox_->hide();
-  }
-  else
-  {
-    optionalToolBox_->show();
-  }
+  if(optionalLayout_->rowCount() == 0) { optionalToolBox_->hide(); }
+  else { optionalToolBox_->show(); }
 }
 
 } // namespace mc_rtc_rviz

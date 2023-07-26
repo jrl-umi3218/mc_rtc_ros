@@ -12,10 +12,7 @@ namespace mc_rtc_rviz
 std::string id2name(const WidgetId & id)
 {
   std::string ret;
-  for(auto & c : id.category)
-  {
-    ret += c + "/";
-  }
+  for(auto & c : id.category) { ret += c + "/"; }
   ret += id.name;
   return ret;
 }

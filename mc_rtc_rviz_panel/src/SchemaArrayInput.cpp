@@ -13,10 +13,7 @@ struct RemoveArrayEntryButton : public QPushButton
 {
   RemoveArrayEntryButton(const char * text, FormElement * element) : QPushButton(text), element_(element) {}
 
-  FormElement * element()
-  {
-    return element_;
-  }
+  FormElement * element() { return element_; }
 
 private:
   FormElement * element_;
@@ -43,10 +40,7 @@ SchemaArrayInput::SchemaArrayInput(QWidget * parent,
   add_button_ = new QPushButton("+");
   connect(add_button_, SIGNAL(released()), this, SLOT(plusReleased()));
   mainLayout->addWidget(add_button_);
-  if(fixed_size_)
-  {
-    add_button_->hide();
-  }
+  if(fixed_size_) { add_button_->hide(); }
   reset();
 }
 
@@ -57,27 +51,18 @@ void SchemaArrayInput::reset()
     for(int j = 0; j < layout_->columnCount(); ++j)
     {
       auto itm = layout_->itemAtPosition(i, j);
-      if(itm)
-      {
-        itm->widget()->deleteLater();
-      }
+      if(itm) { itm->widget()->deleteLater(); }
     }
   }
   items_.clear();
-  for(int i = 0; i < min_size_; ++i)
-  {
-    addItem();
-  }
+  for(int i = 0; i < min_size_; ++i) { addItem(); }
 }
 
 mc_rtc::Configuration SchemaArrayInput::serialize() const
 {
   mc_rtc::Configuration out;
   out = out.array("DATA", items_.size());
-  for(auto & f : items_)
-  {
-    out.push(f->serialize());
-  }
+  for(auto & f : items_) { out.push(f->serialize()); }
   return out;
 }
 
@@ -90,10 +75,7 @@ void SchemaArrayInput::addItem()
                           false, schema_.is_tuple());
     connect(form, SIGNAL(toggled(bool)), this, SLOT(formToggled(bool)));
   }
-  else
-  {
-    form = schema_.create_form(this, data_).at(0);
-  }
+  else { form = schema_.create_form(this, data_).at(0); }
   layout_->addWidget(form);
   if(!schema_.is_object() && !schema_.is_tuple())
   {
@@ -102,10 +84,7 @@ void SchemaArrayInput::addItem()
     connect(minus, SIGNAL(released()), this, SLOT(minusReleased()));
   }
   items_.push_back(form);
-  if(items_.size() >= static_cast<size_t>(max_size_))
-  {
-    add_button_->hide();
-  }
+  if(items_.size() >= static_cast<size_t>(max_size_)) { add_button_->hide(); }
   ready_ = true;
 }
 
@@ -138,10 +117,7 @@ void SchemaArrayInput::minusReleased()
     qDebug() << "SchemaArrayInput::minusReleased unexpected event sender";
     return;
   }
-  if(items_.size() == static_cast<size_t>(min_size_))
-  {
-    return;
-  }
+  if(items_.size() == static_cast<size_t>(min_size_)) { return; }
   removeItem(sender->element());
   sender->deleteLater();
 }
@@ -151,14 +127,8 @@ void SchemaArrayInput::removeItem(FormElement * itm)
   auto it = std::find(items_.begin(), items_.end(), itm);
   items_.erase(it);
   itm->deleteLater();
-  if(items_.size() < static_cast<size_t>(max_size_))
-  {
-    add_button_->show();
-  }
-  if(items_.size() == 0)
-  {
-    ready_ = false;
-  }
+  if(items_.size() < static_cast<size_t>(max_size_)) { add_button_->show(); }
+  if(items_.size() == 0) { ready_ = false; }
 }
 
 } // namespace form

@@ -17,14 +17,8 @@ void LogRobot::update(const mc_rtc::log::FlatLog & log, size_t i)
 {
   q = log.get(config_.configuration, i, q);
   encoders = log.get(config_.encoders, i, encoders);
-  if(config_.base.size())
-  {
-    base = log.get(config_.base, i, base);
-  }
-  if(config_.base_translation.size())
-  {
-    base.translation() = log.get(config_.base_translation, i, base.translation());
-  }
+  if(config_.base.size()) { base = log.get(config_.base, i, base); }
+  if(config_.base_translation.size()) { base.translation() = log.get(config_.base_translation, i, base.translation()); }
   if(config_.base_rotation.size())
   {
     if(config_.base_rotation_is_imu)
@@ -37,10 +31,7 @@ void LogRobot::update(const mc_rtc::log::FlatLog & log, size_t i)
       sva::PTransformd X_0_imu = {log.get<Eigen::Quaterniond>(config_.base_rotation, i, {1, 0, 0, 0})};
       base.rotation() = (X_0_imu * X_imu0_0).rotation();
     }
-    else
-    {
-      base.rotation() = Eigen::Matrix3d(log.get(config_.base_rotation, i, Eigen::Quaterniond(base.rotation())));
-    }
+    else { base.rotation() = Eigen::Matrix3d(log.get(config_.base_rotation, i, Eigen::Quaterniond(base.rotation()))); }
   }
   auto & robot = robots_->robot();
   for(size_t refIdx = 0; refIdx < robot.refJointOrder().size(); ++refIdx)
@@ -49,10 +40,7 @@ void LogRobot::update(const mc_rtc::log::FlatLog & log, size_t i)
     if(robot.hasJoint(jN))
     {
       auto jIndex = robot.jointIndexByName(jN);
-      if(robot.mbc().q[jIndex].size() == 1)
-      {
-        robot.mbc().q[jIndex][0] = q[refIdx];
-      }
+      if(robot.mbc().q[jIndex].size() == 1) { robot.mbc().q[jIndex][0] = q[refIdx]; }
     }
   }
   robot.posW(base);
@@ -62,19 +50,13 @@ void LogRobot::update(const mc_rtc::log::FlatLog & log, size_t i)
 std::vector<std::string> LogRobot::surfaces() const
 {
   std::vector<std::string> ret;
-  for(const auto & p : robot().surfaces())
-  {
-    ret.push_back(p.first);
-  }
+  for(const auto & p : robot().surfaces()) { ret.push_back(p.first); }
   return ret;
 }
 
 std::vector<std::string> LogRobot::bodies() const
 {
   std::vector<std::string> ret;
-  for(const auto & b : robot().mb().bodies())
-  {
-    ret.push_back(b.name());
-  }
+  for(const auto & b : robot().mb().bodies()) { ret.push_back(b.name()); }
   return ret;
 }
