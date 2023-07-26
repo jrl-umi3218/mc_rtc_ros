@@ -221,6 +221,20 @@ protected:                            \
                                      bool default_from_user,
                                      bool interactive))
 
+  DEFINE_OVERRIDE(form_rotation_input(const WidgetId & formId,
+                                      const std::string & name,
+                                      bool required,
+                                      const sva::PTransformd & default_,
+                                      bool default_from_user,
+                                      bool interactive))
+
+  DEFINE_OVERRIDE(form_transform_input(const WidgetId & formId,
+                                       const std::string & name,
+                                       bool required,
+                                       const sva::PTransformd & default_,
+                                       bool default_from_user,
+                                       bool interactive))
+
   DEFINE_OVERRIDE(start_plot(uint64_t id, const std::string & title))
   DEFINE_OVERRIDE(plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range))
   DEFINE_OVERRIDE(plot_setup_yaxis_left(uint64_t id,

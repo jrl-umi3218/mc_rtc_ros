@@ -227,6 +227,10 @@ Panel::Panel(QWidget * parent)
       form_data_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &, bool));
   CONNECT_SIGNAL_SLOT(
       form_point3d_input(const WidgetId &, const std::string &, bool, const Eigen::Vector3d &, bool, bool));
+  CONNECT_SIGNAL_SLOT(
+      form_rotation_input(const WidgetId &, const std::string &, bool, const sva::PTransformd &, bool, bool));
+  CONNECT_SIGNAL_SLOT(
+      form_transform_input(const WidgetId &, const std::string &, bool, const sva::PTransformd &, bool, bool));
   CONNECT_SIGNAL_SLOT(start_plot(uint64_t, const std::string &));
   CONNECT_SIGNAL_SLOT(plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
   CONNECT_SIGNAL_SLOT(plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
@@ -538,6 +542,26 @@ void Panel::form_point3d_input(const WidgetId & formId,
                                bool interactive)
 {
   Q_EMIT signal_form_point3d_input(formId, name, required, default_, default_from_user, interactive);
+}
+
+void Panel::form_rotation_input(const WidgetId & formId,
+                                const std::string & name,
+                                bool required,
+                                const sva::PTransformd & default_,
+                                bool default_from_user,
+                                bool interactive)
+{
+  Q_EMIT signal_form_rotation_input(formId, name, required, default_, default_from_user, interactive);
+}
+
+void Panel::form_transform_input(const WidgetId & formId,
+                                 const std::string & name,
+                                 bool required,
+                                 const sva::PTransformd & default_,
+                                 bool default_from_user,
+                                 bool interactive)
+{
+  Q_EMIT signal_form_transform_input(formId, name, required, default_, default_from_user, interactive);
 }
 
 void Panel::start_plot(uint64_t id, const std::string & title)
@@ -944,6 +968,30 @@ void Panel::got_form_point3d_input(const WidgetId & formId,
   auto & form = get_widget<FormWidget>(formId);
   form.element<form::Point3DInput>(name, required, formId, default_, default_from_user, interactive,
                                    impl_->int_server_);
+}
+
+void Panel::got_form_rotation_input(const WidgetId & formId,
+                                    const std::string & name,
+                                    bool required,
+                                    const sva::PTransformd & default_,
+                                    bool default_from_user,
+                                    bool interactive)
+{
+  auto & form = get_widget<FormWidget>(formId);
+  form.element<form::RotationInput>(name, required, formId, default_, default_from_user, interactive,
+                                    impl_->int_server_);
+}
+
+void Panel::got_form_transform_input(const WidgetId & formId,
+                                     const std::string & name,
+                                     bool required,
+                                     const sva::PTransformd & default_,
+                                     bool default_from_user,
+                                     bool interactive)
+{
+  auto & form = get_widget<FormWidget>(formId);
+  form.element<form::TransformInput>(name, required, formId, default_, default_from_user, interactive,
+                                     impl_->int_server_);
 }
 
 void Panel::got_start_plot(uint64_t id, const std::string & title)

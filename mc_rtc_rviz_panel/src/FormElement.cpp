@@ -738,6 +738,18 @@ void InteractiveMarkerInput<DataT, rotation_only>::handleRequest(
     data_.y() = feedback->pose.position.y;
     data_.z() = feedback->pose.position.z;
   }
+  else
+  {
+    if constexpr(!rotation_only)
+    {
+      data_.translation().x() = feedback->pose.position.x;
+      data_.translation().y() = feedback->pose.position.y;
+      data_.translation().z() = feedback->pose.position.z;
+    }
+    const auto & ori = feedback->pose.orientation;
+    Eigen::Quaterniond q(ori.w, ori.x, ori.y, ori.z);
+    data_.rotation() = q.normalized().toRotationMatrix().transpose();
+  }
   reset_edits();
 }
 

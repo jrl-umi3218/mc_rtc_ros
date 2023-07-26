@@ -542,9 +542,20 @@ extern template struct InteractiveMarkerInput<sva::PTransformd, true>;
 
 struct Point3DInput : public details::InteractiveMarkerInput<Eigen::Vector3d, false>
 {
-  Q_OBJECT
 public:
   using details::InteractiveMarkerInput<Eigen::Vector3d, false>::InteractiveMarkerInput;
+};
+
+struct RotationInput : public details::InteractiveMarkerInput<sva::PTransformd, true>
+{
+public:
+  using details::InteractiveMarkerInput<sva::PTransformd, true>::InteractiveMarkerInput;
+};
+
+struct TransformInput : public details::InteractiveMarkerInput<sva::PTransformd, false>
+{
+public:
+  using details::InteractiveMarkerInput<sva::PTransformd, false>::InteractiveMarkerInput;
 };
 
 } // namespace form
