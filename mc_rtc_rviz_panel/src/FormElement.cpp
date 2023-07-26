@@ -551,10 +551,9 @@ Form::Form(QWidget * parent,
 
 bool Form::ready() const
 {
-  bool ok = false;
+  bool ok = true;
   for(const auto & el : elements_)
   {
-    if(el->ready()) { ok = true; }
     if(el->required() && !el->ready()) { return false; }
   }
   return ok;

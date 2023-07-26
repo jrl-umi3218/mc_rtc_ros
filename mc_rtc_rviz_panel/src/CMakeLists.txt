@@ -72,8 +72,14 @@ else()
   qt5_add_resources(QRC_FILES icons.qrc)
 endif()
 
-set(HEADER_FILES ArrayLabelWidget.h ClientWidget.h ConnectionConfiguration.h
-                 LabelWidget.h Schema.h utils.h)
+set(HEADER_FILES
+    ArrayLabelWidget.h
+    ClientWidget.h
+    ConnectionConfiguration.h
+    FormElementContainer.h
+    LabelWidget.h
+    Schema.h
+    utils.h)
 
 if(NOT ${DISABLE_ROS})
   list(APPEND HEADER_FILES utils.h)
@@ -90,6 +96,7 @@ set(SOURCE_FILES
     ConnectionConfiguration.cpp
     ConnectionDialog.cpp
     FormElement.cpp
+    FormElementContainer.cpp
     FormWidget.cpp
     GenericInputWidget.cpp
     LabelWidget.cpp

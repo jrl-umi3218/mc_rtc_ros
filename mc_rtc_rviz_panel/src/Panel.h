@@ -28,6 +28,8 @@
 namespace mc_rtc_rviz
 {
 
+struct FormElementContainer;
+
 /** Hide ROS details in pimpl */
 struct PanelImpl;
 
@@ -295,6 +297,8 @@ private:
   std::unique_ptr<PanelImpl> impl_;
   /** Latest widget added */
   ClientWidget * latestWidget_ = nullptr;
+  /** Active form */
+  FormElementContainer * activeForm_ = nullptr;
   /** Configuration */
   mutable mc_rtc::Configuration config_;
   mutable std::vector<ConnectionConfiguration> connectionConfigs_;
