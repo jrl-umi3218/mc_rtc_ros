@@ -493,22 +493,25 @@ signals:
   void toggled(bool);
 };
 
-struct Point3DInput : public FormElement
+namespace details
 {
-  Q_OBJECT
+
+template<typename DataT, bool rotation_only>
+struct InteractiveMarkerInput : public FormElement
+{
 public:
-  Point3DInput(QWidget * parent,
-               const std::string & name,
-               bool required,
-               const WidgetId & formId,
-               const Eigen::Vector3d & default_,
-               bool default_from_user,
-               bool interactive,
-               std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server);
+  InteractiveMarkerInput(QWidget * parent,
+                         const std::string & name,
+                         bool required,
+                         const WidgetId & formId,
+                         const DataT & default_,
+                         bool default_from_user,
+                         bool interactive,
+                         std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server);
 
   void changed(bool required,
                const WidgetId & formId,
-               const Eigen::Vector3d & default_,
+               const DataT & default_,
                bool default_from_user,
                bool interactive,
                std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server);
@@ -518,12 +521,29 @@ public:
   void reset() override;
 
 private:
-  std::array<QLineEdit *, 3> edits_;
   SharedMarker marker_;
-  Eigen::Vector3d data_;
+  DataT data_;
   bool user_default_;
 
   void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback);
+
+  static constexpr size_t n_edits = std::is_same_v<Eigen::Vector3d, DataT> ? 3 : (rotation_only ? 4 : 7);
+  std::array<QLineEdit *, n_edits> edits_;
+
+  void reset_edits();
+};
+
+extern template struct InteractiveMarkerInput<Eigen::Vector3d, false>;
+extern template struct InteractiveMarkerInput<sva::PTransformd, false>;
+extern template struct InteractiveMarkerInput<sva::PTransformd, true>;
+
+} // namespace details
+
+struct Point3DInput : public details::InteractiveMarkerInput<Eigen::Vector3d, false>
+{
+  Q_OBJECT
+public:
+  using details::InteractiveMarkerInput<Eigen::Vector3d, false>::InteractiveMarkerInput;
 };
 
 } // namespace form

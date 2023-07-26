@@ -600,49 +600,101 @@ std::string formId2name(const WidgetId & id, const std::string & name)
   return ret;
 }
 
-Point3DInput::Point3DInput(QWidget * parent,
-                           const std::string & name,
-                           bool required,
-                           const WidgetId & formId,
-                           const Eigen::Vector3d & default_,
-                           bool default_from_user,
-                           bool interactive,
-                           std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server)
+namespace details
+{
+
+template<typename DataT, bool rotation_only>
+InteractiveMarkerInput<DataT, rotation_only>::InteractiveMarkerInput(
+    QWidget * parent,
+    const std::string & name,
+    bool required,
+    const WidgetId & formId,
+    const DataT & default_,
+    bool default_from_user,
+    bool interactive,
+    std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server)
 : FormElement(parent, name, required),
   marker_(int_server,
           formId2name(formId, name),
-          make3DMarker(formId2name(formId, name), makeAxisMarker(0.15 * 0.9), interactive),
+          make6DMarker(formId2name(formId, name),
+                       makeAxisMarker(0.15 * 0.9),
+                       (!rotation_only) && interactive,
+                       std::is_same_v<DataT, sva::PTransformd> && interactive),
 
           [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) { handleRequest(feedback); }),
   data_(default_)
 {
   auto layout = new QGridLayout(this);
-  int column = 0;
-  for(const auto & l : {"x", "y", "z"})
+  int row = 0;
+  if constexpr(!rotation_only)
   {
-    layout->addWidget(new QLabel(l), 0, column);
-    auto edit = new QLineEdit(QString::number(data_(column)), this);
-    edits_[static_cast<size_t>(column)] = edit;
-    layout->addWidget(edit, 1, column);
-    this->connect(edit, &QLineEdit::textChanged, this,
-                  [this, column](const QString & txt)
-                  {
-                    ready_ = true;
-                    locked_ = true;
-                    data_(column) = txt.toDouble();
-                    marker_.update(data_);
-                  });
-    column++;
+    auto & data = [this]() -> Eigen::Vector3d &
+    {
+      if constexpr(std::is_same_v<Eigen::Vector3d, DataT>) { return data_; }
+      else { return data_.translation(); }
+    }();
+    int column = 0;
+    for(const auto & l : {"x", "y", "z"})
+    {
+      layout->addWidget(new QLabel(l), 0, column);
+      auto edit = new QLineEdit(QString::number(data(column)), this);
+      edits_[static_cast<size_t>(column)] = edit;
+      layout->addWidget(edit, 1, column);
+      this->connect(edit, &QLineEdit::textChanged, this,
+                    [this, column, &data](const QString & txt)
+                    {
+                      ready_ = true;
+                      locked_ = true;
+                      data(column) = txt.toDouble();
+                      marker_.update(data_);
+                    });
+      column++;
+    }
+    row++;
+  }
+  if constexpr(std::is_same_v<DataT, sva::PTransformd>)
+  {
+    auto get_data = [this]() { return Eigen::Quaterniond(data_.rotation()); };
+    auto data = get_data();
+    auto get_value = [](Eigen::Quaterniond & data, const char label) -> double &
+    {
+      if(label == 'w') { return data.w(); }
+      if(label == 'x') { return data.x(); }
+      if(label == 'y') { return data.y(); }
+      if(label == 'z') { return data.z(); }
+      mc_rtc::log::error_and_throw("unreacheable");
+    };
+    int column = 0;
+    for(const auto & l : {'w', 'x', 'y', 'z'})
+    {
+      layout->addWidget(new QLabel(QString(l)), 2 * row, column);
+      auto edit = new QLineEdit(QString::number(get_value(data, l)), this);
+      edits_[static_cast<size_t>(3 * row + column)] = edit;
+      layout->addWidget(edit, 2 * row + 1, column);
+      column++;
+      this->connect(edit, &QLineEdit::textChanged, this,
+                    [this, l, get_data, get_value](const QString & txt)
+                    {
+                      ready_ = true;
+                      locked_ = true;
+                      auto data = get_data();
+                      get_value(data, l) = txt.toDouble();
+                      data_.rotation() = Eigen::Matrix3d(data.normalized());
+                      marker_.update(data_);
+                    });
+    }
   }
   changed(required, formId, default_, default_from_user, interactive, int_server);
 }
 
-void Point3DInput::changed(bool required,
-                           const WidgetId & formId,
-                           const Eigen::Vector3d & default_,
-                           bool default_from_user,
-                           bool interactive,
-                           std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server)
+template<typename DataT, bool rotation_only>
+void InteractiveMarkerInput<DataT, rotation_only>::changed(
+    bool required,
+    const WidgetId & formId,
+    const DataT & default_,
+    bool default_from_user,
+    bool interactive,
+    std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server)
 {
   if(std::any_of(edits_.begin(), edits_.end(), [](const auto * edit) { return edit->hasFocus(); })) { return; }
   changed_(required);
@@ -651,37 +703,69 @@ void Point3DInput::changed(bool required,
   reset();
 }
 
-void Point3DInput::handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
-{
-  locked_ = true;
-  ready_ = true;
-  data_.x() = feedback->pose.position.x;
-  data_.y() = feedback->pose.position.y;
-  data_.z() = feedback->pose.position.z;
-  for(size_t i = 0; i < 3; ++i) { edits_[i]->setText(QString::number(data_(static_cast<Eigen::DenseIndex>(i)))); }
-}
-
-mc_rtc::Configuration Point3DInput::serialize() const
+template<typename DataT, bool rotation_only>
+mc_rtc::Configuration InteractiveMarkerInput<DataT, rotation_only>::serialize() const
 {
   mc_rtc::Configuration out;
-  out.add("data", data_);
+  if constexpr(std::is_same_v<DataT, sva::PTransformd> && rotation_only) { out.add("data", data_.rotation()); }
+  else { out.add("data", data_); }
   return out("data");
 }
 
-void Point3DInput::reset()
+template<typename DataT, bool rotation_only>
+void InteractiveMarkerInput<DataT, rotation_only>::reset()
 {
   ready_ = user_default_;
-  if(user_default_)
-  {
-    for(size_t i = 0; i < 3; ++i) { edits_[i]->setText(QString::number(data_(static_cast<Eigen::DenseIndex>(i)))); }
-  }
-  else
-  {
-    for(size_t i = 0; i < 3; ++i) { edits_[i]->setText(""); }
-    data_.setZero();
-  }
+  reset_edits();
   marker_.update(data_);
 }
+
+template<typename DataT, bool rotation_only>
+void InteractiveMarkerInput<DataT, rotation_only>::handleRequest(
+    const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+{
+  locked_ = true;
+  ready_ = true;
+  if constexpr(std::is_same_v<DataT, Eigen::Vector3d>)
+  {
+    data_.x() = feedback->pose.position.x;
+    data_.y() = feedback->pose.position.y;
+    data_.z() = feedback->pose.position.z;
+  }
+  reset_edits();
+}
+
+template<typename DataT, bool rotation_only>
+void InteractiveMarkerInput<DataT, rotation_only>::reset_edits()
+{
+  size_t idx = 0;
+  if constexpr(!rotation_only)
+  {
+    auto & data = [this]() -> Eigen::Vector3d &
+    {
+      if constexpr(std::is_same_v<Eigen::Vector3d, DataT>) { return data_; }
+      else { return data_.translation(); }
+    }();
+    edits_[0]->setText(QString::number(data(0)));
+    edits_[1]->setText(QString::number(data(1)));
+    edits_[2]->setText(QString::number(data(2)));
+    idx = 3;
+  }
+  if constexpr(std::is_same_v<DataT, sva::PTransformd>)
+  {
+    auto data = Eigen::Quaterniond(data_.rotation());
+    edits_[idx]->setText(QString::number(data.w()));
+    edits_[idx + 1]->setText(QString::number(data.x()));
+    edits_[idx + 2]->setText(QString::number(data.y()));
+    edits_[idx + 3]->setText(QString::number(data.z()));
+  }
+}
+
+template struct InteractiveMarkerInput<Eigen::Vector3d, false>;
+template struct InteractiveMarkerInput<sva::PTransformd, false>;
+template struct InteractiveMarkerInput<sva::PTransformd, true>;
+
+} // namespace details
 
 } // namespace form
 
