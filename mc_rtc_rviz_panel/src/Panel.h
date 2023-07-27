@@ -237,6 +237,9 @@ protected:                            \
                                        bool default_from_user,
                                        bool interactive))
 
+  DEFINE_OVERRIDE(start_form_object_input(const std::string & name, bool required))
+  DEFINE_OVERRIDE(end_form_object_input())
+
   DEFINE_OVERRIDE(start_plot(uint64_t id, const std::string & title))
   DEFINE_OVERRIDE(plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range))
   DEFINE_OVERRIDE(plot_setup_yaxis_left(uint64_t id,

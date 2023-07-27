@@ -231,6 +231,8 @@ Panel::Panel(QWidget * parent)
       form_rotation_input(const WidgetId &, const std::string &, bool, const sva::PTransformd &, bool, bool));
   CONNECT_SIGNAL_SLOT(
       form_transform_input(const WidgetId &, const std::string &, bool, const sva::PTransformd &, bool, bool));
+  CONNECT_SIGNAL_SLOT(start_form_object_input(const std::string &, bool));
+  CONNECT_SIGNAL_SLOT(end_form_object_input());
   CONNECT_SIGNAL_SLOT(start_plot(uint64_t, const std::string &));
   CONNECT_SIGNAL_SLOT(plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
   CONNECT_SIGNAL_SLOT(plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
@@ -562,6 +564,16 @@ void Panel::form_transform_input(const WidgetId & formId,
                                  bool interactive)
 {
   Q_EMIT signal_form_transform_input(formId, name, required, default_, default_from_user, interactive);
+}
+
+void Panel::start_form_object_input(const std::string & name, bool required)
+{
+  Q_EMIT signal_start_form_object_input(name, required);
+}
+
+void Panel::end_form_object_input()
+{
+  Q_EMIT signal_end_form_object_input();
 }
 
 void Panel::start_plot(uint64_t id, const std::string & title)
@@ -983,6 +995,17 @@ void Panel::got_form_transform_input(const WidgetId & formId,
 {
   activeForm_->element<form::TransformInput>(name, required, formId, default_, default_from_user, interactive,
                                              impl_->int_server_);
+}
+
+void Panel::got_start_form_object_input(const std::string & name, bool required)
+{
+  activeForm_ = activeForm_->element<form::Object>(name, required, activeForm_)->container();
+}
+
+void Panel::got_end_form_object_input()
+{
+  activeForm_->update();
+  activeForm_ = activeForm_->parentForm();
 }
 
 void Panel::got_start_plot(uint64_t id, const std::string & title)

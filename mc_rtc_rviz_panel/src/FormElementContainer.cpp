@@ -33,7 +33,8 @@ private:
   QPushButton * button_;
 };
 
-FormElementContainer::FormElementContainer(QWidget * parent)
+FormElementContainer::FormElementContainer(QWidget * parent, FormElementContainer * parentForm)
+: QWidget(parent), parentForm_(parentForm)
 {
   vlayout_ = new QVBoxLayout(this);
   make_form_layout();
@@ -84,7 +85,7 @@ void FormElementContainer::update()
   }
 }
 
-bool FormElementContainer::ready(std::string & msg)
+bool FormElementContainer::ready(std::string & msg) const
 {
   bool ok = true;
   for(auto & el : elements_)
@@ -94,6 +95,27 @@ bool FormElementContainer::ready(std::string & msg)
     ok = ret && ok;
   }
   return ok;
+}
+
+bool FormElementContainer::ready() const
+{
+  std::string msg;
+  return ready(msg);
+}
+
+bool FormElementContainer::locked() const
+{
+  return std::any_of(elements_.begin(), elements_.end(), [](auto * elem) { return elem->locked(); });
+}
+
+void FormElementContainer::unlock()
+{
+  for(auto & el : elements_) { el->unlock(); }
+}
+
+void FormElementContainer::reset()
+{
+  for(auto & el : elements_) { el->reset(); }
 }
 
 void FormElementContainer::collect(mc_rtc::Configuration & out)

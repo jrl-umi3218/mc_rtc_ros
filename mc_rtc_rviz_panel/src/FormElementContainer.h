@@ -13,7 +13,7 @@ struct FormElementHeader;
 
 struct FormElementContainer : public QWidget
 {
-  FormElementContainer(QWidget * parent);
+  FormElementContainer(QWidget * parent, FormElementContainer * parentForm = nullptr);
 
   template<typename T, typename... Args>
   T * element(const std::string & name, Args &&... args);
@@ -22,9 +22,19 @@ struct FormElementContainer : public QWidget
 
   void update();
 
-  bool ready(std::string & msg);
+  bool ready(std::string & msg) const;
+
+  bool ready() const;
+
+  bool locked() const;
+
+  void unlock();
+
+  void reset();
 
   void collect(mc_rtc::Configuration & out);
+
+  inline FormElementContainer * parentForm() noexcept { return parentForm_; }
 
 private:
   void add_element_to_layout(FormElement * element);
@@ -40,6 +50,8 @@ private:
   size_t idx_;
   std::vector<FormElementHeader *> elements_header_;
   std::vector<FormElement *> elements_;
+
+  FormElementContainer * parentForm_;
 };
 
 template<typename T, typename... Args>

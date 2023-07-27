@@ -4,6 +4,8 @@
 
 #include "FormElement.h"
 
+#include "FormElementContainer.h"
+
 namespace mc_rtc_rviz
 {
 
@@ -789,6 +791,46 @@ template struct InteractiveMarkerInput<sva::PTransformd, false>;
 template struct InteractiveMarkerInput<sva::PTransformd, true>;
 
 } // namespace details
+
+Object::Object(QWidget * parent, const std::string & name, bool required, FormElementContainer * parentForm)
+: FormElement(parent, name, required)
+{
+  auto layout = new QVBoxLayout(this);
+  container_ = new FormElementContainer(this, parentForm);
+  layout->addWidget(container_);
+}
+
+void Object::changed(bool required, FormElementContainer *)
+{
+  changed_(required);
+}
+
+mc_rtc::Configuration Object::serialize() const
+{
+  mc_rtc::Configuration out;
+  container_->collect(out);
+  return out;
+}
+
+void Object::reset()
+{
+  container_->reset();
+}
+
+bool Object::ready() const
+{
+  return container_->ready();
+}
+
+bool Object::locked() const
+{
+  return container_->locked();
+}
+
+void Object::unlock()
+{
+  container_->unlock();
+}
 
 } // namespace form
 

@@ -19,6 +19,8 @@ namespace form
 struct Form;
 }
 
+struct FormElementContainer;
+
 struct FormElement : public QWidget
 {
   Q_OBJECT
@@ -37,11 +39,11 @@ public:
 
   virtual void reset() = 0;
 
-  virtual bool ready() const { return ready_; }
+  virtual inline bool ready() const { return ready_; }
 
-  inline bool locked() const { return locked_; }
+  virtual inline bool locked() const { return locked_; }
 
-  inline void unlock() { locked_ = false; }
+  virtual inline void unlock() { locked_ = false; }
 
   bool required() const { return required_; }
 
@@ -64,7 +66,7 @@ public:
   virtual void update_dependencies(FormElement *) {}
 
 public slots:
-  inline void unlocked() { locked_ = false; }
+  inline void unlocked() { unlock(); }
 
 protected:
   void changed_(bool required) { required_ = required; }
@@ -556,6 +558,28 @@ struct TransformInput : public details::InteractiveMarkerInput<sva::PTransformd,
 {
 public:
   using details::InteractiveMarkerInput<sva::PTransformd, false>::InteractiveMarkerInput;
+};
+
+struct Object : public FormElement
+{
+  Object(QWidget * parent, const std::string & name, bool required, FormElementContainer * parentForm);
+
+  void changed(bool required, FormElementContainer *);
+
+  mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
+
+  bool ready() const override;
+
+  bool locked() const override;
+
+  void unlock() override;
+
+  inline FormElementContainer * container() noexcept { return container_; }
+
+private:
+  FormElementContainer * container_;
 };
 
 } // namespace form
