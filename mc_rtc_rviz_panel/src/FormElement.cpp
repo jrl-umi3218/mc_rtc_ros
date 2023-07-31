@@ -1070,6 +1070,133 @@ void GenericArray::update()
   values_->update();
 }
 
+OneOf::OneOf(QWidget * parent,
+             const std::string & name,
+             bool required,
+             const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data,
+             FormElementContainer * parentForm)
+: FormElement(parent, name, required)
+{
+  container_ = new FormElementContainer(this, parentForm);
+  container_->hide();
+  auto layout = new QVBoxLayout(this);
+  selector_ = new QComboBox(this);
+  using sig_t = void (QComboBox::*)(int);
+  connect(selector_, static_cast<sig_t>(&QComboBox::currentIndexChanged), this,
+          [this](int index)
+          {
+            locked_ = true;
+            updateValue(index, {});
+          });
+  layout->addWidget(selector_);
+  activeLayout_ = new QVBoxLayout();
+  layout->addLayout(activeLayout_);
+}
+
+void OneOf::changed(bool required,
+                    const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data,
+                    FormElementContainer *)
+{
+  changed_(required);
+  if(!data)
+  {
+    if(active_) { updateValue(-1, {}); }
+  }
+  else { updateValue(data->first, data->second); }
+}
+
+mc_rtc::Configuration OneOf::serialize() const
+{
+  auto out = mc_rtc::Configuration::rootArray();
+  out.push(selector_->currentIndex());
+  out.push(active_->serialize());
+  return out;
+}
+
+void OneOf::reset()
+{
+  locked_ = false;
+  updateValue(-1, {});
+}
+
+bool OneOf::ready() const
+{
+  return active_ && active_->ready();
+}
+
+bool OneOf::locked() const
+{
+  return locked_ || (active_ && active_->locked());
+}
+
+void OneOf::unlock()
+{
+  reset();
+}
+
+FormElement * OneOf::clone(QWidget * parent, const std::string & name) const
+{
+  auto out = new OneOf(parent, name, required_, std::nullopt, nullptr);
+  out->container_->copy(*container_);
+  out->updateValue(data_.first, data_.second);
+  return out;
+}
+
+void OneOf::fill(const mc_rtc::Configuration & value)
+{
+  if(value.isArray())
+  {
+    if(value.size() != 2) { mc_rtc::log::error_and_throw("Wrong data to fill OneOf: {}", value.dump(true, true)); }
+    updateValue(value[0], value[1]);
+  }
+}
+
+void OneOf::updateValue(int idx, mc_rtc::Configuration data)
+{
+  if(container_->elements().size() == 0) { return; }
+  selector_->blockSignals(true);
+  if(idx < 0)
+  {
+    selector_->setCurrentIndex(-1);
+    if(active_)
+    {
+      active_->deleteLater();
+      active_ = nullptr;
+    }
+    data_.first = std::numeric_limits<size_t>::max();
+  }
+  else if(data_.first != idx)
+  {
+    data_.first = idx;
+    if(data_.first >= container_->elements().size())
+    {
+      mc_rtc::log::error_and_throw("Data out of range for OneOf::updateValue");
+    }
+    if(active_) { active_->deleteLater(); }
+    auto template_ = container_->elements()[data_.first];
+    active_ = template_->clone(this, template_->name());
+    activeLayout_->addWidget(active_);
+  }
+  selector_->setCurrentIndex(idx);
+  if(active_)
+  {
+    data_.second = data;
+    if(!data_.second.empty()) { active_->fill(data_.second); }
+  }
+  selector_->blockSignals(false);
+}
+
+void OneOf::update()
+{
+  const auto & templates = container_->elements();
+  if(templates.size() == 0 || templates.size() == selector_->count()) { return; }
+  selector_->blockSignals(true);
+  while(selector_->count()) { selector_->removeItem(0); }
+  for(const auto & t : templates) { selector_->addItem(t->name().c_str()); }
+  selector_->setCurrentIndex(-1);
+  selector_->blockSignals(false);
+}
+
 } // namespace form
 
 } // namespace mc_rtc_rviz

@@ -243,8 +243,12 @@ protected:                            \
   DEFINE_OVERRIDE(start_form_generic_array_input(const std::string & name,
                                                  bool required,
                                                  std::optional<std::vector<mc_rtc::Configuration>> data))
-
   DEFINE_OVERRIDE(end_form_generic_array_input())
+
+  DEFINE_OVERRIDE(start_form_one_of_input(const std::string & name,
+                                          bool required,
+                                          const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data))
+  DEFINE_OVERRIDE(end_form_one_of_input())
 
   DEFINE_OVERRIDE(start_plot(uint64_t id, const std::string & title))
   DEFINE_OVERRIDE(plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range))

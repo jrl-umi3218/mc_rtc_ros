@@ -171,6 +171,8 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<rbd::parsers::Visual>("rbd::parsers::Visual");
   qRegisterMetaType<std::optional<std::vector<mc_rtc::Configuration>>>(
       "std::optional<std::vector<mc_rtc::Configuration>>");
+  qRegisterMetaType<std::optional<std::pair<size_t, mc_rtc::Configuration>>>(
+      "std::optional<std::pair<size_t, mc_rtc::Configuration>>");
   tree_.parent = this;
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
@@ -238,6 +240,9 @@ Panel::Panel(QWidget * parent)
   CONNECT_SIGNAL_SLOT(
       start_form_generic_array_input(const std::string &, bool, std::optional<std::vector<mc_rtc::Configuration>>));
   CONNECT_SIGNAL_SLOT(end_form_generic_array_input());
+  CONNECT_SIGNAL_SLOT(start_form_one_of_input(const std::string &, bool,
+                                              const std::optional<std::pair<size_t, mc_rtc::Configuration>> &));
+  CONNECT_SIGNAL_SLOT(end_form_one_of_input());
   CONNECT_SIGNAL_SLOT(start_plot(uint64_t, const std::string &));
   CONNECT_SIGNAL_SLOT(plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
   CONNECT_SIGNAL_SLOT(plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
@@ -591,6 +596,18 @@ void Panel::start_form_generic_array_input(const std::string & name,
 void Panel::end_form_generic_array_input()
 {
   Q_EMIT signal_end_form_generic_array_input();
+}
+
+void Panel::start_form_one_of_input(const std::string & name,
+                                    bool required,
+                                    const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data)
+{
+  Q_EMIT signal_start_form_one_of_input(name, required, data);
+}
+
+void Panel::end_form_one_of_input()
+{
+  Q_EMIT signal_end_form_one_of_input();
 }
 
 void Panel::start_plot(uint64_t id, const std::string & title)
@@ -1034,6 +1051,21 @@ void Panel::got_start_form_generic_array_input(const std::string & name,
 }
 
 void Panel::got_end_form_generic_array_input()
+{
+  activeForm_->update();
+  activeForm_ = activeForm_->parentForm();
+}
+
+void Panel::got_start_form_one_of_input(const std::string & name,
+                                        bool required,
+                                        const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data)
+{
+  auto oneof = activeForm_->element<form::OneOf>(name, required, data, activeForm_);
+  oneof->update();
+  activeForm_ = oneof->container();
+}
+
+void Panel::got_end_form_one_of_input()
 {
   activeForm_->update();
   activeForm_ = activeForm_->parentForm();

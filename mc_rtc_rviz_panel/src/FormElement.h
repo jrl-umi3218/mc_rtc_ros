@@ -694,6 +694,47 @@ private:
   void addValue(const std::string & name);
 };
 
+struct OneOf : public FormElement
+{
+  OneOf(QWidget * parent,
+        const std::string & name,
+        bool required,
+        const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data,
+        FormElementContainer * parentForm);
+
+  void changed(bool required,
+               const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data,
+               FormElementContainer * parentForm);
+
+  mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
+
+  bool ready() const override;
+
+  bool locked() const override;
+
+  void unlock() override;
+
+  inline FormElementContainer * container() noexcept { return container_; }
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+
+  void fill(const mc_rtc::Configuration & value) override;
+
+  void update();
+
+private:
+  QComboBox * selector_;
+  QVBoxLayout * activeLayout_ = nullptr;
+  FormElement * active_ = nullptr;
+  FormElementContainer * container_ = nullptr;
+
+  void updateValue(int idx, mc_rtc::Configuration data);
+
+  std::pair<size_t, mc_rtc::Configuration> data_ = {std::numeric_limits<size_t>::max(), {}};
+};
+
 } // namespace form
 
 } // namespace mc_rtc_rviz
