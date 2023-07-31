@@ -13,7 +13,7 @@ struct FormElementHeader;
 
 struct FormElementContainer : public QWidget
 {
-  FormElementContainer(QWidget * parent, FormElementContainer * parentForm = nullptr);
+  FormElementContainer(QWidget * parent, FormElementContainer * parentForm = nullptr, bool array_like = false);
 
   template<typename T, typename... Args>
   T * element(const std::string & name, Args &&... args);
@@ -34,13 +34,28 @@ struct FormElementContainer : public QWidget
 
   void collect(mc_rtc::Configuration & out);
 
+  void remove_element(FormElement * element);
+
   inline FormElementContainer * parentForm() noexcept { return parentForm_; }
+
+  inline bool empty() const noexcept { return elements_.empty(); }
+
+  inline const FormElement * element() const noexcept
+  {
+    assert(!empty());
+    return elements_[0];
+  }
+
+  inline const std::vector<FormElement *> & elements() const noexcept { return elements_; }
+
+  void copy(const FormElementContainer & container);
 
 private:
   void add_element_to_layout(FormElement * element);
 
   void make_form_layout();
 
+  bool array_like_ = false;
   QVBoxLayout * vlayout_;
   QWidget * form_;
   QFormLayout * requiredLayout_;

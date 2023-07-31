@@ -26,15 +26,14 @@ struct FormElementHeader : public QWidget
     else { button_->hide(); }
   }
 
-private:
   FormElement * element_;
   QHBoxLayout * layout_;
   QLabel * label_;
   QPushButton * button_;
 };
 
-FormElementContainer::FormElementContainer(QWidget * parent, FormElementContainer * parentForm)
-: QWidget(parent), parentForm_(parentForm)
+FormElementContainer::FormElementContainer(QWidget * parent, FormElementContainer * parentForm, bool array_like)
+: QWidget(parent), parentForm_(parentForm), array_like_(array_like)
 {
   vlayout_ = new QVBoxLayout(this);
   make_form_layout();
@@ -58,12 +57,24 @@ void FormElementContainer::make_form_layout()
   auto optionalWidget = new QWidget(form_);
   optionalLayout_ = new QFormLayout(optionalWidget);
   optionalToolBox_->addItem(optionalWidget, "Optional fields");
+  optionalToolBox_->hide();
   vlayout_->insertWidget(0, form_);
   for(auto el : elements_)
   {
     el->setParent(form_);
     add_element_to_layout(el);
   }
+}
+
+void FormElementContainer::remove_element(FormElement * element)
+{
+  auto it = std::find(elements_.begin(), elements_.end(), element);
+  if(it == elements_.end()) { return; }
+  (*it)->deleteLater();
+  size_t idx = std::distance(elements_.begin(), it);
+  elements_.erase(it);
+  for(; idx < elements_.size(); ++idx) { elements_[idx]->name(std::to_string(idx)); }
+  changed_ = true;
 }
 
 void FormElementContainer::update()
@@ -123,11 +134,8 @@ void FormElementContainer::collect(mc_rtc::Configuration & out)
   for(auto & el : elements_)
   {
     if(el->ready()) { out.add(el->name(), el->serialize()); }
-    for(auto & el : elements_)
-    {
-      el->unlock();
-      el->reset();
-    }
+    el->unlock();
+    el->reset();
   }
 }
 
@@ -156,6 +164,17 @@ void FormElementContainer::add_element_to_layout(FormElement * elementIn)
   QFormLayout * layout_ = is_robot_or_required() ? requiredLayout_ : optionalLayout_;
   if(elementIn->required()) { label_text += "*"; }
   auto header = new FormElementHeader(label_text.c_str(), elementIn, form_);
+  if(array_like_)
+  {
+    auto remove_button = new QPushButton("-");
+    header->layout_->addWidget(remove_button);
+    connect(remove_button, &QPushButton::released, this,
+            [this, elementIn]()
+            {
+              remove_element(elementIn);
+              update();
+            });
+  }
   elements_header_.push_back(header);
   if(!elementIn->spanning()) { layout_->addRow(header, elementIn); }
   else
@@ -165,6 +184,12 @@ void FormElementContainer::add_element_to_layout(FormElement * elementIn)
   }
   if(optionalLayout_->rowCount() == 0) { optionalToolBox_->hide(); }
   else { optionalToolBox_->show(); }
+}
+
+void FormElementContainer::copy(const FormElementContainer & other)
+{
+  for(const auto & e : other.elements_) { add_element(e->clone(this, e->name())); }
+  update();
 }
 
 } // namespace mc_rtc_rviz

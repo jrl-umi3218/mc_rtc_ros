@@ -169,6 +169,8 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::vector<std::array<Eigen::Vector3d, 3>>>("std::vector<std::array<Eigen::Vector3d, 3>>");
   qRegisterMetaType<std::vector<std::vector<double>>>("std::vector<std::vector<double>>");
   qRegisterMetaType<rbd::parsers::Visual>("rbd::parsers::Visual");
+  qRegisterMetaType<std::optional<std::vector<mc_rtc::Configuration>>>(
+      "std::optional<std::vector<mc_rtc::Configuration>>");
   tree_.parent = this;
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
@@ -233,6 +235,9 @@ Panel::Panel(QWidget * parent)
       form_transform_input(const WidgetId &, const std::string &, bool, const sva::PTransformd &, bool, bool));
   CONNECT_SIGNAL_SLOT(start_form_object_input(const std::string &, bool));
   CONNECT_SIGNAL_SLOT(end_form_object_input());
+  CONNECT_SIGNAL_SLOT(
+      start_form_generic_array_input(const std::string &, bool, std::optional<std::vector<mc_rtc::Configuration>>));
+  CONNECT_SIGNAL_SLOT(end_form_generic_array_input());
   CONNECT_SIGNAL_SLOT(start_plot(uint64_t, const std::string &));
   CONNECT_SIGNAL_SLOT(plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
   CONNECT_SIGNAL_SLOT(plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
@@ -574,6 +579,18 @@ void Panel::start_form_object_input(const std::string & name, bool required)
 void Panel::end_form_object_input()
 {
   Q_EMIT signal_end_form_object_input();
+}
+
+void Panel::start_form_generic_array_input(const std::string & name,
+                                           bool required,
+                                           std::optional<std::vector<mc_rtc::Configuration>> data)
+{
+  Q_EMIT signal_start_form_generic_array_input(name, required, data);
+}
+
+void Panel::end_form_generic_array_input()
+{
+  Q_EMIT signal_end_form_generic_array_input();
 }
 
 void Panel::start_plot(uint64_t id, const std::string & title)
@@ -971,7 +988,7 @@ void Panel::got_form_point3d_input(const WidgetId & formId,
                                    bool default_from_user,
                                    bool interactive)
 {
-  activeForm_->element<form::Point3DInput>(name, required, formId, default_, default_from_user, interactive,
+  activeForm_->element<form::Point3DInput>(name, required, default_, default_from_user, interactive,
                                            impl_->int_server_);
 }
 
@@ -982,7 +999,7 @@ void Panel::got_form_rotation_input(const WidgetId & formId,
                                     bool default_from_user,
                                     bool interactive)
 {
-  activeForm_->element<form::RotationInput>(name, required, formId, default_, default_from_user, interactive,
+  activeForm_->element<form::RotationInput>(name, required, default_, default_from_user, interactive,
                                             impl_->int_server_);
 }
 
@@ -993,7 +1010,7 @@ void Panel::got_form_transform_input(const WidgetId & formId,
                                      bool default_from_user,
                                      bool interactive)
 {
-  activeForm_->element<form::TransformInput>(name, required, formId, default_, default_from_user, interactive,
+  activeForm_->element<form::TransformInput>(name, required, default_, default_from_user, interactive,
                                              impl_->int_server_);
 }
 
@@ -1003,6 +1020,20 @@ void Panel::got_start_form_object_input(const std::string & name, bool required)
 }
 
 void Panel::got_end_form_object_input()
+{
+  activeForm_->update();
+  activeForm_ = activeForm_->parentForm();
+}
+
+void Panel::got_start_form_generic_array_input(const std::string & name,
+                                               bool required,
+                                               std::optional<std::vector<mc_rtc::Configuration>> data)
+{
+  auto array = activeForm_->element<form::GenericArray>(name, required, data, activeForm_);
+  activeForm_ = array->container();
+}
+
+void Panel::got_end_form_generic_array_input()
 {
   activeForm_->update();
   activeForm_ = activeForm_->parentForm();
