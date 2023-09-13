@@ -14,16 +14,12 @@
 
 #endif
 
-#ifndef DISABLE_ROS
+#include <ros/ros.h>
+#include <visualization_msgs/MarkerArray.h>
 
-#  include <ros/ros.h>
-#  include <visualization_msgs/MarkerArray.h>
-
-#  include <interactive_markers/interactive_marker_server.h>
-#  include <tf/tfMessage.h>
-#  include <tf/transform_listener.h>
-
-#endif
+#include <interactive_markers/interactive_marker_server.h>
+#include <tf/tfMessage.h>
+#include <tf/transform_listener.h>
 
 namespace mc_rtc_rviz
 {

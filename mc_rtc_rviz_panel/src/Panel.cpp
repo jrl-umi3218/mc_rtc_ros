@@ -6,30 +6,28 @@
 
 #include "ArrayInputWidget.h"
 #include "ArrayLabelWidget.h"
+#include "ArrowInteractiveMarkerWidget.h"
 #include "ButtonWidget.h"
 #include "CheckboxWidget.h"
 #include "ComboInputWidget.h"
+#include "ConnectionDialog.h"
+#include "DisplayTrajectoryWidget.h"
+#include "ForceInteractiveMarkerWidget.h"
 #include "FormElement.h"
 #include "FormWidget.h"
 #include "GenericInputWidget.h"
-#ifndef DISABLE_ROS
-#  include "ArrowInteractiveMarkerWidget.h"
-#  include "DisplayTrajectoryWidget.h"
-#  include "ForceInteractiveMarkerWidget.h"
-#  include "InteractiveMarkerWidget.h"
-#  include "Point3DInteractiveMarkerWidget.h"
-#  include "PolygonMarkerWidget.h"
-#  include "PolyhedronMarkerWidget.h"
-#  include "TransformInteractiveMarkerWidget.h"
-#  include "VisualWidget.h"
-#  include "XYThetaInteractiveMarkerWidget.h"
-#endif
-#include "ConnectionDialog.h"
+#include "InteractiveMarkerWidget.h"
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
 #include "PlotTabWidget.h"
+#include "Point3DInteractiveMarkerWidget.h"
+#include "PolygonMarkerWidget.h"
+#include "PolyhedronMarkerWidget.h"
 #include "SchemaWidget.h"
 #include "TableWidget.h"
+#include "TransformInteractiveMarkerWidget.h"
+#include "VisualWidget.h"
+#include "XYThetaInteractiveMarkerWidget.h"
 
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
@@ -112,7 +110,6 @@ double getTimeout()
 
 } // namespace
 
-#ifndef DISABLE_ROS
 struct PanelImpl
 {
   PanelImpl()
@@ -127,11 +124,6 @@ struct PanelImpl
   visualization_msgs::MarkerArray marker_array_;
   ros::Publisher marker_array_pub_;
 };
-#else
-struct PanelImpl
-{
-};
-#endif
 
 Panel::Panel(QWidget * parent)
 : CategoryWidget(ClientWidgetParam{*this, parent, {{}, "ROOT"}}),
@@ -279,12 +271,10 @@ void Panel::got_stop()
 {
   tree_.clean();
   this->clean();
-#ifndef DISABLE_ROS
   impl_->int_server_->applyChanges();
   impl_->marker_array_pub_.publish(impl_->marker_array_);
   impl_->marker_array_.markers.clear();
   if(ros::ok()) { ros::spinOnce(); }
-#endif
 }
 
 Panel::~Panel()
@@ -754,29 +744,23 @@ void Panel::got_point3d(const WidgetId & id,
                         const Eigen::Vector3d & pos,
                         const mc_rtc::gui::PointConfig & config)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<Point3DInteractiveMarkerWidget>(id, requestId, impl_->int_server_, config, !ro, label);
   w.update(pos);
-#endif
 }
 
 void Panel::got_rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, impl_->int_server_, !ro, false, label);
   w.update(pos);
-#endif
 }
 
 void Panel::got_transform(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, impl_->int_server_, !ro, !ro, label);
   w.update(pos);
-#endif
 }
 
 void Panel::got_xytheta(const WidgetId & id,
@@ -785,58 +769,46 @@ void Panel::got_xytheta(const WidgetId & id,
                         const Eigen::Vector3d & vec,
                         double altitude)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, impl_->int_server_, sva::PTransformd::Identity(),
                                                         !ro, !ro, label);
   w.update(vec, altitude);
-#endif
 }
 
 void Panel::got_trajectory(const WidgetId & id,
                            const std::vector<Eigen::Vector3d> & points,
                            const mc_rtc::gui::LineConfig & config)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
   w.update(points, config);
-#endif
 }
 
 void Panel::got_trajectory(const WidgetId & id,
                            const std::vector<sva::PTransformd> & points,
                            const mc_rtc::gui::LineConfig & config)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
   w.update(points, config);
-#endif
 }
 
 void Panel::got_trajectory(const WidgetId & id, const Eigen::Vector3d & point, const mc_rtc::gui::LineConfig & config)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
   w.update(point, config);
-#endif
 }
 
 void Panel::got_trajectory(const WidgetId & id, const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
   w.update(point, config);
-#endif
 }
 
 void Panel::got_polygon(const WidgetId & id,
                         const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                         const mc_rtc::gui::LineConfig & c)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<PolygonMarkerWidget>(id, impl_->marker_array_);
   w.update(polygons, c);
-#endif
 }
 
 void Panel::got_polyhedron(const WidgetId & id,
@@ -844,10 +816,8 @@ void Panel::got_polyhedron(const WidgetId & id,
                            const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
                            const mc_rtc::gui::PolyhedronConfig & c)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<PolyhedronMarkerWidget>(id, impl_->marker_array_, c);
   w.update(triangles, colors);
-#endif
 }
 
 void Panel::got_force(const WidgetId & id,
@@ -857,12 +827,10 @@ void Panel::got_force(const WidgetId & id,
                       const mc_rtc::gui::ForceConfig & forceConfig,
                       bool ro)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<ForceInteractiveMarkerWidget>(id, requestId, impl_->int_server_, surface, forcep, forceConfig,
                                                       ro, label);
   w.update(surface, forcep, forceConfig);
-#endif
 }
 
 void Panel::got_arrow(const WidgetId & id,
@@ -872,12 +840,10 @@ void Panel::got_arrow(const WidgetId & id,
                       const mc_rtc::gui::ArrowConfig & config,
                       bool ro)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w =
       get_widget<ArrowInteractiveMarkerWidget>(id, requestId, impl_->int_server_, start, end, config, !ro, !ro, label);
   w.update(start, end, config);
-#endif
 }
 
 void Panel::got_schema(const WidgetId & id, const std::string & schema)
@@ -920,10 +886,8 @@ void Panel::got_robot(const WidgetId & id,
 
 void Panel::got_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<VisualWidget>(id, impl_->marker_array_);
   w.update(visual, pose);
-#endif
 }
 
 void Panel::got_form(const WidgetId & id)
