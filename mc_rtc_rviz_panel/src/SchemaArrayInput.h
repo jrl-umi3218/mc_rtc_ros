@@ -30,6 +30,16 @@ public:
 
   void reset() override;
 
+  inline FormElement * clone(QWidget *, const std::string &) const override
+  {
+    mc_rtc::log::error_and_throw("Not implement for this type");
+  }
+
+  inline void fill(const mc_rtc::Configuration &) override
+  {
+    mc_rtc::log::error_and_throw("Not implement for this type");
+  }
+
 private:
   Schema schema_;
   mc_rtc::Configuration data_;

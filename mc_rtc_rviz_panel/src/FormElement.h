@@ -8,6 +8,9 @@
 
 #include <mc_rtc/Configuration.h>
 
+#include "ClientWidget.h"
+#include "utils.h"
+
 namespace mc_rtc_rviz
 {
 
@@ -15,6 +18,8 @@ namespace form
 {
 struct Form;
 }
+
+struct FormElementContainer;
 
 struct FormElement : public QWidget
 {
@@ -34,11 +39,11 @@ public:
 
   virtual void reset() = 0;
 
-  virtual bool ready() const { return ready_; }
+  virtual inline bool ready() const { return ready_; }
 
-  inline bool locked() const { return locked_; }
+  virtual inline bool locked() const { return locked_; }
 
-  inline void unlock() { locked_ = false; }
+  virtual inline void unlock() { locked_ = false; }
 
   bool required() const { return required_; }
 
@@ -60,8 +65,11 @@ public:
 
   virtual void update_dependencies(FormElement *) {}
 
+  virtual FormElement * clone(QWidget * parent, const std::string & name) const = 0;
+
+  virtual void fill(const mc_rtc::Configuration & value) = 0;
 public slots:
-  inline void unlocked() { locked_ = false; }
+  inline void unlocked() { unlock(); }
 
 protected:
   void changed_(bool required) { required_ = required; }
@@ -95,6 +103,10 @@ public:
 
   void reset() override;
 
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+
+  void fill(const mc_rtc::Configuration & value) override;
+
 private:
   QCheckBox * cbox_;
   bool def_;
@@ -125,6 +137,10 @@ struct IntegerInput : public CommonInput
 
   void reset() override;
 
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+
+  void fill(const mc_rtc::Configuration & value) override;
+
 private:
   int def_;
   bool user_def_;
@@ -140,6 +156,10 @@ struct NumberInput : public CommonInput
 
   void reset() override;
 
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+
+  void fill(const mc_rtc::Configuration & value) override;
+
 private:
   double def_;
   bool user_def_;
@@ -154,6 +174,10 @@ struct StringInput : public CommonInput
   mc_rtc::Configuration serialize() const override;
 
   void reset() override;
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+
+  void fill(const mc_rtc::Configuration & value) override;
 
 private:
   std::string def_;
@@ -185,6 +209,8 @@ struct ArrayInput : public CommonArrayInput
 
   void reset() override;
 
+  void fill(const mc_rtc::Configuration & value) override;
+
 protected:
   void add_edit(const T & def);
   void data2edit(const T & value, QLineEdit * edit);
@@ -195,10 +221,10 @@ private:
 
 protected:
   bool fixed_size_;
-
-private:
   int min_size_;
   int max_size_;
+
+private:
   bool is_square_ = false;
   int stride_ = 1;
   int next_row_ = 0;
@@ -315,6 +341,16 @@ mc_rtc::Configuration ArrayInput<T>::serialize() const
 }
 
 template<typename T>
+void ArrayInput<T>::fill(const mc_rtc::Configuration & data_)
+{
+  std::vector<T> data = data_;
+  if(data.size() < min_size_) { mc_rtc::log::error_and_throw("Should have engouh data to fill ArrayInput"); }
+  reset();
+  for(size_t i = 0; i < edits_.size(); ++i) { data2edit(data[i], edits_[i]); }
+  for(size_t i = edits_.size(); i < data.size(); ++i) { add_edit(data[i]); }
+}
+
+template<typename T>
 void ArrayInput<T>::add_edit(const T & def)
 {
   auto edit = new QLineEdit(this);
@@ -360,8 +396,19 @@ void ArrayInput<T>::minusReleased()
   delete button;
 }
 
-using IntegerArrayInput = ArrayInput<int>;
-using StringArrayInput = ArrayInput<std::string>;
+struct IntegerArrayInput : public ArrayInput<int>
+{
+  using ArrayInput<int>::ArrayInput;
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+};
+
+struct StringArrayInput : public ArrayInput<std::string>
+{
+  using ArrayInput<std::string>::ArrayInput;
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+};
 
 struct NumberArrayInput : public ArrayInput<double>
 {
@@ -381,6 +428,8 @@ struct NumberArrayInput : public ArrayInput<double>
   void changed(bool required, const Eigen::VectorXd & def, bool fixed_size, bool user_def);
 
   void reset() override;
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
 
 private:
   Eigen::VectorXd def_;
@@ -403,6 +452,10 @@ public:
   mc_rtc::Configuration serialize() const override;
 
   void reset() override;
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+
+  void fill(const mc_rtc::Configuration & data) override;
 
 private:
   std::vector<std::string> values_;
@@ -435,6 +488,10 @@ public:
   mc_rtc::Configuration serialize() const override;
 
   void reset() override;
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+
+  void fill(const mc_rtc::Configuration & data) override;
 
 private:
   bool send_index_;
@@ -480,6 +537,16 @@ public:
 
   void reset() override;
 
+  inline FormElement * clone(QWidget *, const std::string &) const override
+  {
+    mc_rtc::log::error_and_throw("Not implement for this type");
+  }
+
+  inline void fill(const mc_rtc::Configuration &) override
+  {
+    mc_rtc::log::error_and_throw("Not implement for this type");
+  }
+
 private:
   std::vector<FormElement *> elements_;
   QGroupBox * group_;
@@ -488,6 +555,184 @@ private:
 signals:
   /** Emitted if the Form is checkable and the users unchecks it */
   void toggled(bool);
+};
+
+namespace details
+{
+
+template<typename DataT, bool rotation_only>
+struct InteractiveMarkerInput : public FormElement
+{
+public:
+  InteractiveMarkerInput(QWidget * parent,
+                         const std::string & name,
+                         bool required,
+                         const DataT & default_,
+                         bool default_from_user,
+                         bool interactive,
+                         std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server);
+
+  void changed(bool required,
+               const DataT & default_,
+               bool default_from_user,
+               bool interactive,
+               std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server);
+
+  mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
+
+  void fill(const mc_rtc::Configuration & value) override;
+
+protected:
+  SharedMarker marker_;
+  DataT default_data_;
+  DataT data_;
+  bool user_default_;
+  bool interactive_;
+  std::shared_ptr<interactive_markers::InteractiveMarkerServer> server_;
+
+  void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback);
+
+  static constexpr size_t n_edits = std::is_same_v<Eigen::Vector3d, DataT> ? 3 : (rotation_only ? 4 : 7);
+  std::array<QLineEdit *, n_edits> edits_;
+
+  void reset_edits();
+};
+
+extern template struct InteractiveMarkerInput<Eigen::Vector3d, false>;
+extern template struct InteractiveMarkerInput<sva::PTransformd, false>;
+extern template struct InteractiveMarkerInput<sva::PTransformd, true>;
+
+} // namespace details
+
+struct Point3DInput : public details::InteractiveMarkerInput<Eigen::Vector3d, false>
+{
+public:
+  using details::InteractiveMarkerInput<Eigen::Vector3d, false>::InteractiveMarkerInput;
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+};
+
+struct RotationInput : public details::InteractiveMarkerInput<sva::PTransformd, true>
+{
+public:
+  using details::InteractiveMarkerInput<sva::PTransformd, true>::InteractiveMarkerInput;
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+};
+
+struct TransformInput : public details::InteractiveMarkerInput<sva::PTransformd, false>
+{
+public:
+  using details::InteractiveMarkerInput<sva::PTransformd, false>::InteractiveMarkerInput;
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+};
+
+struct Object : public FormElement
+{
+  Object(QWidget * parent, const std::string & name, bool required, FormElementContainer * parentForm);
+
+  void changed(bool required, FormElementContainer *);
+
+  mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
+
+  bool ready() const override;
+
+  bool locked() const override;
+
+  void unlock() override;
+
+  inline FormElementContainer * container() noexcept { return container_; }
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+
+  void fill(const mc_rtc::Configuration & value) override;
+
+private:
+  FormElementContainer * container_;
+};
+
+struct GenericArray : public FormElement
+{
+  GenericArray(QWidget * parent,
+               const std::string & name,
+               bool required,
+               std::optional<std::vector<mc_rtc::Configuration>> data,
+               FormElementContainer * parentForm);
+
+  void changed(bool required, std::optional<std::vector<mc_rtc::Configuration>> data, FormElementContainer *);
+
+  mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
+
+  bool ready() const override;
+
+  bool locked() const override;
+
+  void unlock() override;
+
+  inline FormElementContainer * container() noexcept { return template_; }
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+
+  void fill(const mc_rtc::Configuration & value) override;
+
+  void update();
+
+private:
+  QVBoxLayout * valuesLayout_;
+  FormElementContainer * template_;
+  FormElementContainer * values_;
+
+  void updateValues(const std::vector<mc_rtc::Configuration> & data);
+
+  void addValue(const std::string & name);
+};
+
+struct OneOf : public FormElement
+{
+  OneOf(QWidget * parent,
+        const std::string & name,
+        bool required,
+        const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data,
+        FormElementContainer * parentForm);
+
+  void changed(bool required,
+               const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data,
+               FormElementContainer * parentForm);
+
+  mc_rtc::Configuration serialize() const override;
+
+  void reset() override;
+
+  bool ready() const override;
+
+  bool locked() const override;
+
+  void unlock() override;
+
+  inline FormElementContainer * container() noexcept { return container_; }
+
+  FormElement * clone(QWidget * parent, const std::string & name) const override;
+
+  void fill(const mc_rtc::Configuration & value) override;
+
+  void update();
+
+private:
+  QComboBox * selector_;
+  QVBoxLayout * activeLayout_ = nullptr;
+  FormElement * active_ = nullptr;
+  FormElementContainer * container_ = nullptr;
+
+  void updateValue(int idx, mc_rtc::Configuration data);
+
+  std::pair<size_t, mc_rtc::Configuration> data_ = {std::numeric_limits<size_t>::max(), {}};
 };
 
 } // namespace form

@@ -14,12 +14,3 @@ Build-Depends: debhelper (>= 9),
 # ros-@ROS_DISTRO@-rviz,
 # ros-@ROS_DISTRO@-tf,
                libmc-rtc-dev
-
-
-Package: mc-rtc-gui
-Architecture: any
-Section: science
-Depends: ${misc:Depends},
-         ${shlibs:Depends}
-Description: mc-rtc - Stand-alone GUI
- This package contains a ROS-free GUI for mc_rtc

@@ -4,6 +4,8 @@
 
 #include "FormElement.h"
 
+#include "FormElementContainer.h"
+
 namespace mc_rtc_rviz
 {
 
@@ -105,6 +107,18 @@ mc_rtc::Configuration Checkbox::serialize() const
   return details::serialize(cbox_->isChecked());
 }
 
+FormElement * Checkbox::clone(QWidget * parent, const std::string & name) const
+{
+  return new Checkbox(parent, name, required_, def_, user_def_);
+}
+
+void Checkbox::fill(const mc_rtc::Configuration & value)
+{
+  user_def_ = true;
+  def_ = value.operator bool();
+  reset();
+}
+
 CommonInput::CommonInput(QWidget * parent, const std::string & name, bool required)
 : FormElement(parent, name, required)
 {
@@ -151,6 +165,18 @@ void IntegerInput::reset()
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
 
+FormElement * IntegerInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new IntegerInput(parent, name, required_, def_, user_def_);
+}
+
+void IntegerInput::fill(const mc_rtc::Configuration & value)
+{
+  user_def_ = true;
+  def_ = value.operator int();
+  reset();
+}
+
 NumberInput::NumberInput(QWidget * parent, const std::string & name, bool required, double def, bool user_def)
 : CommonInput(parent, name, required), def_(def), user_def_(user_def)
 {
@@ -181,6 +207,18 @@ void NumberInput::reset()
   else { edit_->setText(""); }
   ready_ = user_def_;
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
+}
+
+FormElement * NumberInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new NumberInput(parent, name, required_, def_, user_def_);
+}
+
+void NumberInput::fill(const mc_rtc::Configuration & value)
+{
+  user_def_ = true;
+  def_ = value.operator double();
+  reset();
 }
 
 StringInput::StringInput(QWidget * parent,
@@ -214,6 +252,18 @@ void StringInput::reset()
 mc_rtc::Configuration StringInput::serialize() const
 {
   return details::serialize(edit_->text().toStdString());
+}
+
+FormElement * StringInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new StringInput(parent, name, required_, def_, user_def_);
+}
+
+void StringInput::fill(const mc_rtc::Configuration & value)
+{
+  user_def_ = true;
+  def_ = value.operator std::string();
+  reset();
 }
 
 CommonArrayInput::CommonArrayInput(QWidget * parent, const std::string & name, bool required)
@@ -276,6 +326,16 @@ std::string ArrayInput<std::string>::edit2data(QLineEdit * edit) const
   return edit->text().toStdString();
 }
 
+FormElement * IntegerArrayInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new IntegerArrayInput(parent, name, required_, fixed_size_, min_size_, max_size_);
+}
+
+FormElement * StringArrayInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new StringArrayInput(parent, name, required_, fixed_size_, min_size_, max_size_);
+}
+
 NumberArrayInput::NumberArrayInput(QWidget * parent,
                                    const std::string & name,
                                    bool required,
@@ -296,6 +356,11 @@ NumberArrayInput::NumberArrayInput(QWidget * parent,
                                    int max_size)
 : ArrayInput<double>(parent, name, required, fixed_size, min_size, max_size)
 {
+}
+
+FormElement * NumberArrayInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new NumberArrayInput(parent, name, required_, def_, fixed_size_, user_def_);
 }
 
 void NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool /*fixed_size*/, bool user_def)
@@ -372,6 +437,18 @@ mc_rtc::Configuration ComboInput::serialize() const
 {
   if(send_index_) { return details::serialize(combo_->currentIndex()); }
   else { return details::serialize(combo_->currentText().toStdString()); }
+}
+
+FormElement * ComboInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new ComboInput(parent, name, required_, values_, send_index_, def_);
+}
+
+void ComboInput::fill(const mc_rtc::Configuration & data)
+{
+  std::string data_ = data;
+  def_ = combo_->findText(data_.c_str());
+  reset();
 }
 
 DataComboInput::DataComboInput(QWidget * parent,
@@ -500,6 +577,16 @@ void DataComboInput::update_values()
   }
 }
 
+FormElement * DataComboInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new DataComboInput(parent, name, required_, data_, ref_, send_index_, rename_);
+}
+
+void DataComboInput::fill(const mc_rtc::Configuration & data)
+{
+  combo_->setCurrentText(data.operator std::string().c_str());
+}
+
 Form::Form(QWidget * parent,
            const std::string & name,
            bool required,
@@ -551,10 +638,9 @@ Form::Form(QWidget * parent,
 
 bool Form::ready() const
 {
-  bool ok = false;
+  bool ok = true;
   for(const auto & el : elements_)
   {
-    if(el->ready()) { ok = true; }
     if(el->required() && !el->ready()) { return false; }
   }
   return ok;
@@ -588,6 +674,527 @@ void Form::rejectUncheck()
 void Form::reset()
 {
   for(auto & el : elements_) { el->reset(); }
+}
+
+std::string formId2name(const WidgetId & id, const std::string & name)
+{
+  std::string ret;
+  for(const auto c : id.category) { ret += c + "/"; }
+  ret += id.name;
+  ret += "/";
+  ret += name;
+  return ret;
+}
+
+namespace details
+{
+
+static uint64_t form_interactive_input_id = 0;
+
+static std::string next_marker_name()
+{
+  return fmt::format("form_interactive_input_{}", form_interactive_input_id);
+}
+
+template<typename DataT, bool rotation_only>
+InteractiveMarkerInput<DataT, rotation_only>::InteractiveMarkerInput(
+    QWidget * parent,
+    const std::string & name,
+    bool required,
+    const DataT & default_,
+    bool default_from_user,
+    bool interactive,
+    std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server)
+: FormElement(parent, name, required),
+  marker_(int_server,
+          next_marker_name(),
+          make6DMarker(next_marker_name(),
+                       makeAxisMarker(0.15 * 0.9),
+                       (!rotation_only) && interactive,
+                       std::is_same_v<DataT, sva::PTransformd> && interactive),
+
+          [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) { handleRequest(feedback); }),
+  data_(default_), interactive_(interactive), server_(int_server)
+{
+  form_interactive_input_id++;
+  auto layout = new QGridLayout(this);
+  auto validator = new QDoubleValidator(this);
+  validator->setLocale(QLocale::C);
+  int row = 0;
+  if constexpr(!rotation_only)
+  {
+    auto & data = [this]() -> Eigen::Vector3d &
+    {
+      if constexpr(std::is_same_v<Eigen::Vector3d, DataT>) { return data_; }
+      else { return data_.translation(); }
+    }();
+    int column = 0;
+    for(const auto & l : {"x", "y", "z"})
+    {
+      layout->addWidget(new QLabel(l), 0, column);
+      auto edit = new QLineEdit(QString::number(data(column)), this);
+      edit->setValidator(validator);
+      edits_[static_cast<size_t>(column)] = edit;
+      layout->addWidget(edit, 1, column);
+      this->connect(edit, &QLineEdit::textChanged, this,
+                    [this, column, &data](const QString & txt)
+                    {
+                      ready_ = true;
+                      locked_ = true;
+                      data(column) = txt.toDouble();
+                      marker_.update(data_);
+                    });
+      column++;
+    }
+    row++;
+  }
+  if constexpr(std::is_same_v<DataT, sva::PTransformd>)
+  {
+    auto get_data = [this]() { return Eigen::Quaterniond(data_.rotation()); };
+    auto data = get_data();
+    auto get_value = [](Eigen::Quaterniond & data, const char label) -> double &
+    {
+      if(label == 'w') { return data.w(); }
+      if(label == 'x') { return data.x(); }
+      if(label == 'y') { return data.y(); }
+      if(label == 'z') { return data.z(); }
+      mc_rtc::log::error_and_throw("unreacheable");
+    };
+    int column = 0;
+    for(const auto & l : {'w', 'x', 'y', 'z'})
+    {
+      layout->addWidget(new QLabel(QString(l)), 2 * row, column);
+      auto edit = new QLineEdit(QString::number(get_value(data, l)), this);
+      edit->setValidator(validator);
+      edits_[static_cast<size_t>(3 * row + column)] = edit;
+      layout->addWidget(edit, 2 * row + 1, column);
+      column++;
+      this->connect(edit, &QLineEdit::textChanged, this,
+                    [this, l, get_data, get_value](const QString & txt)
+                    {
+                      ready_ = true;
+                      locked_ = true;
+                      auto data = get_data();
+                      get_value(data, l) = txt.toDouble();
+                      data_.rotation() = Eigen::Matrix3d(data.normalized());
+                      marker_.update(data_);
+                    });
+    }
+  }
+  changed(required, default_, default_from_user, interactive, int_server);
+}
+
+template<typename DataT, bool rotation_only>
+void InteractiveMarkerInput<DataT, rotation_only>::changed(
+    bool required,
+    const DataT & default_,
+    bool default_from_user,
+    bool interactive,
+    std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server)
+{
+  if(std::any_of(edits_.begin(), edits_.end(), [](const auto * edit) { return edit->hasFocus(); })) { return; }
+  changed_(required);
+  data_ = default_;
+  default_data_ = data_;
+  user_default_ = default_from_user;
+  reset();
+}
+
+template<typename DataT, bool rotation_only>
+mc_rtc::Configuration InteractiveMarkerInput<DataT, rotation_only>::serialize() const
+{
+  mc_rtc::Configuration out;
+  if constexpr(std::is_same_v<DataT, sva::PTransformd> && rotation_only) { out.add("data", data_.rotation()); }
+  else { out.add("data", data_); }
+  return out("data");
+}
+
+template<typename DataT, bool rotation_only>
+void InteractiveMarkerInput<DataT, rotation_only>::reset()
+{
+  data_ = default_data_;
+  ready_ = user_default_;
+  reset_edits();
+  marker_.update(data_);
+}
+
+template<typename DataT, bool rotation_only>
+void InteractiveMarkerInput<DataT, rotation_only>::fill(const mc_rtc::Configuration & value)
+{
+  default_data_ = value;
+  reset();
+}
+
+template<typename DataT, bool rotation_only>
+void InteractiveMarkerInput<DataT, rotation_only>::handleRequest(
+    const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+{
+  locked_ = true;
+  ready_ = true;
+  if constexpr(std::is_same_v<DataT, Eigen::Vector3d>)
+  {
+    data_.x() = feedback->pose.position.x;
+    data_.y() = feedback->pose.position.y;
+    data_.z() = feedback->pose.position.z;
+  }
+  else
+  {
+    if constexpr(!rotation_only)
+    {
+      data_.translation().x() = feedback->pose.position.x;
+      data_.translation().y() = feedback->pose.position.y;
+      data_.translation().z() = feedback->pose.position.z;
+    }
+    const auto & ori = feedback->pose.orientation;
+    Eigen::Quaterniond q(ori.w, ori.x, ori.y, ori.z);
+    data_.rotation() = q.normalized().toRotationMatrix().transpose();
+  }
+  reset_edits();
+}
+
+template<typename DataT, bool rotation_only>
+void InteractiveMarkerInput<DataT, rotation_only>::reset_edits()
+{
+  size_t idx = 0;
+  auto setText = [](QLineEdit * edit, double number)
+  {
+    edit->blockSignals(true);
+    edit->setText(QString::number(number));
+    edit->blockSignals(false);
+  };
+  if constexpr(!rotation_only)
+  {
+    auto & data = [this]() -> Eigen::Vector3d &
+    {
+      if constexpr(std::is_same_v<Eigen::Vector3d, DataT>) { return data_; }
+      else { return data_.translation(); }
+    }();
+    setText(edits_[0], data(0));
+    setText(edits_[1], data(1));
+    setText(edits_[2], data(2));
+    idx = 3;
+  }
+  if constexpr(std::is_same_v<DataT, sva::PTransformd>)
+  {
+    auto data = Eigen::Quaterniond(data_.rotation());
+    setText(edits_[idx], data.w());
+    setText(edits_[idx + 1], data.x());
+    setText(edits_[idx + 2], data.y());
+    setText(edits_[idx + 3], data.z());
+  }
+}
+
+template struct InteractiveMarkerInput<Eigen::Vector3d, false>;
+template struct InteractiveMarkerInput<sva::PTransformd, false>;
+template struct InteractiveMarkerInput<sva::PTransformd, true>;
+
+} // namespace details
+
+FormElement * Point3DInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new Point3DInput(parent, name, required_, default_data_, user_default_, interactive_, server_);
+}
+
+FormElement * RotationInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new RotationInput(parent, name, required_, default_data_, user_default_, interactive_, server_);
+}
+
+FormElement * TransformInput::clone(QWidget * parent, const std::string & name) const
+{
+  return new TransformInput(parent, name, required_, default_data_, user_default_, interactive_, server_);
+}
+
+Object::Object(QWidget * parent, const std::string & name, bool required, FormElementContainer * parentForm)
+: FormElement(parent, name, required)
+{
+  auto layout = new QVBoxLayout(this);
+  container_ = new FormElementContainer(this, parentForm);
+  layout->addWidget(container_);
+}
+
+void Object::changed(bool required, FormElementContainer *)
+{
+  changed_(required);
+}
+
+mc_rtc::Configuration Object::serialize() const
+{
+  mc_rtc::Configuration out;
+  container_->collect(out);
+  return out;
+}
+
+void Object::reset()
+{
+  container_->reset();
+}
+
+bool Object::ready() const
+{
+  return container_->ready();
+}
+
+bool Object::locked() const
+{
+  return container_->locked();
+}
+
+void Object::unlock()
+{
+  container_->unlock();
+}
+
+FormElement * Object::clone(QWidget * parent, const std::string & name) const
+{
+  auto out = new Object(parent, name, required_, nullptr);
+  out->container_->copy(*container_);
+  return out;
+}
+
+void Object::fill(const mc_rtc::Configuration & value)
+{
+  for(auto & el : container_->elements())
+  {
+    if(value.has(el->name())) { el->fill(value(el->name())); }
+  }
+}
+
+GenericArray::GenericArray(QWidget * parent,
+                           const std::string & name,
+                           bool required,
+                           std::optional<std::vector<mc_rtc::Configuration>> data,
+                           FormElementContainer * parentForm)
+: FormElement(parent, name, required)
+{
+  template_ = new FormElementContainer(this, parentForm);
+  template_->hide();
+  values_ = new FormElementContainer(this, nullptr, true);
+  auto layout = new QVBoxLayout(this);
+  layout->addWidget(values_);
+  valuesLayout_ = new QVBoxLayout();
+  layout->addLayout(valuesLayout_);
+  valuesLayout_->addWidget(values_);
+  auto addButton = new QPushButton("+");
+  layout->addWidget(addButton);
+  connect(addButton, &QPushButton::released, this,
+          [this]()
+          {
+            locked_ = true;
+            addValue(std::to_string(values_->elements().size()));
+          });
+}
+
+void GenericArray::changed(bool required,
+                           std::optional<std::vector<mc_rtc::Configuration>> data,
+                           FormElementContainer *)
+{
+  if(template_->empty()) { return; }
+  changed_(required);
+  if(!data)
+  {
+    if(!values_->empty())
+    {
+      values_->deleteLater();
+      values_ = new FormElementContainer(this, nullptr);
+      valuesLayout_->addWidget(values_);
+    }
+    return;
+  }
+  updateValues(data.value());
+}
+
+void GenericArray::updateValues(const std::vector<mc_rtc::Configuration> & data_)
+{
+  // Remove extraneous elements
+  while(values_->elements().size() > data_.size()) { values_->remove_element(values_->elements().back()); }
+  // Update existing elements
+  for(size_t i = 0; i < values_->elements().size(); ++i) { values_->elements()[i]->fill(data_[i]); }
+  // Create missing elements
+  for(size_t i = values_->elements().size(); i < data_.size(); ++i)
+  {
+    addValue(std::to_string(i));
+    values_->elements()[i]->fill(data_[i]);
+  }
+  values_->update();
+}
+
+mc_rtc::Configuration GenericArray::serialize() const
+{
+  mc_rtc::Configuration out = mc_rtc::Configuration::rootArray();
+  for(const auto & v : values_->elements()) { out.push(v->serialize()); }
+  return out;
+}
+
+void GenericArray::reset()
+{
+  values_->reset();
+}
+
+bool GenericArray::ready() const
+{
+  return values_->ready();
+}
+
+bool GenericArray::locked() const
+{
+  return locked_ || values_->locked();
+}
+
+void GenericArray::unlock()
+{
+  locked_ = false;
+  values_->unlock();
+}
+
+void GenericArray::addValue(const std::string & name)
+{
+  if(template_->empty()) { return; }
+  values_->add_element(template_->element()->clone(this, name));
+}
+
+FormElement * GenericArray::clone(QWidget * parent, const std::string & name) const
+{
+  auto out = new GenericArray(parent, name, required_, std::nullopt, nullptr);
+  out->template_ = template_;
+  return out;
+}
+
+void GenericArray::fill(const mc_rtc::Configuration & value)
+{
+  updateValues(value);
+}
+
+void GenericArray::update()
+{
+  values_->update();
+}
+
+OneOf::OneOf(QWidget * parent,
+             const std::string & name,
+             bool required,
+             const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data,
+             FormElementContainer * parentForm)
+: FormElement(parent, name, required)
+{
+  container_ = new FormElementContainer(this, parentForm);
+  container_->hide();
+  auto layout = new QVBoxLayout(this);
+  selector_ = new QComboBox(this);
+  using sig_t = void (QComboBox::*)(int);
+  connect(selector_, static_cast<sig_t>(&QComboBox::currentIndexChanged), this,
+          [this](int index)
+          {
+            locked_ = true;
+            updateValue(index, {});
+          });
+  layout->addWidget(selector_);
+  activeLayout_ = new QVBoxLayout();
+  layout->addLayout(activeLayout_);
+}
+
+void OneOf::changed(bool required,
+                    const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data,
+                    FormElementContainer *)
+{
+  changed_(required);
+  if(!data)
+  {
+    if(active_) { updateValue(-1, {}); }
+  }
+  else { updateValue(data->first, data->second); }
+}
+
+mc_rtc::Configuration OneOf::serialize() const
+{
+  auto out = mc_rtc::Configuration::rootArray();
+  out.push(selector_->currentIndex());
+  out.push(active_->serialize());
+  return out;
+}
+
+void OneOf::reset()
+{
+  locked_ = false;
+  updateValue(-1, {});
+}
+
+bool OneOf::ready() const
+{
+  return active_ && active_->ready();
+}
+
+bool OneOf::locked() const
+{
+  return locked_ || (active_ && active_->locked());
+}
+
+void OneOf::unlock()
+{
+  reset();
+}
+
+FormElement * OneOf::clone(QWidget * parent, const std::string & name) const
+{
+  auto out = new OneOf(parent, name, required_, std::nullopt, nullptr);
+  out->container_->copy(*container_);
+  out->updateValue(data_.first, data_.second);
+  return out;
+}
+
+void OneOf::fill(const mc_rtc::Configuration & value)
+{
+  if(value.isArray())
+  {
+    if(value.size() != 2) { mc_rtc::log::error_and_throw("Wrong data to fill OneOf: {}", value.dump(true, true)); }
+    updateValue(value[0], value[1]);
+  }
+}
+
+void OneOf::updateValue(int idx, mc_rtc::Configuration data)
+{
+  if(container_->elements().size() == 0) { return; }
+  selector_->blockSignals(true);
+  if(idx < 0)
+  {
+    selector_->setCurrentIndex(-1);
+    if(active_)
+    {
+      active_->deleteLater();
+      active_ = nullptr;
+    }
+    data_.first = std::numeric_limits<size_t>::max();
+  }
+  else if(data_.first != idx)
+  {
+    data_.first = idx;
+    if(data_.first >= container_->elements().size())
+    {
+      mc_rtc::log::error_and_throw("Data out of range for OneOf::updateValue");
+    }
+    if(active_) { active_->deleteLater(); }
+    auto template_ = container_->elements()[data_.first];
+    active_ = template_->clone(this, template_->name());
+    activeLayout_->addWidget(active_);
+  }
+  selector_->setCurrentIndex(idx);
+  if(active_)
+  {
+    data_.second = data;
+    if(!data_.second.empty()) { active_->fill(data_.second); }
+  }
+  selector_->blockSignals(false);
+}
+
+void OneOf::update()
+{
+  const auto & templates = container_->elements();
+  if(templates.size() == 0 || templates.size() == selector_->count()) { return; }
+  selector_->blockSignals(true);
+  while(selector_->count()) { selector_->removeItem(0); }
+  for(const auto & t : templates) { selector_->addItem(t->name().c_str()); }
+  selector_->setCurrentIndex(-1);
+  selector_->blockSignals(false);
 }
 
 } // namespace form

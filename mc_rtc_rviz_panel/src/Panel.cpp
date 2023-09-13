@@ -6,30 +6,28 @@
 
 #include "ArrayInputWidget.h"
 #include "ArrayLabelWidget.h"
+#include "ArrowInteractiveMarkerWidget.h"
 #include "ButtonWidget.h"
 #include "CheckboxWidget.h"
 #include "ComboInputWidget.h"
+#include "ConnectionDialog.h"
+#include "DisplayTrajectoryWidget.h"
+#include "ForceInteractiveMarkerWidget.h"
 #include "FormElement.h"
 #include "FormWidget.h"
 #include "GenericInputWidget.h"
-#ifndef DISABLE_ROS
-#  include "ArrowInteractiveMarkerWidget.h"
-#  include "DisplayTrajectoryWidget.h"
-#  include "ForceInteractiveMarkerWidget.h"
-#  include "InteractiveMarkerWidget.h"
-#  include "Point3DInteractiveMarkerWidget.h"
-#  include "PolygonMarkerWidget.h"
-#  include "PolyhedronMarkerWidget.h"
-#  include "TransformInteractiveMarkerWidget.h"
-#  include "VisualWidget.h"
-#  include "XYThetaInteractiveMarkerWidget.h"
-#endif
-#include "ConnectionDialog.h"
+#include "InteractiveMarkerWidget.h"
 #include "LabelWidget.h"
 #include "NumberSliderWidget.h"
 #include "PlotTabWidget.h"
+#include "Point3DInteractiveMarkerWidget.h"
+#include "PolygonMarkerWidget.h"
+#include "PolyhedronMarkerWidget.h"
 #include "SchemaWidget.h"
 #include "TableWidget.h"
+#include "TransformInteractiveMarkerWidget.h"
+#include "VisualWidget.h"
+#include "XYThetaInteractiveMarkerWidget.h"
 
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
@@ -112,7 +110,6 @@ double getTimeout()
 
 } // namespace
 
-#ifndef DISABLE_ROS
 struct PanelImpl
 {
   PanelImpl()
@@ -127,11 +124,6 @@ struct PanelImpl
   visualization_msgs::MarkerArray marker_array_;
   ros::Publisher marker_array_pub_;
 };
-#else
-struct PanelImpl
-{
-};
-#endif
 
 Panel::Panel(QWidget * parent)
 : CategoryWidget(ClientWidgetParam{*this, parent, {{}, "ROOT"}}),
@@ -169,158 +161,93 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::vector<std::array<Eigen::Vector3d, 3>>>("std::vector<std::array<Eigen::Vector3d, 3>>");
   qRegisterMetaType<std::vector<std::vector<double>>>("std::vector<std::vector<double>>");
   qRegisterMetaType<rbd::parsers::Visual>("rbd::parsers::Visual");
+  qRegisterMetaType<std::optional<std::vector<mc_rtc::Configuration>>>(
+      "std::optional<std::vector<mc_rtc::Configuration>>");
+  qRegisterMetaType<std::optional<std::pair<size_t, mc_rtc::Configuration>>>(
+      "std::optional<std::pair<size_t, mc_rtc::Configuration>>");
   tree_.parent = this;
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
   connect(this, SIGNAL(signal_start()), this, SLOT(got_start()));
   connect(this, SIGNAL(signal_stop()), this, SLOT(got_stop()));
-  connect(this, SIGNAL(signal_category(const std::vector<std::string> &, const std::string &)), this,
-          SLOT(got_category(const std::vector<std::string> &, const std::string &)));
-  connect(this, SIGNAL(signal_label(const WidgetId &, const std::string &)), this,
-          SLOT(got_label(const WidgetId &, const std::string &)));
-  connect(this, SIGNAL(signal_array_label(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &)),
-          this, SLOT(got_array_label(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &)));
-  connect(this, SIGNAL(signal_button(const WidgetId &)), this, SLOT(got_button(const WidgetId &)));
-  connect(this, SIGNAL(signal_checkbox(const WidgetId &, bool)), this, SLOT(got_checkbox(const WidgetId &, bool)));
-  connect(this, SIGNAL(signal_string_input(const WidgetId &, const std::string &)), this,
-          SLOT(got_string_input(const WidgetId &, const std::string &)));
-  connect(this, SIGNAL(signal_integer_input(const WidgetId &, int)), this,
-          SLOT(got_integer_input(const WidgetId &, int)));
-  connect(this, SIGNAL(signal_number_input(const WidgetId &, double)), this,
-          SLOT(got_number_input(const WidgetId &, double)));
-  connect(this, SIGNAL(signal_number_slider(const WidgetId &, double, double, double)), this,
-          SLOT(got_number_slider(const WidgetId &, double, double, double)));
-  connect(this, SIGNAL(signal_array_input(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &)),
-          this, SLOT(got_array_input(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &)));
-  connect(this, SIGNAL(signal_combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &)),
-          this, SLOT(got_combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &)));
-  connect(this,
-          SIGNAL(signal_data_combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &)),
-          this, SLOT(got_data_combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &)));
-  connect(this,
-          SIGNAL(signal_point3d(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &,
-                                const mc_rtc::gui::PointConfig &)),
-          this,
-          SLOT(got_point3d(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &,
-                           const mc_rtc::gui::PointConfig &)));
-  connect(
-      this,
-      SIGNAL(
-          signal_trajectory(const WidgetId &, const std::vector<Eigen::Vector3d> &, const mc_rtc::gui::LineConfig &)),
-      this,
-      SLOT(got_trajectory(const WidgetId &, const std::vector<Eigen::Vector3d> &, const mc_rtc::gui::LineConfig &)));
-  connect(
-      this,
-      SIGNAL(
-          signal_trajectory(const WidgetId &, const std::vector<sva::PTransformd> &, const mc_rtc::gui::LineConfig &)),
-      this,
-      SLOT(got_trajectory(const WidgetId &, const std::vector<sva::PTransformd> &, const mc_rtc::gui::LineConfig &)));
-  connect(this, SIGNAL(signal_trajectory(const WidgetId &, const Eigen::Vector3d &, const mc_rtc::gui::LineConfig &)),
-          this, SLOT(got_trajectory(const WidgetId &, const Eigen::Vector3d &, const mc_rtc::gui::LineConfig &)));
-  connect(this, SIGNAL(signal_trajectory(const WidgetId &, const sva::PTransformd &, const mc_rtc::gui::LineConfig &)),
-          this, SLOT(got_trajectory(const WidgetId &, const sva::PTransformd &, const mc_rtc::gui::LineConfig &)));
-  connect(this,
-          SIGNAL(signal_polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &,
-                                const mc_rtc::gui::LineConfig &)),
-          this,
-          SLOT(got_polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &,
-                           const mc_rtc::gui::LineConfig &)));
-  connect(this,
-          SIGNAL(signal_polyhedron(const WidgetId &, const std::vector<std::array<Eigen::Vector3d, 3>> &,
-                                   const std::vector<std::array<mc_rtc::gui::Color, 3>> &,
-                                   const mc_rtc::gui::PolyhedronConfig &)),
-          this,
-          SLOT(got_polyhedron(const WidgetId &, const std::vector<std::array<Eigen::Vector3d, 3>> &,
-                              const std::vector<std::array<mc_rtc::gui::Color, 3>> &,
-                              const mc_rtc::gui::PolyhedronConfig &)));
-  connect(this,
-          SIGNAL(signal_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
-                              const mc_rtc::gui::ForceConfig &, bool)),
-          this,
-          SLOT(got_force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
-                         const mc_rtc::gui::ForceConfig &, bool)));
-  connect(this,
-          SIGNAL(signal_arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
-                              const mc_rtc::gui::ArrowConfig &, bool)),
-          this,
-          SLOT(got_arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
-                         const mc_rtc::gui::ArrowConfig &, bool)));
-  connect(this, SIGNAL(signal_rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)), this,
-          SLOT(got_rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)));
-  connect(this, SIGNAL(signal_transform(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)), this,
-          SLOT(got_transform(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &)));
-  connect(this, SIGNAL(signal_xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, double)), this,
-          SLOT(got_xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, double)));
-  connect(this, SIGNAL(signal_schema(const WidgetId &, const std::string &)), this,
-          SLOT(got_schema(const WidgetId &, const std::string &)));
-  connect(this, SIGNAL(signal_table_start(const WidgetId &, const std::vector<std::string> &)), this,
-          SLOT(got_table_start(const WidgetId &, const std::vector<std::string> &)));
-  connect(this, SIGNAL(signal_table_row(const WidgetId &, const std::vector<std::string> &)), this,
-          SLOT(got_table_row(const WidgetId &, const std::vector<std::string> &)));
-  connect(this, SIGNAL(signal_table_end(const WidgetId &)), this, SLOT(got_table_end(const WidgetId &)));
-  connect(this,
-          SIGNAL(signal_robot(const WidgetId &, const std::vector<std::string> &,
-                              const std::vector<std::vector<double>> &, const sva::PTransformd &)),
-          this,
-          SLOT(got_robot(const WidgetId &, const std::vector<std::string> &, const std::vector<std::vector<double>> &,
-                         const sva::PTransformd &)));
-  connect(this, SIGNAL(signal_visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &)), this,
-          SLOT(got_visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &)));
-  connect(this, SIGNAL(signal_form(const WidgetId &)), this, SLOT(got_form(const WidgetId &)));
-  connect(this, SIGNAL(signal_form_checkbox(const WidgetId &, const std::string &, bool, bool, bool)), this,
-          SLOT(got_form_checkbox(const WidgetId &, const std::string &, bool, bool, bool)));
-  connect(this, SIGNAL(signal_form_integer_input(const WidgetId &, const std::string &, bool, int, bool)), this,
-          SLOT(got_form_integer_input(const WidgetId &, const std::string &, bool, int, bool)));
-  connect(this, SIGNAL(signal_form_number_input(const WidgetId &, const std::string &, bool, double, bool)), this,
-          SLOT(got_form_number_input(const WidgetId &, const std::string &, bool, double, bool)));
-  connect(this,
-          SIGNAL(signal_form_string_input(const WidgetId &, const std::string &, bool, const std::string &, bool)),
-          this, SLOT(got_form_string_input(const WidgetId &, const std::string &, bool, const std::string &, bool)));
-  connect(
-      this,
-      SIGNAL(signal_form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool, bool)),
-      this,
-      SLOT(got_form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool, bool)));
-  connect(this,
-          SIGNAL(signal_form_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &,
-                                         bool, int)),
-          this,
-          SLOT(got_form_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &, bool,
-                                    int)));
-  connect(this,
-          SIGNAL(signal_form_data_combo_input(const WidgetId &, const std::string &, bool,
-                                              const std::vector<std::string> &, bool)),
-          this,
-          SLOT(got_form_data_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &,
-                                         bool)));
-  connect(this, SIGNAL(signal_start_plot(uint64_t, const std::string &)), this,
-          SLOT(got_start_plot(uint64_t, const std::string &)));
-  connect(this, SIGNAL(signal_plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)), this,
-          SLOT(got_plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
-  connect(this, SIGNAL(signal_plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)),
-          this, SLOT(got_plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
-  connect(this, SIGNAL(signal_plot_setup_yaxis_right(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)),
-          this, SLOT(got_plot_setup_yaxis_right(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &)));
-  connect(this,
-          SIGNAL(signal_plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
-                                   mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side)),
-          this,
-          SLOT(got_plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
-                              mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side)));
-  connect(this,
-          SIGNAL(signal_plot_polygon(uint64_t, uint64_t, const std::string &,
-                                     const mc_rtc::gui::plot::PolygonDescription &, mc_rtc::gui::plot::Side)),
-          this,
-          SLOT(got_plot_polygon(uint64_t, uint64_t, const std::string &, const mc_rtc::gui::plot::PolygonDescription &,
-                                mc_rtc::gui::plot::Side)));
-  connect(
-      this,
-      SIGNAL(signal_plot_polygons(uint64_t, uint64_t, const std::string &,
-                                  const std::vector<mc_rtc::gui::plot::PolygonDescription> &, mc_rtc::gui::plot::Side)),
-      this,
-      SLOT(got_plot_polygons(uint64_t, uint64_t, const std::string &,
-                             const std::vector<mc_rtc::gui::plot::PolygonDescription> &, mc_rtc::gui::plot::Side)));
-  connect(this, SIGNAL(signal_end_plot(uint64_t)), this, SLOT(got_end_plot(uint64_t)));
+#define CONNECT_SIGNAL_SLOT(...) connect(this, SIGNAL(signal_##__VA_ARGS__), this, SLOT(got_##__VA_ARGS__))
+  CONNECT_SIGNAL_SLOT(category(const std::vector<std::string> &, const std::string &));
+  CONNECT_SIGNAL_SLOT(label(const WidgetId &, const std::string &));
+  CONNECT_SIGNAL_SLOT(array_label(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &));
+  CONNECT_SIGNAL_SLOT(button(const WidgetId &));
+  CONNECT_SIGNAL_SLOT(checkbox(const WidgetId &, bool));
+  CONNECT_SIGNAL_SLOT(string_input(const WidgetId &, const std::string &));
+  CONNECT_SIGNAL_SLOT(integer_input(const WidgetId &, int));
+  CONNECT_SIGNAL_SLOT(number_input(const WidgetId &, double));
+  CONNECT_SIGNAL_SLOT(number_slider(const WidgetId &, double, double, double));
+  CONNECT_SIGNAL_SLOT(array_input(const WidgetId &, const std::vector<std::string> &, const Eigen::VectorXd &));
+  CONNECT_SIGNAL_SLOT(combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &));
+  CONNECT_SIGNAL_SLOT(data_combo_input(const WidgetId &, const std::vector<std::string> &, const std::string &));
+  CONNECT_SIGNAL_SLOT(
+      point3d(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, const mc_rtc::gui::PointConfig &));
+  CONNECT_SIGNAL_SLOT(
+      trajectory(const WidgetId &, const std::vector<Eigen::Vector3d> &, const mc_rtc::gui::LineConfig &));
+  CONNECT_SIGNAL_SLOT(
+      trajectory(const WidgetId &, const std::vector<sva::PTransformd> &, const mc_rtc::gui::LineConfig &));
+  CONNECT_SIGNAL_SLOT(trajectory(const WidgetId &, const Eigen::Vector3d &, const mc_rtc::gui::LineConfig &));
+  CONNECT_SIGNAL_SLOT(trajectory(const WidgetId &, const sva::PTransformd &, const mc_rtc::gui::LineConfig &));
+  CONNECT_SIGNAL_SLOT(
+      polygon(const WidgetId &, const std::vector<std::vector<Eigen::Vector3d>> &, const mc_rtc::gui::LineConfig &));
+  CONNECT_SIGNAL_SLOT(polyhedron(const WidgetId &, const std::vector<std::array<Eigen::Vector3d, 3>> &,
+                                 const std::vector<std::array<mc_rtc::gui::Color, 3>> &,
+                                 const mc_rtc::gui::PolyhedronConfig &));
+  CONNECT_SIGNAL_SLOT(force(const WidgetId &, const WidgetId &, const sva::ForceVecd &, const sva::PTransformd &,
+                            const mc_rtc::gui::ForceConfig &, bool));
+  CONNECT_SIGNAL_SLOT(arrow(const WidgetId &, const WidgetId &, const Eigen::Vector3d &, const Eigen::Vector3d &,
+                            const mc_rtc::gui::ArrowConfig &, bool));
+  CONNECT_SIGNAL_SLOT(rotation(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &));
+  CONNECT_SIGNAL_SLOT(transform(const WidgetId &, const WidgetId &, bool, const sva::PTransformd &));
+  CONNECT_SIGNAL_SLOT(xytheta(const WidgetId &, const WidgetId &, bool, const Eigen::Vector3d &, double));
+  CONNECT_SIGNAL_SLOT(schema(const WidgetId &, const std::string &));
+  CONNECT_SIGNAL_SLOT(table_start(const WidgetId &, const std::vector<std::string> &));
+  CONNECT_SIGNAL_SLOT(table_row(const WidgetId &, const std::vector<std::string> &));
+  CONNECT_SIGNAL_SLOT(table_end(const WidgetId &));
+  CONNECT_SIGNAL_SLOT(robot(const WidgetId &, const std::vector<std::string> &,
+                            const std::vector<std::vector<double>> &, const sva::PTransformd &));
+  CONNECT_SIGNAL_SLOT(visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &));
+  CONNECT_SIGNAL_SLOT(form(const WidgetId &));
+  CONNECT_SIGNAL_SLOT(form_checkbox(const WidgetId &, const std::string &, bool, bool, bool));
+  CONNECT_SIGNAL_SLOT(form_integer_input(const WidgetId &, const std::string &, bool, int, bool));
+  CONNECT_SIGNAL_SLOT(form_number_input(const WidgetId &, const std::string &, bool, double, bool));
+  CONNECT_SIGNAL_SLOT(form_string_input(const WidgetId &, const std::string &, bool, const std::string &, bool));
+  CONNECT_SIGNAL_SLOT(
+      form_array_input(const WidgetId &, const std::string &, bool, const Eigen::VectorXd &, bool, bool));
+  CONNECT_SIGNAL_SLOT(
+      form_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &, bool, int));
+  CONNECT_SIGNAL_SLOT(
+      form_data_combo_input(const WidgetId &, const std::string &, bool, const std::vector<std::string> &, bool));
+  CONNECT_SIGNAL_SLOT(
+      form_point3d_input(const WidgetId &, const std::string &, bool, const Eigen::Vector3d &, bool, bool));
+  CONNECT_SIGNAL_SLOT(
+      form_rotation_input(const WidgetId &, const std::string &, bool, const sva::PTransformd &, bool, bool));
+  CONNECT_SIGNAL_SLOT(
+      form_transform_input(const WidgetId &, const std::string &, bool, const sva::PTransformd &, bool, bool));
+  CONNECT_SIGNAL_SLOT(start_form_object_input(const std::string &, bool));
+  CONNECT_SIGNAL_SLOT(end_form_object_input());
+  CONNECT_SIGNAL_SLOT(
+      start_form_generic_array_input(const std::string &, bool, std::optional<std::vector<mc_rtc::Configuration>>));
+  CONNECT_SIGNAL_SLOT(end_form_generic_array_input());
+  CONNECT_SIGNAL_SLOT(start_form_one_of_input(const std::string &, bool,
+                                              const std::optional<std::pair<size_t, mc_rtc::Configuration>> &));
+  CONNECT_SIGNAL_SLOT(end_form_one_of_input());
+  CONNECT_SIGNAL_SLOT(start_plot(uint64_t, const std::string &));
+  CONNECT_SIGNAL_SLOT(plot_setup_xaxis(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
+  CONNECT_SIGNAL_SLOT(plot_setup_yaxis_left(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
+  CONNECT_SIGNAL_SLOT(plot_setup_yaxis_right(uint64_t, const std::string &, const mc_rtc::gui::plot::Range &));
+  CONNECT_SIGNAL_SLOT(plot_point(uint64_t, uint64_t, const std::string &, double, double, mc_rtc::gui::Color,
+                                 mc_rtc::gui::plot::Style, mc_rtc::gui::plot::Side));
+  CONNECT_SIGNAL_SLOT(plot_polygon(uint64_t, uint64_t, const std::string &,
+                                   const mc_rtc::gui::plot::PolygonDescription &, mc_rtc::gui::plot::Side));
+  CONNECT_SIGNAL_SLOT(plot_polygons(uint64_t, uint64_t, const std::string &,
+                                    const std::vector<mc_rtc::gui::plot::PolygonDescription> &,
+                                    mc_rtc::gui::plot::Side));
+  CONNECT_SIGNAL_SLOT(end_plot(uint64_t));
+#undef CONNECT_SIGNAL_SLOT
   mc_control::ControllerClient::start();
 }
 
@@ -344,12 +271,10 @@ void Panel::got_stop()
 {
   tree_.clean();
   this->clean();
-#ifndef DISABLE_ROS
   impl_->int_server_->applyChanges();
   impl_->marker_array_pub_.publish(impl_->marker_array_);
   impl_->marker_array_.markers.clear();
   if(ros::ok()) { ros::spinOnce(); }
-#endif
 }
 
 Panel::~Panel()
@@ -611,6 +536,70 @@ void Panel::form_data_combo_input(const WidgetId & formId,
   Q_EMIT signal_form_data_combo_input(formId, name, required, ref, send_index);
 }
 
+void Panel::form_point3d_input(const WidgetId & formId,
+                               const std::string & name,
+                               bool required,
+                               const Eigen::Vector3d & default_,
+                               bool default_from_user,
+                               bool interactive)
+{
+  Q_EMIT signal_form_point3d_input(formId, name, required, default_, default_from_user, interactive);
+}
+
+void Panel::form_rotation_input(const WidgetId & formId,
+                                const std::string & name,
+                                bool required,
+                                const sva::PTransformd & default_,
+                                bool default_from_user,
+                                bool interactive)
+{
+  Q_EMIT signal_form_rotation_input(formId, name, required, default_, default_from_user, interactive);
+}
+
+void Panel::form_transform_input(const WidgetId & formId,
+                                 const std::string & name,
+                                 bool required,
+                                 const sva::PTransformd & default_,
+                                 bool default_from_user,
+                                 bool interactive)
+{
+  Q_EMIT signal_form_transform_input(formId, name, required, default_, default_from_user, interactive);
+}
+
+void Panel::start_form_object_input(const std::string & name, bool required)
+{
+  Q_EMIT signal_start_form_object_input(name, required);
+}
+
+void Panel::end_form_object_input()
+{
+  Q_EMIT signal_end_form_object_input();
+}
+
+void Panel::start_form_generic_array_input(const std::string & name,
+                                           bool required,
+                                           std::optional<std::vector<mc_rtc::Configuration>> data)
+{
+  Q_EMIT signal_start_form_generic_array_input(name, required, data);
+}
+
+void Panel::end_form_generic_array_input()
+{
+  Q_EMIT signal_end_form_generic_array_input();
+}
+
+void Panel::start_form_one_of_input(const std::string & name,
+                                    bool required,
+                                    const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data)
+{
+  Q_EMIT signal_start_form_one_of_input(name, required, data);
+}
+
+void Panel::end_form_one_of_input()
+{
+  Q_EMIT signal_end_form_one_of_input();
+}
+
 void Panel::start_plot(uint64_t id, const std::string & title)
 {
   Q_EMIT signal_start_plot(id, title);
@@ -755,29 +744,23 @@ void Panel::got_point3d(const WidgetId & id,
                         const Eigen::Vector3d & pos,
                         const mc_rtc::gui::PointConfig & config)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<Point3DInteractiveMarkerWidget>(id, requestId, impl_->int_server_, config, !ro, label);
   w.update(pos);
-#endif
 }
 
 void Panel::got_rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, impl_->int_server_, !ro, false, label);
   w.update(pos);
-#endif
 }
 
 void Panel::got_transform(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<TransformInteractiveMarkerWidget>(id, requestId, impl_->int_server_, !ro, !ro, label);
   w.update(pos);
-#endif
 }
 
 void Panel::got_xytheta(const WidgetId & id,
@@ -786,58 +769,46 @@ void Panel::got_xytheta(const WidgetId & id,
                         const Eigen::Vector3d & vec,
                         double altitude)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<XYThetaInteractiveMarkerWidget>(id, requestId, impl_->int_server_, sva::PTransformd::Identity(),
                                                         !ro, !ro, label);
   w.update(vec, altitude);
-#endif
 }
 
 void Panel::got_trajectory(const WidgetId & id,
                            const std::vector<Eigen::Vector3d> & points,
                            const mc_rtc::gui::LineConfig & config)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
   w.update(points, config);
-#endif
 }
 
 void Panel::got_trajectory(const WidgetId & id,
                            const std::vector<sva::PTransformd> & points,
                            const mc_rtc::gui::LineConfig & config)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
   w.update(points, config);
-#endif
 }
 
 void Panel::got_trajectory(const WidgetId & id, const Eigen::Vector3d & point, const mc_rtc::gui::LineConfig & config)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
   w.update(point, config);
-#endif
 }
 
 void Panel::got_trajectory(const WidgetId & id, const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<DisplayTrajectoryWidget>(id, impl_->marker_array_);
   w.update(point, config);
-#endif
 }
 
 void Panel::got_polygon(const WidgetId & id,
                         const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                         const mc_rtc::gui::LineConfig & c)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<PolygonMarkerWidget>(id, impl_->marker_array_);
   w.update(polygons, c);
-#endif
 }
 
 void Panel::got_polyhedron(const WidgetId & id,
@@ -845,10 +816,8 @@ void Panel::got_polyhedron(const WidgetId & id,
                            const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors,
                            const mc_rtc::gui::PolyhedronConfig & c)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<PolyhedronMarkerWidget>(id, impl_->marker_array_, c);
   w.update(triangles, colors);
-#endif
 }
 
 void Panel::got_force(const WidgetId & id,
@@ -858,12 +827,10 @@ void Panel::got_force(const WidgetId & id,
                       const mc_rtc::gui::ForceConfig & forceConfig,
                       bool ro)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w = get_widget<ForceInteractiveMarkerWidget>(id, requestId, impl_->int_server_, surface, forcep, forceConfig,
                                                       ro, label);
   w.update(surface, forcep, forceConfig);
-#endif
 }
 
 void Panel::got_arrow(const WidgetId & id,
@@ -873,12 +840,10 @@ void Panel::got_arrow(const WidgetId & id,
                       const mc_rtc::gui::ArrowConfig & config,
                       bool ro)
 {
-#ifndef DISABLE_ROS
   auto label = latestWidget_;
   auto & w =
       get_widget<ArrowInteractiveMarkerWidget>(id, requestId, impl_->int_server_, start, end, config, !ro, !ro, label);
   w.update(start, end, config);
-#endif
 }
 
 void Panel::got_schema(const WidgetId & id, const std::string & schema)
@@ -921,15 +886,14 @@ void Panel::got_robot(const WidgetId & id,
 
 void Panel::got_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose)
 {
-#ifndef DISABLE_ROS
   auto & w = get_widget<VisualWidget>(id, impl_->marker_array_);
   w.update(visual, pose);
-#endif
 }
 
 void Panel::got_form(const WidgetId & id)
 {
   auto & form = get_widget<FormWidget>(id);
+  activeForm_ = form.container();
   form.update();
 }
 
@@ -939,8 +903,7 @@ void Panel::got_form_checkbox(const WidgetId & formId,
                               bool def,
                               bool def_from_user)
 {
-  auto & form = get_widget<FormWidget>(formId);
-  form.element<form::Checkbox>(name, required, def, def_from_user);
+  activeForm_->element<form::Checkbox>(name, required, def, def_from_user);
 }
 
 void Panel::got_form_integer_input(const WidgetId & formId,
@@ -949,8 +912,7 @@ void Panel::got_form_integer_input(const WidgetId & formId,
                                    int def,
                                    bool def_from_user)
 {
-  auto & form = get_widget<FormWidget>(formId);
-  form.element<form::IntegerInput>(name, required, def, def_from_user);
+  activeForm_->element<form::IntegerInput>(name, required, def, def_from_user);
 }
 
 void Panel::got_form_number_input(const WidgetId & formId,
@@ -959,8 +921,7 @@ void Panel::got_form_number_input(const WidgetId & formId,
                                   double def,
                                   bool def_from_user)
 {
-  auto & form = get_widget<FormWidget>(formId);
-  form.element<form::NumberInput>(name, required, def, def_from_user);
+  activeForm_->element<form::NumberInput>(name, required, def, def_from_user);
 }
 
 void Panel::got_form_string_input(const WidgetId & formId,
@@ -969,8 +930,7 @@ void Panel::got_form_string_input(const WidgetId & formId,
                                   const std::string & def,
                                   bool def_from_user)
 {
-  auto & form = get_widget<FormWidget>(formId);
-  form.element<form::StringInput>(name, required, def, def_from_user);
+  activeForm_->element<form::StringInput>(name, required, def, def_from_user);
 }
 
 void Panel::got_form_array_input(const WidgetId & formId,
@@ -980,8 +940,7 @@ void Panel::got_form_array_input(const WidgetId & formId,
                                  bool fixed_size,
                                  bool def_from_user)
 {
-  auto & form = get_widget<FormWidget>(formId);
-  form.element<form::NumberArrayInput>(name, required, def, fixed_size, def_from_user);
+  activeForm_->element<form::NumberArrayInput>(name, required, def, fixed_size, def_from_user);
 }
 
 void Panel::got_form_combo_input(const WidgetId & formId,
@@ -991,8 +950,7 @@ void Panel::got_form_combo_input(const WidgetId & formId,
                                  bool send_index,
                                  int def)
 {
-  auto & form = get_widget<FormWidget>(formId);
-  form.element<form::ComboInput>(name, required, values, send_index, def);
+  activeForm_->element<form::ComboInput>(name, required, values, send_index, def);
 }
 
 void Panel::got_form_data_combo_input(const WidgetId & formId,
@@ -1001,8 +959,80 @@ void Panel::got_form_data_combo_input(const WidgetId & formId,
                                       const std::vector<std::string> & ref,
                                       bool send_index)
 {
-  auto & form = get_widget<FormWidget>(formId);
-  form.element<form::DataComboInput>(name, required, data_, ref, send_index);
+  activeForm_->element<form::DataComboInput>(name, required, data_, ref, send_index);
+}
+
+void Panel::got_form_point3d_input(const WidgetId & formId,
+                                   const std::string & name,
+                                   bool required,
+                                   const Eigen::Vector3d & default_,
+                                   bool default_from_user,
+                                   bool interactive)
+{
+  activeForm_->element<form::Point3DInput>(name, required, default_, default_from_user, interactive,
+                                           impl_->int_server_);
+}
+
+void Panel::got_form_rotation_input(const WidgetId & formId,
+                                    const std::string & name,
+                                    bool required,
+                                    const sva::PTransformd & default_,
+                                    bool default_from_user,
+                                    bool interactive)
+{
+  activeForm_->element<form::RotationInput>(name, required, default_, default_from_user, interactive,
+                                            impl_->int_server_);
+}
+
+void Panel::got_form_transform_input(const WidgetId & formId,
+                                     const std::string & name,
+                                     bool required,
+                                     const sva::PTransformd & default_,
+                                     bool default_from_user,
+                                     bool interactive)
+{
+  activeForm_->element<form::TransformInput>(name, required, default_, default_from_user, interactive,
+                                             impl_->int_server_);
+}
+
+void Panel::got_start_form_object_input(const std::string & name, bool required)
+{
+  activeForm_ = activeForm_->element<form::Object>(name, required, activeForm_)->container();
+}
+
+void Panel::got_end_form_object_input()
+{
+  activeForm_->update();
+  activeForm_ = activeForm_->parentForm();
+}
+
+void Panel::got_start_form_generic_array_input(const std::string & name,
+                                               bool required,
+                                               std::optional<std::vector<mc_rtc::Configuration>> data)
+{
+  auto array = activeForm_->element<form::GenericArray>(name, required, data, activeForm_);
+  activeForm_ = array->container();
+}
+
+void Panel::got_end_form_generic_array_input()
+{
+  activeForm_->update();
+  activeForm_ = activeForm_->parentForm();
+}
+
+void Panel::got_start_form_one_of_input(const std::string & name,
+                                        bool required,
+                                        const std::optional<std::pair<size_t, mc_rtc::Configuration>> & data)
+{
+  auto oneof = activeForm_->element<form::OneOf>(name, required, data, activeForm_);
+  oneof->update();
+  activeForm_ = oneof->container();
+}
+
+void Panel::got_end_form_one_of_input()
+{
+  activeForm_->update();
+  activeForm_ = activeForm_->parentForm();
 }
 
 void Panel::got_start_plot(uint64_t id, const std::string & title)
