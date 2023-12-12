@@ -230,7 +230,7 @@ vm::InteractiveMarker makeXYThetaMarker(const std::string & name, bool readonly)
   return int_marker;
 }
 
-visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & /*pos*/,
+visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos,
                                           const mc_rtc::gui::Color & color,
                                           double scale = 0.02)
 {
@@ -244,6 +244,13 @@ visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & /*pos*/,
   m.color.r = static_cast<float>(color.r);
   m.color.g = static_cast<float>(color.g);
   m.color.b = static_cast<float>(color.b);
+  m.pose.orientation.w = 1.0;
+  m.pose.orientation.x = 0.0;
+  m.pose.orientation.y = 0.0;
+  m.pose.orientation.z = 0.0;
+  m.pose.position.x = pos.x();
+  m.pose.position.y = pos.y();
+  m.pose.position.z = pos.z();
   return m;
 }
 

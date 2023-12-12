@@ -1,5 +1,6 @@
 #pragma once
 #include "InteractiveMarkerWidget.h"
+#include "utils.h"
 
 namespace mc_rtc_rviz
 {
@@ -25,7 +26,16 @@ public:
 
   void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;
 
-  void update(const Eigen::Vector3d & t) { marker_.update(t); }
+  void update(const Eigen::Vector3d & t)
+  {
+    if(is_nan(t))
+    {
+      mc_rtc::log::error("Could not update marker {}: invalid value in coordinates ({})", id2name(request_id_),
+                         t.transpose());
+      return;
+    }
+    marker_.update(t);
+  }
   void update(const sva::PTransformd & pos) { marker_.update(pos); }
 
 protected:

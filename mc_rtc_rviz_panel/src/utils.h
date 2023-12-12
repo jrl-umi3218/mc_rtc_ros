@@ -16,6 +16,13 @@ namespace vm = visualization_msgs;
 namespace mc_rtc_rviz
 {
 
+// Check if at least one values in x.array() is nan
+template<typename Derived>
+inline bool is_nan(const Eigen::MatrixBase<Derived> & x)
+{
+  return x.array().isNaN().any();
+}
+
 template<typename Derived>
 inline bool is_in_range(const Eigen::MatrixBase<Derived> & x, double min = -10e10, double max = 10e10)
 {
