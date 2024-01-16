@@ -1,3 +1,9 @@
+mc-rtc-ros (1.4.0-1debian1) unstable; urgency=medium
+
+  * Update upstream
+
+ -- Pierre Gergondet <pierre.gergondet+ppa@gmail.com>  Tue, 16 Jan 2024 11:30:09 +0900
+
 mc-rtc-ros (1.3.3-1debian1) unstable; urgency=medium
 
   * Update upstream

@@ -8,7 +8,7 @@ set(PROJECT_NAME mc_rtc_ticker)
 project(
   ${PROJECT_NAME}
   LANGUAGES CXX
-  VERSION 1.3.3)
+  VERSION 1.4.0)
 
 find_package(catkin REQUIRED)
 catkin_package()
