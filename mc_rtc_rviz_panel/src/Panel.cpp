@@ -457,8 +457,7 @@ void Panel::table_end(const WidgetId & id)
   Q_EMIT signal_table_end(id);
 }
 
-void Panel::robot(const WidgetId & id,
-                  const mc_control::RobotMsg & msg)
+void Panel::robot(const WidgetId & id, const mc_control::RobotMsg & msg)
 {
   Q_EMIT signal_robot(id, msg);
 }
@@ -867,18 +866,14 @@ void Panel::got_table_end(const WidgetId & id)
   w.finalize();
 }
 
-void Panel::got_robot(const WidgetId & id,
-                      const mc_control::RobotMsg & msg)
+void Panel::got_robot(const WidgetId & id, const mc_control::RobotMsg & msg)
 {
   // std::cout << id2name(id) << std::endl;
   std::string params = "[ ";
   for(size_t i = 0; i < msg.parameters.size(); ++i)
   {
     params += msg.parameters[i];
-    if(i != msg.parameters.size() - 1)
-    {
-      params += ", ";
-    }
+    if(i != msg.parameters.size() - 1) { params += ", "; }
   }
   params += "]";
   got_label(id, params);
