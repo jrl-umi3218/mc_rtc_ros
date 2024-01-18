@@ -136,6 +136,7 @@ Panel::Panel(QWidget * parent)
   qRegisterMetaType<std::string>("std::string");
   qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
   qRegisterMetaType<WidgetId>("WidgetId");
+  qRegisterMetaType<mc_control::RobotMsg>("mc_control::RobotMsg");
   qRegisterMetaType<Eigen::Vector3d>("Eigen::Vector3d");
   qRegisterMetaType<Eigen::VectorXd>("Eigen::VectorXd");
   qRegisterMetaType<sva::PTransformd>("sva::PTransformd");
@@ -207,8 +208,7 @@ Panel::Panel(QWidget * parent)
   CONNECT_SIGNAL_SLOT(table_start(const WidgetId &, const std::vector<std::string> &));
   CONNECT_SIGNAL_SLOT(table_row(const WidgetId &, const std::vector<std::string> &));
   CONNECT_SIGNAL_SLOT(table_end(const WidgetId &));
-  CONNECT_SIGNAL_SLOT(robot(const WidgetId &, const std::vector<std::string> &,
-                            const std::vector<std::vector<double>> &, const sva::PTransformd &));
+  CONNECT_SIGNAL_SLOT(robot(const WidgetId &, const mc_control::RobotMsg &));
   CONNECT_SIGNAL_SLOT(visual(const WidgetId &, const rbd::parsers::Visual &, const sva::PTransformd &));
   CONNECT_SIGNAL_SLOT(form(const WidgetId &));
   CONNECT_SIGNAL_SLOT(form_checkbox(const WidgetId &, const std::string &, bool, bool, bool));
@@ -458,11 +458,9 @@ void Panel::table_end(const WidgetId & id)
 }
 
 void Panel::robot(const WidgetId & id,
-                  const std::vector<std::string> & parameters,
-                  const std::vector<std::vector<double>> & q,
-                  const sva::PTransformd & posW)
+                  const mc_control::RobotMsg & msg)
 {
-  Q_EMIT signal_robot(id, parameters, q, posW);
+  Q_EMIT signal_robot(id, msg);
 }
 
 void Panel::visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pos)
@@ -870,15 +868,17 @@ void Panel::got_table_end(const WidgetId & id)
 }
 
 void Panel::got_robot(const WidgetId & id,
-                      const std::vector<std::string> & parameters,
-                      const std::vector<std::vector<double>> & /*q*/,
-                      const sva::PTransformd & /*posW*/)
+                      const mc_control::RobotMsg & msg)
 {
+  // std::cout << id2name(id) << std::endl;
   std::string params = "[ ";
-  for(size_t i = 0; i < parameters.size(); ++i)
+  for(size_t i = 0; i < msg.parameters.size(); ++i)
   {
-    params += parameters[i];
-    if(i != parameters.size() - 1) { params += ", "; }
+    params += msg.parameters[i];
+    if(i != msg.parameters.size() - 1)
+    {
+      params += ", ";
+    }
   }
   params += "]";
   got_label(id, params);

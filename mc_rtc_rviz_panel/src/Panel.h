@@ -166,9 +166,7 @@ protected:                            \
   DEFINE_OVERRIDE(table_end(const WidgetId & id))
 
   DEFINE_OVERRIDE(robot(const WidgetId & id,
-                        const std::vector<std::string> & parameters,
-                        const std::vector<std::vector<double>> & q,
-                        const sva::PTransformd & posW))
+                        const mc_control::RobotMsg &))
 
   DEFINE_OVERRIDE(visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose))
 
