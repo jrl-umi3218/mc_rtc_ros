@@ -100,9 +100,9 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     {
       auto & m = boost::get<Geometry::Mesh>(geom_data);
       marker_.type = visualization_msgs::Marker::MESH_RESOURCE;
-      marker_.scale.x = m.scale;
-      marker_.scale.y = m.scale;
-      marker_.scale.z = m.scale;
+      marker_.scale.x = m.scaleV.x();
+      marker_.scale.y = m.scaleV.y();
+      marker_.scale.z = m.scaleV.z();
       marker_.mesh_resource = m.filename;
       marker_.mesh_use_embedded_materials = true;
     }
