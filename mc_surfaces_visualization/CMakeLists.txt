@@ -8,7 +8,7 @@ set(PROJECT_NAME mc_surfaces_visualization)
 project(
   ${PROJECT_NAME}
   LANGUAGES CXX
-  VERSION 1.4.0)
+  VERSION 1.5.0)
 
 find_package(catkin REQUIRED COMPONENTS visualization_msgs geometry_msgs roscpp
                                         std_msgs)

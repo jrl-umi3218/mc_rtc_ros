@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD 17)
 project(
   ${PROJECT_NAME}
   LANGUAGES CXX
-  VERSION 1.4.0)
+  VERSION 1.5.0)
 
 find_package(mc_rtc REQUIRED)
 
