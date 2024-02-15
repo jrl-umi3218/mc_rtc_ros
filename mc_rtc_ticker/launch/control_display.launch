@@ -1,24 +1,3 @@
 <launch>
-  <arg name="display_surfaces" default="false" />
-  <arg name="display_convex" default="false" />
-
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mc_rtc_ticker)/launch/display.rviz" output="screen"/>
-
-  <group if="$(arg display_surfaces)">
-    <include file="$(find mc_surfaces_visualization)/launch/surfaces_publisher.launch" ns="control">
-      <arg name="tf_prefix" value="control" />
-    </include>
-    <include file="$(find mc_surfaces_visualization)/launch/surfaces_publisher.launch" ns="control/env_1">
-      <arg name="tf_prefix" value="control/env_1" />
-    </include>
-  </group>
-
-  <group if="$(arg display_convex)">
-    <include file="$(find mc_convex_visualization)/launch/convex_publisher.launch" ns="control">
-      <arg name="tf_prefix" value="control" />
-    </include>
-    <include file="$(find mc_convex_visualization)/launch/convex_publisher.launch" ns="control/env_1">
-      <arg name="tf_prefix" value="control/env_1" />
-    </include>
-  </group>
 </launch>
