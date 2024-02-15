@@ -20,86 +20,21 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04]
-        compiler: [gcc]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v1
-      with:
-        submodules: recursive
-    - name: Temporary APT mirrors cleanup
-      if: startsWith(runner.os, 'Linux')
-      run: |
-        set -e
-        sudo rm -f /etc/apt/sources.list.d/dotnetdev.list /etc/apt/sources.list.d/microsoft-prod.list
-    - name: Setup extra APT mirror
-      if: startsWith(runner.os, 'Linux')
-      run: |
-        set -x
-        set -e
-        curl -1sLf 'https://dl.cloudsmith.io/public/mc-rtc/head/setup.deb.sh' | sudo -E bash
-    - name: Install ROS
-      if: startsWith(runner.os, 'Linux')
-      run: |
-        set -e
-        set -x
-        pushd .
-        if [ "${{ matrix.os }}" = "ubuntu-16.04" ]
-        then
-          export ROS_DISTRO="kinetic"
-        elif [ "${{ matrix.os }}" = "ubuntu-18.04" ]
-        then
-          export ROS_DISTRO="melodic"
-        else
-          export ROS_DISTRO="noetic"
-        fi
-        sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-        wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
-        sudo apt-get update -qq
-        sudo apt-get install -qq ros-${ROS_DISTRO}-ros-base ros-${ROS_DISTRO}-tf2-ros ros-${ROS_DISTRO}-tf ros-${ROS_DISTRO}-rviz ros-${ROS_DISTRO}-mc-rtc-plugin
-        . /opt/ros/${ROS_DISTRO}/setup.bash
-        mkdir -p /tmp/_ci/catkin_ws/src/
-        cd /tmp/_ci/catkin_ws/src
-        catkin_init_workspace
-        cd ../
-        catkin_make || exit 1
-        popd
-    - name: Setup env
-      if: matrix.os == 'macos-latest'
-      run: |
-        export PATH=/usr/local/opt/qt/bin:$PATH
-        echo "PATH=${PATH}" >> $GITHUB_ENV
-        export CMAKE_PREFIX_PATH=/usr/local/opt/qt@5:${CMAKE_PREFIX_PATH}
-        echo "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" >> $GITHUB_ENV
     - name: Install dependencies
       uses: jrl-umi3218/github-actions/install-dependencies@master
       with:
-        compiler: gcc
-        build-type: RelWithDebInfo
         ubuntu: |
-          apt: libltdl-dev qt5-default libqwt-qt5-dev libmc-rtc-dev
-        macos: |
-          brew-taps: mc-rtc/mc-rtc
-          brew: qt5 qwt mc_rtc
-          github: # Get the head version of mc_rtc
-            - path: jrl-umi3218/mc_rtc
-              options: -DPYTHON_BINDING:BOOL=OFF
-    - name: Build and test
-      if: matrix.os == 'macos-latest'
-      uses: jrl-umi3218/github-actions/build-cmake-project@master
-      with:
-        compiler: gcc
-        build-type: RelWithDebInfo
-        macos-options: '-DCMAKE_CXX_STANDARD=17'
+          apt-mirrors:
+            mc-rtc:
+              cloudsmith: mc-rtc/head
+          apt: libmc-rtc-dev
+        ros: |
+          apt: mc-rtc-plugin
     - name: Build with catkin
-      if: startsWith(runner.os, 'Linux')
-      run: |
-        set -e
-        set -x
-        PROJECT_DIR=`pwd`
-        cd /tmp/_ci/catkin_ws
-        cp -r $PROJECT_DIR src/
-        . devel/setup.bash
-        catkin_make || exit 1
+      if: ${{ matrix.os == 'ubuntu-20.04' }}
+      uses: jrl-umi3218/github-actions/build-catkin-project@master
     - name: Slack Notification
       if: failure()
       uses: archive/github-actions-slack@master
