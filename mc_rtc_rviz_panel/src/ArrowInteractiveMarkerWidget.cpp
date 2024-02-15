@@ -3,31 +3,28 @@
 namespace mc_rtc_rviz
 {
 
-ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(
-    const ClientWidgetParam & params,
-    const WidgetId & requestId,
-    std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-    const Eigen::Vector3d & start,
-    const Eigen::Vector3d & end,
-    const mc_rtc::gui::ArrowConfig & config,
-    bool control_start,
-    bool control_end,
-    ClientWidget * label)
+ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(const ClientWidgetParam & params,
+                                                           const WidgetId & requestId,
+                                                           std::shared_ptr<InteractiveMarkerServer> & server,
+                                                           const Eigen::Vector3d & start,
+                                                           const Eigen::Vector3d & end,
+                                                           const mc_rtc::gui::ArrowConfig & config,
+                                                           bool control_start,
+                                                           bool control_end,
+                                                           ClientWidget * label)
 : ClientWidget(params), request_id_(requestId),
   start_marker_(server,
                 id2name(requestId),
-                vm::InteractiveMarker{},
-                [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
-                { handleStartRequest(feedback); }),
+                InteractiveMarker{},
+                [this](const InteractiveMarkerFeedbackConstPtr & feedback) { handleStartRequest(feedback); }),
   end_marker_(server,
               id2name(requestId),
-              vm::InteractiveMarker{},
-              [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
-              { handleEndRequest(feedback); }),
+              InteractiveMarker{},
+              [this](const InteractiveMarkerFeedbackConstPtr & feedback) { handleEndRequest(feedback); }),
   arrow_marker_(server,
                 id2name(requestId),
                 makeInteractiveMarker(id2name(requestId) + "_arrow", makeArrowMarker(start, end, config)),
-                [](const visualization_msgs::InteractiveMarkerFeedbackConstPtr &) {})
+                [](const InteractiveMarkerFeedbackConstPtr &) {})
 
 {
   if(config.start_point_scale > 0)
@@ -84,16 +81,14 @@ void ArrowInteractiveMarkerWidget::update(const Eigen::Vector3d & start,
   }
 }
 
-void ArrowInteractiveMarkerWidget::handleStartRequest(
-    const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+void ArrowInteractiveMarkerWidget::handleStartRequest(const InteractiveMarkerFeedbackConstPtr & feedback)
 {
   arrow_points_.head<3>() =
       Eigen::Vector3d{feedback->pose.position.x, feedback->pose.position.y, feedback->pose.position.z};
   client().send_request(request_id_, arrow_points_);
 }
 
-void ArrowInteractiveMarkerWidget::handleEndRequest(
-    const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+void ArrowInteractiveMarkerWidget::handleEndRequest(const InteractiveMarkerFeedbackConstPtr & feedback)
 {
   arrow_points_.tail<3>() =
       Eigen::Vector3d{feedback->pose.position.x, feedback->pose.position.y, feedback->pose.position.z};

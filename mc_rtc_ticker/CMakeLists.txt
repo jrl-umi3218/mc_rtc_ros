@@ -10,7 +10,29 @@ project(
   LANGUAGES CXX
   VERSION 1.5.0)
 
-find_package(catkin REQUIRED)
-catkin_package()
+if(NOT DEFINED ENV{ROS_VERSION})
+  message(FATAL_ERROR "Expected to find ROS_VERSION in the environment")
+endif()
+set(ROS_VERSION $ENV{ROS_VERSION})
 
-install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+if(ROS_VERSION EQUAL 1)
+  find_package(catkin REQUIRED)
+  catkin_package()
+
+  install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+elseif(ROS_VERSION EQUAL 2)
+  find_package(ament_cmake REQUIRED)
+  ament_package()
+
+  install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+  install(
+    FILES launch/display.2.launch
+    DESTINATION share/${PROJECT_NAME}/launch/
+    RENAME display.launch)
+  install(
+    FILES launch/display.2.rviz
+    DESTINATION share/${PROJECT_NAME}/launch/
+    RENAME display.rviz)
+else()
+  message(FATAL_ERROR "ROS_VERSION ${ROS_VERSION} is not supported yet")
+endif()

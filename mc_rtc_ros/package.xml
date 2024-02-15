@@ -6,11 +6,8 @@
   <maintainer email="pierre.gergondet@gmail.com">Pierre Gergondet</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
-  <run_depend>mc_log_visualization</run_depend>
   <run_depend>mc_rtc_msgs</run_depend>
   <run_depend>mc_rtc_ticker</run_depend>
-  <run_depend>mc_surfaces_visualization</run_depend>
-  <run_depend>mc_convex_visualization</run_depend>
   <export>
     <metapackage/>
   </export>

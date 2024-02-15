@@ -10,13 +10,13 @@ struct XYThetaInteractiveMarkerWidget : public InteractiveMarkerWidget
 public:
   XYThetaInteractiveMarkerWidget(const ClientWidgetParam & params,
                                  const WidgetId & requestId,
-                                 std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
+                                 std::shared_ptr<InteractiveMarkerServer> & server,
                                  const sva::PTransformd & pos,
                                  bool control_orientation,
                                  bool control_position,
                                  ClientWidget * label);
 
-  void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;
+  void handleRequest(const InteractiveMarkerFeedbackConstPtr & feedback) override;
 
   // update with X, Y, theta
   void update(const Eigen::Vector3d & vec, double altitude);
@@ -26,8 +26,8 @@ private slots:
 
 protected:
   QCheckBox * coupled_checkbox_;
-  vm::InteractiveMarker coupled_marker_;
-  vm::InteractiveMarker decoupled_marker_;
+  InteractiveMarker coupled_marker_;
+  InteractiveMarker decoupled_marker_;
 };
 
 } // namespace mc_rtc_rviz

@@ -9,14 +9,14 @@ namespace mc_rtc_rviz
 
 InteractiveMarkerWidget::InteractiveMarkerWidget(const ClientWidgetParam & params,
                                                  const WidgetId & requestId,
-                                                 std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-                                                 const vm::InteractiveMarker & marker,
+                                                 std::shared_ptr<InteractiveMarkerServer> & server,
+                                                 const InteractiveMarker & marker,
                                                  ClientWidget * label)
 : ClientWidget(params), request_id_(requestId),
   marker_(server,
           id2name(requestId),
           marker,
-          [this](const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) { handleRequest(feedback); })
+          [this](const InteractiveMarkerFeedbackConstPtr & feedback) { handleRequest(feedback); })
 {
   layout_ = new QVBoxLayout(this);
   button_ = label->showHideButton();

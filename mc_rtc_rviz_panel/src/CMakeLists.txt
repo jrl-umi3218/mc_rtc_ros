@@ -121,83 +121,40 @@ add_library(_gui_objects OBJECT ${SOURCE_FILES})
 target_compile_definitions(_gui_objects
                            PRIVATE -DMC_RTC_DOCDIR="${MC_RTC_DOCDIR}")
 if(NOT ${FORCE_QT5} AND "${ROS_DISTRO}" STREQUAL "indigo")
-  target_include_directories(
-    _gui_objects
-    PRIVATE $<TARGET_PROPERTY:Qt4::QtCore,INTERFACE_INCLUDE_DIRECTORIES>)
-  target_compile_definitions(
-    _gui_objects
-    PRIVATE $<TARGET_PROPERTY:Qt4::QtCore,INTERFACE_COMPILE_DEFINITIONS>)
-  target_include_directories(
-    _gui_objects
-    PRIVATE $<TARGET_PROPERTY:Qt4::QtGui,INTERFACE_INCLUDE_DIRECTORIES>)
-  target_compile_definitions(
-    _gui_objects
-    PRIVATE $<TARGET_PROPERTY:Qt4::QtGui,INTERFACE_COMPILE_DEFINITIONS>)
+  target_link_libraries(_gui_objects PUBLIC Qt4::QtCore Qt4::QtGui)
 else()
-  target_include_directories(
-    _gui_objects
-    PRIVATE $<TARGET_PROPERTY:Qt5::Core,INTERFACE_INCLUDE_DIRECTORIES>)
-  target_compile_definitions(
-    _gui_objects
-    PRIVATE $<TARGET_PROPERTY:Qt5::Core,INTERFACE_COMPILE_DEFINITIONS>)
-  target_include_directories(
-    _gui_objects
-    PRIVATE $<TARGET_PROPERTY:Qt5::Gui,INTERFACE_INCLUDE_DIRECTORIES>)
-  target_compile_definitions(
-    _gui_objects
-    PRIVATE $<TARGET_PROPERTY:Qt5::Gui,INTERFACE_COMPILE_DEFINITIONS>)
-  target_include_directories(
-    _gui_objects
-    PRIVATE $<TARGET_PROPERTY:Qt5::Widgets,INTERFACE_INCLUDE_DIRECTORIES>)
-  target_compile_definitions(
-    _gui_objects
-    PRIVATE $<TARGET_PROPERTY:Qt5::Widgets,INTERFACE_COMPILE_DEFINITIONS>)
+  target_link_libraries(_gui_objects PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
 endif()
 target_compile_options(_gui_objects PRIVATE -fPIC)
-target_include_directories(
-  _gui_objects PUBLIC $<TARGET_PROPERTY:Qwt::Qwt,INTERFACE_INCLUDE_DIRECTORIES>)
-target_include_directories(
-  _gui_objects
-  PUBLIC
-    $<TARGET_PROPERTY:mc_rtc::mc_control_client,INTERFACE_INCLUDE_DIRECTORIES>)
-target_compile_definitions(
-  _gui_objects
-  PUBLIC
-    $<TARGET_PROPERTY:mc_rtc::mc_control_client,INTERFACE_COMPILE_DEFINITIONS>)
-target_compile_features(
-  _gui_objects
-  PUBLIC $<TARGET_PROPERTY:mc_rtc::mc_control_client,INTERFACE_COMPILE_FEATURES>
-)
-target_include_directories(
-  _gui_objects
-  PUBLIC $<TARGET_PROPERTY:mc_rtc::mc_rtc_ros,INTERFACE_INCLUDE_DIRECTORIES>)
-target_compile_definitions(
-  _gui_objects
-  PUBLIC $<TARGET_PROPERTY:mc_rtc::mc_rtc_ros,INTERFACE_COMPILE_DEFINITIONS>)
-target_compile_features(
-  _gui_objects
-  PUBLIC $<TARGET_PROPERTY:mc_rtc::mc_rtc_ros,INTERFACE_COMPILE_FEATURES>)
+target_link_libraries(_gui_objects PUBLIC Qwt::Qwt mc_rtc::mc_control_client
+                                          mc_rtc::mc_rtc_ros)
 
-add_library(${PROJECT_NAME} Panel.cpp ${HEADER_FILES} ${MOC_HEADERS}
-                            $<TARGET_OBJECTS:_gui_objects>)
-add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(
-  ${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES} mc_rtc::mc_rtc_ros
-                         mc_rtc::mc_control_client Qwt::Qwt)
-
-target_link_libraries(${PROJECT_NAME} PUBLIC)
-if(NOT ${FORCE_QT5} AND "${ROS_DISTRO}" STREQUAL "indigo")
-  target_link_libraries(${PROJECT_NAME} PUBLIC Qt4::QtCore Qt4::QtGui)
-else()
-  target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
+add_library(${PROJECT_NAME} Panel.cpp ${HEADER_FILES} ${MOC_HEADERS})
+if(ROS_VERSION EQUAL 1)
+  add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES})
+elseif(ROS_VERSION EQUAL 2)
+  target_link_libraries(${PROJECT_NAME} PUBLIC ROSDependencies)
+  target_compile_definitions(
+    ${PROJECT_NAME} PRIVATE RVIZ_DEFAULT_PLUGINS_BUILDING_LIBRARY
+                            MC_RTC_RVIZ_PANEL_IS_ROS2)
 endif()
+target_link_libraries(${PROJECT_NAME} PUBLIC _gui_objects)
 
 add_executable(mc_rtc_gui main.cpp)
 target_link_libraries(mc_rtc_gui PUBLIC ${PROJECT_NAME})
 target_compile_options(mc_rtc_gui PRIVATE -fPIC)
 
-install(
-  TARGETS ${PROJECT_NAME} mc_rtc_gui
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+if(ROS_VERSION EQUAL 1)
+  install(
+    TARGETS ${PROJECT_NAME} mc_rtc_gui
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+elseif(ROS_VERSION EQUAL 2)
+  install(
+    TARGETS ${PROJECT_NAME} mc_rtc_gui
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin)
+endif()

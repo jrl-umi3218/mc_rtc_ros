@@ -112,16 +112,13 @@ double getTimeout()
 
 struct PanelImpl
 {
-  PanelImpl()
-  : nh_(),
-    int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
+  PanelImpl() : nh_(), int_server_(std::make_shared<InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
   {
-    marker_array_pub_ =
-        mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::MarkerArray>("/mc_rtc_rviz", 0);
+    marker_array_pub_ = mc_rtc::ROSBridge::get_node_handle()->advertise<MarkerArray>("/mc_rtc_rviz", 0);
   }
   ros::NodeHandle nh_;
-  std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server_;
-  visualization_msgs::MarkerArray marker_array_;
+  std::shared_ptr<InteractiveMarkerServer> int_server_;
+  MarkerArray marker_array_;
   ros::Publisher marker_array_pub_;
 };
 

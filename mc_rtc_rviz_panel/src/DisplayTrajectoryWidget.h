@@ -9,8 +9,6 @@
 
 #include <mc_rtc/ros.h>
 
-#include <visualization_msgs/MarkerArray.h>
-
 namespace mc_rtc_rviz
 {
 
@@ -18,7 +16,7 @@ struct DisplayTrajectoryWidget : public ClientWidget
 {
   Q_OBJECT
 public:
-  DisplayTrajectoryWidget(const ClientWidgetParam & params, visualization_msgs::MarkerArray & markers);
+  DisplayTrajectoryWidget(const ClientWidgetParam & params, MarkerArray & markers);
 
   ~DisplayTrajectoryWidget() override;
 
@@ -28,8 +26,8 @@ public:
   void update(const sva::PTransformd & point, const mc_rtc::gui::LineConfig & config);
 
 private:
-  visualization_msgs::MarkerArray & markers_;
-  visualization_msgs::Marker path_;
+  MarkerArray & markers_;
+  Marker path_;
   void configure(const mc_rtc::gui::LineConfig & config);
   void publish();
   bool visible_;

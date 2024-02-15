@@ -9,8 +9,7 @@
 namespace mc_rtc_rviz
 {
 
-DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & params,
-                                                 visualization_msgs::MarkerArray & markers)
+DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & params, MarkerArray & markers)
 : ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
@@ -26,7 +25,7 @@ DisplayTrajectoryWidget::DisplayTrajectoryWidget(const ClientWidgetParam & param
 DisplayTrajectoryWidget::~DisplayTrajectoryWidget()
 {
   configure({});
-  path_.action = visualization_msgs::Marker::DELETE;
+  path_.action = Marker::DELETE;
   publish();
 }
 
@@ -113,8 +112,7 @@ void DisplayTrajectoryWidget::update(const sva::PTransformd & point, const mc_rt
 
 void DisplayTrajectoryWidget::configure(const mc_rtc::gui::LineConfig & config)
 {
-  path_.type = config.style == mc_rtc::gui::LineStyle::Dotted ? visualization_msgs::Marker::POINTS
-                                                              : visualization_msgs::Marker::LINE_STRIP;
+  path_.type = config.style == mc_rtc::gui::LineStyle::Dotted ? Marker::POINTS : Marker::LINE_STRIP;
   path_.header.frame_id = "robot_map";
   path_.header.stamp = ros::Time::now();
   path_.pose.orientation.w = 1.0;
@@ -127,7 +125,7 @@ void DisplayTrajectoryWidget::configure(const mc_rtc::gui::LineConfig & config)
   path_.color.g = static_cast<float>(config.color.g);
   path_.color.b = static_cast<float>(config.color.b);
   path_.color.a = static_cast<float>(config.color.a);
-  path_.action = visualization_msgs::Marker::ADD;
+  path_.action = Marker::ADD;
   path_.ns = id2name(id());
 }
 
@@ -136,7 +134,7 @@ void DisplayTrajectoryWidget::publish()
   if(visible_ || was_visible_)
   {
     markers_.markers.push_back(path_);
-    if(!visible_ || path_.points.size() == 0) { markers_.markers.back().action = visualization_msgs::Marker::DELETE; }
+    if(!visible_ || path_.points.size() == 0) { markers_.markers.back().action = Marker::DELETE; }
   }
   was_visible_ = visible_;
 }

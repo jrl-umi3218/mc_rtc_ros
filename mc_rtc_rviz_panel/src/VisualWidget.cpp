@@ -3,7 +3,7 @@
 namespace mc_rtc_rviz
 {
 
-VisualWidget::VisualWidget(const ClientWidgetParam & params, visualization_msgs::MarkerArray & markers)
+VisualWidget::VisualWidget(const ClientWidgetParam & params, MarkerArray & markers)
 : ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
@@ -21,7 +21,7 @@ VisualWidget::VisualWidget(const ClientWidgetParam & params, visualization_msgs:
 
 VisualWidget::~VisualWidget()
 {
-  marker_.action = visualization_msgs::Marker::DELETE;
+  marker_.action = Marker::DELETE;
   markers_.markers.push_back(marker_);
 }
 
@@ -31,7 +31,7 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     // Marker general settings
     marker_.header.seq++;
     marker_.header.stamp = ros::Time::now();
-    marker_.action = visualization_msgs::Marker::ADD;
+    marker_.action = Marker::ADD;
   }
   {
     // Convert the position
@@ -75,7 +75,7 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     if(type == Type::BOX)
     {
       auto & b = boost::get<Geometry::Box>(geom_data);
-      marker_.type = visualization_msgs::Marker::CUBE;
+      marker_.type = Marker::CUBE;
       marker_.scale.x = b.size.x();
       marker_.scale.y = b.size.y();
       marker_.scale.z = b.size.z();
@@ -83,7 +83,7 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     else if(type == Type::CYLINDER)
     {
       auto & c = boost::get<Geometry::Cylinder>(geom_data);
-      marker_.type = visualization_msgs::Marker::CYLINDER;
+      marker_.type = Marker::CYLINDER;
       marker_.scale.x = 2 * c.radius;
       marker_.scale.y = 2 * c.radius;
       marker_.scale.z = c.length;
@@ -91,7 +91,7 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     else if(type == Type::SPHERE)
     {
       auto & s = boost::get<Geometry::Sphere>(geom_data);
-      marker_.type = visualization_msgs::Marker::SPHERE;
+      marker_.type = Marker::SPHERE;
       marker_.scale.x = 2 * s.radius;
       marker_.scale.y = 2 * s.radius;
       marker_.scale.z = 2 * s.radius;
@@ -99,7 +99,7 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
     else if(type == Type::MESH)
     {
       auto & m = boost::get<Geometry::Mesh>(geom_data);
-      marker_.type = visualization_msgs::Marker::MESH_RESOURCE;
+      marker_.type = Marker::MESH_RESOURCE;
       marker_.scale.x = m.scaleV.x();
       marker_.scale.y = m.scaleV.y();
       marker_.scale.z = m.scaleV.z();
@@ -121,7 +121,7 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
       }
       else
       {
-        marker_.type = visualization_msgs::Marker::SPHERE;
+        marker_.type = Marker::SPHERE;
         marker_.scale.x = se.size.x();
         marker_.scale.y = se.size.y();
         marker_.scale.z = se.size.z();
@@ -130,7 +130,7 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
   }
   if(visible_ || was_visible_)
   {
-    if(!visible_) { marker_.action = visualization_msgs::Marker::DELETE; }
+    if(!visible_) { marker_.action = Marker::DELETE; }
     markers_.markers.push_back(marker_);
   }
   was_visible_ = visible_;

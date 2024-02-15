@@ -10,8 +10,6 @@
 #include <mc_rtc/gui/types.h>
 #include <mc_rtc/ros.h>
 
-#include <visualization_msgs/MarkerArray.h>
-
 namespace mc_rtc_rviz
 {
 
@@ -20,7 +18,7 @@ struct PolyhedronMarkerWidget : public ClientWidget
   Q_OBJECT
 public:
   PolyhedronMarkerWidget(const ClientWidgetParam & params,
-                         visualization_msgs::MarkerArray & markers,
+                         MarkerArray & markers,
                          const mc_rtc::gui::PolyhedronConfig & config);
 
   void update(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
@@ -43,14 +41,14 @@ private slots:
   void show_vertices_changed(int);
 
 private:
-  visualization_msgs::MarkerArray & markers_;
+  MarkerArray & markers_;
   mc_rtc::gui::PolyhedronConfig config_;
   QCheckBox * show_triangles_ = nullptr;
   QCheckBox * show_edges_ = nullptr;
   QCheckBox * show_vertices_ = nullptr;
-  visualization_msgs::Marker triangles_; // Triangles displayed as a TRIANGLE_LIST
-  visualization_msgs::Marker edges_; // Edges displayed as a LINE_STRIP
-  visualization_msgs::Marker vertices_; // Vertices displayed as a SPHERE_LIST
+  Marker triangles_; // Triangles displayed as a TRIANGLE_LIST
+  Marker edges_; // Edges displayed as a LINE_STRIP
+  Marker vertices_; // Vertices displayed as a SPHERE_LIST
   size_t prevPolyhedronNum_ = 0;
   size_t currPolyhedronNum_ = 0;
   bool visible_ = true;

@@ -13,7 +13,7 @@ struct ArrowInteractiveMarkerWidget : public ClientWidget
 public:
   ArrowInteractiveMarkerWidget(const ClientWidgetParam & params,
                                const WidgetId & requestId,
-                               std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
+                               std::shared_ptr<InteractiveMarkerServer> & server,
                                const Eigen::Vector3d & start,
                                const Eigen::Vector3d & end,
                                const mc_rtc::gui::ArrowConfig & config,
@@ -24,8 +24,8 @@ public:
   void update(const Eigen::Vector3d & start, const Eigen::Vector3d & end, const mc_rtc::gui::ArrowConfig & c);
 
 protected:
-  virtual void handleStartRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback);
-  virtual void handleEndRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback);
+  virtual void handleStartRequest(const InteractiveMarkerFeedbackConstPtr & feedback);
+  virtual void handleEndRequest(const InteractiveMarkerFeedbackConstPtr & feedback);
 
 protected:
   WidgetId request_id_;
