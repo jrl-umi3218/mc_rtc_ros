@@ -1,3 +1,2 @@
-opt/ros/@ROS_DISTRO@/lib/mc_rtc_ticker/*
 opt/ros/@ROS_DISTRO@/lib/pkgconfig/mc_rtc_ticker.pc
 opt/ros/@ROS_DISTRO@/share/mc_rtc_ticker/*
