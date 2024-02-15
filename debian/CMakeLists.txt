@@ -7,10 +7,7 @@ enable_testing()
 find_package(catkin)
 
 if(${catkin_FOUND})
-  add_subdirectory(mc_log_visualization)
-  add_subdirectory(mc_convex_visualization)
   add_subdirectory(mc_rtc_ticker)
-  add_subdirectory(mc_surfaces_visualization)
 endif()
 
 add_subdirectory(mc_rtc_rviz_panel)

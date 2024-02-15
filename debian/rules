@@ -8,9 +8,11 @@ ifeq (${ROS_DISTRO},)
 	export CMAKE_OPTIONS=
 	export EXTRA_STEPS=
 else
+	export ROS_VERSION:=$(shell . /opt/ros/${ROS_DISTRO}/setup.sh && echo $$ROS_VERSION)
 	export ROS_PYTHON_VERSION:=$(shell . /opt/ros/${ROS_DISTRO}/setup.sh && echo $$ROS_PYTHON_VERSION)
 	ifeq (${ROS_PYTHON_VERSION}, 3)
 		export PYTHONPATH:=/opt/ros/${ROS_DISTRO}/lib/python3/dist-packages:${PYTHONPATH}
+		export PYTHONPATH:=/opt/ros/${ROS_DISTRO}/lib/python$(shell python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}');")/site-packages:${PYTHONPATH}
 		export PYTHON_EXECUTABLE=/usr/bin/python3
 	else
 		export PYTHONPATH:=/opt/ros/${ROS_DISTRO}/lib/python2.7/dist-packages:${PYTHONPATH}
@@ -19,6 +21,7 @@ else
 	export PKG_CONFIG_PATH=/opt/ros/${ROS_DISTRO}/lib/pkgconfig:$PKG_CONFIG_PATH
 	export ROS_MASTER_URI=http://localhost:11311
 	export ROS_PACKAGE_PATH=/opt/ros/${ROS_DISTRO}/share
+	export LD_LIBRARY_PATH:=/opt/ros/${ROS_DISTRO}/lib:$LD_LIBRARY_PATH
 	export CMAKE_PREFIX_PATH=/opt/ros/${ROS_DISTRO}:$CMAKE_PREFIX_PATH
 	export CMAKE_OPTIONS=-DCMAKE_INSTALL_PREFIX=/opt/ros/${ROS_DISTRO} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
 endif
@@ -28,6 +31,7 @@ endif
 	dh $@
 
 override_dh_auto_configure:
+	cp $(CURDIR)/debian/CMakeLists.txt $(CURDIR)/
 	dh_auto_configure -- ${CMAKE_OPTIONS}
 
 override_dh_auto_install:

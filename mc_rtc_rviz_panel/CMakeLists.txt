@@ -2,7 +2,7 @@
 # Copyright 2016-2023 CNRS-UM LIRMM, CNRS-AIST JRL
 #
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.10)
 
 set(PROJECT_NAME mc_rtc_rviz_panel)
 set(PROJECT_DESCRIPTION "mc_rtc RVIz panel for prototyping controllers")
