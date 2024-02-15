@@ -29,7 +29,7 @@ jobs:
           apt-mirrors:
             mc-rtc:
               cloudsmith: mc-rtc/head
-          apt: libmc-rtc-dev
+          apt: libmc-rtc-dev qt5-default libqwt-qt5-dev
         ros: |
           apt: mc-rtc-plugin
     - name: Build with catkin
