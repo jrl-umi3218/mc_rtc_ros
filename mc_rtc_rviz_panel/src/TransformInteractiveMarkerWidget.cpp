@@ -3,13 +3,12 @@
 namespace mc_rtc_rviz
 {
 
-TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(
-    const ClientWidgetParam & params,
-    const WidgetId & requestId,
-    std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-    bool control_orientation,
-    bool control_position,
-    ClientWidget * label)
+TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
+                                                                   const WidgetId & requestId,
+                                                                   std::shared_ptr<InteractiveMarkerServer> & server,
+                                                                   bool control_orientation,
+                                                                   bool control_position,
+                                                                   ClientWidget * label)
 : InteractiveMarkerWidget(
     params,
     requestId,
@@ -20,21 +19,19 @@ TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(
 {
 }
 
-TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(
-    const ClientWidgetParam & params,
-    const WidgetId & requestId,
-    std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-    const vm::InteractiveMarker & marker,
-    bool control_orientation,
-    bool control_position,
-    ClientWidget * label)
+TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
+                                                                   const WidgetId & requestId,
+                                                                   std::shared_ptr<InteractiveMarkerServer> & server,
+                                                                   const InteractiveMarker & marker,
+                                                                   bool control_orientation,
+                                                                   bool control_position,
+                                                                   ClientWidget * label)
 : InteractiveMarkerWidget(params, requestId, server, marker, label), control_orientation_(control_orientation),
   control_position_(control_position)
 {
 }
 
-void TransformInteractiveMarkerWidget::handleRequest(
-    const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+void TransformInteractiveMarkerWidget::handleRequest(const InteractiveMarkerFeedbackConstPtr & feedback)
 {
   if(!control_position_ && !control_orientation_) { return; }
   if(control_position_ && !control_orientation_)

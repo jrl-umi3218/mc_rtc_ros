@@ -5,14 +5,13 @@
 namespace mc_rtc_rviz
 {
 
-XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(
-    const ClientWidgetParam & params,
-    const WidgetId & requestId,
-    std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-    const sva::PTransformd & /*pos*/,
-    bool control_orientation,
-    bool control_position,
-    ClientWidget * label)
+XYThetaInteractiveMarkerWidget::XYThetaInteractiveMarkerWidget(const ClientWidgetParam & params,
+                                                               const WidgetId & requestId,
+                                                               std::shared_ptr<InteractiveMarkerServer> & server,
+                                                               const sva::PTransformd & /*pos*/,
+                                                               bool control_orientation,
+                                                               bool control_position,
+                                                               ClientWidget * label)
 : InteractiveMarkerWidget(params, requestId, server, makeXYThetaMarker(id2name(requestId)), label)
 {
   if(control_position || control_orientation)
@@ -39,8 +38,7 @@ void XYThetaInteractiveMarkerWidget::update(const Eigen::Vector3d & vec, double 
   marker_.update(X);
 }
 
-void XYThetaInteractiveMarkerWidget::handleRequest(
-    const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback)
+void XYThetaInteractiveMarkerWidget::handleRequest(const InteractiveMarkerFeedbackConstPtr & feedback)
 {
   auto q = Eigen::Quaterniond{feedback->pose.orientation.w, feedback->pose.orientation.x, feedback->pose.orientation.y,
                               feedback->pose.orientation.z}

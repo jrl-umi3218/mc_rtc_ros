@@ -113,16 +113,25 @@ double getTimeout()
 struct PanelImpl
 {
   PanelImpl()
-  : nh_(),
-    int_server_(std::make_shared<interactive_markers::InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers"))
   {
-    marker_array_pub_ =
-        mc_rtc::ROSBridge::get_node_handle()->advertise<visualization_msgs::MarkerArray>("/mc_rtc_rviz", 0);
+#ifdef MC_RTC_ROS_IS_ROS2
+    nh_ = rclcpp::Node::make_shared("mc_rtc_rviz_panel");
+    marker_array_pub_ = nh_->create_publisher<MarkerArray>("/mc_rtc_rviz", 0);
+    int_server_ = std::make_shared<InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers", nh_);
+#else
+    int_server_ = std::make_shared<InteractiveMarkerServer>("mc_rtc_rviz_interactive_markers");
+    marker_array_pub_ = nh_.advertise<MarkerArray>("/mc_rtc_rviz", 0);
+#endif
   }
+#ifdef MC_RTC_ROS_IS_ROS2
+  mc_rtc::NodeHandlePtr nh_;
+  rclcpp::Publisher<MarkerArray>::SharedPtr marker_array_pub_;
+#else
   ros::NodeHandle nh_;
-  std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server_;
-  visualization_msgs::MarkerArray marker_array_;
   ros::Publisher marker_array_pub_;
+#endif
+  std::shared_ptr<InteractiveMarkerServer> int_server_;
+  MarkerArray marker_array_;
 };
 
 Panel::Panel(QWidget * parent)
@@ -272,9 +281,14 @@ void Panel::got_stop()
   tree_.clean();
   this->clean();
   impl_->int_server_->applyChanges();
+#ifdef MC_RTC_ROS_IS_ROS2
+  impl_->marker_array_pub_->publish(impl_->marker_array_);
+  if(rclcpp::ok()) { rclcpp::spin_some(impl_->nh_); }
+#else
   impl_->marker_array_pub_.publish(impl_->marker_array_);
-  impl_->marker_array_.markers.clear();
   if(ros::ok()) { ros::spinOnce(); }
+#endif
+  impl_->marker_array_.markers.clear();
 }
 
 Panel::~Panel()
@@ -828,8 +842,8 @@ void Panel::got_force(const WidgetId & id,
                       bool ro)
 {
   auto label = latestWidget_;
-  auto & w = get_widget<ForceInteractiveMarkerWidget>(id, requestId, impl_->int_server_, surface, forcep, forceConfig,
-                                                      ro, label);
+  auto & w = get_widget<ForceInteractiveMarkerWidget>(id, requestId, impl_->int_server_, impl_->marker_array_, surface,
+                                                      forcep, forceConfig, ro, label);
   w.update(surface, forcep, forceConfig);
 }
 
@@ -841,8 +855,8 @@ void Panel::got_arrow(const WidgetId & id,
                       bool ro)
 {
   auto label = latestWidget_;
-  auto & w =
-      get_widget<ArrowInteractiveMarkerWidget>(id, requestId, impl_->int_server_, start, end, config, !ro, !ro, label);
+  auto & w = get_widget<ArrowInteractiveMarkerWidget>(id, requestId, impl_->int_server_, impl_->marker_array_, start,
+                                                      end, config, !ro, !ro, label);
   w.update(start, end, config);
 }
 
@@ -1195,6 +1209,15 @@ mc_rtc::Configuration Panel::config(const WidgetId & id) const
   }
   if(!ret.has(id.name)) { ret.add(id.name); }
   return ret(id.name);
+}
+
+Time Panel::now() const
+{
+#ifdef MC_RTC_ROS_IS_ROS2
+  return impl_->nh_->now();
+#else
+  return ros::Time::now();
+#endif
 }
 
 } // namespace mc_rtc_rviz

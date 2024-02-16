@@ -7,19 +7,19 @@
 namespace mc_rtc_rviz
 {
 
-geometry_msgs::Point rosPoint(const Eigen::Vector3d & vec)
+Point rosPoint(const Eigen::Vector3d & vec)
 {
-  geometry_msgs::Point p;
+  Point p;
   p.x = vec.x();
   p.y = vec.y();
   p.z = vec.z();
   return p;
 }
 
-vm::Marker makeVisual(int t, double scale)
+Marker makeVisual(int t, double scale)
 {
-  vm::Marker ret;
-  ret.action = vm::Marker::ADD;
+  Marker ret;
+  ret.action = Marker::ADD;
   ret.type = t;
   ret.scale.x = scale;
   ret.scale.y = scale;
@@ -32,16 +32,16 @@ vm::Marker makeVisual(int t, double scale)
   return ret;
 }
 
-std::vector<vm::Marker> makeAxisMarker(double scale)
+std::vector<Marker> makeAxisMarker(double scale)
 {
   const Eigen::Vector3d t0 = scale * Eigen::Vector3d{0., 0., 0.};
   const Eigen::Vector3d tx = scale * Eigen::Vector3d{1., 0., 0.};
   const Eigen::Vector3d ty = scale * Eigen::Vector3d{0., 1., 0.};
   const Eigen::Vector3d tz = scale * Eigen::Vector3d{0., 0., 1.};
 
-  vm::Marker m;
-  m.type = vm::Marker::ARROW;
-  m.action = vm::Marker::ADD;
+  Marker m;
+  m.type = Marker::ARROW;
+  m.action = Marker::ADD;
   // Arrow shaft diameter
   m.scale.x = scale * 0.15;
   // arrow head diameter
@@ -50,7 +50,7 @@ std::vector<vm::Marker> makeAxisMarker(double scale)
   m.scale.z = scale * 0.5;
   m.pose.orientation.w = 1.0;
 
-  std::vector<vm::Marker> ret;
+  std::vector<Marker> ret;
   // X axis
   m.points.push_back(rosPoint(t0));
   m.points.push_back(rosPoint(tx));
@@ -80,14 +80,11 @@ std::vector<vm::Marker> makeAxisMarker(double scale)
   return ret;
 }
 
-std::vector<vm::Marker> makeArrowMarker(const Eigen::Vector3d & start,
-                                        const Eigen::Vector3d & end,
-                                        const mc_rtc::gui::ArrowConfig & c)
+Marker makeArrowMarker(const Eigen::Vector3d & start, const Eigen::Vector3d & end, const mc_rtc::gui::ArrowConfig & c)
 {
-  std::vector<vm::Marker> markers;
-  visualization_msgs::Marker m;
-  m.type = visualization_msgs::Marker::ARROW;
-  m.action = visualization_msgs::Marker::ADD;
+  Marker m;
+  m.type = Marker::ARROW;
+  m.action = Marker::ADD;
   m.points.push_back(rosPoint(start));
   m.points.push_back(rosPoint(end));
   m.scale.x = c.shaft_diam;
@@ -97,14 +94,12 @@ std::vector<vm::Marker> makeArrowMarker(const Eigen::Vector3d & start,
   m.color.r = static_cast<float>(c.color.r);
   m.color.g = static_cast<float>(c.color.g);
   m.color.b = static_cast<float>(c.color.b);
-  markers.push_back(m);
-  return markers;
+  return m;
 }
 
-vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker> & visual_makers,
-                                                 vm::InteractiveMarker & marker)
+InteractiveMarkerControl & makeVisualControl(const std::vector<Marker> & visual_makers, InteractiveMarker & marker)
 {
-  vm::InteractiveMarkerControl ret;
+  InteractiveMarkerControl ret;
   ret.always_visible = true;
   ret.orientation.w = 1.0;
   ret.markers = visual_makers;
@@ -112,12 +107,12 @@ vm::InteractiveMarkerControl & makeVisualControl(const std::vector<vm::Marker> &
   return marker.controls.back();
 }
 
-vm::InteractiveMarker makeInteractiveMarker(const std::string & name, const std::vector<vm::Marker> & visual_markers)
+InteractiveMarker makeInteractiveMarker(const std::string & name, const std::vector<Marker> & visual_markers)
 {
-  vm::InteractiveMarker marker;
+  InteractiveMarker marker;
   marker.header.frame_id = "robot_map";
   marker.name = name;
-  vm::InteractiveMarkerControl ret;
+  InteractiveMarkerControl ret;
   ret.always_visible = true;
   ret.orientation.w = 1.0;
   ret.markers = visual_markers;
@@ -125,25 +120,25 @@ vm::InteractiveMarker makeInteractiveMarker(const std::string & name, const std:
   return marker;
 }
 
-vm::InteractiveMarker make6DMarker(const std::string & name,
-                                   const std::vector<vm::Marker> & visual_markers,
-                                   bool control_position,
-                                   bool control_orientation,
-                                   bool move_x,
-                                   bool move_y,
-                                   bool move_z,
-                                   bool rotate_x,
-                                   bool rotate_y,
-                                   bool rotate_z)
+InteractiveMarker make6DMarker(const std::string & name,
+                               const std::vector<Marker> & visual_markers,
+                               bool control_position,
+                               bool control_orientation,
+                               bool move_x,
+                               bool move_y,
+                               bool move_z,
+                               bool rotate_x,
+                               bool rotate_y,
+                               bool rotate_z)
 {
-  vm::InteractiveMarker ret;
+  InteractiveMarker ret;
   ret.header.frame_id = "robot_map";
   ret.scale = 0.15f;
   ret.name = name;
   ret.description = "";
   makeVisualControl(visual_markers, ret);
 
-  vm::InteractiveMarkerControl control;
+  InteractiveMarkerControl control;
   control.orientation.w = 0.707107;
   control.orientation.x = 0.707107;
   control.orientation.y = 0;
@@ -151,13 +146,13 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   if(control_orientation && rotate_x)
   {
     control.name = "rotate_x";
-    control.interaction_mode = vm::InteractiveMarkerControl::ROTATE_AXIS;
+    control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
     ret.controls.push_back(control);
   }
   if(control_position && move_x)
   {
     control.name = "move_x";
-    control.interaction_mode = vm::InteractiveMarkerControl::MOVE_AXIS;
+    control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
     ret.controls.push_back(control);
   }
 
@@ -168,13 +163,13 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   if(control_orientation && rotate_z)
   {
     control.name = "rotate_z";
-    control.interaction_mode = vm::InteractiveMarkerControl::ROTATE_AXIS;
+    control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
     ret.controls.push_back(control);
   }
   if(control_position && move_z)
   {
     control.name = "move_z";
-    control.interaction_mode = vm::InteractiveMarkerControl::MOVE_AXIS;
+    control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
     ret.controls.push_back(control);
   }
 
@@ -185,32 +180,32 @@ vm::InteractiveMarker make6DMarker(const std::string & name,
   if(control_orientation && rotate_y)
   {
     control.name = "rotate_y";
-    control.interaction_mode = vm::InteractiveMarkerControl::ROTATE_AXIS;
+    control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
     ret.controls.push_back(control);
   }
   if(control_position && move_y)
   {
     control.name = "move_y";
-    control.interaction_mode = vm::InteractiveMarkerControl::MOVE_AXIS;
+    control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
     ret.controls.push_back(control);
   }
 
   return ret;
 }
 
-vm::InteractiveMarker make3DMarker(const std::string & name,
-                                   const std::vector<vm::Marker> & visual_markers,
-                                   bool control_position,
-                                   bool /*move_x*/,
-                                   bool /*move_y*/,
-                                   bool /*move_z*/)
+InteractiveMarker make3DMarker(const std::string & name,
+                               const std::vector<Marker> & visual_markers,
+                               bool control_position,
+                               bool /*move_x*/,
+                               bool /*move_y*/,
+                               bool /*move_z*/)
 {
   return make6DMarker(name, visual_markers, control_position, false);
 }
 
-vm::InteractiveMarker makeXYThetaMarker(const std::string & name, bool readonly)
+InteractiveMarker makeXYThetaMarker(const std::string & name, bool readonly)
 {
-  vm::InteractiveMarker int_marker;
+  InteractiveMarker int_marker;
   int_marker.header.frame_id = "robot_map";
   int_marker.scale = 0.25;
   int_marker.name = name;
@@ -219,24 +214,22 @@ vm::InteractiveMarker makeXYThetaMarker(const std::string & name, bool readonly)
 
   if(!readonly)
   {
-    vm::InteractiveMarkerControl control;
+    InteractiveMarkerControl control;
     control.orientation.w = 1;
     control.orientation.x = 0;
     control.orientation.y = 1;
     control.orientation.z = 0;
-    control.interaction_mode = vm::InteractiveMarkerControl::MOVE_ROTATE;
+    control.interaction_mode = InteractiveMarkerControl::MOVE_ROTATE;
     int_marker.controls.push_back(control);
   }
   return int_marker;
 }
 
-visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos,
-                                          const mc_rtc::gui::Color & color,
-                                          double scale = 0.02)
+Marker getPointMarker(const Eigen::Vector3d & pos, const mc_rtc::gui::Color & color, double scale = 0.02)
 {
-  visualization_msgs::Marker m;
-  m.type = visualization_msgs::Marker::SPHERE;
-  m.action = visualization_msgs::Marker::ADD;
+  Marker m;
+  m.type = Marker::SPHERE;
+  m.action = Marker::ADD;
   m.scale.x = scale;
   m.scale.y = scale;
   m.scale.z = scale;
@@ -254,10 +247,10 @@ visualization_msgs::Marker getPointMarker(const Eigen::Vector3d & pos,
   return m;
 }
 
-SharedMarker::SharedMarker(std::shared_ptr<interactive_markers::InteractiveMarkerServer> server,
+SharedMarker::SharedMarker(std::shared_ptr<InteractiveMarkerServer> server,
                            const std::string & /*name*/,
-                           const vm::InteractiveMarker & marker,
-                           interactive_markers::InteractiveMarkerServer::FeedbackCallback callback)
+                           const InteractiveMarker & marker,
+                           InteractiveMarkerServer::FeedbackCallback callback)
 : server_(server), marker_(marker), callback_(callback)
 {
   server_->insert(marker_, callback_);
@@ -286,7 +279,7 @@ void SharedMarker::update(const Eigen::Vector3d & t)
 {
   if(!hidden_)
   {
-    geometry_msgs::Pose pose;
+    Pose pose;
     pose.orientation.w = 1.0;
     pose.position.x = t.x();
     pose.position.y = t.y();
@@ -299,7 +292,7 @@ void SharedMarker::update(const sva::PTransformd & pos)
 {
   if(!hidden_)
   {
-    geometry_msgs::Pose pose;
+    Pose pose;
     Eigen::Quaterniond q{pos.rotation().transpose()};
     pose.orientation.w = q.w();
     pose.orientation.x = q.x();

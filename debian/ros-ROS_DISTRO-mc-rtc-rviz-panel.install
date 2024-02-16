@@ -1,4 +1,9 @@
 opt/ros/@ROS_DISTRO@/lib/libmc_rtc_rviz_panel.so
-opt/ros/@ROS_DISTRO@/lib/mc_rtc_rviz_panel/mc_rtc_gui
-opt/ros/@ROS_DISTRO@/lib/pkgconfig/mc_rtc_rviz_panel.pc
+#ROS1 opt/ros/@ROS_DISTRO@/lib/mc_rtc_rviz_panel/mc_rtc_gui
+#ROS1 opt/ros/@ROS_DISTRO@/lib/pkgconfig/mc_rtc_rviz_panel.pc
+#ROS2 opt/ros/@ROS_DISTRO@/bin/mc_rtc_gui
+#ROS2 opt/ros/@ROS_DISTRO@/share/ament_index/resource_index/package_run_dependencies/mc_rtc_rviz_panel
+#ROS2 opt/ros/@ROS_DISTRO@/share/ament_index/resource_index/packages/mc_rtc_rviz_panel
+#ROS2 opt/ros/@ROS_DISTRO@/share/ament_index/resource_index/parent_prefix_path/mc_rtc_rviz_panel
+#ROS2 opt/ros/@ROS_DISTRO@/share/ament_index/resource_index/rviz_common__pluginlib__plugin/mc_rtc_rviz_panel
 opt/ros/@ROS_DISTRO@/share/mc_rtc_rviz_panel/*

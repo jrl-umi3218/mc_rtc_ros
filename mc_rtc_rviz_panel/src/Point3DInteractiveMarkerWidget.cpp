@@ -3,13 +3,12 @@
 namespace mc_rtc_rviz
 {
 
-Point3DInteractiveMarkerWidget::Point3DInteractiveMarkerWidget(
-    const ClientWidgetParam & params,
-    const WidgetId & requestId,
-    std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-    const mc_rtc::gui::PointConfig & config,
-    bool control_position,
-    ClientWidget * label)
+Point3DInteractiveMarkerWidget::Point3DInteractiveMarkerWidget(const ClientWidgetParam & params,
+                                                               const WidgetId & requestId,
+                                                               std::shared_ptr<InteractiveMarkerServer> & server,
+                                                               const mc_rtc::gui::PointConfig & config,
+                                                               bool control_position,
+                                                               ClientWidget * label)
 : TransformInteractiveMarkerWidget(params,
                                    requestId,
                                    server,

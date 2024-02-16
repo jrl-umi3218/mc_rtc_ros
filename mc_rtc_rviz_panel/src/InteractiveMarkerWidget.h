@@ -17,12 +17,12 @@ struct InteractiveMarkerWidget : public ClientWidget
 public:
   InteractiveMarkerWidget(const ClientWidgetParam & params,
                           const WidgetId & requestId,
-                          std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-                          const vm::InteractiveMarker & marker,
+                          std::shared_ptr<InteractiveMarkerServer> & server,
+                          const InteractiveMarker & marker,
                           ClientWidget * label);
 
 protected:
-  virtual void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) = 0;
+  virtual void handleRequest(const InteractiveMarkerFeedbackConstPtr & feedback) = 0;
 
 protected:
   WidgetId request_id_;

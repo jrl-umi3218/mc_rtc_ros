@@ -1,3 +1,5 @@
-opt/ros/@ROS_DISTRO@/lib/mc_rtc_ticker/*
-opt/ros/@ROS_DISTRO@/lib/pkgconfig/mc_rtc_ticker.pc
+#ROS1 opt/ros/@ROS_DISTRO@/lib/pkgconfig/mc_rtc_ticker.pc
+#ROS2 opt/ros/@ROS_DISTRO@/share/ament_index/resource_index/package_run_dependencies/mc_rtc_ticker
+#ROS2 opt/ros/@ROS_DISTRO@/share/ament_index/resource_index/packages/mc_rtc_ticker
+#ROS2 opt/ros/@ROS_DISTRO@/share/ament_index/resource_index/parent_prefix_path/mc_rtc_ticker
 opt/ros/@ROS_DISTRO@/share/mc_rtc_ticker/*

@@ -9,7 +9,7 @@
 namespace mc_rtc_rviz
 {
 
-PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params, visualization_msgs::MarkerArray & markers)
+PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params, MarkerArray & markers)
 : ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
@@ -24,8 +24,8 @@ PolygonMarkerWidget::PolygonMarkerWidget(const ClientWidgetParam & params, visua
 
 PolygonMarkerWidget::~PolygonMarkerWidget()
 {
-  visualization_msgs::Marker m;
-  m.action = visualization_msgs::Marker::DELETE;
+  Marker m;
+  m.action = Marker::DELETE;
   m.ns = id2name(id());
   for(size_t i = 0; i < currPolygonNum_; ++i)
   {
@@ -53,9 +53,9 @@ void PolygonMarkerWidget::update(const std::string & ns,
                                  const std::vector<Eigen::Vector3d> & points,
                                  const mc_rtc::gui::LineConfig & c)
 {
-  visualization_msgs::Marker m;
-  m.type = visualization_msgs::Marker::LINE_STRIP;
-  m.action = visualization_msgs::Marker::ADD;
+  Marker m;
+  m.type = Marker::LINE_STRIP;
+  m.action = Marker::ADD;
   m.pose.position.x = 0;
   m.pose.position.y = 0;
   m.pose.position.z = 0;
@@ -70,7 +70,7 @@ void PolygonMarkerWidget::update(const std::string & ns,
       mc_rtc::log::error("Could not display polygon {}: invalid value in coordinates ({})", ns, point.transpose());
       return;
     }
-    geometry_msgs::Point p;
+    Point p;
     p.x = point.x();
     p.y = point.y();
     p.z = point.z();
@@ -82,14 +82,14 @@ void PolygonMarkerWidget::update(const std::string & ns,
   m.color.g = static_cast<float>(c.color.g);
   m.color.b = static_cast<float>(c.color.b);
   m.color.a = static_cast<float>(c.color.a);
-  m.header.stamp = ros::Time::now();
+  m.header.stamp = now();
   m.header.frame_id = "robot_map";
   m.ns = ns;
   m.id = static_cast<int>(id);
   if(visible_ || was_visible_)
   {
     markers_.markers.push_back(m);
-    if(!visible_) { markers_.markers.back().action = visualization_msgs::Marker::DELETE; }
+    if(!visible_) { markers_.markers.back().action = Marker::DELETE; }
   }
   was_visible_ = visible_;
 }
@@ -98,8 +98,8 @@ void PolygonMarkerWidget::clear()
 {
   for(size_t i = currPolygonNum_; i < prevPolygonNum_; ++i)
   {
-    visualization_msgs::Marker m;
-    m.action = visualization_msgs::Marker::DELETE;
+    Marker m;
+    m.action = Marker::DELETE;
     m.ns = id2name(id());
     m.id = static_cast<int>(i);
     markers_.markers.push_back(m);

@@ -10,6 +10,12 @@
 #include <QVBoxLayout>
 #include <csignal>
 
+#ifdef MC_RTC_ROS_IS_ROS2
+#  include <rclcpp/rclcpp.hpp>
+#else
+#  include <ros/ros.h>
+#endif
+
 QApplication * app_ = nullptr;
 
 void signal_handler(int)
@@ -19,7 +25,11 @@ void signal_handler(int)
 
 int main(int argc, char * argv[])
 {
+#ifdef MC_RTC_ROS_IS_ROS2
+  rclcpp::init(argc, argv);
+#else
   ros::init(argc, argv, "mc_rtc_gui");
+#endif
   QApplication app(argc, argv);
   app.setWindowIcon(QIcon(":/icons/gui.ico"));
   app_ = &app;

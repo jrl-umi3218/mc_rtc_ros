@@ -570,13 +570,13 @@ public:
                          const DataT & default_,
                          bool default_from_user,
                          bool interactive,
-                         std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server);
+                         std::shared_ptr<InteractiveMarkerServer> int_server);
 
   void changed(bool required,
                const DataT & default_,
                bool default_from_user,
                bool interactive,
-               std::shared_ptr<interactive_markers::InteractiveMarkerServer> int_server);
+               std::shared_ptr<InteractiveMarkerServer> int_server);
 
   mc_rtc::Configuration serialize() const override;
 
@@ -590,9 +590,9 @@ protected:
   DataT data_;
   bool user_default_;
   bool interactive_;
-  std::shared_ptr<interactive_markers::InteractiveMarkerServer> server_;
+  std::shared_ptr<InteractiveMarkerServer> server_;
 
-  void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback);
+  void handleRequest(const InteractiveMarkerFeedbackConstPtr & feedback);
 
   static constexpr size_t n_edits = std::is_same_v<Eigen::Vector3d, DataT> ? 3 : (rotation_only ? 4 : 7);
   std::array<QLineEdit *, n_edits> edits_;

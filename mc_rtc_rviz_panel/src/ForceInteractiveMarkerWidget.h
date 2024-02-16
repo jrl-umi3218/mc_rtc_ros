@@ -12,7 +12,8 @@ struct ForceInteractiveMarkerWidget : public ArrowInteractiveMarkerWidget
 public:
   ForceInteractiveMarkerWidget(const ClientWidgetParam & params,
                                const WidgetId & requestId,
-                               std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
+                               std::shared_ptr<InteractiveMarkerServer> & server,
+                               MarkerArray & markers,
                                const sva::PTransformd & surface,
                                const sva::ForceVecd & force,
                                const mc_rtc::gui::ForceConfig & config,
@@ -22,7 +23,7 @@ public:
   void update(const sva::PTransformd & surface, const sva::ForceVecd & force, const mc_rtc::gui::ForceConfig & c);
 
 protected:
-  void handleEndRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;
+  void handleEndRequest(const InteractiveMarkerFeedbackConstPtr & feedback) override;
 
 protected:
   mc_rtc::gui::ForceConfig config_;

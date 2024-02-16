@@ -11,20 +11,20 @@ struct TransformInteractiveMarkerWidget : public InteractiveMarkerWidget
 public:
   TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
                                    const WidgetId & requestId,
-                                   std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
+                                   std::shared_ptr<InteractiveMarkerServer> & server,
                                    bool control_orientation,
                                    bool control_position,
                                    ClientWidget * label);
 
   TransformInteractiveMarkerWidget(const ClientWidgetParam & params,
                                    const WidgetId & requestId,
-                                   std::shared_ptr<interactive_markers::InteractiveMarkerServer> & server,
-                                   const vm::InteractiveMarker & marker,
+                                   std::shared_ptr<InteractiveMarkerServer> & server,
+                                   const InteractiveMarker & marker,
                                    bool control_orientation,
                                    bool control_position,
                                    ClientWidget * label);
 
-  void handleRequest(const visualization_msgs::InteractiveMarkerFeedbackConstPtr & feedback) override;
+  void handleRequest(const InteractiveMarkerFeedbackConstPtr & feedback) override;
 
   void update(const Eigen::Vector3d & t)
   {
