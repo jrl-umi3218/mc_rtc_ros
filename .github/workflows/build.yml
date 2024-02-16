@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04, ubuntu-20.04]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Install dependencies
@@ -29,12 +29,15 @@ jobs:
           apt-mirrors:
             mc-rtc:
               cloudsmith: mc-rtc/head
-          apt: libmc-rtc-dev qt5-default libqwt-qt5-dev
+          apt: libmc-rtc-dev libqwt-qt5-dev
         ros: |
           apt: mc-rtc-plugin
     - name: Build with catkin
       if: ${{ matrix.os == 'ubuntu-20.04' }}
       uses: jrl-umi3218/github-actions/build-catkin-project@master
+    - name: Build with colcon
+      if: ${{ matrix.os != 'ubuntu-20.04' }}
+      uses: jrl-umi3218/github-actions/build-colcon-project@master
     - name: Slack Notification
       if: failure()
       uses: archive/github-actions-slack@master
