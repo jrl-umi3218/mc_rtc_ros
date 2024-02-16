@@ -22,9 +22,7 @@ if(ROS_VERSION EQUAL 1)
   install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 elseif(ROS_VERSION EQUAL 2)
   find_package(ament_cmake REQUIRED)
-  ament_package()
 
-  install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
   install(
     FILES launch/display.2.launch
     DESTINATION share/${PROJECT_NAME}/launch/
@@ -33,6 +31,8 @@ elseif(ROS_VERSION EQUAL 2)
     FILES launch/display.2.rviz
     DESTINATION share/${PROJECT_NAME}/launch/
     RENAME display.rviz)
+
+  ament_package()
 else()
   message(FATAL_ERROR "ROS_VERSION ${ROS_VERSION} is not supported yet")
 endif()

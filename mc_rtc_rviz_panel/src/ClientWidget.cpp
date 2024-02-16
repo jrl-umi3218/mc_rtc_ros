@@ -12,7 +12,7 @@ namespace mc_rtc_rviz
 std::string id2name(const WidgetId & id)
 {
   std::string ret;
-  for(auto & c : id.category) { ret += c + "/"; }
+  for(const auto & c : id.category) { ret += c + "/"; }
   ret += id.name;
   return ret;
 }
@@ -40,6 +40,11 @@ bool ClientWidget::visible()
 void ClientWidget::visible(bool visibility)
 {
   static_cast<Panel &>(client_).visible(id_, visibility);
+}
+
+Time ClientWidget::now() const
+{
+  return dynamic_cast<const Panel &>(client_).now();
 }
 
 } // namespace mc_rtc_rviz

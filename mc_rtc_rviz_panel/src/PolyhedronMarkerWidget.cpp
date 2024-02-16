@@ -94,7 +94,7 @@ void PolyhedronMarkerWidget::update_triangles(const std::vector<std::array<Eigen
   triangles_.colors.clear();
   triangles_.type = Marker::TRIANGLE_LIST;
   triangles_.action = Marker::ADD;
-  triangles_.header.stamp = ros::Time::now();
+  triangles_.header.stamp = now();
   auto set_triangles = [&]()
   {
     for(const auto & triangle : triangles)
@@ -108,7 +108,7 @@ void PolyhedronMarkerWidget::update_triangles(const std::vector<std::array<Eigen
           clear();
           return;
         }
-        geometry_msgs::Point p;
+        Point p;
         p.x = point.x();
         p.y = point.y();
         p.z = point.z();
@@ -122,7 +122,7 @@ void PolyhedronMarkerWidget::update_triangles(const std::vector<std::array<Eigen
     {
       for(const auto & color : triangle_colors)
       {
-        std_msgs::ColorRGBA c;
+        ColorRGBA c;
         c.r = color.r;
         c.g = color.g;
         c.b = color.b;
@@ -157,7 +157,7 @@ void PolyhedronMarkerWidget::update_edges(const std::vector<std::array<Eigen::Ve
   edges_.colors.clear();
   edges_.type = Marker::LINE_STRIP;
   edges_.action = Marker::ADD;
-  edges_.header.stamp = ros::Time::now();
+  edges_.header.stamp = now();
   edges_.points = triangles_.points;
 
   if(!config_.fixed_edge_color) { edges_.colors = triangles_.colors; }
@@ -186,7 +186,7 @@ void PolyhedronMarkerWidget::update_vertices(const std::vector<std::array<Eigen:
   vertices_.colors.clear();
   vertices_.type = Marker::SPHERE_LIST;
   vertices_.action = Marker::ADD;
-  vertices_.header.stamp = ros::Time::now();
+  vertices_.header.stamp = now();
   vertices_.id = 0;
   vertices_.points = triangles_.points;
 

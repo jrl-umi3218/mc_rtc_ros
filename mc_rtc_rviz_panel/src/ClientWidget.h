@@ -8,10 +8,22 @@
 
 #include <mc_control/ControllerClient.h>
 
+#ifdef MC_RTC_ROS_IS_ROS2
+#  include <rclcpp/time.hpp>
+#else
+#  include <ros/time.h>
+#endif
+
 namespace mc_rtc_rviz
 {
 
 using WidgetId = mc_control::ElementId;
+
+#ifdef MC_RTC_ROS_IS_ROS2
+using Time = rclcpp::Time;
+#else
+using Time = ros::Time;
+#endif
 
 struct ClientWidgetParam
 {
@@ -74,6 +86,9 @@ public:
 
   /** To be implemented in container, return a widget by its name or a nullptr if the widget does not exist */
   virtual ClientWidget * widget(const std::string &) { return nullptr; }
+
+  /** Get the current ROS time */
+  Time now() const;
 
 protected:
   mc_control::ControllerClient & client() { return client_; }

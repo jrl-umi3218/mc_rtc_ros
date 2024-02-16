@@ -13,6 +13,7 @@ public:
   ForceInteractiveMarkerWidget(const ClientWidgetParam & params,
                                const WidgetId & requestId,
                                std::shared_ptr<InteractiveMarkerServer> & server,
+                               MarkerArray & markers,
                                const sva::PTransformd & surface,
                                const sva::ForceVecd & force,
                                const mc_rtc::gui::ForceConfig & config,

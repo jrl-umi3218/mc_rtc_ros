@@ -80,11 +80,8 @@ std::vector<Marker> makeAxisMarker(double scale)
   return ret;
 }
 
-std::vector<Marker> makeArrowMarker(const Eigen::Vector3d & start,
-                                    const Eigen::Vector3d & end,
-                                    const mc_rtc::gui::ArrowConfig & c)
+Marker makeArrowMarker(const Eigen::Vector3d & start, const Eigen::Vector3d & end, const mc_rtc::gui::ArrowConfig & c)
 {
-  std::vector<Marker> markers;
   Marker m;
   m.type = Marker::ARROW;
   m.action = Marker::ADD;
@@ -97,8 +94,7 @@ std::vector<Marker> makeArrowMarker(const Eigen::Vector3d & start,
   m.color.r = static_cast<float>(c.color.r);
   m.color.g = static_cast<float>(c.color.g);
   m.color.b = static_cast<float>(c.color.b);
-  markers.push_back(m);
-  return markers;
+  return m;
 }
 
 InteractiveMarkerControl & makeVisualControl(const std::vector<Marker> & visual_makers, InteractiveMarker & marker)

@@ -70,7 +70,7 @@ void PolygonMarkerWidget::update(const std::string & ns,
       mc_rtc::log::error("Could not display polygon {}: invalid value in coordinates ({})", ns, point.transpose());
       return;
     }
-    geometry_msgs::Point p;
+    Point p;
     p.x = point.x();
     p.y = point.y();
     p.z = point.z();
@@ -82,7 +82,7 @@ void PolygonMarkerWidget::update(const std::string & ns,
   m.color.g = static_cast<float>(c.color.g);
   m.color.b = static_cast<float>(c.color.b);
   m.color.a = static_cast<float>(c.color.a);
-  m.header.stamp = ros::Time::now();
+  m.header.stamp = now();
   m.header.frame_id = "robot_map";
   m.ns = ns;
   m.id = static_cast<int>(id);

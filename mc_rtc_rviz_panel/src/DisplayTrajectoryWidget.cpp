@@ -41,7 +41,7 @@ void DisplayTrajectoryWidget::update(const std::vector<Eigen::Vector3d> & points
                          p.transpose());
       return;
     }
-    geometry_msgs::Point pose;
+    Point pose;
     pose.x = p.x();
     pose.y = p.y();
     pose.z = p.z();
@@ -64,7 +64,7 @@ void DisplayTrajectoryWidget::update(const std::vector<sva::PTransformd> & point
                          p.transpose());
       return;
     }
-    geometry_msgs::Point pose;
+    Point pose;
     pose.x = p.x();
     pose.y = p.y();
     pose.z = p.z();
@@ -82,7 +82,7 @@ void DisplayTrajectoryWidget::update(const Eigen::Vector3d & point, const mc_rtc
                        point.transpose());
     return;
   }
-  geometry_msgs::Point pose;
+  Point pose;
   pose.x = point.x();
   pose.y = point.y();
   pose.z = point.z();
@@ -101,7 +101,7 @@ void DisplayTrajectoryWidget::update(const sva::PTransformd & point, const mc_rt
     return;
   }
   configure(config);
-  geometry_msgs::Point pose;
+  Point pose;
   pose.x = p.x();
   pose.y = p.y();
   pose.z = p.z();
@@ -114,7 +114,7 @@ void DisplayTrajectoryWidget::configure(const mc_rtc::gui::LineConfig & config)
 {
   path_.type = config.style == mc_rtc::gui::LineStyle::Dotted ? Marker::POINTS : Marker::LINE_STRIP;
   path_.header.frame_id = "robot_map";
-  path_.header.stamp = ros::Time::now();
+  path_.header.stamp = now();
   path_.pose.orientation.w = 1.0;
   path_.pose.orientation.x = 0.0;
   path_.pose.orientation.y = 0.0;

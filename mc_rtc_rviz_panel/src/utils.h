@@ -10,11 +10,13 @@
 #include <SpaceVecAlg/SpaceVecAlg>
 
 #ifdef MC_RTC_ROS_IS_ROS2
+#  include <std_msgs/msg/color_rgba.hpp>
 #  include <visualization_msgs/msg/interactive_marker.hpp>
 #  include <visualization_msgs/msg/interactive_marker_control.hpp>
 #  include <visualization_msgs/msg/marker_array.hpp>
 #  include <interactive_markers/interactive_marker_server.hpp>
 #else
+#  include <std_msgs/ColorRGBA.h>
 #  include <visualization_msgs/InteractiveMarker.h>
 #  include <visualization_msgs/InteractiveMarkerControl.h>
 #  include <visualization_msgs/MarkerArray.h>
@@ -25,22 +27,24 @@ namespace mc_rtc_rviz
 {
 
 #ifdef MC_RTC_ROS_IS_ROS2
-using Marker = visualization_msgs::msg::Marker;
-using MarkerArray = visualization_msgs::msg::MarkerArray;
-using Point = geometry_msgs::msg::Point;
+using ColorRGBA = std_msgs::msg::ColorRGBA;
 using InteractiveMarker = visualization_msgs::msg::InteractiveMarker;
 using InteractiveMarkerServer = interactive_markers::InteractiveMarkerServer;
 using InteractiveMarkerControl = visualization_msgs::msg::InteractiveMarkerControl;
 using InteractiveMarkerFeedbackConstPtr = visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr;
+using Marker = visualization_msgs::msg::Marker;
+using MarkerArray = visualization_msgs::msg::MarkerArray;
+using Point = geometry_msgs::msg::Point;
 using Pose = geometry_msgs::msg::Pose;
 #else
-using Marker = visualization_msgs::Marker;
-using MarkerArray = visualization_msgs::MarkerArray;
-using Point = geometry_msgs::Point;
+using ColorRGBA = std_msgs::ColorRGBA;
 using InteractiveMarker = visualization_msgs::InteractiveMarker;
 using InteractiveMarkerServer = interactive_markers::InteractiveMarkerServer;
 using InteractiveMarkerControl = visualization_msgs::InteractiveMarkerControl;
 using InteractiveMarkerFeedbackConstPtr = visualization_msgs::InteractiveMarkerFeedbackConstPtr;
+using Marker = visualization_msgs::Marker;
+using MarkerArray = visualization_msgs::MarkerArray;
+using Point = geometry_msgs::Point;
 using Pose = geometry_msgs::Pose;
 #endif
 
@@ -79,9 +83,7 @@ InteractiveMarker make3DMarker(const std::string & name,
                                bool move_y = true,
                                bool move_z = true);
 InteractiveMarker makeXYThetaMarker(const std::string & name, bool readonly = false);
-std::vector<Marker> makeArrowMarker(const Eigen::Vector3d & start,
-                                    const Eigen::Vector3d & end,
-                                    const mc_rtc::gui::ArrowConfig & c);
+Marker makeArrowMarker(const Eigen::Vector3d & start, const Eigen::Vector3d & end, const mc_rtc::gui::ArrowConfig & c);
 
 struct SharedMarker
 {

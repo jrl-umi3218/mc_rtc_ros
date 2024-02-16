@@ -34,6 +34,9 @@ public:
 
   using CategoryWidget::connect;
 
+  /** Returns the current ROS time */
+  Time now() const;
+
   /** Returns true if the provided widget should be visible
    *
    * If the widget has never been seen, returns true

@@ -56,10 +56,12 @@ elseif(ROS_VERSION EQUAL 2)
   add_ros2_dependency(rviz_common rviz_common)
 
   pluginlib_export_plugin_description_file(rviz_common plugin/rviz_plugin.xml)
-
-  ament_package()
 else()
   message(FATAL_ERROR "ROS_VERSION ${ROS_VERSION} is not supported yet")
 endif()
 
 add_subdirectory(src)
+
+if(ROS_VERSION EQUAL 2)
+  ament_package()
+endif()

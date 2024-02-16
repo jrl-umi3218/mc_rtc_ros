@@ -14,6 +14,7 @@ public:
   ArrowInteractiveMarkerWidget(const ClientWidgetParam & params,
                                const WidgetId & requestId,
                                std::shared_ptr<InteractiveMarkerServer> & server,
+                               MarkerArray & markers,
                                const Eigen::Vector3d & start,
                                const Eigen::Vector3d & end,
                                const mc_rtc::gui::ArrowConfig & config,
@@ -29,10 +30,11 @@ protected:
 
 protected:
   WidgetId request_id_;
+  MarkerArray & markers_;
   Eigen::Vector6d arrow_points_;
   SharedMarker start_marker_;
   SharedMarker end_marker_;
-  SharedMarker arrow_marker_;
+  Marker arrow_marker_;
   QPushButton * button_;
 
 private slots:

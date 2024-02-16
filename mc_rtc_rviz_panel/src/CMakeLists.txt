@@ -128,13 +128,15 @@ endif()
 target_compile_options(_gui_objects PRIVATE -fPIC)
 target_link_libraries(_gui_objects PUBLIC Qwt::Qwt mc_rtc::mc_control_client
                                           mc_rtc::mc_rtc_ros)
-
-add_library(${PROJECT_NAME} Panel.cpp ${HEADER_FILES} ${MOC_HEADERS})
 if(ROS_VERSION EQUAL 1)
-  add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${catkin_LIBRARIES})
+  add_dependencies(_gui_objects ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(_gui_objects PUBLIC ${catkin_LIBRARIES})
 elseif(ROS_VERSION EQUAL 2)
-  target_link_libraries(${PROJECT_NAME} PUBLIC ROSDependencies)
+  target_link_libraries(_gui_objects PUBLIC ROSDependencies)
+endif()
+
+add_library(${PROJECT_NAME} SHARED Panel.cpp ${HEADER_FILES} ${MOC_HEADERS})
+if(ROS_VERSION EQUAL 2)
   target_compile_definitions(
     ${PROJECT_NAME} PRIVATE RVIZ_DEFAULT_PLUGINS_BUILDING_LIBRARY
                             MC_RTC_RVIZ_PANEL_IS_ROS2)

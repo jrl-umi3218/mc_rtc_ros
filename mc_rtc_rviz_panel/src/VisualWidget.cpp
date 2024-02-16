@@ -16,7 +16,9 @@ VisualWidget::VisualWidget(const ClientWidgetParam & params, MarkerArray & marke
   connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
   marker_.ns = id2name(id());
   marker_.header.frame_id = "robot_map";
+#ifndef MC_RTC_ROS_IS_ROS2
   marker_.header.seq = 0;
+#endif
 }
 
 VisualWidget::~VisualWidget()
@@ -29,14 +31,17 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
 {
   {
     // Marker general settings
+#ifndef MC_RTC_ROS_IS_ROS2
+    marker_.header.seq = 0;
     marker_.header.seq++;
-    marker_.header.stamp = ros::Time::now();
+#endif
+    marker_.header.stamp = now();
     marker_.action = Marker::ADD;
   }
   {
     // Convert the position
     auto X_0_marker = visual.origin * pose;
-    geometry_msgs::Pose p;
+    Pose p;
     Eigen::Quaterniond q{X_0_marker.rotation().transpose()};
     p.orientation.w = q.w();
     p.orientation.x = q.x();
