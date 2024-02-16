@@ -4,7 +4,8 @@ Architecture: any
 Section: science
 Depends: ${mic:Depends},
          ${shlibs:Depends},
-         ros-@ROS_DISTRO@-rviz
+#ROS1         ros-@ROS_DISTRO@-rviz
+#ROS2         ros-@ROS_DISTRO@-rviz2
 Description: mc-rtc - RViZ panel
  RViZ plugin implementing mc_rtc GUI
 
@@ -15,15 +16,6 @@ Depends: ${misc:Depends},
          ${shlibs:Depends}
 Description: mc-rtc - ROS ticker
  mc_rtc interface implementation using ROS for kinematic simulations
-
-Package: ros-@ROS_DISTRO@-mc-surfaces-visualization
-Architecture: any
-Section: science
-Depends: ${misc:Depends},
-         ${shlibs:Depends},
-         ros-@ROS_DISTRO@-rviz
-Description: mc-rtc - Surfaces visualization
- RViZ based tools to visualize surfaces
 
 Package: ros-@ROS_DISTRO@-mc-rtc-tools
 Architecture: any
