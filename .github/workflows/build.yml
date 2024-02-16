@@ -32,6 +32,12 @@ jobs:
           apt: libmc-rtc-dev libqwt-qt5-dev
         ros: |
           apt: mc-rtc-plugin
+    - name: Install Qt5
+      if: ${{ matrix.os == 'ubuntu-20.04' }}
+      uses: jrl-umi3218/github-actions/install-dependencies@master
+      with:
+        ubuntu: |
+          apt: qt5-default
     - name: Build with catkin
       if: ${{ matrix.os == 'ubuntu-20.04' }}
       uses: jrl-umi3218/github-actions/build-catkin-project@master
