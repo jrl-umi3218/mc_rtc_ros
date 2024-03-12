@@ -557,8 +557,7 @@ void DataComboInput::update_values()
   auto dataIn = data_;
   for(const auto & k : resolved_ref_) { dataIn = dataIn(k, mc_rtc::Configuration{}); }
   auto values = dataIn.size() ? dataIn : std::vector<std::string>{};
-  std::sort(values.begin(), values.end(),
-            [](const std::string & lhs, const std::string & rhs)
+  std::sort(values.begin(), values.end(), [](const std::string & lhs, const std::string & rhs)
             { return QString::compare(lhs.c_str(), rhs.c_str(), Qt::CaseInsensitive) < 0; });
   if(values_ != values)
   {

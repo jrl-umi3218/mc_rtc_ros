@@ -10,11 +10,11 @@ TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(const ClientW
                                                                    bool control_position,
                                                                    ClientWidget * label)
 : InteractiveMarkerWidget(
-    params,
-    requestId,
-    server,
-    make6DMarker(id2name(params.id), makeAxisMarker(0.15 * 0.9), control_position, control_orientation),
-    label),
+      params,
+      requestId,
+      server,
+      make6DMarker(id2name(params.id), makeAxisMarker(0.15 * 0.9), control_position, control_orientation),
+      label),
   control_orientation_(control_orientation), control_position_(control_position)
 {
 }
