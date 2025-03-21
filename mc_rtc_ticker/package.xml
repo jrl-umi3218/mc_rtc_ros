@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <package>
   <name>mc_rtc_ticker</name>
-  <version>1.5.0</version>
+  <version>1.6.0</version>
   <description>The mc_rtc_ticker package</description>
 
+  <maintainer email="arn.tanguy@gmail.com">Arnaud Tanguy</maintainer>
   <maintainer email="pierre.gergondet@gmail.com">Pierre Gergondet</maintainer>
 
   <license>BSD</license>

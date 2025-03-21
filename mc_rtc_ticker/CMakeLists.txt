@@ -8,7 +8,7 @@ set(PROJECT_NAME mc_rtc_ticker)
 project(
   ${PROJECT_NAME}
   LANGUAGES CXX
-  VERSION 1.5.0)
+  VERSION 1.6.0)
 
 if(NOT DEFINED ENV{ROS_VERSION})
   message(FATAL_ERROR "Expected to find ROS_VERSION in the environment")
