@@ -7,10 +7,7 @@
 namespace mc_rtc_rviz
 {
 
-RobotModelDisplay::RobotModelDisplay(const ClientWidgetParam & param,
-                                     rviz_common::DisplayContext * display_context,
-                                     rviz_common::DisplayGroup * display_group)
-: ClientWidget(param)
+RobotModelDisplay::RobotModelDisplay(const ClientWidgetParam & param, DisplayContext *display_context, DisplayGroup *display_group) : ClientWidget(param)
 {
   layout_ = new QHBoxLayout(this);
   if(!secret()) { layout_->addWidget(new QLabel(name().c_str(), this)); }
@@ -27,7 +24,7 @@ RobotModelDisplay::RobotModelDisplay(const ClientWidgetParam & param,
     return;
   }
 
-  robot_model_display = displayGroup()->createDisplay("rviz_default_plugins/RobotModel");
+  robot_model_display = displayGroup()->createDisplay(display_class_id.c_str());
 
   robot_model_display->initialize(displayContext());
   displayGroup()->addChild(robot_model_display);

@@ -14,6 +14,8 @@
 #  include <rviz_common/display_group.hpp>
 #else
 #  include <ros/time.h>
+#  include <rviz/display_context.h>
+#  include <rviz/display_group.h>
 #endif
 
 namespace mc_rtc_rviz
@@ -23,8 +25,12 @@ using WidgetId = mc_control::ElementId;
 
 #ifdef MC_RTC_ROS_IS_ROS2
 using Time = rclcpp::Time;
+using DisplayGroup = rviz_common::DisplayGroup;
+using DisplayContext = rviz_common::DisplayContext;
 #else
 using Time = ros::Time;
+using DisplayGroup = rviz::DisplayGroup;
+using DisplayContext = rviz::DisplayContext;
 #endif
 
 struct ClientWidgetParam
@@ -91,19 +97,19 @@ public:
 
   /** Get the current ROS time */
   Time now() const;
-
-  inline void setDisplayContext(rviz_common::DisplayContext * display_context) { display_context_ = display_context; }
-  inline void setDisplayGroup(rviz_common::DisplayGroup * display_group) { root_display_group_ = display_group; };
+  
+  inline void setDisplayContext(DisplayContext *display_context){display_context_ = display_context;}
+  inline void setDisplayGroup(DisplayGroup *display_group) {root_display_group_ = display_group;};
 
 protected:
   mc_control::ControllerClient & client() { return client_; }
-  rviz_common::DisplayGroup * displayGroup() { return root_display_group_; }
-  rviz_common::DisplayContext * displayContext() { return display_context_; }
+  DisplayGroup *displayGroup() { return root_display_group_; }
+  DisplayContext *displayContext() { return display_context_; }
 
 private:
   mc_control::ControllerClient & client_;
-  rviz_common::DisplayGroup * root_display_group_ = nullptr;
-  rviz_common::DisplayContext * display_context_ = nullptr;
+  DisplayGroup * root_display_group_ = nullptr;
+  DisplayContext * display_context_ = nullptr;
   WidgetId id_;
   bool seen_ = true;
 };
