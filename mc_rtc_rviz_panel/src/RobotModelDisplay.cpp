@@ -3,8 +3,6 @@
  */
 
 #include "RobotModelDisplay.h"
-#include <rviz_common/display_context.hpp>
-#include <rviz_common/display_group.hpp>
 
 namespace mc_rtc_rviz
 {
