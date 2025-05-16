@@ -29,7 +29,8 @@ set(MOC_HEADERS
     DisplayTrajectoryWidget.h
     PolygonMarkerWidget.h
     PolyhedronMarkerWidget.h
-    plugin.h)
+    plugin.h
+    RobotModelDisplay.h)
 
 if(NOT DEFINED ENV{ROS_DISTRO})
   set(ROS_DISTRO "none")
@@ -103,6 +104,7 @@ set(SOURCE_FILES
     PolyhedronMarkerWidget.cpp
     utils.cpp
     plugin.cpp
+    RobotModelDisplay.cpp
     ${MOC_FILES}
     ${QRC_FILES})
 
