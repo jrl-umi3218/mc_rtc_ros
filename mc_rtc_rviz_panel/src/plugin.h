@@ -23,7 +23,6 @@ public:
 
   void onInitialize() override;
 
-
 #ifdef MC_RTC_ROS_IS_ROS2
   virtual ~MyPanel();
 #else
