@@ -18,7 +18,17 @@ MyPanel::MyPanel(QWidget * parent) : PanelBase(parent)
 void MyPanel::onInitialize()
 {
   PanelBase::onInitialize();
+#ifdef MC_RTC_ROS_IS_ROS2
   DisplayContext * ctx = getDisplayContext();
+#else
+  auto* viz = vis_manager_;
+  if (!viz)
+  {
+    ROS_WARN("VisualizationManager not available in onInitialize()");
+    return;
+  }
+  DisplayContext * ctx = viz->getDisplayContext();
+#endif
   if(!ctx)
   {
     qWarning("DisplayContext not available in onInitialize()");
