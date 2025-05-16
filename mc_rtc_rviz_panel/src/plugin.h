@@ -4,6 +4,8 @@
 
 #ifdef MC_RTC_ROS_IS_ROS2
 #  include <rviz_common/panel.hpp>
+#  include <rviz_common/display_context.hpp>
+#  include <rviz_common/display_group.hpp>
 using PanelBase = rviz_common::Panel;
 #else
 #  include <rviz/panel.h>
@@ -23,6 +25,7 @@ public:
 
 #ifdef MC_RTC_ROS_IS_ROS2
   virtual ~MyPanel();
+  void onInitialize() override;
 #else
   virtual ~MyPanel() override;
 #endif

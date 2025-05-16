@@ -15,6 +15,20 @@ MyPanel::MyPanel(QWidget * parent) : PanelBase(parent)
   setLayout(layout);
 }
 
+void MyPanel::onInitialize()
+{
+  rviz_common::Panel::onInitialize(); 
+  rviz_common::DisplayContext* ctx = getDisplayContext();
+  if (!ctx)
+  {
+    qWarning("DisplayContext not available in onInitialize()");
+    return;
+  }
+
+  panel->setDisplayContext(ctx);
+  panel->setDisplayGroup(ctx->getRootDisplayGroup());
+}
+
 MyPanel::~MyPanel() {}
 
 } // namespace mc_rtc_rviz
