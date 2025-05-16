@@ -17,9 +17,9 @@ MyPanel::MyPanel(QWidget * parent) : PanelBase(parent)
 
 void MyPanel::onInitialize()
 {
-  PanelBase::onInitialize(); 
-  DisplayContext* ctx = getDisplayContext();
-  if (!ctx)
+  PanelBase::onInitialize();
+  DisplayContext * ctx = getDisplayContext();
+  if(!ctx)
   {
     qWarning("DisplayContext not available in onInitialize()");
     return;

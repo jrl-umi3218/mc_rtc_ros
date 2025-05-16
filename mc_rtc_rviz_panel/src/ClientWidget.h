@@ -97,14 +97,14 @@ public:
 
   /** Get the current ROS time */
   Time now() const;
-  
-  inline void setDisplayContext(DisplayContext *display_context){display_context_ = display_context;}
-  inline void setDisplayGroup(DisplayGroup *display_group) {root_display_group_ = display_group;};
+
+  inline void setDisplayContext(DisplayContext * display_context) { display_context_ = display_context; }
+  inline void setDisplayGroup(DisplayGroup * display_group) { root_display_group_ = display_group; };
 
 protected:
   mc_control::ControllerClient & client() { return client_; }
-  DisplayGroup *displayGroup() { return root_display_group_; }
-  DisplayContext *displayContext() { return display_context_; }
+  DisplayGroup * displayGroup() { return root_display_group_; }
+  DisplayContext * displayContext() { return display_context_; }
 
 private:
   mc_control::ControllerClient & client_;

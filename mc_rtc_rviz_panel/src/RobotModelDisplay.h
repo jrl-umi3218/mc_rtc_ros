@@ -19,13 +19,13 @@ namespace mc_rtc_rviz
 /** Handle label and display mangement of Robot */
 struct RobotModelDisplay : public ClientWidget
 {
-  RobotModelDisplay(const ClientWidgetParam & param, DisplayContext *display_context, DisplayGroup *display_group);
+  RobotModelDisplay(const ClientWidgetParam & param, DisplayContext * display_context, DisplayGroup * display_group);
 
   void update(const std::vector<std::string> & in);
 
 protected:
   QHBoxLayout * layout_;
   QLabel * label_;
-  Display* robot_model_display = nullptr;
+  Display * robot_model_display = nullptr;
 };
 } // namespace mc_rtc_rviz
