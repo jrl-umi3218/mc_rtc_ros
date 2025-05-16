@@ -7,7 +7,10 @@
 namespace mc_rtc_rviz
 {
 
-RobotModelDisplay::RobotModelDisplay(const ClientWidgetParam & param, rviz_common::DisplayContext *display_context, rviz_common::DisplayGroup *display_group) : ClientWidget(param)
+RobotModelDisplay::RobotModelDisplay(const ClientWidgetParam & param,
+                                     rviz_common::DisplayContext * display_context,
+                                     rviz_common::DisplayGroup * display_group)
+: ClientWidget(param)
 {
   layout_ = new QHBoxLayout(this);
   if(!secret()) { layout_->addWidget(new QLabel(name().c_str(), this)); }
@@ -18,7 +21,7 @@ RobotModelDisplay::RobotModelDisplay(const ClientWidgetParam & param, rviz_commo
   setDisplayContext(display_context);
   setDisplayGroup(display_group);
 
-  if (!displayGroup() || !displayContext())
+  if(!displayGroup() || !displayContext())
   {
     qWarning("Display group or context not set before init");
     return;
@@ -30,7 +33,6 @@ RobotModelDisplay::RobotModelDisplay(const ClientWidgetParam & param, rviz_commo
   displayGroup()->addChild(robot_model_display);
   robot_model_display->setEnabled(true);
 }
-
 
 void RobotModelDisplay::update(const std::vector<std::string> & in)
 {

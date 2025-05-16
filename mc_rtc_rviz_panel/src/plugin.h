@@ -3,9 +3,9 @@
  */
 
 #ifdef MC_RTC_ROS_IS_ROS2
-#  include <rviz_common/panel.hpp>
 #  include <rviz_common/display_context.hpp>
 #  include <rviz_common/display_group.hpp>
+#  include <rviz_common/panel.hpp>
 using PanelBase = rviz_common::Panel;
 #else
 #  include <rviz/panel.h>

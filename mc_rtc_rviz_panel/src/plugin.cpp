@@ -17,9 +17,9 @@ MyPanel::MyPanel(QWidget * parent) : PanelBase(parent)
 
 void MyPanel::onInitialize()
 {
-  rviz_common::Panel::onInitialize(); 
-  rviz_common::DisplayContext* ctx = getDisplayContext();
-  if (!ctx)
+  rviz_common::Panel::onInitialize();
+  rviz_common::DisplayContext * ctx = getDisplayContext();
+  if(!ctx)
   {
     qWarning("DisplayContext not available in onInitialize()");
     return;

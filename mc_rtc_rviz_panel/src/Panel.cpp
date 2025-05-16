@@ -23,12 +23,12 @@
 #include "Point3DInteractiveMarkerWidget.h"
 #include "PolygonMarkerWidget.h"
 #include "PolyhedronMarkerWidget.h"
+#include "RobotModelDisplay.h"
 #include "SchemaWidget.h"
 #include "TableWidget.h"
 #include "TransformInteractiveMarkerWidget.h"
 #include "VisualWidget.h"
 #include "XYThetaInteractiveMarkerWidget.h"
-#include "RobotModelDisplay.h"
 
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
