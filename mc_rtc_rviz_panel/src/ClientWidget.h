@@ -10,6 +10,8 @@
 
 #ifdef MC_RTC_ROS_IS_ROS2
 #  include <rclcpp/time.hpp>
+#  include <rviz_common/display_group.hpp>
+#  include <rviz_common/display_context.hpp>
 #else
 #  include <ros/time.h>
 #endif
@@ -89,12 +91,19 @@ public:
 
   /** Get the current ROS time */
   Time now() const;
+  
+  inline void setDisplayContext(rviz_common::DisplayContext *display_context){display_context_ = display_context;}
+  inline void setDisplayGroup(rviz_common::DisplayGroup *display_group) {root_display_group_ = display_group;};
 
 protected:
   mc_control::ControllerClient & client() { return client_; }
+  rviz_common::DisplayGroup *displayGroup() { return root_display_group_; }
+  rviz_common::DisplayContext *displayContext() { return display_context_; }
 
 private:
   mc_control::ControllerClient & client_;
+  rviz_common::DisplayGroup * root_display_group_ = nullptr;
+  rviz_common::DisplayContext * display_context_ = nullptr;
   WidgetId id_;
   bool seen_ = true;
 };
