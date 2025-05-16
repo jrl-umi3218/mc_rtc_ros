@@ -21,9 +21,11 @@ class MyPanel : public PanelBase
 public:
   MyPanel(QWidget * parent = 0);
 
+  void onInitialize() override;
+
+
 #ifdef MC_RTC_ROS_IS_ROS2
   virtual ~MyPanel();
-  void onInitialize() override;
 #else
   virtual ~MyPanel() override;
 #endif
