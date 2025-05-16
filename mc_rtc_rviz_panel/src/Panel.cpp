@@ -28,6 +28,7 @@
 #include "TransformInteractiveMarkerWidget.h"
 #include "VisualWidget.h"
 #include "XYThetaInteractiveMarkerWidget.h"
+#include "RobotModelDisplay.h"
 
 #include <boost/filesystem.hpp>
 namespace bfs = boost::filesystem;
@@ -888,14 +889,8 @@ void Panel::got_robot(const WidgetId & id,
                       const std::vector<std::vector<double>> & /*q*/,
                       const sva::PTransformd & /*posW*/)
 {
-  std::string params = "[ ";
-  for(size_t i = 0; i < parameters.size(); ++i)
-  {
-    params += parameters[i];
-    if(i != parameters.size() - 1) { params += ", "; }
-  }
-  params += "]";
-  got_label(id, params);
+  auto & w = get_widget<RobotModelDisplay>(id, displayContext(), displayGroup());
+  w.update(parameters);
 }
 
 void Panel::got_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose)
