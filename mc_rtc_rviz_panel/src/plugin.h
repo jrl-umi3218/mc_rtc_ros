@@ -7,6 +7,7 @@
 using PanelBase = rviz_common::Panel;
 #else
 #  include <rviz/panel.h>
+#  include <rviz/visualization_manager.h>
 using PanelBase = rviz::Panel;
 #endif
 
