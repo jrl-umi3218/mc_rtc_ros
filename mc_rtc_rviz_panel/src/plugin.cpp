@@ -27,7 +27,7 @@ void MyPanel::onInitialize()
     ROS_WARN("VisualizationManager not available in onInitialize()");
     return;
   }
-  DisplayContext * ctx = viz->getDisplayContext();
+  DisplayContext * ctx = viz->getViewManager()->getRenderPanel()->getManager();
 #endif
   if(!ctx)
   {
