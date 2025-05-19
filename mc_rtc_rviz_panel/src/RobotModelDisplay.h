@@ -20,7 +20,7 @@ namespace mc_rtc_rviz
 struct RobotModelDisplay : public ClientWidget
 {
   RobotModelDisplay(const ClientWidgetParam & param, DisplayContext * display_context, DisplayGroup * display_group);
-
+  ~RobotModelDisplay();
   void update(const std::vector<std::string> & in);
 
 protected:

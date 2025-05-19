@@ -34,6 +34,12 @@ RobotModelDisplay::RobotModelDisplay(const ClientWidgetParam & param,
   robot_model_display->setEnabled(true);
 }
 
+RobotModelDisplay::~RobotModelDisplay(){
+  displayGroup()->takeDisplay(robot_model_display);
+  displayGroup()->reset();
+  delete robot_model_display;
+}
+
 void RobotModelDisplay::update(const std::vector<std::string> & in)
 {
   std::string params = "[ " + in[0] + "]";
