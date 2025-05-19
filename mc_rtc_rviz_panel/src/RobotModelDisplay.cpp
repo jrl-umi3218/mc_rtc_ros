@@ -47,8 +47,12 @@ void RobotModelDisplay::update(const std::vector<std::string> & in)
   label_->setText(params.c_str());
 
   robot_model_display->setName(in[0].c_str());
-  robot_model_display->subProp("Description Topic")->setValue(("/" + in[1] + "/robot_description").c_str());
-  robot_model_display->subProp("TF Prefix")->setValue(in[1].c_str());
+
+  if(in.size() >= 2)
+  {
+    robot_model_display->subProp(description_prop.c_str())->setValue(("/" + in[1] + "/robot_description").c_str());
+    robot_model_display->subProp("TF Prefix")->setValue(in[1].c_str());
+  }
 }
 
 } // namespace mc_rtc_rviz

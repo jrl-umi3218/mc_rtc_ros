@@ -21,13 +21,12 @@ void MyPanel::onInitialize()
 #ifdef MC_RTC_ROS_IS_ROS2
   DisplayContext * ctx = getDisplayContext();
 #else
-  auto * viz = vis_manager_;
-  if(!viz)
+  if(!vis_manager_)
   {
     ROS_WARN("VisualizationManager not available in onInitialize()");
     return;
   }
-  DisplayContext * ctx = viz->getViewManager()->getRenderPanel()->getManager();
+  DisplayContext * ctx = vis_manager_->getViewManager()->getRenderPanel()->getManager();
 #endif
   if(!ctx)
   {

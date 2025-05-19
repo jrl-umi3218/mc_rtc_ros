@@ -8,6 +8,8 @@ using PanelBase = rviz_common::Panel;
 #else
 #  include <rviz/panel.h>
 #  include <rviz/visualization_manager.h>
+#  include <rviz/view_manager.h>
+#  include <rviz/render_panel.h>
 using PanelBase = rviz::Panel;
 #endif
 
