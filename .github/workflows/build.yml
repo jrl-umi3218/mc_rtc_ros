@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04]
+        os: [ubuntu-22.04]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Install dependencies
@@ -32,17 +32,7 @@ jobs:
           apt: libmc-rtc-dev libqwt-qt5-dev
         ros: |
           apt: mc-rtc-plugin
-    - name: Install Qt5
-      if: ${{ matrix.os == 'ubuntu-20.04' }}
-      uses: jrl-umi3218/github-actions/install-dependencies@master
-      with:
-        ubuntu: |
-          apt: qt5-default
-    - name: Build with catkin
-      if: ${{ matrix.os == 'ubuntu-20.04' }}
-      uses: jrl-umi3218/github-actions/build-catkin-project@master
     - name: Build with colcon
-      if: ${{ matrix.os != 'ubuntu-20.04' }}
       uses: jrl-umi3218/github-actions/build-colcon-project@master
     - name: Slack Notification
       if: failure()
