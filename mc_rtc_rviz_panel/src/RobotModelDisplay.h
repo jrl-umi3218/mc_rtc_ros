@@ -9,7 +9,7 @@
 #ifdef MC_RTC_ROS_IS_ROS2
 using Display = rviz_common::Display;
 const std::string display_class_id = "rviz_default_plugins/RobotModel";
-const std::string description_prop = "Description Topic"
+const std::string description_prop = "Description Topic";
 #else
 using Display = rviz::Display;
 const std::string display_class_id = "rviz/RobotModel";
