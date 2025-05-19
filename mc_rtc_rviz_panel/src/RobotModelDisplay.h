@@ -15,18 +15,18 @@ using Display = rviz::Display;
 const std::string display_class_id = "rviz/RobotModel";
 const std::string description_prop = "Robot Description";
 #endif
-    namespace mc_rtc_rviz
+namespace mc_rtc_rviz
 {
-  /** Handle label and display mangement of Robot */
-  struct RobotModelDisplay : public ClientWidget
-  {
-    RobotModelDisplay(const ClientWidgetParam & param, DisplayContext * display_context, DisplayGroup * display_group);
-    ~RobotModelDisplay();
-    void update(const std::vector<std::string> & in);
+/** Handle label and display mangement of Robot */
+struct RobotModelDisplay : public ClientWidget
+{
+  RobotModelDisplay(const ClientWidgetParam & param, DisplayContext * display_context, DisplayGroup * display_group);
+  ~RobotModelDisplay();
+  void update(const std::vector<std::string> & in);
 
-  protected:
-    QHBoxLayout * layout_;
-    QLabel * label_;
-    Display * robot_model_display = nullptr;
-  };
+protected:
+  QHBoxLayout * layout_;
+  QLabel * label_;
+  Display * robot_model_display = nullptr;
+};
 } // namespace mc_rtc_rviz
