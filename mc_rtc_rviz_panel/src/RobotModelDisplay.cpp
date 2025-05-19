@@ -34,7 +34,8 @@ RobotModelDisplay::RobotModelDisplay(const ClientWidgetParam & param,
   robot_model_display->setEnabled(true);
 }
 
-RobotModelDisplay::~RobotModelDisplay(){
+RobotModelDisplay::~RobotModelDisplay()
+{
   displayGroup()->takeDisplay(robot_model_display);
   displayGroup()->reset();
   delete robot_model_display;
