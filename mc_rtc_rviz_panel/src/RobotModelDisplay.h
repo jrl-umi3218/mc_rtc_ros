@@ -22,7 +22,7 @@ struct RobotModelDisplay : public ClientWidget
 {
   RobotModelDisplay(const ClientWidgetParam & param, DisplayContext * display_context, DisplayGroup * display_group);
   ~RobotModelDisplay();
-  void update(const std::vector<std::string> & in);
+  void update(const std::string &robot_name);
 
 protected:
   QHBoxLayout * layout_;

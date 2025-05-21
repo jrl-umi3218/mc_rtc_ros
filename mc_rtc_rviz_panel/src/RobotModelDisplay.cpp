@@ -41,18 +41,15 @@ RobotModelDisplay::~RobotModelDisplay()
   delete robot_model_display;
 }
 
-void RobotModelDisplay::update(const std::vector<std::string> & in)
+void RobotModelDisplay::update(const std::string &robot_name)
 {
-  std::string params = "[ " + in[0] + "]";
+  std::string params = "[ " + robot_name + "]";
   label_->setText(params.c_str());
 
-  robot_model_display->setName(in[0].c_str());
+  robot_model_display->setName(robot_name.c_str());
 
-  if(in.size() >= 2)
-  {
-    robot_model_display->subProp(description_prop.c_str())->setValue(("/" + in[1] + "/robot_description").c_str());
-    robot_model_display->subProp("TF Prefix")->setValue(in[1].c_str());
-  }
+  robot_model_display->subProp(description_prop.c_str())->setValue(("/control/" + name() + "/robot_description").c_str());
+  robot_model_display->subProp("TF Prefix")->setValue(("control/" + name()).c_str());
 }
 
 } // namespace mc_rtc_rviz

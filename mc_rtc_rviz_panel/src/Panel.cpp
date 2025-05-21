@@ -890,7 +890,7 @@ void Panel::got_robot(const WidgetId & id,
                       const sva::PTransformd & /*posW*/)
 {
   auto & w = get_widget<RobotModelDisplay>(id, displayContext(), displayGroup());
-  w.update(parameters);
+  w.update(parameters[0]);
 }
 
 void Panel::got_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose)
