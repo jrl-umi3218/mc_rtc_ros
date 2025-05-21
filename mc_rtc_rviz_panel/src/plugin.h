@@ -7,6 +7,9 @@
 using PanelBase = rviz_common::Panel;
 #else
 #  include <rviz/panel.h>
+#  include <rviz/render_panel.h>
+#  include <rviz/view_manager.h>
+#  include <rviz/visualization_manager.h>
 using PanelBase = rviz::Panel;
 #endif
 
@@ -20,6 +23,8 @@ class MyPanel : public PanelBase
   Q_OBJECT
 public:
   MyPanel(QWidget * parent = 0);
+
+  void onInitialize() override;
 
 #ifdef MC_RTC_ROS_IS_ROS2
   virtual ~MyPanel();

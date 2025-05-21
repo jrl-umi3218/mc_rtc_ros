@@ -23,6 +23,7 @@
 #include "Point3DInteractiveMarkerWidget.h"
 #include "PolygonMarkerWidget.h"
 #include "PolyhedronMarkerWidget.h"
+#include "RobotModelDisplay.h"
 #include "SchemaWidget.h"
 #include "TableWidget.h"
 #include "TransformInteractiveMarkerWidget.h"
@@ -888,14 +889,8 @@ void Panel::got_robot(const WidgetId & id,
                       const std::vector<std::vector<double>> & /*q*/,
                       const sva::PTransformd & /*posW*/)
 {
-  std::string params = "[ ";
-  for(size_t i = 0; i < parameters.size(); ++i)
-  {
-    params += parameters[i];
-    if(i != parameters.size() - 1) { params += ", "; }
-  }
-  params += "]";
-  got_label(id, params);
+  auto & w = get_widget<RobotModelDisplay>(id, displayContext(), displayGroup());
+  w.update(parameters[0]);
 }
 
 void Panel::got_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose)
