@@ -137,7 +137,22 @@ elseif(ROS_VERSION EQUAL 2)
   target_link_libraries(_gui_objects PUBLIC ROSDependencies)
 endif()
 
-add_library(${PROJECT_NAME} SHARED Panel.cpp ${HEADER_FILES} ${MOC_HEADERS})
+set(PANEL_SOURCE_FILES
+    Panel.cpp
+    PanelImpl.cpp
+    Panel_arrows.cpp
+    Panel_form.cpp
+    Panel_frames.cpp
+    Panel_gui.cpp
+    Panel_plot.cpp
+    Panel_point.cpp
+    Panel_polygon.cpp
+    Panel_polyhedron.cpp
+    Panel_robot.cpp
+    Panel_trajectory.cpp
+    Panel_visual.cpp)
+add_library(${PROJECT_NAME} SHARED ${PANEL_SOURCE_FILES} ${HEADER_FILES}
+                                   ${MOC_HEADERS})
 if(ROS_VERSION EQUAL 2)
   target_compile_definitions(
     ${PROJECT_NAME} PRIVATE RVIZ_DEFAULT_PLUGINS_BUILDING_LIBRARY
