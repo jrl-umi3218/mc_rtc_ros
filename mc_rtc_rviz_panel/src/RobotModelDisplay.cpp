@@ -36,21 +36,28 @@ RobotModelDisplay::RobotModelDisplay(const ClientWidgetParam & param,
 
 RobotModelDisplay::~RobotModelDisplay()
 {
-  displayGroup()->takeDisplay(robot_model_display);
-  displayGroup()->reset();
-  delete robot_model_display;
+  if(robot_model_display)
+  {
+    displayGroup()->takeDisplay(robot_model_display);
+    robot_model_display->setParent(nullptr);
+    displayGroup()->reset();
+    delete robot_model_display;
+  }
 }
 
 void RobotModelDisplay::update(const std::string & robot_name)
 {
-  std::string params = "[ " + robot_name + "]";
-  label_->setText(params.c_str());
+  if(robot_model_display)
+  {
+    std::string params = "[ " + robot_name + "]";
+    label_->setText(params.c_str());
 
-  robot_model_display->setName(robot_name.c_str());
+    robot_model_display->setName(robot_name.c_str());
 
-  robot_model_display->subProp(description_prop.c_str())
-      ->setValue(("/control/" + name() + "/robot_description").c_str());
-  robot_model_display->subProp("TF Prefix")->setValue(("control/" + name()).c_str());
+    robot_model_display->subProp(description_prop.c_str())
+        ->setValue(("/control/" + name() + "/robot_description").c_str());
+    robot_model_display->subProp("TF Prefix")->setValue(("control/" + name()).c_str());
+  }
 }
 
 } // namespace mc_rtc_rviz

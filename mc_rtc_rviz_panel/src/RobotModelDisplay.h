@@ -21,12 +21,12 @@ namespace mc_rtc_rviz
 struct RobotModelDisplay : public ClientWidget
 {
   RobotModelDisplay(const ClientWidgetParam & param, DisplayContext * display_context, DisplayGroup * display_group);
-  ~RobotModelDisplay();
+  virtual ~RobotModelDisplay();
   void update(const std::string & robot_name);
 
 protected:
   QHBoxLayout * layout_;
   QLabel * label_;
-  Display * robot_model_display = nullptr;
+  QPointer<Display> robot_model_display = nullptr;
 };
 } // namespace mc_rtc_rviz
