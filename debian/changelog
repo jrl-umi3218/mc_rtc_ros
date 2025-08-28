@@ -1,12 +1,14 @@
+mc-rtc-ros (1.7.0-1debian1) unstable; urgency=medium
+
+  * Update upstream
+
+ -- Arnaud TANGUY <arn.tanguy+ppa@gmail.com>  Thu, 28 Aug 2025 18:00:00 +0000
+
 mc-rtc-ros (1.6.1-1debian1) unstable; urgency=medium
 
   * ROS2 support packaging
 
  -- Arnaud TANGUY <arn.tanguy+ppa@gmail.com>  Mon, 19 Mai 2025 13:00:00 +0000
-
-mc-rtc-ros (1.6.0-1debian1) unstable; urgency=medium
-
-  * ROS2 support
 
 mc-rtc-ros (1.6.0-1debian1) unstable; urgency=medium
 

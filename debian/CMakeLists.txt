@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 cmake_policy(SET CMP0048 NEW)
-project(mc_rtc_ros VERSION 1.6.1)
+project(mc_rtc_ros VERSION 1.7.0)
 
 enable_testing()
 
