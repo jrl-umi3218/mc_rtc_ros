@@ -54,6 +54,12 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(const ClientWidgetPar
   connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
 }
 
+ArrowInteractiveMarkerWidget::~ArrowInteractiveMarkerWidget()
+{
+  arrow_marker_.action = Marker::DELETE;
+  markers_.markers.push_back(arrow_marker_);
+}
+
 void ArrowInteractiveMarkerWidget::update(const Eigen::Vector3d & start,
                                           const Eigen::Vector3d & end,
                                           const mc_rtc::gui::ArrowConfig & c)
