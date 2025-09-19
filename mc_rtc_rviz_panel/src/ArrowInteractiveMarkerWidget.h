@@ -21,6 +21,7 @@ public:
                                bool control_start,
                                bool control_end,
                                ClientWidget * label);
+  ~ArrowInteractiveMarkerWidget();
 
   void update(const Eigen::Vector3d & start, const Eigen::Vector3d & end, const mc_rtc::gui::ArrowConfig & c);
 
