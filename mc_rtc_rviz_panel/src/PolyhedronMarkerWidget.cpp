@@ -153,9 +153,13 @@ void PolyhedronMarkerWidget::update_triangles(const std::vector<std::array<Eigen
 void PolyhedronMarkerWidget::update_edges(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
                                           const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors)
 {
+  // Delete markers from previous update
+  edges_.action = Marker::DELETE;
+  markers_.markers.push_back(edges_);
+
   edges_.points.clear();
   edges_.colors.clear();
-  edges_.type = Marker::LINE_STRIP;
+  edges_.type = Marker::LINE_LIST;
   edges_.action = Marker::ADD;
   edges_.header.stamp = now();
   edges_.points = triangles_.points;
@@ -164,6 +168,32 @@ void PolyhedronMarkerWidget::update_edges(const std::vector<std::array<Eigen::Ve
 
   if(visible_)
   {
+    // Fill edges_.points with each triangle's edges (2 points per edge)
+    edges_.points.clear();
+    for(const auto & triangle : triangles)
+    {
+      // Edge 0-1
+      Point p0, p1, p2;
+      p0.x = triangle[0].x();
+      p0.y = triangle[0].y();
+      p0.z = triangle[0].z();
+      p1.x = triangle[1].x();
+      p1.y = triangle[1].y();
+      p1.z = triangle[1].z();
+      p2.x = triangle[2].x();
+      p2.y = triangle[2].y();
+      p2.z = triangle[2].z();
+
+      edges_.points.push_back(p0);
+      edges_.points.push_back(p1);
+
+      edges_.points.push_back(p1);
+      edges_.points.push_back(p2);
+
+      edges_.points.push_back(p2);
+      edges_.points.push_back(p0);
+    }
+
     if(visible_edges_) { markers_.markers.push_back(edges_); }
     else if(was_visible_edges_)
     {
