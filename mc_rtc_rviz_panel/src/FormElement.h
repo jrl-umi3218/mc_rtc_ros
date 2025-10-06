@@ -298,7 +298,10 @@ void ArrayInput<T>::reset()
   for(int i = 0; i < min_size_; ++i)
   {
     if(is_square_) { add_edit(i % stride_ == next_row_ ? T{1} : T{0}); }
-    else { add_edit(T{}); }
+    else
+    {
+      add_edit(T{});
+    }
   }
 }
 
@@ -321,7 +324,10 @@ void ArrayInput<T>::updateStride(size_t size)
     is_square_ = true;
     stride_ = 6;
   }
-  else { stride_ = 6; }
+  else
+  {
+    stride_ = 6;
+  }
 }
 
 template<typename T>

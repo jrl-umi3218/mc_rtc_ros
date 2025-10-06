@@ -75,7 +75,10 @@ void SchemaArrayInput::addItem()
                           false, schema_.is_tuple());
     connect(form, SIGNAL(toggled(bool)), this, SLOT(formToggled(bool)));
   }
-  else { form = schema_.create_form(this, data_).at(0); }
+  else
+  {
+    form = schema_.create_form(this, data_).at(0);
+  }
   layout_->addWidget(form);
   if(!schema_.is_object() && !schema_.is_tuple())
   {
