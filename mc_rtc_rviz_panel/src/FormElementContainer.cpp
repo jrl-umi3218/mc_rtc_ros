@@ -23,7 +23,10 @@ struct FormElementHeader : public QWidget
   void update()
   {
     if(element_->locked()) { button_->show(); }
-    else { button_->hide(); }
+    else
+    {
+      button_->hide();
+    }
   }
 
   FormElement * element_;
@@ -183,7 +186,10 @@ void FormElementContainer::add_element_to_layout(FormElement * elementIn)
     layout_->addRow(elementIn);
   }
   if(optionalLayout_->rowCount() == 0) { optionalToolBox_->hide(); }
-  else { optionalToolBox_->show(); }
+  else
+  {
+    optionalToolBox_->show();
+  }
 }
 
 void FormElementContainer::copy(const FormElementContainer & other)

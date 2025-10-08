@@ -70,7 +70,10 @@ ConnectionConfiguration ConfigurationLoader<ConnectionConfiguration>::load(const
 {
   Protocol proto = static_cast<std::string>(cfg("type")) == "IPC" ? Protocol::IPC : Protocol::TCP;
   if(proto == Protocol::IPC) { return ConnectionConfiguration(static_cast<std::string>(cfg("host"))); }
-  else { return ConnectionConfiguration(cfg("host"), cfg("sub_suffix"), cfg("push_suffix")); }
+  else
+  {
+    return ConnectionConfiguration(cfg("host"), cfg("sub_suffix"), cfg("push_suffix"));
+  }
 }
 
 Configuration ConfigurationLoader<ConnectionConfiguration>::save(const ConnectionConfiguration & config)

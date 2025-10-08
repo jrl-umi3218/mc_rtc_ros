@@ -30,7 +30,10 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(const ClientWidgetPar
                                       {getPointMarker(Eigen::Vector3d::Zero(), config.color, config.start_point_scale)},
                                       control_start));
   }
-  else { start_marker_.marker(make3DMarker(id2name(params.id) + "_start", {}, control_start)); }
+  else
+  {
+    start_marker_.marker(make3DMarker(id2name(params.id) + "_start", {}, control_start));
+  }
 
   if(config.end_point_scale > 0)
   {
@@ -38,7 +41,10 @@ ArrowInteractiveMarkerWidget::ArrowInteractiveMarkerWidget(const ClientWidgetPar
                                     {getPointMarker(Eigen::Vector3d::Zero(), config.color, config.end_point_scale)},
                                     control_end));
   }
-  else { end_marker_.marker(make3DMarker(id2name(params.id) + "_end", {}, control_end)); }
+  else
+  {
+    end_marker_.marker(make3DMarker(id2name(params.id) + "_end", {}, control_end));
+  }
   start_marker_.applyChanges();
   end_marker_.applyChanges();
 

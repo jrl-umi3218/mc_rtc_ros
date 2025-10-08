@@ -89,7 +89,10 @@ void CategoryWidget::removeWidget(ClientWidget * w)
       stack_layouts_.erase(sid);
     }
   }
-  else { main_layout_->removeWidget(w); }
+  else
+  {
+    main_layout_->removeWidget(w);
+  }
   widgets_.erase(std::find(widgets_.begin(), widgets_.end(), w));
   delete w;
 }
@@ -100,7 +103,10 @@ size_t CategoryWidget::clean()
   {
     ClientWidget * w = *it;
     if(!w->wasSeen()) { removeWidget(w); }
-    else { ++it; }
+    else
+    {
+      ++it;
+    }
   }
   return widgets_.size();
 }
@@ -138,7 +144,10 @@ void CategoryWidget::updateSizeImpl(bool active)
     static_cast<CategoryWidget *>(tabs_->widget(i))->updateSizeImpl(active && tabs_->currentIndex() == i);
   }
   if(active) { setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred); }
-  else { setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored); }
+  else
+  {
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+  }
 }
 
 void CategoryWidget::updateSize(int)

@@ -53,7 +53,10 @@ PlotWidget::Curve::Curve(QwtPlot * plot, const std::string & legend, mc_rtc::gui
   curve_->setRenderHint(QwtPlotItem::RenderAntialiased);
   curve_->setRawSamples(samples_x_.data(), samples_y_.data(), static_cast<int>(samples_x_.size()));
   if(side == Side::Left) { curve_->setYAxis(QwtPlot::yLeft); }
-  else { curve_->setYAxis(QwtPlot::yRight); }
+  else
+  {
+    curve_->setYAxis(QwtPlot::yRight);
+  }
 }
 
 PlotWidget::Curve::Curve(Curve && rhs)
@@ -152,7 +155,10 @@ PlotWidget::Polygon::Polygon(QwtPlot * plot, const std::string & legend, mc_rtc:
   item_->setRenderHint(QwtPlotItem::RenderAntialiased);
   item_->setPolygon(polygon_);
   if(side == Side::Left) { item_->setYAxis(QwtPlot::yLeft); }
-  else { item_->setYAxis(QwtPlot::yRight); }
+  else
+  {
+    item_->setYAxis(QwtPlot::yRight);
+  }
 }
 
 PlotWidget::Polygon::Polygon(Polygon && rhs)
@@ -200,7 +206,10 @@ QRectF PlotWidget::Polygon::update(const PolygonDescription & poly)
     rect_.setTop(p[1]);
     rect_.setBottom(p[1]);
   }
-  else { rect_ = QRectF(); }
+  else
+  {
+    rect_ = QRectF();
+  }
   for(const auto & p : poly_.points())
   {
     polygon_ << QPointF{p[0], p[1]};
@@ -283,7 +292,10 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
       button->setIcon(QIcon::fromTheme(iconName));
       button->setToolTip(fallbackText);
     }
-    else { button->setText(fallbackText); }
+    else
+    {
+      button->setText(fallbackText);
+    }
   };
   controls_widget_ = new QWidget();
   controls_widget_->setVisible(false);
@@ -498,7 +510,10 @@ void PlotWidget::zoom_button_clicked()
     pan_button_->setChecked(false);
     zoom_->setEnabled(true);
   }
-  else { zoom_->setEnabled(false); }
+  else
+  {
+    zoom_->setEnabled(false);
+  }
 }
 
 void PlotWidget::zoom_reset_button_clicked()
@@ -524,7 +539,10 @@ void PlotWidget::pan_button_clicked()
     zoom_button_->setChecked(false);
     pan_->setEnabled(true);
   }
-  else { pan_->setEnabled(false); }
+  else
+  {
+    pan_->setEnabled(false);
+  }
 }
 
 void PlotWidget::save_button_clicked()
@@ -537,7 +555,10 @@ void PlotWidget::toggle_options_widget()
 {
   options_widget_->setVisible(!options_widget_->isVisible());
   if(options_widget_->isVisible()) { options_button_->setText("Less"); }
-  else { options_button_->setText("More"); }
+  else
+  {
+    options_button_->setText("More");
+  }
 }
 
 void PlotWidget::line_width_changed(double width)

@@ -37,7 +37,10 @@ void ArrayLabelWidget::update(const Eigen::VectorXd & dataIn)
     normLabel_->setText("norm = " + QString::number(dataIn.norm()));
     if(dataIn.size() <= 6) { ArrayInputWidget::update(dataIn); }
   }
-  else { ArrayInputWidget::update(dataIn); }
+  else
+  {
+    ArrayInputWidget::update(dataIn);
+  }
 }
 
 } // namespace mc_rtc_rviz

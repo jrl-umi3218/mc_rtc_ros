@@ -160,7 +160,10 @@ void IntegerInput::reset()
 {
   edit_->disconnect();
   if(user_def_) { edit_->setText(QString::number(def_)); }
-  else { edit_->setText(""); }
+  else
+  {
+    edit_->setText("");
+  }
   ready_ = user_def_;
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
@@ -204,7 +207,10 @@ void NumberInput::reset()
 {
   edit_->disconnect();
   if(user_def_) { edit_->setText(QString::number(def_)); }
-  else { edit_->setText(""); }
+  else
+  {
+    edit_->setText("");
+  }
   ready_ = user_def_;
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
@@ -244,7 +250,10 @@ void StringInput::reset()
 {
   edit_->disconnect();
   if(user_def_) { edit_->setText(def_.c_str()); }
-  else { edit_->setText(""); }
+  else
+  {
+    edit_->setText("");
+  }
   ready_ = user_def_;
   connect(edit_, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
 }
@@ -436,7 +445,10 @@ void ComboInput::currentIndexChanged(int idx)
 mc_rtc::Configuration ComboInput::serialize() const
 {
   if(send_index_) { return details::serialize(combo_->currentIndex()); }
-  else { return details::serialize(combo_->currentText().toStdString()); }
+  else
+  {
+    return details::serialize(combo_->currentText().toStdString());
+  }
 }
 
 FormElement * ComboInput::clone(QWidget * parent, const std::string & name) const
@@ -527,7 +539,10 @@ void DataComboInput::currentIndexChanged(const QString & text)
 mc_rtc::Configuration DataComboInput::serialize() const
 {
   if(send_index_) { return details::serialize(combo_->currentIndex()); }
-  else { return details::serialize(combo_->currentText().toStdString()); }
+  else
+  {
+    return details::serialize(combo_->currentText().toStdString());
+  }
 }
 
 bool DataComboInput::resolve_ref()
@@ -659,7 +674,10 @@ mc_rtc::Configuration Form::serialize(bool asTuple) const
     if(el->ready())
     {
       if(asTuple) { out.push(el->serialize()); }
-      else { out.add(el->name(), el->serialize()); }
+      else
+      {
+        out.add(el->name(), el->serialize());
+      }
     }
   }
   return out;
@@ -724,7 +742,10 @@ InteractiveMarkerInput<DataT, rotation_only>::InteractiveMarkerInput(QWidget * p
     auto & data = [this]() -> Eigen::Vector3d &
     {
       if constexpr(std::is_same_v<Eigen::Vector3d, DataT>) { return data_; }
-      else { return data_.translation(); }
+      else
+      {
+        return data_.translation();
+      }
     }();
     int column = 0;
     for(const auto & l : {"x", "y", "z"})
@@ -802,7 +823,10 @@ mc_rtc::Configuration InteractiveMarkerInput<DataT, rotation_only>::serialize() 
 {
   mc_rtc::Configuration out;
   if constexpr(std::is_same_v<DataT, sva::PTransformd> && rotation_only) { out.add("data", data_.rotation()); }
-  else { out.add("data", data_); }
+  else
+  {
+    out.add("data", data_);
+  }
   return out("data");
 }
 
@@ -863,7 +887,10 @@ void InteractiveMarkerInput<DataT, rotation_only>::reset_edits()
     auto & data = [this]() -> Eigen::Vector3d &
     {
       if constexpr(std::is_same_v<Eigen::Vector3d, DataT>) { return data_; }
-      else { return data_.translation(); }
+      else
+      {
+        return data_.translation();
+      }
     }();
     setText(edits_[0], data(0));
     setText(edits_[1], data(1));
@@ -1098,7 +1125,10 @@ void OneOf::changed(bool required,
   {
     if(active_) { updateValue(-1, {}); }
   }
-  else { updateValue(data->first, data->second); }
+  else
+  {
+    updateValue(data->first, data->second);
+  }
 }
 
 mc_rtc::Configuration OneOf::serialize() const

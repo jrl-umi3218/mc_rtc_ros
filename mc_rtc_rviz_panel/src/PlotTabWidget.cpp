@@ -206,7 +206,10 @@ bool PlotTabWidget::wasSeen()
         }
       }
     }
-    else { ++it; }
+    else
+    {
+      ++it;
+    }
   }
   return (plots_.size() + inactive_plots_.size()) != 0;
 }
@@ -292,13 +295,19 @@ void PlotTabWidget::closeTabOnRequest(int i)
 void PlotTabWidget::previousTab()
 {
   if(tab_->currentIndex() != 0) { tab_->setCurrentIndex(tab_->currentIndex() - 1); }
-  else { tab_->setCurrentIndex(tab_->count() - 1); }
+  else
+  {
+    tab_->setCurrentIndex(tab_->count() - 1);
+  }
 }
 
 void PlotTabWidget::nextTab()
 {
   if(tab_->currentIndex() != tab_->count() - 1) { tab_->setCurrentIndex(tab_->currentIndex() + 1); }
-  else { tab_->setCurrentIndex(0); }
+  else
+  {
+    tab_->setCurrentIndex(0);
+  }
 }
 
 void PlotTabWidget::closeCurrentTab()

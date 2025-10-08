@@ -295,7 +295,10 @@ void Panel::WidgetTree::clean()
       if(parent && t.parent) { parent->removeWidget(t.parent); }
       sub_trees_.erase(it++);
     }
-    else { ++it; }
+    else
+    {
+      ++it;
+    }
   }
 }
 

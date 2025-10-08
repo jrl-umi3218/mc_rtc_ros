@@ -55,12 +55,18 @@ mc_rtc::Configuration Schema::resolveAllOf(const mc_rtc::Configuration & s, cons
       auto si = s("allOf")[i];
       if(si.has("$ref")) { schema.load(resolveAllOf(mc_rtc::Configuration{ref_path(source, si("$ref"))}, source)); }
       else if(si.has("allOf")) { schema.load(resolveAllOf(si, source)); }
-      else { schema.load(si); }
+      else
+      {
+        schema.load(si);
+      }
     }
     schema.remove("allOf");
     return schema;
   }
-  else { return s; }
+  else
+  {
+    return s;
+  }
 }
 
 Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, const std::string & title, bool required_in)
@@ -293,7 +299,10 @@ void Schema::init(const mc_rtc::Configuration & s,
         return v;
       };
     }
-    else { mc_rtc::log::warning("{}{} in {} is an array but items' type is not specified", desc, k, source); }
+    else
+    {
+      mc_rtc::log::warning("{}{} in {} is an array but items' type is not specified", desc, k, source);
+    }
   };
   auto handle_object = [&](const std::string & titleIn, const mc_rtc::Configuration & schemaIn)
   {
@@ -311,7 +320,10 @@ void Schema::init(const mc_rtc::Configuration & s,
       {
         std::string type = prop("type");
         if(type == "array") { handle_array("Property ", k, is_required(k), prop); }
-        else { handle_type(k, is_required(k), type, prop); }
+        else
+        {
+          handle_type(k, is_required(k), type, prop);
+        }
       }
       else if(prop.has("$ref"))
       {
@@ -334,7 +346,10 @@ void Schema::init(const mc_rtc::Configuration & s,
           return v;
         };
       }
-      else { mc_rtc::log::error("Cannot handle property {} in {}: {}", k, source, prop.dump()); }
+      else
+      {
+        mc_rtc::log::error("Cannot handle property {} in {}: {}", k, source, prop.dump());
+      }
     }
   };
   if(s.has("$ref"))
@@ -350,7 +365,10 @@ void Schema::init(const mc_rtc::Configuration & s,
     handle_object(title_, s);
   }
   else if(type == "array") { handle_array("", title_, required_in, s); }
-  else { handle_type(title_, required_in, type, s); }
+  else
+  {
+    handle_type(title_, required_in, type, s);
+  }
 }
 
 SchemaStore & Schema::store()
