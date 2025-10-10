@@ -652,12 +652,25 @@ Form::Form(QWidget * parent,
 
 bool Form::ready() const
 {
-  bool ok = true;
-  for(const auto & el : elements_)
-  {
-    if(el->required() && !el->ready()) { return false; }
+  if(required())
+  { // for required forms, return true if all required elements have been completed
+    for(const auto & el : elements_)
+    {
+      if(el->required() && !el->ready()) { return false; }
+    }
+    return true;
   }
-  return ok;
+  else
+  { // optional, if at least one element was filled return true
+    for(const auto & el : elements_)
+    {
+      if(el->ready())
+      { // optional element was modified
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 mc_rtc::Configuration Form::serialize() const
