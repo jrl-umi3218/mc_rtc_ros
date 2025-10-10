@@ -17,9 +17,8 @@ namespace
 
 std::string ref_path(const std::string & source, const std::string & ref_)
 {
-  auto ref = ref_.substr(3); // remove leading /..
   bfs::path ref_schema{source};
-  ref_schema = bfs::canonical(ref_schema.parent_path() / ref);
+  ref_schema = bfs::canonical(ref_schema.parent_path() / ref_);
   return ref_schema.string();
 }
 
