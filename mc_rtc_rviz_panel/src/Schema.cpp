@@ -103,6 +103,18 @@ void Schema::init(const mc_rtc::Configuration & s,
       return v;
     };
   };
+  /** Handle const entries */
+  auto handle_const = [this](const std::string & k, bool requiredIn, const std::string & value)
+  {
+    auto cf = create_form;
+    create_form = [cf, k, requiredIn, value](QWidget * parent, const mc_rtc::Configuration & data)
+    {
+      auto v = cf(parent, data);
+      v.emplace_back(new form::StringInput(parent, k, requiredIn, value, true));
+      if(value.size() && requiredIn) { v.back()->hidden(true); }
+      return v;
+    };
+  };
   /** Handle: boolean/integer/number/string */
   auto handle_type = [this, &source](const std::string & k, bool requiredIn, const std::string & type,
                                      const mc_rtc::Configuration & schema)
@@ -315,6 +327,10 @@ void Schema::init(const mc_rtc::Configuration & s,
     {
       auto prop = properties(k);
       if(prop.has("enum")) { handle_enum(k, is_required(k), prop("enum")); }
+      else if(prop.has("const"))
+      {
+        handle_const(k, is_required(k), prop("const"));
+      }
       else if(prop.has("type"))
       {
         std::string type = prop("type");
