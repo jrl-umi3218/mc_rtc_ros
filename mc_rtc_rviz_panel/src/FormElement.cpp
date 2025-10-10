@@ -477,20 +477,21 @@ DataComboInput::DataComboInput(QWidget * parent,
   combo_ = new QComboBox(this);
   combo_->installEventFilter(this);
   combo_->setFocusPolicy(Qt::StrongFocus);
+  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
   layout->addWidget(combo_);
   reset();
 }
 
 void DataComboInput::reset()
 {
-  combo_->disconnect();
+  combo_->blockSignals(true);
   combo_->clear();
   values_.clear();
   resolved_ref_ = ref_;
   if(resolve_ref()) { update_values(); }
   combo_->setCurrentIndex(-1);
   ready_ = false;
-  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
+  combo_->blockSignals(false);
 }
 
 void DataComboInput::changed(bool required,

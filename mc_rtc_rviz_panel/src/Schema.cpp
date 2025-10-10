@@ -327,10 +327,7 @@ void Schema::init(const mc_rtc::Configuration & s,
     {
       auto prop = properties(k);
       if(prop.has("enum")) { handle_enum(k, is_required(k), prop("enum")); }
-      else if(prop.has("const"))
-      {
-        handle_const(k, is_required(k), prop("const"));
-      }
+      else if(prop.has("const")) { handle_const(k, is_required(k), prop("const")); }
       else if(prop.has("type"))
       {
         std::string type = prop("type");
