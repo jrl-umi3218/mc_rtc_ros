@@ -225,8 +225,8 @@ void Schema::init(const mc_rtc::Configuration & s,
     }
   };
   /** Handle an array */
-  auto handle_type_array =
-      [this, &source](const std::string & k, bool requiredIn, const std::string & type, size_t min, size_t max)
+  auto handle_type_array = [this, &source](const std::string & k, bool requiredIn, const std::string & type,
+                                           const mc_rtc::Configuration itemsSchema, size_t min, size_t max)
   {
     auto cf = create_form;
     if(type == "integer")
@@ -246,6 +246,17 @@ void Schema::init(const mc_rtc::Configuration & s,
         auto v = cf(parent, data);
         v.emplace_back(new form::NumberArrayInput(parent, k, requiredIn, min == max, static_cast<int>(min),
                                                   static_cast<int>(max)));
+        return v;
+      };
+    }
+    else if(type == "object")
+    {
+      Schema schema(itemsSchema, source, k, requiredIn);
+      create_form = [cf, k, requiredIn, min, max, schema](QWidget * parent, const mc_rtc::Configuration & data)
+      {
+        auto v = cf(parent, data);
+        v.emplace_back(new form::SchemaArrayInput(parent, k, requiredIn, schema, data, min == max,
+                                                  static_cast<int>(min), static_cast<int>(max)));
         return v;
       };
     }
@@ -290,7 +301,16 @@ void Schema::init(const mc_rtc::Configuration & s,
     auto items = c("items");
     size_t minItems = c("minItems", size_t{0});
     size_t maxItems = c("maxItems", size_t{256});
-    if(items.has("type")) { handle_type_array(k, requiredIn, items("type"), minItems, maxItems); }
+    if(auto oneOfIt = items.find("oneOf"); oneOfIt && oneOfIt->size())
+    {
+      // XXX: If an item contains a oneOf property, we only use the first option for the GUI, and ignore all others
+      mc_rtc::log::warning("[Schema {}] Property {} array items' contain a oneOf property which is only partially "
+                           "supported, assuming display of the first oneOf element",
+                           source, k);
+      items.load((*oneOfIt)[0]);
+      items.remove("oneOf");
+    }
+    if(items.has("type")) { handle_type_array(k, requiredIn, items("type"), items, minItems, maxItems); }
     else if(items.has("$ref")) { handle_ref_array(k, requiredIn, items("$ref"), minItems, maxItems); }
     else if(items.size())
     {
