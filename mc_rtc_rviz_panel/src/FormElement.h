@@ -45,6 +45,8 @@ public:
 
   virtual inline void unlock() { locked_ = false; }
 
+  void required(bool required) { required_ = required; }
+
   bool required() const { return required_; }
 
   bool show_name() const { return show_name_; }

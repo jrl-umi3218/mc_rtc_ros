@@ -353,6 +353,7 @@ void Schema::init(const mc_rtc::Configuration & s,
           else
           {
             auto el = schema.create_form(parent, data).at(0);
+            el->required(requiredIn);
             el->name(k);
             v.push_back(el);
           }
