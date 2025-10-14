@@ -335,7 +335,7 @@ void Schema::init(const mc_rtc::Configuration & s,
       mc_rtc::log::warning("{}{} in {} is an array but items' type is not specified", desc, k, source);
     }
   };
-  auto handle_object = [&](const std::string & titleIn, const mc_rtc::Configuration & schemaIn, bool requiredInParent)
+  auto handle_object = [&](const std::string & titleIn, const mc_rtc::Configuration & schemaIn)
   {
     if(!schemaIn.has("properties"))
     {
@@ -362,13 +362,12 @@ void Schema::init(const mc_rtc::Configuration & s,
         const auto & schema = resolve_ref(source, prop("$ref"), k);
         auto cf = create_form;
         bool requiredIn = is_required(k);
-        create_form =
-            [cf, k, requiredIn, requiredInParent, &schema](QWidget * parent, const mc_rtc::Configuration & data)
+        create_form = [cf, k, requiredIn, &schema](QWidget * parent, const mc_rtc::Configuration & data)
         {
           auto v = cf(parent, data);
           if(schema.is_object())
           {
-            v.emplace_back(new form::Form(parent, k, requiredInParent, schema.create_form(parent, data)));
+            v.emplace_back(new form::Form(parent, k, requiredIn, schema.create_form(parent, data)));
           }
           else
           {
@@ -396,7 +395,7 @@ void Schema::init(const mc_rtc::Configuration & s,
   if(type == "object")
   {
     is_object_ = true;
-    handle_object(title_, s, required_in);
+    handle_object(title_, s);
   }
   else if(type == "array") { handle_array("", title_, required_in, s); }
   else
