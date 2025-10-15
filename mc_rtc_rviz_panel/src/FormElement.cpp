@@ -477,20 +477,21 @@ DataComboInput::DataComboInput(QWidget * parent,
   combo_ = new QComboBox(this);
   combo_->installEventFilter(this);
   combo_->setFocusPolicy(Qt::StrongFocus);
+  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
   layout->addWidget(combo_);
   reset();
 }
 
 void DataComboInput::reset()
 {
-  combo_->disconnect();
+  combo_->blockSignals(true);
   combo_->clear();
   values_.clear();
   resolved_ref_ = ref_;
   if(resolve_ref()) { update_values(); }
   combo_->setCurrentIndex(-1);
   ready_ = false;
-  connect(combo_, SIGNAL(currentIndexChanged(int)), this, SLOT(currentIndexChanged(int)));
+  combo_->blockSignals(false);
 }
 
 void DataComboInput::changed(bool required,
@@ -652,12 +653,25 @@ Form::Form(QWidget * parent,
 
 bool Form::ready() const
 {
-  bool ok = true;
-  for(const auto & el : elements_)
-  {
-    if(el->required() && !el->ready()) { return false; }
+  if(required())
+  { // for required forms, return true if all required elements have been completed
+    for(const auto & el : elements_)
+    {
+      if(el->required() && !el->ready()) { return false; }
+    }
+    return true;
   }
-  return ok;
+  else
+  { // optional, if at least one element was filled return true
+    for(const auto & el : elements_)
+    {
+      if(el->ready())
+      { // optional element was modified
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 mc_rtc::Configuration Form::serialize() const

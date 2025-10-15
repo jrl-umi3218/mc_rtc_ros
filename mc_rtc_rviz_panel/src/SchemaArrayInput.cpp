@@ -56,6 +56,7 @@ void SchemaArrayInput::reset()
   }
   items_.clear();
   for(int i = 0; i < min_size_; ++i) { addItem(); }
+  ready_ = false;
 }
 
 mc_rtc::Configuration SchemaArrayInput::serialize() const

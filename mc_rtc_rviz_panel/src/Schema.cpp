@@ -17,9 +17,8 @@ namespace
 
 std::string ref_path(const std::string & source, const std::string & ref_)
 {
-  auto ref = ref_.substr(3); // remove leading /..
   bfs::path ref_schema{source};
-  ref_schema = bfs::canonical(ref_schema.parent_path() / ref);
+  ref_schema = bfs::canonical(ref_schema.parent_path() / ref_);
   return ref_schema.string();
 }
 
@@ -101,6 +100,18 @@ void Schema::init(const mc_rtc::Configuration & s,
       auto v = cf(parent, data);
       v.emplace_back(new form::ComboInput(parent, k, requiredIn, values, false, values.size() == 1 ? 0 : -1));
       if(values.size() == 1 && requiredIn) { v.back()->hidden(true); }
+      return v;
+    };
+  };
+  /** Handle const entries */
+  auto handle_const = [this](const std::string & k, bool requiredIn, const std::string & value)
+  {
+    auto cf = create_form;
+    create_form = [cf, k, requiredIn, value](QWidget * parent, const mc_rtc::Configuration & data)
+    {
+      auto v = cf(parent, data);
+      v.emplace_back(new form::StringInput(parent, k, requiredIn, value, true));
+      if(value.size() && requiredIn) { v.back()->hidden(true); }
       return v;
     };
   };
@@ -214,8 +225,8 @@ void Schema::init(const mc_rtc::Configuration & s,
     }
   };
   /** Handle an array */
-  auto handle_type_array =
-      [this, &source](const std::string & k, bool requiredIn, const std::string & type, size_t min, size_t max)
+  auto handle_type_array = [this, &source](const std::string & k, bool requiredIn, const std::string & type,
+                                           const mc_rtc::Configuration itemsSchema, size_t min, size_t max)
   {
     auto cf = create_form;
     if(type == "integer")
@@ -235,6 +246,17 @@ void Schema::init(const mc_rtc::Configuration & s,
         auto v = cf(parent, data);
         v.emplace_back(new form::NumberArrayInput(parent, k, requiredIn, min == max, static_cast<int>(min),
                                                   static_cast<int>(max)));
+        return v;
+      };
+    }
+    else if(type == "object")
+    {
+      Schema schema(itemsSchema, source, k, requiredIn);
+      create_form = [cf, k, requiredIn, min, max, schema](QWidget * parent, const mc_rtc::Configuration & data)
+      {
+        auto v = cf(parent, data);
+        v.emplace_back(new form::SchemaArrayInput(parent, k, requiredIn, schema, data, min == max,
+                                                  static_cast<int>(min), static_cast<int>(max)));
         return v;
       };
     }
@@ -279,7 +301,16 @@ void Schema::init(const mc_rtc::Configuration & s,
     auto items = c("items");
     size_t minItems = c("minItems", size_t{0});
     size_t maxItems = c("maxItems", size_t{256});
-    if(items.has("type")) { handle_type_array(k, requiredIn, items("type"), minItems, maxItems); }
+    if(auto oneOfIt = items.find("oneOf"); oneOfIt && oneOfIt->size())
+    {
+      // XXX: If an item contains a oneOf property, we only use the first option for the GUI, and ignore all others
+      mc_rtc::log::warning("[Schema {}] Property {} array items' contain a oneOf property which is only partially "
+                           "supported, assuming display of the first oneOf element",
+                           source, k);
+      items.load((*oneOfIt)[0]);
+      items.remove("oneOf");
+    }
+    if(items.has("type")) { handle_type_array(k, requiredIn, items("type"), items, minItems, maxItems); }
     else if(items.has("$ref")) { handle_ref_array(k, requiredIn, items("$ref"), minItems, maxItems); }
     else if(items.size())
     {
@@ -316,6 +347,7 @@ void Schema::init(const mc_rtc::Configuration & s,
     {
       auto prop = properties(k);
       if(prop.has("enum")) { handle_enum(k, is_required(k), prop("enum")); }
+      else if(prop.has("const")) { handle_const(k, is_required(k), prop("const")); }
       else if(prop.has("type"))
       {
         std::string type = prop("type");
@@ -340,6 +372,7 @@ void Schema::init(const mc_rtc::Configuration & s,
           else
           {
             auto el = schema.create_form(parent, data).at(0);
+            el->required(requiredIn);
             el->name(k);
             v.push_back(el);
           }
