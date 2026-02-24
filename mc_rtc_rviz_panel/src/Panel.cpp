@@ -7,8 +7,8 @@
 
 #include "ConnectionDialog.h"
 
-#include <boost/filesystem.hpp>
-namespace bfs = boost::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace mc_rtc_rviz
 {
@@ -16,25 +16,25 @@ namespace mc_rtc_rviz
 namespace
 {
 
-bfs::path getUserDirectory()
+fs::path getUserDirectory()
 {
 #ifndef WIN32
-  return bfs::path(std::getenv("HOME")) / ".config";
+  return fs::path(std::getenv("HOME")) / ".config";
 #else
   // Should work for Windows Vista and up
-  return bfs::path(std::getenv("APPDATA"));
+  return fs::path(std::getenv("APPDATA"));
 #endif
 }
 
-bfs::path getConfigDirectory()
+fs::path getConfigDirectory()
 {
   return getUserDirectory() / "mc_rtc/rviz_panel";
 }
 
-bfs::path getConfigPath()
+fs::path getConfigPath()
 {
-  bfs::path config = getConfigDirectory() / "rviz_panel.conf";
-  if(bfs::exists(config)) { return config; }
+  fs::path config = getConfigDirectory() / "rviz_panel.conf";
+  if(fs::exists(config)) { return config; }
   return getConfigDirectory() / "rviz_panel.yaml";
 }
 
@@ -44,7 +44,7 @@ const mc_rtc::Configuration & loadPanelConfiguration()
   {
     mc_rtc::Configuration configOut;
     auto config_path = getConfigPath();
-    if(bfs::exists(config_path) && bfs::is_regular(config_path)) { configOut.load(config_path.string()); }
+    if(fs::exists(config_path) && fs::is_regular_file(config_path)) { configOut.load(config_path.string()); }
     return configOut;
   }();
   return config;
@@ -53,14 +53,14 @@ const mc_rtc::Configuration & loadPanelConfiguration()
 void savePanelConfiguration(const mc_rtc::Configuration & config)
 {
   auto config_directory = getConfigDirectory();
-  if(!bfs::exists(config_directory)) { bfs::create_directories(config_directory); }
-  if(!bfs::is_directory(config_directory))
+  if(!fs::exists(config_directory)) { fs::create_directories(config_directory); }
+  if(!fs::is_directory(config_directory))
   {
     mc_rtc::log::error("Cannot save configuration to {}, {} is not a directory", config_directory, config_directory);
     return;
   }
   auto config_path = getConfigPath();
-  if(bfs::exists(config_path) && !bfs::is_regular(config_path))
+  if(fs::exists(config_path) && !fs::is_regular_file(config_path))
   {
     mc_rtc::log::error("Cannot save configuration to {}, {} is not a regular file", config_path, config_path);
     return;

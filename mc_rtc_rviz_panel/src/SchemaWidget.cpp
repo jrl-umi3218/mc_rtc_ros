@@ -8,29 +8,28 @@
 #include "Schema.h"
 
 #include <mc_rtc/logging.h>
+#include <mc_rtc/config.h>
 
-#include <boost/filesystem.hpp>
-namespace bfs = boost::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace mc_rtc_rviz
 {
-
-static const std::string schema_dir = std::string(MC_RTC_DOCDIR) + "/json/schemas/";
 
 SchemaWidget::SchemaWidget(const ClientWidgetParam & params,
                            const std::string & schema,
                            const mc_rtc::Configuration & dataIn)
 : ClientWidget(params)
 {
-  bfs::path schema_path = schema_dir;
+  auto schema_path = fs::path{mc_rtc::MC_RTC_JSON_SCHEMA_PATH};
   schema_path /= schema;
-  if(!bfs::exists(schema_path))
+  if(!fs::exists(schema_path))
   {
     mc_rtc::log::error("Schema path: {} does not exist in this machine", schema_path.string());
     return;
   }
-  bfs::directory_iterator dit(schema_path), endit;
-  std::vector<bfs::path> drange;
+  fs::directory_iterator dit(schema_path), endit;
+  std::vector<fs::path> drange;
   std::copy(dit, endit, std::back_inserter(drange));
   std::sort(std::begin(drange), std::end(drange));
 
@@ -40,7 +39,7 @@ SchemaWidget::SchemaWidget(const ClientWidgetParam & params,
   stack_->addWidget(new QWidget(this));
   for(const auto & p : drange)
   {
-    auto path = bfs::canonical(p);
+    auto path = fs::canonical(p);
     Schema s{path.string()};
     Schema::store()[path.string()] = s;
     auto form = new FormWidget(params);
