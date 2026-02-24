@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 CNRS-UM LIRMM, CNRS-AIST JRL
+ * Copyright 2016-2026 CNRS-UM LIRMM, CNRS-AIST JRL
  */
 
 #include "Panel.h"

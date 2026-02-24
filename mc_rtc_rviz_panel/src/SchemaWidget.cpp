@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+ * Copyright 2016-2026 CNRS-UM LIRMM, CNRS-AIST JRL
  */
 
 #include "SchemaWidget.h"
@@ -7,8 +7,8 @@
 #include "FormWidget.h"
 #include "Schema.h"
 
-#include <mc_rtc/logging.h>
 #include <mc_rtc/config.h>
+#include <mc_rtc/logging.h>
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -21,7 +21,7 @@ SchemaWidget::SchemaWidget(const ClientWidgetParam & params,
                            const mc_rtc::Configuration & dataIn)
 : ClientWidget(params)
 {
-  auto schema_path = fs::path{mc_rtc::MC_RTC_JSON_SCHEMA_PATH};
+  auto schema_path = fs::path(mc_rtc::MC_RTC_JSON_SCHEMA_PATH);
   schema_path /= schema;
   if(!fs::exists(schema_path))
   {
