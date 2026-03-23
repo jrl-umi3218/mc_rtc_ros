@@ -1,9 +1,8 @@
 #
-# Copyright 2016-2023 CNRS-UM LIRMM, CNRS-AIST JRL
+# Copyright 2016-2026 CNRS-UM LIRMM, CNRS-AIST JRL
 #
 
-# Require 3.14 to use simplified linking with OBJECT libraries
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.22)
 
 set(PROJECT_NAME mc_rtc_rviz_panel)
 set(PROJECT_DESCRIPTION "mc_rtc RVIz panel for prototyping controllers")

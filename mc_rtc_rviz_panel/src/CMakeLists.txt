@@ -108,20 +108,7 @@ set(SOURCE_FILES
     ${MOC_FILES}
     ${QRC_FILES})
 
-if(NOT DEFINED MC_RTC_DOCDIR)
-  set(MC_RTC_DOCDIR "${mc_rtc_DIR}/../../../share/doc/mc_rtc")
-endif()
-get_filename_component(MC_RTC_DOCDIR "${MC_RTC_DOCDIR}" ABSOLUTE)
-if(NOT EXISTS "${MC_RTC_DOCDIR}")
-  message(
-    SEND_ERROR
-      "Provided mc_rtc documentation directory (${MC_RTC_DOCDIR}) does not exist"
-  )
-endif()
-
 add_library(_gui_objects OBJECT ${SOURCE_FILES})
-target_compile_definitions(_gui_objects
-                           PRIVATE -DMC_RTC_DOCDIR="${MC_RTC_DOCDIR}")
 if(NOT ${FORCE_QT5} AND "${ROS_DISTRO}" STREQUAL "indigo")
   target_link_libraries(_gui_objects PUBLIC Qt4::QtCore Qt4::QtGui)
 else()

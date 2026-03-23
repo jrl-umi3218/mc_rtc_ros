@@ -4,8 +4,8 @@
 
 #include <mc_rtc/logging.h>
 
-#include <boost/filesystem.hpp>
-namespace bfs = boost::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include <unordered_map>
 
@@ -17,8 +17,8 @@ namespace
 
 std::string ref_path(const std::string & source, const std::string & ref_)
 {
-  bfs::path ref_schema{source};
-  ref_schema = bfs::canonical(ref_schema.parent_path() / ref_);
+  fs::path ref_schema{source};
+  ref_schema = fs::canonical(ref_schema.parent_path() / ref_);
   return ref_schema.string();
 }
 

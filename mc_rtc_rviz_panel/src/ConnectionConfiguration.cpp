@@ -1,13 +1,13 @@
 #include "ConnectionConfiguration.h"
 
-#include <boost/filesystem.hpp>
-namespace bfs = boost::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace mc_rtc_rviz
 {
 
 ConnectionConfiguration::ConnectionConfiguration()
-: protocol_(Protocol::IPC), host_((bfs::temp_directory_path() / "mc_rtc").string()), sub_suffix_("_pub.ipc"),
+: protocol_(Protocol::IPC), host_((fs::temp_directory_path() / "mc_rtc").string()), sub_suffix_("_pub.ipc"),
   push_suffix_("_rep.ipc")
 {
 }
