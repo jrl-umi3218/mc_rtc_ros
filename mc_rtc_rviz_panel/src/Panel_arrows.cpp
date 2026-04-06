@@ -15,9 +15,7 @@ void Panel::force(const WidgetId & id,
                   const sva::PTransformd & start,
                   const mc_rtc::gui::ForceConfig & forceConfig,
                   bool ro)
-{
-  Q_EMIT signal_force(id, requestId, force_, start, forceConfig, ro);
-}
+{ Q_EMIT signal_force(id, requestId, force_, start, forceConfig, ro); }
 
 void Panel::arrow(const WidgetId & id,
                   const WidgetId & requestId,
@@ -25,9 +23,7 @@ void Panel::arrow(const WidgetId & id,
                   const Eigen::Vector3d & end,
                   const mc_rtc::gui::ArrowConfig & config,
                   bool ro)
-{
-  Q_EMIT signal_arrow(id, requestId, start, end, config, ro);
-}
+{ Q_EMIT signal_arrow(id, requestId, start, end, config, ro); }
 
 void Panel::got_force(const WidgetId & id,
                       const WidgetId & requestId,

@@ -83,9 +83,7 @@ PolyhedronMarkerWidget::PolyhedronMarkerWidget(const ClientWidgetParam & params,
 }
 
 PolyhedronMarkerWidget::~PolyhedronMarkerWidget()
-{
-  clear();
-}
+{ clear(); }
 
 void PolyhedronMarkerWidget::update_triangles(const std::vector<std::array<Eigen::Vector3d, 3>> & triangles,
                                               const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors)
@@ -271,18 +269,12 @@ void PolyhedronMarkerWidget::toggled(bool hide)
 }
 
 void PolyhedronMarkerWidget::show_triangles_changed(int)
-{
-  visible_triangles_ = show_triangles_->isChecked();
-}
+{ visible_triangles_ = show_triangles_->isChecked(); }
 
 void PolyhedronMarkerWidget::show_edges_changed(int)
-{
-  visible_edges_ = show_edges_->isChecked();
-}
+{ visible_edges_ = show_edges_->isChecked(); }
 
 void PolyhedronMarkerWidget::show_vertices_changed(int)
-{
-  visible_vertices_ = show_vertices_->isChecked();
-}
+{ visible_vertices_ = show_vertices_->isChecked(); }
 
 } // namespace mc_rtc_rviz

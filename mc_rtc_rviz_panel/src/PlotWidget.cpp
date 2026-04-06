@@ -22,9 +22,7 @@ using Style = mc_rtc::gui::plot::Style;
 using PolygonDescription = mc_rtc::gui::plot::PolygonDescription;
 
 QColor convert(const Color & color)
-{
-  return QColor::fromRgbF(color.r, color.g, color.b, color.a);
-}
+{ return QColor::fromRgbF(color.r, color.g, color.b, color.a); }
 
 template<typename T>
 bool setPen(T * curve, Color color, Style style, double width = 0.)
@@ -365,9 +363,7 @@ PlotWidget::PlotWidget(const std::string & title, QWidget * parent) : QWidget(pa
 }
 
 const std::string & PlotWidget::title() const
-{
-  return title_;
-}
+{ return title_; }
 
 void PlotWidget::setup_xaxis(const std::string & legend, const mc_rtc::gui::plot::Range & range)
 {
@@ -475,14 +471,10 @@ void PlotWidget::refresh()
 }
 
 void PlotWidget::limit_xrange_cbox_changed(int state)
-{
-  limit_xrange_ = (state == Qt::Checked);
-}
+{ limit_xrange_ = (state == Qt::Checked); }
 
 void PlotWidget::show_duration_changed(double value)
-{
-  show_duration_ = value;
-}
+{ show_duration_ = value; }
 
 void PlotWidget::pause_button_clicked()
 {
@@ -517,19 +509,13 @@ void PlotWidget::zoom_button_clicked()
 }
 
 void PlotWidget::zoom_reset_button_clicked()
-{
-  zoom_->zoom(0);
-}
+{ zoom_->zoom(0); }
 
 void PlotWidget::zoom_prev_button_clicked()
-{
-  zoom_->zoom(-1);
-}
+{ zoom_->zoom(-1); }
 
 void PlotWidget::zoom_next_button_clicked()
-{
-  zoom_->zoom(1);
-}
+{ zoom_->zoom(1); }
 
 void PlotWidget::pan_button_clicked()
 {
@@ -562,8 +548,6 @@ void PlotWidget::toggle_options_widget()
 }
 
 void PlotWidget::line_width_changed(double width)
-{
-  line_width_ = width;
-}
+{ line_width_ = width; }
 
 } // namespace mc_rtc_rviz

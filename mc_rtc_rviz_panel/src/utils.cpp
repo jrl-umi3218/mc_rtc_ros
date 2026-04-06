@@ -199,9 +199,7 @@ InteractiveMarker make3DMarker(const std::string & name,
                                bool /*move_x*/,
                                bool /*move_y*/,
                                bool /*move_z*/)
-{
-  return make6DMarker(name, visual_markers, control_position, false);
-}
+{ return make6DMarker(name, visual_markers, control_position, false); }
 
 InteractiveMarker makeXYThetaMarker(const std::string & name, bool readonly)
 {
@@ -252,9 +250,7 @@ SharedMarker::SharedMarker(std::shared_ptr<InteractiveMarkerServer> server,
                            const InteractiveMarker & marker,
                            InteractiveMarkerServer::FeedbackCallback callback)
 : server_(server), marker_(marker), callback_(callback)
-{
-  server_->insert(marker_, callback_);
-}
+{ server_->insert(marker_, callback_); }
 
 SharedMarker::~SharedMarker()
 {

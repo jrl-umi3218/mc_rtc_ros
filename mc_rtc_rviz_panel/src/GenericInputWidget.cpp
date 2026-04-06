@@ -27,26 +27,18 @@ void GenericInputWidget<int>::set_validator()
 
 template<>
 void GenericInputWidget<std::string>::to_edit(const std::string & dataIn)
-{
-  edit_->setText(dataIn.c_str());
-}
+{ edit_->setText(dataIn.c_str()); }
 
 template<>
 std::string GenericInputWidget<std::string>::from_edit()
-{
-  return edit_->text().toStdString();
-}
+{ return edit_->text().toStdString(); }
 
 template<>
 int GenericInputWidget<int>::from_edit()
-{
-  return edit_->text().toInt();
-}
+{ return edit_->text().toInt(); }
 
 template<>
 double GenericInputWidget<double>::from_edit()
-{
-  return edit_->text().toDouble();
-}
+{ return edit_->text().toDouble(); }
 
 } // namespace mc_rtc_rviz

@@ -27,9 +27,7 @@ fs::path getUserDirectory()
 }
 
 fs::path getConfigDirectory()
-{
-  return getUserDirectory() / "mc_rtc/rviz_panel";
-}
+{ return getUserDirectory() / "mc_rtc/rviz_panel"; }
 
 fs::path getConfigPath()
 {
@@ -76,9 +74,7 @@ const std::vector<ConnectionConfiguration> & getConnectionConfigurations()
 }
 
 const ConnectionConfiguration & getConnectionConfiguration()
-{
-  return getConnectionConfigurations()[0];
-}
+{ return getConnectionConfigurations()[0]; }
 
 double getTimeout()
 {
@@ -215,9 +211,7 @@ Panel::Panel(QWidget * parent)
 }
 
 void Panel::started()
-{
-  Q_EMIT signal_start();
-}
+{ Q_EMIT signal_start(); }
 
 void Panel::got_start()
 {
@@ -226,9 +220,7 @@ void Panel::got_start()
 }
 
 void Panel::stopped()
-{
-  Q_EMIT signal_stop();
-}
+{ Q_EMIT signal_stop(); }
 
 void Panel::got_stop()
 {
@@ -252,9 +244,7 @@ Panel::~Panel()
 }
 
 void Panel::category(const std::vector<std::string> & parent, const std::string & category)
-{
-  Q_EMIT signal_category(parent, category);
-}
+{ Q_EMIT signal_category(parent, category); }
 
 void Panel::got_category(const std::vector<std::string> & parent, const std::string & category)
 {
@@ -341,14 +331,10 @@ void Panel::contextMenu_editConnection()
 }
 
 void Panel::contextMenu_reconnect()
-{
-  reconnect(connectionConfigs_[0].sub_uri(), connectionConfigs_[0].push_uri());
-}
+{ reconnect(connectionConfigs_[0].sub_uri(), connectionConfigs_[0].push_uri()); }
 
 bool Panel::visible(const WidgetId & id) const
-{
-  return config(id)("visible", true);
-}
+{ return config(id)("visible", true); }
 
 void Panel::visible(const WidgetId & id, bool visibility)
 {

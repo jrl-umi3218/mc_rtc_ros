@@ -11,23 +11,17 @@ namespace mc_rtc_rviz
 {
 
 void Panel::rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos)
-{
-  Q_EMIT signal_rotation(id, requestId, ro, pos);
-}
+{ Q_EMIT signal_rotation(id, requestId, ro, pos); }
 
 void Panel::transform(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos)
-{
-  Q_EMIT signal_transform(id, requestId, ro, pos);
-}
+{ Q_EMIT signal_transform(id, requestId, ro, pos); }
 
 void Panel::xytheta(const WidgetId & id,
                     const WidgetId & requestId,
                     bool ro,
                     const Eigen::Vector3d & vec,
                     double altitude)
-{
-  Q_EMIT signal_xytheta(id, requestId, ro, vec, altitude);
-}
+{ Q_EMIT signal_xytheta(id, requestId, ro, vec, altitude); }
 
 void Panel::got_rotation(const WidgetId & id, const WidgetId & requestId, bool ro, const sva::PTransformd & pos)
 {

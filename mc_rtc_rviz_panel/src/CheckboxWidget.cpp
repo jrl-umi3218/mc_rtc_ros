@@ -27,8 +27,6 @@ void CheckboxWidget::update(bool b)
 }
 
 void CheckboxWidget::toggled(bool)
-{
-  this->client().send_request(id());
-}
+{ this->client().send_request(id()); }
 
 } // namespace mc_rtc_rviz

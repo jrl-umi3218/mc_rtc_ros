@@ -23,28 +23,18 @@ ClientWidget::ClientWidget(const ClientWidgetParam & params)
 }
 
 void ClientWidget::addWidget(ClientWidget *)
-{
-  throw(std::runtime_error("This is only implemented for container widgets"));
-}
+{ throw(std::runtime_error("This is only implemented for container widgets")); }
 
 void ClientWidget::removeWidget(ClientWidget *)
-{
-  throw(std::runtime_error("This is only implemented for container widgets"));
-}
+{ throw(std::runtime_error("This is only implemented for container widgets")); }
 
 bool ClientWidget::visible()
-{
-  return static_cast<Panel &>(client_).visible(id_);
-}
+{ return static_cast<Panel &>(client_).visible(id_); }
 
 void ClientWidget::visible(bool visibility)
-{
-  static_cast<Panel &>(client_).visible(id_, visibility);
-}
+{ static_cast<Panel &>(client_).visible(id_, visibility); }
 
 Time ClientWidget::now() const
-{
-  return dynamic_cast<const Panel &>(client_).now();
-}
+{ return dynamic_cast<const Panel &>(client_).now(); }
 
 } // namespace mc_rtc_rviz

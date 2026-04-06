@@ -18,9 +18,7 @@ FormWidget::FormWidget(const ClientWidgetParam & param) : ClientWidget(param)
 }
 
 void FormWidget::update()
-{
-  container_->update();
-}
+{ container_->update(); }
 
 void FormWidget::released()
 {

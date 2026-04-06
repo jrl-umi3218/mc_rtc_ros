@@ -57,9 +57,7 @@ void PlotDialog::closeEvent(QCloseEvent * event)
 }
 
 void PlotDialog::handle_close()
-{
-  parent_->close_dialog(this);
-}
+{ parent_->close_dialog(this); }
 
 PopTabButton::PopTabButton(int index, PlotTabWidget * tab, QWidget * parent)
 : QPushButton(QIcon(":/icons/view-fullscreen.svg"), "", parent), index_(index), tab_(tab)
@@ -69,14 +67,10 @@ PopTabButton::PopTabButton(int index, PlotTabWidget * tab, QWidget * parent)
 }
 
 void PopTabButton::update(int idx)
-{
-  index_ = idx;
-}
+{ index_ = idx; }
 
 void PopTabButton::clicked()
-{
-  tab_->popTab(index_);
-}
+{ tab_->popTab(index_); }
 
 CloseTabButton::CloseTabButton(int index, PlotTabWidget * tab, QWidget * parent)
 : QPushButton(QIcon(":/icons/close.svg"), "", parent), index_(index), tab_(tab)
@@ -86,19 +80,13 @@ CloseTabButton::CloseTabButton(int index, PlotTabWidget * tab, QWidget * parent)
 }
 
 void CloseTabButton::update(int idx)
-{
-  index_ = idx;
-}
+{ index_ = idx; }
 
 void CloseTabButton::clicked()
-{
-  Q_EMIT tab_->tab()->tabCloseRequested(index_);
-}
+{ Q_EMIT tab_->tab()->tabCloseRequested(index_); }
 
 PlotTabBar::PlotTabBar(QWidget * parent, PlotTabWidget * tab) : QTabBar(parent), tab_(tab)
-{
-  this->setStyle(new TabStyle(this, tab_));
-}
+{ this->setStyle(new TabStyle(this, tab_)); }
 
 QSize PlotTabBar::tabSizeHint(int index) const
 {
@@ -158,14 +146,10 @@ void PlotTabBar::tabLayoutChange()
 }
 
 PlotTab::PlotTab(QWidget * parent) : QTabWidget(parent)
-{
-  connect(this, SIGNAL(tabCloseRequested(int)), parent, SLOT(closeTabOnRequest(int)));
-}
+{ connect(this, SIGNAL(tabCloseRequested(int)), parent, SLOT(closeTabOnRequest(int))); }
 
 void PlotTab::setTabBar(QTabBar * bar)
-{
-  QTabWidget::setTabBar(bar);
-}
+{ QTabWidget::setTabBar(bar); }
 
 PlotTabWidget::PlotTabWidget(const ClientWidgetParam & param) : ClientWidget(param)
 {
@@ -179,9 +163,7 @@ PlotTabWidget::PlotTabWidget(const ClientWidgetParam & param) : ClientWidget(par
 }
 
 void PlotTabWidget::resetSeen()
-{
-  seen_.clear();
-}
+{ seen_.clear(); }
 
 bool PlotTabWidget::wasSeen()
 {
@@ -233,23 +215,17 @@ void PlotTabWidget::start_plot(uint64_t id, const std::string & title)
 }
 
 void PlotTabWidget::plot_setup_xaxis(uint64_t id, const std::string & legend, const mc_rtc::gui::plot::Range & range)
-{
-  plots_[id]->setup_xaxis(legend, range);
-}
+{ plots_[id]->setup_xaxis(legend, range); }
 
 void PlotTabWidget::plot_setup_yaxis_left(uint64_t id,
                                           const std::string & legend,
                                           const mc_rtc::gui::plot::Range & range)
-{
-  plots_[id]->setup_yaxis_left(legend, range);
-}
+{ plots_[id]->setup_yaxis_left(legend, range); }
 
 void PlotTabWidget::plot_setup_yaxis_right(uint64_t id,
                                            const std::string & legend,
                                            const mc_rtc::gui::plot::Range & range)
-{
-  plots_[id]->setup_yaxis_right(legend, range);
-}
+{ plots_[id]->setup_yaxis_right(legend, range); }
 
 void PlotTabWidget::plot_point(uint64_t id,
                                uint64_t did,
@@ -259,32 +235,24 @@ void PlotTabWidget::plot_point(uint64_t id,
                                mc_rtc::gui::Color color,
                                mc_rtc::gui::plot::Style style,
                                mc_rtc::gui::plot::Side side)
-{
-  plots_[id]->plot(did, legend, x, y, color, style, side);
-}
+{ plots_[id]->plot(did, legend, x, y, color, style, side); }
 
 void PlotTabWidget::plot_polygon(uint64_t id,
                                  uint64_t did,
                                  const std::string & legend,
                                  const mc_rtc::gui::plot::PolygonDescription & polygon,
                                  mc_rtc::gui::plot::Side side)
-{
-  plots_[id]->plot(did, legend, polygon, side);
-}
+{ plots_[id]->plot(did, legend, polygon, side); }
 
 void PlotTabWidget::plot_polygons(uint64_t id,
                                   uint64_t did,
                                   const std::string & legend,
                                   const std::vector<mc_rtc::gui::plot::PolygonDescription> & polygons,
                                   mc_rtc::gui::plot::Side side)
-{
-  plots_[id]->plot(did, legend, polygons, side);
-}
+{ plots_[id]->plot(did, legend, polygons, side); }
 
 void PlotTabWidget::end_plot(uint64_t id)
-{
-  plots_[id]->refresh();
-}
+{ plots_[id]->refresh(); }
 
 void PlotTabWidget::closeTabOnRequest(int i)
 {
@@ -311,9 +279,7 @@ void PlotTabWidget::nextTab()
 }
 
 void PlotTabWidget::closeCurrentTab()
-{
-  Q_EMIT tab_->tabCloseRequested(tab_->currentIndex());
-}
+{ Q_EMIT tab_->tabCloseRequested(tab_->currentIndex()); }
 
 void PlotTabWidget::popTab(int idx)
 {
@@ -338,9 +304,7 @@ void PlotTabWidget::close_dialog(PlotDialog * dialog)
 }
 
 bool PlotTabWidget::is_done(PlotWidget * widget)
-{
-  return std::find(inactive_plots_.begin(), inactive_plots_.end(), widget) != inactive_plots_.end();
-}
+{ return std::find(inactive_plots_.begin(), inactive_plots_.end(), widget) != inactive_plots_.end(); }
 
 bool PlotTabWidget::remove_plot_widget(PlotWidget * widget)
 {

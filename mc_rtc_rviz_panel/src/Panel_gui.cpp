@@ -18,79 +18,49 @@ namespace mc_rtc_rviz
 {
 
 void Panel::label(const WidgetId & id, const std::string & dataIn)
-{
-  Q_EMIT signal_label(id, dataIn);
-}
+{ Q_EMIT signal_label(id, dataIn); }
 
 void Panel::array_label(const WidgetId & id, const std::vector<std::string> & labels, const Eigen::VectorXd & dataIn)
-{
-  Q_EMIT signal_array_label(id, labels, dataIn);
-}
+{ Q_EMIT signal_array_label(id, labels, dataIn); }
 
 void Panel::button(const WidgetId & id)
-{
-  Q_EMIT signal_button(id);
-}
+{ Q_EMIT signal_button(id); }
 
 void Panel::checkbox(const WidgetId & id, bool state)
-{
-  Q_EMIT signal_checkbox(id, state);
-}
+{ Q_EMIT signal_checkbox(id, state); }
 
 void Panel::string_input(const WidgetId & id, const std::string & dataIn)
-{
-  Q_EMIT signal_string_input(id, dataIn);
-}
+{ Q_EMIT signal_string_input(id, dataIn); }
 
 void Panel::integer_input(const WidgetId & id, int dataIn)
-{
-  Q_EMIT signal_integer_input(id, dataIn);
-}
+{ Q_EMIT signal_integer_input(id, dataIn); }
 
 void Panel::number_input(const WidgetId & id, double dataIn)
-{
-  Q_EMIT signal_number_input(id, dataIn);
-}
+{ Q_EMIT signal_number_input(id, dataIn); }
 
 void Panel::number_slider(const WidgetId & id, double dataIn, double min, double max)
-{
-  Q_EMIT signal_number_slider(id, dataIn, min, max);
-}
+{ Q_EMIT signal_number_slider(id, dataIn, min, max); }
 
 void Panel::array_input(const WidgetId & id, const std::vector<std::string> & inputs, const Eigen::VectorXd & dataIn)
-{
-  Q_EMIT signal_array_input(id, inputs, dataIn);
-}
+{ Q_EMIT signal_array_input(id, inputs, dataIn); }
 
 void Panel::combo_input(const WidgetId & id, const std::vector<std::string> & values, const std::string & dataIn)
-{
-  Q_EMIT signal_combo_input(id, values, dataIn);
-}
+{ Q_EMIT signal_combo_input(id, values, dataIn); }
 
 void Panel::data_combo_input(const WidgetId & id, const std::vector<std::string> & ref, const std::string & dataIn)
-{
-  Q_EMIT signal_data_combo_input(id, ref, dataIn);
-}
+{ Q_EMIT signal_data_combo_input(id, ref, dataIn); }
 
 void Panel::schema(const WidgetId & id, const std::string & schema)
-{
-  Q_EMIT signal_schema(id, schema);
-}
+{ Q_EMIT signal_schema(id, schema); }
 
 void Panel::table_start(const WidgetId & id, const std::vector<std::string> & header)
-{
-  Q_EMIT signal_table_start(id, header);
-}
+{ Q_EMIT signal_table_start(id, header); }
 
 void Panel::table_row(const WidgetId & id, const std::vector<std::string> & dataIn)
-{
-  Q_EMIT signal_table_row(id, dataIn);
-}
+{ Q_EMIT signal_table_row(id, dataIn); }
 
 void Panel::table_end(const WidgetId & id)
-{
-  Q_EMIT signal_table_end(id);
-}
+{ Q_EMIT signal_table_end(id); }
 
 void Panel::got_label(const WidgetId & id, const std::string & dataIn)
 {
@@ -107,9 +77,7 @@ void Panel::got_array_label(const WidgetId & id,
 }
 
 void Panel::got_button(const WidgetId & id)
-{
-  get_widget<ButtonWidget>(id);
-}
+{ get_widget<ButtonWidget>(id); }
 
 void Panel::got_checkbox(const WidgetId & id, bool state)
 {
@@ -164,9 +132,7 @@ void Panel::got_data_combo_input(const WidgetId & id,
 }
 
 void Panel::got_schema(const WidgetId & id, const std::string & schema)
-{
-  get_widget<SchemaWidget>(id, schema, data_);
-}
+{ get_widget<SchemaWidget>(id, schema, data_); }
 
 void Panel::got_table_start(const WidgetId & id, const std::vector<std::string> & header)
 {

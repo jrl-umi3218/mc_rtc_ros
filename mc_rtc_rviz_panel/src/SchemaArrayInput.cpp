@@ -93,9 +93,7 @@ void SchemaArrayInput::addItem()
 }
 
 void SchemaArrayInput::plusReleased()
-{
-  addItem();
-}
+{ addItem(); }
 
 void SchemaArrayInput::formToggled(bool)
 {

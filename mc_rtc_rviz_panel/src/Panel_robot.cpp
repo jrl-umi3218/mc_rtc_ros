@@ -12,9 +12,7 @@ void Panel::robot(const WidgetId & id,
                   const std::vector<std::string> & parameters,
                   const std::vector<std::vector<double>> & q,
                   const sva::PTransformd & posW)
-{
-  Q_EMIT signal_robot(id, parameters, q, posW);
-}
+{ Q_EMIT signal_robot(id, parameters, q, posW); }
 
 void Panel::got_robot(const WidgetId & id,
                       const std::vector<std::string> & parameters,

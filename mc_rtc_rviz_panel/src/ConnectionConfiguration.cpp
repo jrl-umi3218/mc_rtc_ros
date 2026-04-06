@@ -13,9 +13,7 @@ ConnectionConfiguration::ConnectionConfiguration()
 }
 
 ConnectionConfiguration::ConnectionConfiguration(const std::string & host) : ConnectionConfiguration()
-{
-  host_ = host;
-}
+{ host_ = host; }
 
 namespace
 {

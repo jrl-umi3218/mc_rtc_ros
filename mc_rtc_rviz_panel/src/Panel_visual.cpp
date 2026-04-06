@@ -10,9 +10,7 @@ namespace mc_rtc_rviz
 {
 
 void Panel::visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pos)
-{
-  Q_EMIT signal_visual(id, visual, pos);
-}
+{ Q_EMIT signal_visual(id, visual, pos); }
 
 void Panel::got_visual(const WidgetId & id, const rbd::parsers::Visual & visual, const sva::PTransformd & pose)
 {

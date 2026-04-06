@@ -14,9 +14,7 @@ void Panel::point3d(const WidgetId & id,
                     bool ro,
                     const Eigen::Vector3d & pos,
                     const mc_rtc::gui::PointConfig & config)
-{
-  Q_EMIT signal_point3d(id, requestId, ro, pos, config);
-}
+{ Q_EMIT signal_point3d(id, requestId, ro, pos, config); }
 
 void Panel::got_point3d(const WidgetId & id,
                         const WidgetId & requestId,

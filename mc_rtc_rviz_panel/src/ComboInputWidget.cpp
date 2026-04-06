@@ -23,9 +23,7 @@ ComboInputWidget::ComboInputWidget(const ClientWidgetParam & param,
                                    const mc_rtc::Configuration & dataIn,
                                    const std::vector<std::string> & ref)
 : ComboInputWidget(param, {})
-{
-  update(dataIn, ref);
-}
+{ update(dataIn, ref); }
 
 ComboInputWidget::ComboInputWidget(const ClientWidgetParam & param, const std::vector<std::string> & values)
 : ClientWidget(param), values_()
@@ -76,8 +74,6 @@ void ComboInputWidget::update(const std::vector<std::string> & values)
 }
 
 void ComboInputWidget::update(const mc_rtc::Configuration & dataIn, const std::vector<std::string> & values)
-{
-  update(ref2values(dataIn, values));
-}
+{ update(ref2values(dataIn, values)); }
 
 } // namespace mc_rtc_rviz

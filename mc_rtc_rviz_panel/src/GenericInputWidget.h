@@ -91,9 +91,7 @@ void GenericInputWidget<T>::update(const T & dataIn)
 
 template<typename T>
 void GenericInputWidget<T>::to_edit(const T & dataIn)
-{
-  edit_->setText(QVariant(dataIn).toString());
-}
+{ edit_->setText(QVariant(dataIn).toString()); }
 
 template<>
 void GenericInputWidget<std::string>::to_edit(const std::string & data);

@@ -103,14 +103,10 @@ void Checkbox::stateChanged(int s)
 }
 
 mc_rtc::Configuration Checkbox::serialize() const
-{
-  return details::serialize(cbox_->isChecked());
-}
+{ return details::serialize(cbox_->isChecked()); }
 
 FormElement * Checkbox::clone(QWidget * parent, const std::string & name) const
-{
-  return new Checkbox(parent, name, required_, def_, user_def_);
-}
+{ return new Checkbox(parent, name, required_, def_, user_def_); }
 
 void Checkbox::fill(const mc_rtc::Configuration & value)
 {
@@ -152,9 +148,7 @@ void IntegerInput::changed(bool required, int def, bool user_def)
 }
 
 mc_rtc::Configuration IntegerInput::serialize() const
-{
-  return details::serialize(edit_->text().toInt());
-}
+{ return details::serialize(edit_->text().toInt()); }
 
 void IntegerInput::reset()
 {
@@ -169,9 +163,7 @@ void IntegerInput::reset()
 }
 
 FormElement * IntegerInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new IntegerInput(parent, name, required_, def_, user_def_);
-}
+{ return new IntegerInput(parent, name, required_, def_, user_def_); }
 
 void IntegerInput::fill(const mc_rtc::Configuration & value)
 {
@@ -199,9 +191,7 @@ void NumberInput::changed(bool required, double def, bool user_def)
 }
 
 mc_rtc::Configuration NumberInput::serialize() const
-{
-  return details::serialize(edit_->text().toDouble());
-}
+{ return details::serialize(edit_->text().toDouble()); }
 
 void NumberInput::reset()
 {
@@ -216,9 +206,7 @@ void NumberInput::reset()
 }
 
 FormElement * NumberInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new NumberInput(parent, name, required_, def_, user_def_);
-}
+{ return new NumberInput(parent, name, required_, def_, user_def_); }
 
 void NumberInput::fill(const mc_rtc::Configuration & value)
 {
@@ -233,9 +221,7 @@ StringInput::StringInput(QWidget * parent,
                          const std::string & def,
                          bool user_def)
 : CommonInput(parent, name, required), def_(def), user_def_(user_def)
-{
-  reset();
-}
+{ reset(); }
 
 void StringInput::changed(bool required, const std::string & def, bool user_def)
 {
@@ -259,14 +245,10 @@ void StringInput::reset()
 }
 
 mc_rtc::Configuration StringInput::serialize() const
-{
-  return details::serialize(edit_->text().toStdString());
-}
+{ return details::serialize(edit_->text().toStdString()); }
 
 FormElement * StringInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new StringInput(parent, name, required_, def_, user_def_);
-}
+{ return new StringInput(parent, name, required_, def_, user_def_); }
 
 void StringInput::fill(const mc_rtc::Configuration & value)
 {
@@ -302,48 +284,32 @@ void ArrayInput<double>::add_validator(QLineEdit * edit)
 }
 template<>
 void ArrayInput<int>::data2edit(const int & value, QLineEdit * edit)
-{
-  edit->setText(QString::number(value));
-}
+{ edit->setText(QString::number(value)); }
 template<>
 int ArrayInput<int>::edit2data(QLineEdit * edit) const
-{
-  return edit->text().toInt();
-}
+{ return edit->text().toInt(); }
 template<>
 void ArrayInput<double>::data2edit(const double & value, QLineEdit * edit)
-{
-  edit->setText(QString::number(value));
-}
+{ edit->setText(QString::number(value)); }
 template<>
 double ArrayInput<double>::edit2data(QLineEdit * edit) const
-{
-  return edit->text().toDouble();
-}
+{ return edit->text().toDouble(); }
 template<>
 void ArrayInput<std::string>::add_validator(QLineEdit *)
 {
 }
 template<>
 void ArrayInput<std::string>::data2edit(const std::string & value, QLineEdit * edit)
-{
-  edit->setText(value.c_str());
-}
+{ edit->setText(value.c_str()); }
 template<>
 std::string ArrayInput<std::string>::edit2data(QLineEdit * edit) const
-{
-  return edit->text().toStdString();
-}
+{ return edit->text().toStdString(); }
 
 FormElement * IntegerArrayInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new IntegerArrayInput(parent, name, required_, fixed_size_, min_size_, max_size_);
-}
+{ return new IntegerArrayInput(parent, name, required_, fixed_size_, min_size_, max_size_); }
 
 FormElement * StringArrayInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new StringArrayInput(parent, name, required_, fixed_size_, min_size_, max_size_);
-}
+{ return new StringArrayInput(parent, name, required_, fixed_size_, min_size_, max_size_); }
 
 NumberArrayInput::NumberArrayInput(QWidget * parent,
                                    const std::string & name,
@@ -368,9 +334,7 @@ NumberArrayInput::NumberArrayInput(QWidget * parent,
 }
 
 FormElement * NumberArrayInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new NumberArrayInput(parent, name, required_, def_, fixed_size_, user_def_);
-}
+{ return new NumberArrayInput(parent, name, required_, def_, fixed_size_, user_def_); }
 
 void NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool /*fixed_size*/, bool user_def)
 {
@@ -452,9 +416,7 @@ mc_rtc::Configuration ComboInput::serialize() const
 }
 
 FormElement * ComboInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new ComboInput(parent, name, required_, values_, send_index_, def_);
-}
+{ return new ComboInput(parent, name, required_, values_, send_index_, def_); }
 
 void ComboInput::fill(const mc_rtc::Configuration & data)
 {
@@ -593,14 +555,10 @@ void DataComboInput::update_values()
 }
 
 FormElement * DataComboInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new DataComboInput(parent, name, required_, data_, ref_, send_index_, rename_);
-}
+{ return new DataComboInput(parent, name, required_, data_, ref_, send_index_, rename_); }
 
 void DataComboInput::fill(const mc_rtc::Configuration & data)
-{
-  combo_->setCurrentText(data.operator std::string().c_str());
-}
+{ combo_->setCurrentText(data.operator std::string().c_str()); }
 
 Form::Form(QWidget * parent,
            const std::string & name,
@@ -675,9 +633,7 @@ bool Form::ready() const
 }
 
 mc_rtc::Configuration Form::serialize() const
-{
-  return serialize(tuple_);
-}
+{ return serialize(tuple_); }
 
 mc_rtc::Configuration Form::serialize(bool asTuple) const
 {
@@ -698,9 +654,7 @@ mc_rtc::Configuration Form::serialize(bool asTuple) const
 }
 
 void Form::rejectUncheck()
-{
-  group_->setChecked(true);
-}
+{ group_->setChecked(true); }
 
 void Form::reset()
 {
@@ -723,9 +677,7 @@ namespace details
 static uint64_t form_interactive_input_id = 0;
 
 static std::string next_marker_name()
-{
-  return fmt::format("form_interactive_input_{}", form_interactive_input_id);
-}
+{ return fmt::format("form_interactive_input_{}", form_interactive_input_id); }
 
 template<typename DataT, bool rotation_only>
 InteractiveMarkerInput<DataT, rotation_only>::InteractiveMarkerInput(QWidget * parent,
@@ -928,19 +880,13 @@ template struct InteractiveMarkerInput<sva::PTransformd, true>;
 } // namespace details
 
 FormElement * Point3DInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new Point3DInput(parent, name, required_, default_data_, user_default_, interactive_, server_);
-}
+{ return new Point3DInput(parent, name, required_, default_data_, user_default_, interactive_, server_); }
 
 FormElement * RotationInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new RotationInput(parent, name, required_, default_data_, user_default_, interactive_, server_);
-}
+{ return new RotationInput(parent, name, required_, default_data_, user_default_, interactive_, server_); }
 
 FormElement * TransformInput::clone(QWidget * parent, const std::string & name) const
-{
-  return new TransformInput(parent, name, required_, default_data_, user_default_, interactive_, server_);
-}
+{ return new TransformInput(parent, name, required_, default_data_, user_default_, interactive_, server_); }
 
 Object::Object(QWidget * parent, const std::string & name, bool required, FormElementContainer * parentForm)
 : FormElement(parent, name, required)
@@ -951,9 +897,7 @@ Object::Object(QWidget * parent, const std::string & name, bool required, FormEl
 }
 
 void Object::changed(bool required, FormElementContainer *)
-{
-  changed_(required);
-}
+{ changed_(required); }
 
 mc_rtc::Configuration Object::serialize() const
 {
@@ -963,24 +907,16 @@ mc_rtc::Configuration Object::serialize() const
 }
 
 void Object::reset()
-{
-  container_->reset();
-}
+{ container_->reset(); }
 
 bool Object::ready() const
-{
-  return container_->ready();
-}
+{ return container_->ready(); }
 
 bool Object::locked() const
-{
-  return container_->locked();
-}
+{ return container_->locked(); }
 
 void Object::unlock()
-{
-  container_->unlock();
-}
+{ container_->unlock(); }
 
 FormElement * Object::clone(QWidget * parent, const std::string & name) const
 {
@@ -1064,19 +1000,13 @@ mc_rtc::Configuration GenericArray::serialize() const
 }
 
 void GenericArray::reset()
-{
-  values_->reset();
-}
+{ values_->reset(); }
 
 bool GenericArray::ready() const
-{
-  return values_->ready();
-}
+{ return values_->ready(); }
 
 bool GenericArray::locked() const
-{
-  return locked_ || values_->locked();
-}
+{ return locked_ || values_->locked(); }
 
 void GenericArray::unlock()
 {
@@ -1098,14 +1028,10 @@ FormElement * GenericArray::clone(QWidget * parent, const std::string & name) co
 }
 
 void GenericArray::fill(const mc_rtc::Configuration & value)
-{
-  updateValues(value);
-}
+{ updateValues(value); }
 
 void GenericArray::update()
-{
-  values_->update();
-}
+{ values_->update(); }
 
 OneOf::OneOf(QWidget * parent,
              const std::string & name,
@@ -1160,19 +1086,13 @@ void OneOf::reset()
 }
 
 bool OneOf::ready() const
-{
-  return active_ && active_->ready();
-}
+{ return active_ && active_->ready(); }
 
 bool OneOf::locked() const
-{
-  return locked_ || (active_ && active_->locked());
-}
+{ return locked_ || (active_ && active_->locked()); }
 
 void OneOf::unlock()
-{
-  reset();
-}
+{ reset(); }
 
 FormElement * OneOf::clone(QWidget * parent, const std::string & name) const
 {

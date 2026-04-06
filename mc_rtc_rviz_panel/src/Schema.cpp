@@ -69,9 +69,7 @@ mc_rtc::Configuration Schema::resolveAllOf(const mc_rtc::Configuration & s, cons
 }
 
 Schema::Schema(const mc_rtc::Configuration & s, const std::string & source, const std::string & title, bool required_in)
-{
-  init(resolveAllOf(s, source), source, title, required_in);
-}
+{ init(resolveAllOf(s, source), source, title, required_in); }
 
 void Schema::init(const mc_rtc::Configuration & s,
                   const std::string & source,

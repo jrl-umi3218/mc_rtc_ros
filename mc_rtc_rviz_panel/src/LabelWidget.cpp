@@ -17,8 +17,6 @@ LabelWidget::LabelWidget(const ClientWidgetParam & param) : ClientWidget(param)
 }
 
 void LabelWidget::update(const std::string & in)
-{
-  label_->setText(in.c_str());
-}
+{ label_->setText(in.c_str()); }
 
 } // namespace mc_rtc_rviz

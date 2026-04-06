@@ -51,15 +51,11 @@ using Pose = geometry_msgs::Pose;
 // Check if at least one values in x.array() is nan
 template<typename Derived>
 inline bool is_nan(const Eigen::MatrixBase<Derived> & x)
-{
-  return x.array().isNaN().any();
-}
+{ return x.array().isNaN().any(); }
 
 template<typename Derived>
 inline bool is_in_range(const Eigen::MatrixBase<Derived> & x, double min = -10e10, double max = 10e10)
-{
-  return (x.array() > min).all() && (x.array() < max).all();
-}
+{ return (x.array() > min).all() && (x.array() < max).all(); }
 
 Marker getPointMarker(const Eigen::Vector3d & pos, const mc_rtc::gui::Color & color, double scale);
 Point rosPoint(const Eigen::Vector3d & vec);

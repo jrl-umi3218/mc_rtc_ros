@@ -16,8 +16,6 @@ ButtonWidget::ButtonWidget(const ClientWidgetParam & param) : ClientWidget(param
 }
 
 void ButtonWidget::button_released()
-{
-  client().send_request(id());
-}
+{ client().send_request(id()); }
 
 } // namespace mc_rtc_rviz

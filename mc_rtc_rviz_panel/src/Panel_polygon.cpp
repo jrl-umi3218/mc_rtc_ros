@@ -12,16 +12,12 @@ namespace mc_rtc_rviz
 void Panel::polygon(const WidgetId & id,
                     const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                     const mc_rtc::gui::Color & color)
-{
-  polygon(id, polygons, mc_rtc::gui::LineConfig{color});
-}
+{ polygon(id, polygons, mc_rtc::gui::LineConfig{color}); }
 
 void Panel::polygon(const WidgetId & id,
                     const std::vector<std::vector<Eigen::Vector3d>> & polygons,
                     const mc_rtc::gui::LineConfig & config)
-{
-  Q_EMIT signal_polygon(id, polygons, config);
-}
+{ Q_EMIT signal_polygon(id, polygons, config); }
 
 void Panel::got_polygon(const WidgetId & id,
                         const std::vector<std::vector<Eigen::Vector3d>> & polygons,

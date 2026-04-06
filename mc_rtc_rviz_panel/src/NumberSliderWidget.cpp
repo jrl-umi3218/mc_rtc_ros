@@ -41,13 +41,9 @@ void NumberSliderWidget::sliderMoved(int value)
 }
 
 void NumberSliderWidget::sliderPressed()
-{
-  locked_ = true;
-}
+{ locked_ = true; }
 
 void NumberSliderWidget::sliderReleased()
-{
-  locked_ = false;
-}
+{ locked_ = false; }
 
 } // namespace mc_rtc_rviz
