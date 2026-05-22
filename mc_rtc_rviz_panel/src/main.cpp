@@ -8,6 +8,10 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QScreen>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#  include <QDesktopWidget>
+#endif
 #include <csignal>
 
 #ifdef MC_RTC_ROS_IS_ROS2
@@ -35,7 +39,11 @@ int main(int argc, char * argv[])
   app_ = &app;
   QMainWindow window;
   window.setWindowTitle("mc_rtc GUI");
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+  window.resize(app.primaryScreen()->availableGeometry().size() * 0.7);
+#else
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.7);
+#endif
   window.setCentralWidget(new mc_rtc_rviz::Panel(&window));
   window.show();
   std::signal(SIGINT, &signal_handler);

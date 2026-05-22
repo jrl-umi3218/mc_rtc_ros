@@ -108,13 +108,21 @@ QSize PlotTabBar::tabSizeHint(int index) const
     auto s = QTabBar::tabSizeHint(index);
 
     const QFontMetrics fm(font());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    const int w = fm.horizontalAdvance(tabText(index));
+#else
     const int w = fm.width(tabText(index));
+#endif
     const int h = fm.height();
 
     QFont f = font();
     f.setBold(true);
     const QFontMetrics bfm(f);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    const int bw = bfm.horizontalAdvance(tabText(index));
+#else
     const int bw = bfm.width(tabText(index));
+#endif
     const int bh = bfm.height();
 
     return {s.width() + bw - w, s.height() + bh - h};

@@ -45,6 +45,13 @@ if(NOT DEFINED ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
 else()
   set(FORCE_QT5 $ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
 endif()
+
+if("${ROS_DISTRO}" STREQUAL "lyrical")
+  set(USE_QT6 1)
+else()
+  set(USE_QT6 0)
+endif()
+
 if(NOT ${FORCE_QT5} AND "${ROS_DISTRO}" STREQUAL "indigo")
   find_package(
     Qt4
@@ -52,6 +59,13 @@ if(NOT ${FORCE_QT5} AND "${ROS_DISTRO}" STREQUAL "indigo")
     REQUIRED)
   qt4_wrap_cpp(MOC_FILES ${MOC_HEADERS})
   qt4_add_resources(QRC_FILES icons.qrc)
+elseif(USE_QT6)
+  find_package(
+    Qt6
+    COMPONENTS Core Gui Widgets
+    REQUIRED)
+  qt6_wrap_cpp(MOC_FILES ${MOC_HEADERS})
+  qt6_add_resources(QRC_FILES icons.qrc)
 else()
   find_package(
     Qt5
@@ -111,6 +125,8 @@ set(SOURCE_FILES
 add_library(_gui_objects OBJECT ${SOURCE_FILES})
 if(NOT ${FORCE_QT5} AND "${ROS_DISTRO}" STREQUAL "indigo")
   target_link_libraries(_gui_objects PUBLIC Qt4::QtCore Qt4::QtGui)
+elseif(USE_QT6)
+  target_link_libraries(_gui_objects PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
 else()
   target_link_libraries(_gui_objects PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
 endif()
