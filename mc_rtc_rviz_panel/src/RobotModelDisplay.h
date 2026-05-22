@@ -7,11 +7,11 @@
 #include "ClientWidget.h"
 
 #ifdef MC_RTC_ROS_IS_ROS2
-using Display = rviz_common::Display;
+using RVizDisplay = rviz_common::Display;
 const std::string display_class_id = "rviz_default_plugins/RobotModel";
 const std::string description_prop = "Description Topic";
 #else
-using Display = rviz::Display;
+using RVizDisplay = rviz::Display;
 const std::string display_class_id = "rviz/RobotModel";
 const std::string description_prop = "Robot Description";
 #endif
@@ -27,6 +27,6 @@ struct RobotModelDisplay : public ClientWidget
 protected:
   QHBoxLayout * layout_;
   QLabel * label_;
-  QPointer<Display> robot_model_display = nullptr;
+  QPointer<RVizDisplay> robot_model_display = nullptr;
 };
 } // namespace mc_rtc_rviz
