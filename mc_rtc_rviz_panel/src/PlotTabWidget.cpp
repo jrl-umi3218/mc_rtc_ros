@@ -47,7 +47,7 @@ PlotDialog::PlotDialog(PlotWidget * plot, PlotTabWidget * parent, QString title)
   plot->show();
   show();
   connect(this, SIGNAL(rejected()), this, SLOT(handle_close()));
-  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_W), this, SLOT(reject()));
+  new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_W), this, SLOT(reject()));
 }
 
 void PlotDialog::closeEvent(QCloseEvent * event)
@@ -181,9 +181,9 @@ PlotTabWidget::PlotTabWidget(const ClientWidgetParam & param) : ClientWidget(par
   tab_ = new PlotTab(this);
   tab_->setTabBar(new PlotTabBar(tab_, this));
   layout->addWidget(tab_);
-  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageUp), this, SLOT(previousTab()));
-  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageDown), this, SLOT(nextTab()));
-  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_W), this, SLOT(closeCurrentTab()));
+  new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_PageUp), this, SLOT(previousTab()));
+  new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_PageDown), this, SLOT(nextTab()));
+  new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_W), this, SLOT(closeCurrentTab()));
 }
 
 void PlotTabWidget::resetSeen()
