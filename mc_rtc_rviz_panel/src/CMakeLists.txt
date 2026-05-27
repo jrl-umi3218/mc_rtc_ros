@@ -46,7 +46,7 @@ else()
   set(FORCE_QT5 $ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
 endif()
 
-if("${ROS_DISTRO}" STREQUAL "lyrical")
+if(NOT ${FORCE_QT5} AND "${ROS_DISTRO}" STREQUAL "lyrical")
   set(USE_QT6 1)
 else()
   set(USE_QT6 0)
