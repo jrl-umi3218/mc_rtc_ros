@@ -47,7 +47,7 @@ PlotDialog::PlotDialog(PlotWidget * plot, PlotTabWidget * parent, QString title)
   plot->show();
   show();
   connect(this, SIGNAL(rejected()), this, SLOT(handle_close()));
-  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_W), this, SLOT(reject()));
+  new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_W), this, SLOT(reject()));
 }
 
 void PlotDialog::closeEvent(QCloseEvent * event)
@@ -108,13 +108,21 @@ QSize PlotTabBar::tabSizeHint(int index) const
     auto s = QTabBar::tabSizeHint(index);
 
     const QFontMetrics fm(font());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    const int w = fm.horizontalAdvance(tabText(index));
+#else
     const int w = fm.width(tabText(index));
+#endif
     const int h = fm.height();
 
     QFont f = font();
     f.setBold(true);
     const QFontMetrics bfm(f);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    const int bw = bfm.horizontalAdvance(tabText(index));
+#else
     const int bw = bfm.width(tabText(index));
+#endif
     const int bh = bfm.height();
 
     return {s.width() + bw - w, s.height() + bh - h};
@@ -173,9 +181,9 @@ PlotTabWidget::PlotTabWidget(const ClientWidgetParam & param) : ClientWidget(par
   tab_ = new PlotTab(this);
   tab_->setTabBar(new PlotTabBar(tab_, this));
   layout->addWidget(tab_);
-  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageUp), this, SLOT(previousTab()));
-  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageDown), this, SLOT(nextTab()));
-  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_W), this, SLOT(closeCurrentTab()));
+  new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_PageUp), this, SLOT(previousTab()));
+  new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_PageDown), this, SLOT(nextTab()));
+  new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_W), this, SLOT(closeCurrentTab()));
 }
 
 void PlotTabWidget::resetSeen()

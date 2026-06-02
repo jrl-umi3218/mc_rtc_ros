@@ -21,7 +21,7 @@ endif()
 
 find_library(
   Qwt_LIBRARY
-  NAMES qwt-qt5 qwt qwt-qt4
+  NAMES qwt-qt6 qwt-qt5 qwt qwt-qt4
   PATHS ${QWT_PATHS}
   HINTS ${QWT_HINTS}
   PATH_SUFFIXES ${ARCH_SUFFIX}
@@ -38,8 +38,6 @@ find_package_handle_standard_args(
 if(Qwt_FOUND)
   set(Qwt_LIBRARIES ${Qwt_LIBRARY})
   set(Qwt_INCLUDE_DIRS ${Qwt_INCLUDE_DIR})
-else()
-  message(FATAL_ERROR "Could not find Qwt on your system")
 endif()
 if(Qwt_FOUND AND NOT TARGET Qwt::Qwt)
   if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
