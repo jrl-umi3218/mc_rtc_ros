@@ -36,8 +36,14 @@ bool setPen(T * curve, Color color, Style style, double width = 0.)
   }
   auto qc = convert(color);
   auto pstyle = Qt::SolidLine;
-  if(style == Style::Dashed) { pstyle = Qt::DashLine; }
-  if(style == Style::Dotted) { pstyle = Qt::DotLine; }
+  if(style == Style::Dashed)
+  {
+    pstyle = Qt::DashLine;
+  }
+  if(style == Style::Dotted)
+  {
+    pstyle = Qt::DotLine;
+  }
   curve->setPen(qc, width, pstyle);
   return true;
 }
@@ -52,7 +58,10 @@ PlotWidget::Curve::Curve(QwtPlot * plot, const std::string & legend, mc_rtc::gui
   curve_->attach(plot);
   curve_->setRenderHint(QwtPlotItem::RenderAntialiased);
   curve_->setRawSamples(samples_x_.data(), samples_y_.data(), static_cast<int>(samples_x_.size()));
-  if(side == Side::Left) { curve_->setYAxis(QwtPlot::yLeft); }
+  if(side == Side::Left)
+  {
+    curve_->setYAxis(QwtPlot::yLeft);
+  }
   else
   {
     curve_->setYAxis(QwtPlot::yRight);
@@ -76,7 +85,10 @@ PlotWidget::Curve::Curve(Curve && rhs)
 
 PlotWidget::Curve & PlotWidget::Curve::operator=(Curve && rhs)
 {
-  if(&rhs == this) { return *this; }
+  if(&rhs == this)
+  {
+    return *this;
+  }
   if(curve_)
   {
     curve_->detach();
@@ -104,7 +116,10 @@ QRectF PlotWidget::Curve::update(double x,
     rect_.setBottom(y);
     rect_.setTop(y);
   }
-  if(setPen(curve_, color, style, line_width)) { curve_->setStyle(QwtPlotCurve::Lines); }
+  if(setPen(curve_, color, style, line_width))
+  {
+    curve_->setStyle(QwtPlotCurve::Lines);
+  }
   else
   {
     samples_x_.resize(0);
@@ -154,7 +169,10 @@ PlotWidget::Polygon::Polygon(QwtPlot * plot, const std::string & legend, mc_rtc:
   item_->attach(plot);
   item_->setRenderHint(QwtPlotItem::RenderAntialiased);
   item_->setPolygon(polygon_);
-  if(side == Side::Left) { item_->setYAxis(QwtPlot::yLeft); }
+  if(side == Side::Left)
+  {
+    item_->setYAxis(QwtPlot::yLeft);
+  }
   else
   {
     item_->setYAxis(QwtPlot::yRight);
@@ -173,12 +191,18 @@ PlotWidget::Polygon::Polygon(Polygon && rhs)
   polygon_ = rhs.polygon_;
   rect_ = rhs.rect_;
   rhs.item_ = nullptr;
-  if(item_) { item_->setPolygon(polygon_); }
+  if(item_)
+  {
+    item_->setPolygon(polygon_);
+  }
 }
 
 PlotWidget::Polygon & PlotWidget::Polygon::operator=(Polygon && rhs)
 {
-  if(&rhs == this) { return *this; }
+  if(&rhs == this)
+  {
+    return *this;
+  }
   if(item_)
   {
     item_->detach();
@@ -189,13 +213,19 @@ PlotWidget::Polygon & PlotWidget::Polygon::operator=(Polygon && rhs)
   polygon_ = rhs.polygon_;
   rect_ = rhs.rect_;
   rhs.item_ = nullptr;
-  if(item_) { item_->setPolygon(polygon_); }
+  if(item_)
+  {
+    item_->setPolygon(polygon_);
+  }
   return *this;
 }
 
 QRectF PlotWidget::Polygon::update(const PolygonDescription & poly)
 {
-  if(poly_ == poly) { return rect_; }
+  if(poly_ == poly)
+  {
+    return rect_;
+  }
   poly_ = poly;
   polygon_.clear();
   if(poly_.points().size())
@@ -225,7 +255,10 @@ QRectF PlotWidget::Polygon::update(const PolygonDescription & poly)
   }
   setPen(item_, poly_.outline(), poly_.style());
   const auto & fill = poly_.fill();
-  if(poly_.closed()) { item_->setBrush(convert(fill)); }
+  if(poly_.closed())
+  {
+    item_->setBrush(convert(fill));
+  }
   item_->setPolygon(polygon_);
   return rect_;
 }
@@ -256,8 +289,14 @@ QRectF PlotWidget::PolygonsVector::update(const std::vector<PolygonDescription> 
     }
   }
   QRectF rect;
-  if(polygons_.size()) { rect = polygons_[0].rect(); }
-  for(size_t i = 1; i < polygons_.size(); ++i) { rect = rect.united(polygons_[i].rect()); }
+  if(polygons_.size())
+  {
+    rect = polygons_[0].rect();
+  }
+  for(size_t i = 1; i < polygons_.size(); ++i)
+  {
+    rect = rect.united(polygons_[i].rect());
+  }
   return rect;
 }
 
@@ -371,19 +410,28 @@ const std::string & PlotWidget::title() const
 
 void PlotWidget::setup_xaxis(const std::string & legend, const mc_rtc::gui::plot::Range & range)
 {
-  if(legend.size()) { plot_->setAxisTitle(QwtPlot::xBottom, QwtText(legend.c_str())); }
+  if(legend.size())
+  {
+    plot_->setAxisTitle(QwtPlot::xBottom, QwtText(legend.c_str()));
+  }
   xRange_ = range;
 }
 
 void PlotWidget::setup_yaxis_left(const std::string & legend, const mc_rtc::gui::plot::Range & range)
 {
-  if(legend.size()) { plot_->setAxisTitle(QwtPlot::yLeft, QwtText(legend.c_str())); }
+  if(legend.size())
+  {
+    plot_->setAxisTitle(QwtPlot::yLeft, QwtText(legend.c_str()));
+  }
   yLeftRange_ = range;
 }
 
 void PlotWidget::setup_yaxis_right(const std::string & legend, const mc_rtc::gui::plot::Range & range)
 {
-  if(legend.size()) { plot_->setAxisTitle(QwtPlot::yRight, QwtText(legend.c_str())); }
+  if(legend.size())
+  {
+    plot_->setAxisTitle(QwtPlot::yRight, QwtText(legend.c_str()));
+  }
   yRightRange_ = range;
 }
 
@@ -395,7 +443,10 @@ void PlotWidget::plot(uint64_t id,
                       mc_rtc::gui::plot::Style style,
                       mc_rtc::gui::plot::Side side)
 {
-  if(!curves_.count(id)) { curves_[id] = Curve(plot_, legend, side); }
+  if(!curves_.count(id))
+  {
+    curves_[id] = Curve(plot_, legend, side);
+  }
   update(side, curves_[id].update(x, y, color, style, line_width_, limit_xrange_ ? show_duration_ : -1));
 }
 
@@ -404,7 +455,10 @@ void PlotWidget::plot(uint64_t id,
                       const PolygonDescription & polygon,
                       mc_rtc::gui::plot::Side side)
 {
-  if(!polygons_.count(id)) { polygons_[id] = Polygon(plot_, legend, side); }
+  if(!polygons_.count(id))
+  {
+    polygons_[id] = Polygon(plot_, legend, side);
+  }
   update(side, polygons_[id].update(polygon));
 }
 
@@ -413,7 +467,10 @@ void PlotWidget::plot(uint64_t id,
                       const std::vector<PolygonDescription> & polygons,
                       mc_rtc::gui::plot::Side side)
 {
-  if(!polygonsVectors_.count(id)) { polygonsVectors_[id] = PolygonsVector(plot_, legend, side); }
+  if(!polygonsVectors_.count(id))
+  {
+    polygonsVectors_[id] = PolygonsVector(plot_, legend, side);
+  }
   update(side, polygonsVectors_[id].update(polygons));
 }
 
@@ -446,8 +503,14 @@ void PlotWidget::refresh()
     plot_->replot();
     return;
   }
-  if(!has_left_plot_) { plot_->enableAxis(QwtPlot::yLeft, false); }
-  if(has_right_plot_) { plot_->enableAxis(QwtPlot::yRight); }
+  if(!has_left_plot_)
+  {
+    plot_->enableAxis(QwtPlot::yLeft, false);
+  }
+  if(has_right_plot_)
+  {
+    plot_->enableAxis(QwtPlot::yRight);
+  }
   auto inf = mc_rtc::gui::plot::Range::inf;
   auto setScale = [this, inf](int id, const mc_rtc::gui::plot::Range & range, double min, double max, bool limit)
   {
@@ -458,16 +521,28 @@ void PlotWidget::refresh()
       min = 0;
       max = 1;
     }
-    if(min == max) { max = min + 0.1; }
+    if(min == max)
+    {
+      max = min + 0.1;
+    }
     double r = max - min;
-    if(limit && r > show_duration_) { min = max - show_duration_; }
+    if(limit && r > show_duration_)
+    {
+      min = max - show_duration_;
+    }
     plot_->setAxisScale(id, min, max);
   };
   auto & yLRect = boundingRects_[Side::Left];
   auto & yRRect = boundingRects_[Side::Right];
   auto xRect = yLRect.united(yRRect);
-  if(has_left_plot_ && !has_right_plot_) { xRect = yLRect; }
-  if(has_right_plot_ && !has_left_plot_) { xRect = yRRect; }
+  if(has_left_plot_ && !has_right_plot_)
+  {
+    xRect = yLRect;
+  }
+  if(has_right_plot_ && !has_left_plot_)
+  {
+    xRect = yRRect;
+  }
   setScale(QwtPlot::xBottom, xRange_, xRect.left(), xRect.right(), limit_xrange_);
   setScale(QwtPlot::yLeft, yLeftRange_, yLRect.top(), yLRect.bottom(), false);
   setScale(QwtPlot::yRight, yRightRange_, yRRect.top(), yRRect.bottom(), false);
@@ -554,7 +629,10 @@ void PlotWidget::save_button_clicked()
 void PlotWidget::toggle_options_widget()
 {
   options_widget_->setVisible(!options_widget_->isVisible());
-  if(options_widget_->isVisible()) { options_button_->setText("Less"); }
+  if(options_widget_->isVisible())
+  {
+    options_button_->setText("Less");
+  }
   else
   {
     options_button_->setText("More");

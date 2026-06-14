@@ -7,7 +7,10 @@ VisualWidget::VisualWidget(const ClientWidgetParam & params, MarkerArray & marke
 : ClientWidget(params), markers_(markers), visible_(visible()), was_visible_(visible_)
 {
   auto layout = new QHBoxLayout(this);
-  if(!secret()) { layout->addWidget(new QLabel(id().name.c_str())); }
+  if(!secret())
+  {
+    layout->addWidget(new QLabel(id().name.c_str()));
+  }
   button_ = new QPushButton(this);
   button_->setCheckable(true);
   button_->setChecked(!visible());
@@ -135,7 +138,10 @@ void VisualWidget::update(const rbd::parsers::Visual & visual, const sva::PTrans
   }
   if(visible_ || was_visible_)
   {
-    if(!visible_) { marker_.action = Marker::DELETE; }
+    if(!visible_)
+    {
+      marker_.action = Marker::DELETE;
+    }
     markers_.markers.push_back(marker_);
   }
   was_visible_ = visible_;

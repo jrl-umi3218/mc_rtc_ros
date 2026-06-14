@@ -38,7 +38,10 @@ Schema::Schema(const std::vector<Schema> & schemas)
     std::vector<FormElement *> elems;
     for(const auto & s : schemas)
     {
-      for(auto & el : s.create_form(parent, data)) { elems.push_back(el); }
+      for(auto & el : s.create_form(parent, data))
+      {
+        elems.push_back(el);
+      }
     }
     return elems;
   };
@@ -52,8 +55,14 @@ mc_rtc::Configuration Schema::resolveAllOf(const mc_rtc::Configuration & s, cons
     for(size_t i = 0; i < s("allOf").size(); ++i)
     {
       auto si = s("allOf")[i];
-      if(si.has("$ref")) { schema.load(resolveAllOf(mc_rtc::Configuration{ref_path(source, si("$ref"))}, source)); }
-      else if(si.has("allOf")) { schema.load(resolveAllOf(si, source)); }
+      if(si.has("$ref"))
+      {
+        schema.load(resolveAllOf(mc_rtc::Configuration{ref_path(source, si("$ref"))}, source));
+      }
+      else if(si.has("allOf"))
+      {
+        schema.load(resolveAllOf(si, source));
+      }
       else
       {
         schema.load(si);
@@ -88,7 +97,10 @@ void Schema::init(const mc_rtc::Configuration & s,
   {
     auto ref_schema = ref_path(sourceIn, ref_);
     auto key = ref_schema + "::" + titleIn;
-    if(!store().count(key)) { store()[key] = Schema{ref_schema, titleIn}; }
+    if(!store().count(key))
+    {
+      store()[key] = Schema{ref_schema, titleIn};
+    }
     return store().at(key);
   };
   /** Handle enum entries */
@@ -99,7 +111,10 @@ void Schema::init(const mc_rtc::Configuration & s,
     {
       auto v = cf(parent, data);
       v.emplace_back(new form::ComboInput(parent, k, requiredIn, values, false, values.size() == 1 ? 0 : -1));
-      if(values.size() == 1 && requiredIn) { v.back()->hidden(true); }
+      if(values.size() == 1 && requiredIn)
+      {
+        v.back()->hidden(true);
+      }
       return v;
     };
   };
@@ -111,7 +126,10 @@ void Schema::init(const mc_rtc::Configuration & s,
     {
       auto v = cf(parent, data);
       v.emplace_back(new form::StringInput(parent, k, requiredIn, value, true));
-      if(value.size() && requiredIn) { v.back()->hidden(true); }
+      if(value.size() && requiredIn)
+      {
+        v.back()->hidden(true);
+      }
       return v;
     };
   };
@@ -297,7 +315,10 @@ void Schema::init(const mc_rtc::Configuration & s,
   auto handle_array = [this, &source, &handle_type_array, &handle_ref_array](
                           const char * desc, const std::string & k, bool requiredIn, const mc_rtc::Configuration & c)
   {
-    if(!c.has("items")) { mc_rtc::log::warning("{}{} in {} is an array but items are not specified", desc, k, source); }
+    if(!c.has("items"))
+    {
+      mc_rtc::log::warning("{}{} in {} is an array but items are not specified", desc, k, source);
+    }
     auto items = c("items");
     size_t minItems = c("minItems", size_t{0});
     size_t maxItems = c("maxItems", size_t{256});
@@ -310,8 +331,14 @@ void Schema::init(const mc_rtc::Configuration & s,
       items.load((*oneOfIt)[0]);
       items.remove("oneOf");
     }
-    if(items.has("type")) { handle_type_array(k, requiredIn, items("type"), items, minItems, maxItems); }
-    else if(items.has("$ref")) { handle_ref_array(k, requiredIn, items("$ref"), minItems, maxItems); }
+    if(items.has("type"))
+    {
+      handle_type_array(k, requiredIn, items("type"), items, minItems, maxItems);
+    }
+    else if(items.has("$ref"))
+    {
+      handle_ref_array(k, requiredIn, items("$ref"), minItems, maxItems);
+    }
     else if(items.size())
     {
       std::vector<Schema> schemas;
@@ -346,12 +373,21 @@ void Schema::init(const mc_rtc::Configuration & s,
     for(const auto & k : properties.keys())
     {
       auto prop = properties(k);
-      if(prop.has("enum")) { handle_enum(k, is_required(k), prop("enum")); }
-      else if(prop.has("const")) { handle_const(k, is_required(k), prop("const")); }
+      if(prop.has("enum"))
+      {
+        handle_enum(k, is_required(k), prop("enum"));
+      }
+      else if(prop.has("const"))
+      {
+        handle_const(k, is_required(k), prop("const"));
+      }
       else if(prop.has("type"))
       {
         std::string type = prop("type");
-        if(type == "array") { handle_array("Property ", k, is_required(k), prop); }
+        if(type == "array")
+        {
+          handle_array("Property ", k, is_required(k), prop);
+        }
         else
         {
           handle_type(k, is_required(k), type, prop);
@@ -390,14 +426,20 @@ void Schema::init(const mc_rtc::Configuration & s,
     *this = resolve_ref(source, s("$ref"), title_);
     return;
   }
-  if(!s.has("type")) { mc_rtc::log::error("No type entry for {} in {}", title, source); }
+  if(!s.has("type"))
+  {
+    mc_rtc::log::error("No type entry for {} in {}", title, source);
+  }
   std::string type = s("type");
   if(type == "object")
   {
     is_object_ = true;
     handle_object(title_, s);
   }
-  else if(type == "array") { handle_array("", title_, required_in, s); }
+  else if(type == "array")
+  {
+    handle_array("", title_, required_in, s);
+  }
   else
   {
     handle_type(title_, required_in, type, s);

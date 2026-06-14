@@ -34,7 +34,10 @@ fs::path getConfigDirectory()
 fs::path getConfigPath()
 {
   fs::path config = getConfigDirectory() / "rviz_panel.conf";
-  if(fs::exists(config)) { return config; }
+  if(fs::exists(config))
+  {
+    return config;
+  }
   return getConfigDirectory() / "rviz_panel.yaml";
 }
 
@@ -44,7 +47,10 @@ const mc_rtc::Configuration & loadPanelConfiguration()
   {
     mc_rtc::Configuration configOut;
     auto config_path = getConfigPath();
-    if(fs::exists(config_path) && fs::is_regular_file(config_path)) { configOut.load(config_path.string()); }
+    if(fs::exists(config_path) && fs::is_regular_file(config_path))
+    {
+      configOut.load(config_path.string());
+    }
     return configOut;
   }();
   return config;
@@ -53,7 +59,10 @@ const mc_rtc::Configuration & loadPanelConfiguration()
 void savePanelConfiguration(const mc_rtc::Configuration & config)
 {
   auto config_directory = getConfigDirectory();
-  if(!fs::exists(config_directory)) { fs::create_directories(config_directory); }
+  if(!fs::exists(config_directory))
+  {
+    fs::create_directories(config_directory);
+  }
   if(!fs::is_directory(config_directory))
   {
     mc_rtc::log::error("Cannot save configuration to {}, {} is not a directory", config_directory, config_directory);
@@ -237,10 +246,16 @@ void Panel::got_stop()
   impl_->int_server_->applyChanges();
 #ifdef MC_RTC_ROS_IS_ROS2
   impl_->marker_array_pub_->publish(impl_->marker_array_);
-  if(rclcpp::ok()) { rclcpp::spin_some(impl_->nh_); }
+  if(rclcpp::ok())
+  {
+    rclcpp::spin_some(impl_->nh_);
+  }
 #else
   impl_->marker_array_pub_.publish(impl_->marker_array_);
-  if(ros::ok()) { ros::spinOnce(); }
+  if(ros::ok())
+  {
+    ros::spinOnce();
+  }
 #endif
   impl_->marker_array_.markers.clear();
 }
@@ -271,14 +286,23 @@ void Panel::got_category(const std::vector<std::string> & parent, const std::str
 Panel::WidgetTree & Panel::get_category(const std::vector<std::string> & category)
 {
   auto ret = &tree_;
-  for(const auto & c : category) { ret = &(ret->sub_trees_[c]); }
+  for(const auto & c : category)
+  {
+    ret = &(ret->sub_trees_[c]);
+  }
   return *ret;
 }
 
 void Panel::WidgetTree::start()
 {
-  if(parent) { parent->resetSeen(); }
-  for(auto & st : sub_trees_) { st.second.start(); }
+  if(parent)
+  {
+    parent->resetSeen();
+  }
+  for(auto & st : sub_trees_)
+  {
+    st.second.start();
+  }
 }
 
 void Panel::WidgetTree::clean()
@@ -289,10 +313,16 @@ void Panel::WidgetTree::clean()
     auto & t = it->second;
     t.clean();
     size_t rem = 0;
-    if(t.parent) { rem = t.parent->clean(); }
+    if(t.parent)
+    {
+      rem = t.parent->clean();
+    }
     if(rem == 0 && t.sub_trees_.size() == 0)
     {
-      if(parent && t.parent) { parent->removeWidget(t.parent); }
+      if(parent && t.parent)
+      {
+        parent->removeWidget(t.parent);
+      }
       sub_trees_.erase(it++);
     }
     else
@@ -358,14 +388,23 @@ void Panel::visible(const WidgetId & id, bool visibility)
 
 mc_rtc::Configuration Panel::config(const WidgetId & id) const
 {
-  if(!config_.has("widgets")) { config_.add("widgets"); }
+  if(!config_.has("widgets"))
+  {
+    config_.add("widgets");
+  }
   auto ret = config_("widgets");
   for(const auto & c : id.category)
   {
-    if(!ret.has(c)) { ret.add(c); }
+    if(!ret.has(c))
+    {
+      ret.add(c);
+    }
     ret = ret(c);
   }
-  if(!ret.has(id.name)) { ret.add(id.name); }
+  if(!ret.has(id.name))
+  {
+    ret.add(id.name);
+  }
   return ret(id.name);
 }
 

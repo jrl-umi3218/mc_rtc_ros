@@ -16,7 +16,10 @@ PolyhedronMarkerWidget::PolyhedronMarkerWidget(const ClientWidgetParam & params,
   visible_triangles_(config.show_triangle), visible_edges_(config.show_edges), visible_vertices_(config.show_vertices)
 {
   auto layout = new QHBoxLayout(this);
-  if(!secret()) { layout->addWidget(new QLabel(id().name.c_str())); }
+  if(!secret())
+  {
+    layout->addWidget(new QLabel(id().name.c_str()));
+  }
   button_ = new QPushButton(this);
   button_->setCheckable(true);
   button_->setChecked(!visible_);
@@ -132,10 +135,16 @@ void PolyhedronMarkerWidget::update_triangles(const std::vector<std::array<Eigen
     }
   };
   set_triangles();
-  if(!config_.use_triangle_color && colors.size() && colors.size() == triangles.size()) { set_colors(); }
+  if(!config_.use_triangle_color && colors.size() && colors.size() == triangles.size())
+  {
+    set_colors();
+  }
   if(visible_)
   {
-    if(visible_triangles_) { markers_.markers.push_back(triangles_); }
+    if(visible_triangles_)
+    {
+      markers_.markers.push_back(triangles_);
+    }
     else if(was_visible_triangles_)
     {
       markers_.markers.push_back(triangles_);
@@ -164,7 +173,10 @@ void PolyhedronMarkerWidget::update_edges(const std::vector<std::array<Eigen::Ve
   edges_.header.stamp = now();
   edges_.points = triangles_.points;
 
-  if(!config_.fixed_edge_color) { edges_.colors = triangles_.colors; }
+  if(!config_.fixed_edge_color)
+  {
+    edges_.colors = triangles_.colors;
+  }
 
   if(visible_)
   {
@@ -194,7 +206,10 @@ void PolyhedronMarkerWidget::update_edges(const std::vector<std::array<Eigen::Ve
       edges_.points.push_back(p0);
     }
 
-    if(visible_edges_) { markers_.markers.push_back(edges_); }
+    if(visible_edges_)
+    {
+      markers_.markers.push_back(edges_);
+    }
     else if(was_visible_edges_)
     {
       markers_.markers.push_back(edges_);
@@ -220,11 +235,17 @@ void PolyhedronMarkerWidget::update_vertices(const std::vector<std::array<Eigen:
   vertices_.id = 0;
   vertices_.points = triangles_.points;
 
-  if(!config_.fixed_vertices_color) { vertices_.colors = triangles_.colors; }
+  if(!config_.fixed_vertices_color)
+  {
+    vertices_.colors = triangles_.colors;
+  }
 
   if(visible_)
   {
-    if(visible_vertices_) { markers_.markers.push_back(vertices_); }
+    if(visible_vertices_)
+    {
+      markers_.markers.push_back(vertices_);
+    }
     else if(was_visible_vertices_)
     {
       markers_.markers.push_back(vertices_);
@@ -243,7 +264,10 @@ void PolyhedronMarkerWidget::update(const std::vector<std::array<Eigen::Vector3d
                                     const std::vector<std::array<mc_rtc::gui::Color, 3>> & colors)
 {
   currPolyhedronNum_ = triangles.size();
-  if(prevPolyhedronNum_ > currPolyhedronNum_) { clear(); }
+  if(prevPolyhedronNum_ > currPolyhedronNum_)
+  {
+    clear();
+  }
 
   update_triangles(triangles, colors);
   update_edges(triangles, colors);
