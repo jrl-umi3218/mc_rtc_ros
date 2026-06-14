@@ -14,7 +14,10 @@ ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param, const std::v
 
   labels_layout_ = new QHBoxLayout();
   mainLayout->addLayout(labels_layout_);
-  if(!secret()) { labels_layout_->addWidget(new QLabel(name().c_str())); }
+  if(!secret())
+  {
+    labels_layout_->addWidget(new QLabel(name().c_str()));
+  }
   lock_button_ = new QPushButton("EDIT");
   lock_button_->setCheckable(true);
   labels_layout_->addWidget(lock_button_);
@@ -25,13 +28,19 @@ ArrayInputWidget::ArrayInputWidget(const ClientWidgetParam & param, const std::v
   {
     edits_row_ = 1;
     int col = 0;
-    for(const auto & l : labels) { edits_layout_->addWidget(new QLabel(l.c_str()), 0, col++, Qt::AlignCenter); }
+    for(const auto & l : labels)
+    {
+      edits_layout_->addWidget(new QLabel(l.c_str()), 0, col++, Qt::AlignCenter);
+    }
   }
 }
 
 void ArrayInputWidget::update(const Eigen::VectorXd & dataIn)
 {
-  if(lock_button_ && lock_button_->isChecked()) { return; }
+  if(lock_button_ && lock_button_->isChecked())
+  {
+    return;
+  }
   if(static_cast<size_t>(dataIn.size()) != edits_.size())
   {
     auto old_size = edits_.size();
@@ -59,7 +68,10 @@ void ArrayInputWidget::lock_toggled(bool unlocked)
   if(unlocked)
   {
     lock_button_->setText("SEND");
-    for(auto e : edits_) { e->setReadOnly(false); }
+    for(auto e : edits_)
+    {
+      e->setReadOnly(false);
+    }
   }
   else
   {
@@ -77,7 +89,10 @@ void ArrayInputWidget::lock_toggled(bool unlocked)
 
 void ArrayInputWidget::edit_return_pressed()
 {
-  if(lock_button_ && lock_button_->isChecked()) { lock_button_->toggle(); }
+  if(lock_button_ && lock_button_->isChecked())
+  {
+    lock_button_->toggle();
+  }
 }
 
 QPushButton * ArrayInputWidget::showHideButton()

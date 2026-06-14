@@ -33,7 +33,10 @@ TransformInteractiveMarkerWidget::TransformInteractiveMarkerWidget(const ClientW
 
 void TransformInteractiveMarkerWidget::handleRequest(const InteractiveMarkerFeedbackConstPtr & feedback)
 {
-  if(!control_position_ && !control_orientation_) { return; }
+  if(!control_position_ && !control_orientation_)
+  {
+    return;
+  }
   if(control_position_ && !control_orientation_)
   {
     Eigen::Vector3d v{feedback->pose.position.x, feedback->pose.position.y, feedback->pose.position.z};

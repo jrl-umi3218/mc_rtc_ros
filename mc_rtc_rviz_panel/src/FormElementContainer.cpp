@@ -22,7 +22,10 @@ struct FormElementHeader : public QWidget
 
   void update()
   {
-    if(element_->locked()) { button_->show(); }
+    if(element_->locked())
+    {
+      button_->show();
+    }
     else
     {
       button_->hide();
@@ -47,7 +50,10 @@ void FormElementContainer::make_form_layout()
 {
   for(auto & el : elements_header_)
   {
-    if(el) { el->deleteLater(); }
+    if(el)
+    {
+      el->deleteLater();
+    }
   }
   elements_header_.clear();
   form_ = new QWidget();
@@ -72,11 +78,17 @@ void FormElementContainer::make_form_layout()
 void FormElementContainer::remove_element(FormElement * element)
 {
   auto it = std::find(elements_.begin(), elements_.end(), element);
-  if(it == elements_.end()) { return; }
+  if(it == elements_.end())
+  {
+    return;
+  }
   (*it)->deleteLater();
   size_t idx = std::distance(elements_.begin(), it);
   elements_.erase(it);
-  for(; idx < elements_.size(); ++idx) { elements_[idx]->name(std::to_string(idx)); }
+  for(; idx < elements_.size(); ++idx)
+  {
+    elements_[idx]->name(std::to_string(idx));
+  }
   changed_ = true;
 }
 
@@ -94,7 +106,10 @@ void FormElementContainer::update()
   {
     for(auto & h : elements_header_)
     {
-      if(h) { h->update(); }
+      if(h)
+      {
+        h->update();
+      }
     }
   }
 }
@@ -105,7 +120,10 @@ bool FormElementContainer::ready(std::string & msg) const
   for(auto & el : elements_)
   {
     bool ret = el->can_fill(msg);
-    if(!ret) { msg += '\n'; }
+    if(!ret)
+    {
+      msg += '\n';
+    }
     ok = ret && ok;
   }
   return ok;
@@ -124,19 +142,28 @@ bool FormElementContainer::locked() const
 
 void FormElementContainer::unlock()
 {
-  for(auto & el : elements_) { el->unlock(); }
+  for(auto & el : elements_)
+  {
+    el->unlock();
+  }
 }
 
 void FormElementContainer::reset()
 {
-  for(auto & el : elements_) { el->reset(); }
+  for(auto & el : elements_)
+  {
+    el->reset();
+  }
 }
 
 void FormElementContainer::collect(mc_rtc::Configuration & out)
 {
   for(auto & el : elements_)
   {
-    if(el->ready()) { out.add(el->name(), el->serialize()); }
+    if(el->ready())
+    {
+      out.add(el->name(), el->serialize());
+    }
     el->unlock();
     el->reset();
   }
@@ -165,7 +192,10 @@ void FormElementContainer::add_element_to_layout(FormElement * elementIn)
   auto is_robot_or_required = [&label_text, elementIn]()
   { return elementIn->required() || label_text == "robot" || label_text == "r1" || label_text == "r2"; };
   QFormLayout * layout_ = is_robot_or_required() ? requiredLayout_ : optionalLayout_;
-  if(elementIn->required()) { label_text += "*"; }
+  if(elementIn->required())
+  {
+    label_text += "*";
+  }
   auto header = new FormElementHeader(label_text.c_str(), elementIn, form_);
   if(array_like_)
   {
@@ -179,13 +209,22 @@ void FormElementContainer::add_element_to_layout(FormElement * elementIn)
             });
   }
   elements_header_.push_back(header);
-  if(!elementIn->spanning()) { layout_->addRow(header, elementIn); }
+  if(!elementIn->spanning())
+  {
+    layout_->addRow(header, elementIn);
+  }
   else
   {
-    if(elementIn->show_name()) { layout_->addRow(header); }
+    if(elementIn->show_name())
+    {
+      layout_->addRow(header);
+    }
     layout_->addRow(elementIn);
   }
-  if(optionalLayout_->rowCount() == 0) { optionalToolBox_->hide(); }
+  if(optionalLayout_->rowCount() == 0)
+  {
+    optionalToolBox_->hide();
+  }
   else
   {
     optionalToolBox_->show();
@@ -194,7 +233,10 @@ void FormElementContainer::add_element_to_layout(FormElement * elementIn)
 
 void FormElementContainer::copy(const FormElementContainer & other)
 {
-  for(const auto & e : other.elements_) { add_element(e->clone(this, e->name())); }
+  for(const auto & e : other.elements_)
+  {
+    add_element(e->clone(this, e->name()));
+  }
   update();
 }
 

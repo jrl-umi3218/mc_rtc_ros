@@ -29,7 +29,10 @@ bool FormElement::eventFilter(QObject * o, QEvent * e)
 
 bool FormElement::can_fill(std::string & msg)
 {
-  if(ready()) { return true; }
+  if(ready())
+  {
+    return true;
+  }
   else if(required())
   {
     msg += name() + " must be completed";
@@ -65,7 +68,10 @@ Checkbox::Checkbox(QWidget * parent, const std::string & name, bool required, bo
 
 void Checkbox::changed(bool required, bool def, bool user_def)
 {
-  if(cbox_->hasFocus()) { return; }
+  if(cbox_->hasFocus())
+  {
+    return;
+  }
   changed_(required);
   def_ = def;
   user_def_ = user_def;
@@ -81,7 +87,10 @@ void Checkbox::toggled(bool)
 void Checkbox::reset()
 {
   cbox_->disconnect();
-  if(user_def_) { cbox_->setChecked(def_); }
+  if(user_def_)
+  {
+    cbox_->setChecked(def_);
+  }
   else
   {
     cbox_->setTristate(true);
@@ -144,7 +153,10 @@ IntegerInput::IntegerInput(QWidget * parent, const std::string & name, bool requ
 
 void IntegerInput::changed(bool required, int def, bool user_def)
 {
-  if(edit_->hasFocus()) { return; }
+  if(edit_->hasFocus())
+  {
+    return;
+  }
   changed_(required);
   def_ = def;
   user_def_ = user_def;
@@ -159,7 +171,10 @@ mc_rtc::Configuration IntegerInput::serialize() const
 void IntegerInput::reset()
 {
   edit_->disconnect();
-  if(user_def_) { edit_->setText(QString::number(def_)); }
+  if(user_def_)
+  {
+    edit_->setText(QString::number(def_));
+  }
   else
   {
     edit_->setText("");
@@ -191,7 +206,10 @@ NumberInput::NumberInput(QWidget * parent, const std::string & name, bool requir
 
 void NumberInput::changed(bool required, double def, bool user_def)
 {
-  if(edit_->hasFocus()) { return; }
+  if(edit_->hasFocus())
+  {
+    return;
+  }
   changed_(required);
   def_ = def;
   user_def_ = user_def;
@@ -206,7 +224,10 @@ mc_rtc::Configuration NumberInput::serialize() const
 void NumberInput::reset()
 {
   edit_->disconnect();
-  if(user_def_) { edit_->setText(QString::number(def_)); }
+  if(user_def_)
+  {
+    edit_->setText(QString::number(def_));
+  }
   else
   {
     edit_->setText("");
@@ -239,7 +260,10 @@ StringInput::StringInput(QWidget * parent,
 
 void StringInput::changed(bool required, const std::string & def, bool user_def)
 {
-  if(edit_->hasFocus()) { return; }
+  if(edit_->hasFocus())
+  {
+    return;
+  }
   changed_(required);
   def_ = def;
   user_def_ = user_def;
@@ -249,7 +273,10 @@ void StringInput::changed(bool required, const std::string & def, bool user_def)
 void StringInput::reset()
 {
   edit_->disconnect();
-  if(user_def_) { edit_->setText(def_.c_str()); }
+  if(user_def_)
+  {
+    edit_->setText(def_.c_str());
+  }
   else
   {
     edit_->setText("");
@@ -353,7 +380,10 @@ NumberArrayInput::NumberArrayInput(QWidget * parent,
                                    bool user_def)
 : ArrayInput<double>(parent, name, required, fixed_size), def_(def), user_def_(user_def)
 {
-  if(fixed_size) { updateStride(static_cast<size_t>(def.size())); }
+  if(fixed_size)
+  {
+    updateStride(static_cast<size_t>(def.size()));
+  }
   reset();
 }
 
@@ -376,14 +406,20 @@ void NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool 
 {
   for(const auto & e : edits_)
   {
-    if(e->hasFocus()) { return; }
+    if(e->hasFocus())
+    {
+      return;
+    }
   }
   changed_(required);
   bool should_reset = def_.size() != def.size();
   def_ = def;
   user_def_ = user_def;
   fixed_size_ = fixed_size_;
-  if(should_reset) { reset(); }
+  if(should_reset)
+  {
+    reset();
+  }
   size_t i = 0;
   for(auto & e : edits_)
   {
@@ -397,7 +433,10 @@ void NumberArrayInput::changed(bool required, const Eigen::VectorXd & def, bool 
 void NumberArrayInput::reset()
 {
   ArrayInput<double>::reset();
-  for(int i = 0; i < def_.size(); ++i) { add_edit(def_(i)); }
+  for(int i = 0; i < def_.size(); ++i)
+  {
+    add_edit(def_(i));
+  }
   ready_ = user_def_;
 }
 
@@ -414,7 +453,10 @@ ComboInput::ComboInput(QWidget * parent,
   combo_->installEventFilter(this);
   combo_->setFocusPolicy(Qt::StrongFocus);
   layout->addWidget(combo_);
-  for(const auto & v : values) { combo_->addItem(v.c_str()); }
+  for(const auto & v : values)
+  {
+    combo_->addItem(v.c_str());
+  }
   reset();
 }
 
@@ -428,7 +470,10 @@ void ComboInput::reset()
 
 void ComboInput::changed(bool required, const std::vector<std::string> & values, bool send_index, int def)
 {
-  if(combo_->hasFocus()) { return; }
+  if(combo_->hasFocus())
+  {
+    return;
+  }
   changed_(required);
   def_ = def;
   values_ = values;
@@ -444,7 +489,10 @@ void ComboInput::currentIndexChanged(int idx)
 
 mc_rtc::Configuration ComboInput::serialize() const
 {
-  if(send_index_) { return details::serialize(combo_->currentIndex()); }
+  if(send_index_)
+  {
+    return details::serialize(combo_->currentIndex());
+  }
   else
   {
     return details::serialize(combo_->currentText().toStdString());
@@ -488,7 +536,10 @@ void DataComboInput::reset()
   combo_->clear();
   values_.clear();
   resolved_ref_ = ref_;
-  if(resolve_ref()) { update_values(); }
+  if(resolve_ref())
+  {
+    update_values();
+  }
   combo_->setCurrentIndex(-1);
   ready_ = false;
   combo_->blockSignals(false);
@@ -499,11 +550,17 @@ void DataComboInput::changed(bool required,
                              const std::vector<std::string> & ref,
                              bool send_index)
 {
-  if(combo_->hasFocus()) { return; }
+  if(combo_->hasFocus())
+  {
+    return;
+  }
   changed_(required);
   ref_ = ref;
   send_index_ = send_index;
-  if(resolve_ref()) { update_values(); }
+  if(resolve_ref())
+  {
+    update_values();
+  }
 }
 
 void DataComboInput::currentIndexChanged(int idx)
@@ -524,7 +581,10 @@ void DataComboInput::update_dependencies(FormElement * other)
         auto combo = static_cast<QComboBox *>(other->layout()->itemAt(0)->widget());
         connect(combo, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(currentIndexChanged(const QString &)));
         connected_.insert(need);
-        if(combo->currentIndex() != -1) { update_field(other->name(), combo->currentText().toStdString()); }
+        if(combo->currentIndex() != -1)
+        {
+          update_field(other->name(), combo->currentText().toStdString());
+        }
       }
     }
   }
@@ -539,7 +599,10 @@ void DataComboInput::currentIndexChanged(const QString & text)
 
 mc_rtc::Configuration DataComboInput::serialize() const
 {
-  if(send_index_) { return details::serialize(combo_->currentIndex()); }
+  if(send_index_)
+  {
+    return details::serialize(combo_->currentIndex());
+  }
   else
   {
     return details::serialize(combo_->currentText().toStdString());
@@ -550,7 +613,10 @@ bool DataComboInput::resolve_ref()
 {
   for(const auto & k : resolved_ref_)
   {
-    if(k.size() == 0 || k[0] == '$') { return false; }
+    if(k.size() == 0 || k[0] == '$')
+    {
+      return false;
+    }
   }
   return true;
 }
@@ -562,16 +628,25 @@ void DataComboInput::update_field(const std::string & name, const std::string & 
     if(ref_[i].size() && ref_[i][0] == '$')
     {
       auto k = ref_[i].substr(1, ref_[i].size() - 1);
-      if(k == name) { resolved_ref_[i] = value; }
+      if(k == name)
+      {
+        resolved_ref_[i] = value;
+      }
     }
   }
-  if(resolve_ref()) { update_values(); }
+  if(resolve_ref())
+  {
+    update_values();
+  }
 }
 
 void DataComboInput::update_values()
 {
   auto dataIn = data_;
-  for(const auto & k : resolved_ref_) { dataIn = dataIn(k, mc_rtc::Configuration{}); }
+  for(const auto & k : resolved_ref_)
+  {
+    dataIn = dataIn(k, mc_rtc::Configuration{});
+  }
   auto values = dataIn.size() ? dataIn : std::vector<std::string>{};
   std::sort(values.begin(), values.end(), [](const std::string & lhs, const std::string & rhs)
             { return QString::compare(lhs.c_str(), rhs.c_str(), Qt::CaseInsensitive) < 0; });
@@ -584,11 +659,20 @@ void DataComboInput::update_values()
     for(size_t i = 0; i < values.size(); ++i)
     {
       const auto & v = values[i];
-      if(v == selected) { idx = static_cast<int>(i); }
+      if(v == selected)
+      {
+        idx = static_cast<int>(i);
+      }
       combo_->addItem(v.c_str());
     }
-    if(idx != -1) { combo_->setCurrentIndex(idx); }
-    else if(values.size()) { combo_->setCurrentIndex(0); }
+    if(idx != -1)
+    {
+      combo_->setCurrentIndex(idx);
+    }
+    else if(values.size())
+    {
+      combo_->setCurrentIndex(0);
+    }
   }
 }
 
@@ -623,7 +707,10 @@ Form::Form(QWidget * parent,
     auto layout = new QHBoxLayout(group_);
     for(auto & el : elements_)
     {
-      for(auto & other : elements_) { el->update_dependencies(other); }
+      for(auto & other : elements_)
+      {
+        el->update_dependencies(other);
+      }
       layout->addWidget(el);
     }
   }
@@ -632,12 +719,21 @@ Form::Form(QWidget * parent,
     auto layout = new QFormLayout(group_);
     for(auto & el : elements_)
     {
-      for(auto & other : elements_) { el->update_dependencies(other); }
+      for(auto & other : elements_)
+      {
+        el->update_dependencies(other);
+      }
       auto el_name = el->required() ? el->name() + "*" : el->name();
-      if(!el->spanning()) { layout->addRow(el_name.c_str(), el); }
+      if(!el->spanning())
+      {
+        layout->addRow(el_name.c_str(), el);
+      }
       else
       {
-        if(el->show_name()) { layout->addRow(new QLabel(el_name.c_str(), this)); }
+        if(el->show_name())
+        {
+          layout->addRow(new QLabel(el_name.c_str(), this));
+        }
         layout->addRow(el);
       }
     }
@@ -657,7 +753,10 @@ bool Form::ready() const
   { // for required forms, return true if all required elements have been completed
     for(const auto & el : elements_)
     {
-      if(el->required() && !el->ready()) { return false; }
+      if(el->required() && !el->ready())
+      {
+        return false;
+      }
     }
     return true;
   }
@@ -682,12 +781,18 @@ mc_rtc::Configuration Form::serialize() const
 mc_rtc::Configuration Form::serialize(bool asTuple) const
 {
   mc_rtc::Configuration out;
-  if(asTuple) { out = out.array("data", elements_.size()); }
+  if(asTuple)
+  {
+    out = out.array("data", elements_.size());
+  }
   for(auto & el : elements_)
   {
     if(el->ready())
     {
-      if(asTuple) { out.push(el->serialize()); }
+      if(asTuple)
+      {
+        out.push(el->serialize());
+      }
       else
       {
         out.add(el->name(), el->serialize());
@@ -704,13 +809,19 @@ void Form::rejectUncheck()
 
 void Form::reset()
 {
-  for(auto & el : elements_) { el->reset(); }
+  for(auto & el : elements_)
+  {
+    el->reset();
+  }
 }
 
 std::string formId2name(const WidgetId & id, const std::string & name)
 {
   std::string ret;
-  for(const auto c : id.category) { ret += c + "/"; }
+  for(const auto c : id.category)
+  {
+    ret += c + "/";
+  }
   ret += id.name;
   ret += "/";
   ret += name;
@@ -755,7 +866,10 @@ InteractiveMarkerInput<DataT, rotation_only>::InteractiveMarkerInput(QWidget * p
   {
     auto & data = [this]() -> Eigen::Vector3d &
     {
-      if constexpr(std::is_same_v<Eigen::Vector3d, DataT>) { return data_; }
+      if constexpr(std::is_same_v<Eigen::Vector3d, DataT>)
+      {
+        return data_;
+      }
       else
       {
         return data_.translation();
@@ -787,10 +901,22 @@ InteractiveMarkerInput<DataT, rotation_only>::InteractiveMarkerInput(QWidget * p
     auto data = get_data();
     auto get_value = [](Eigen::Quaterniond & data, const char label) -> double &
     {
-      if(label == 'w') { return data.w(); }
-      if(label == 'x') { return data.x(); }
-      if(label == 'y') { return data.y(); }
-      if(label == 'z') { return data.z(); }
+      if(label == 'w')
+      {
+        return data.w();
+      }
+      if(label == 'x')
+      {
+        return data.x();
+      }
+      if(label == 'y')
+      {
+        return data.y();
+      }
+      if(label == 'z')
+      {
+        return data.z();
+      }
       mc_rtc::log::error_and_throw("unreacheable");
     };
     int column = 0;
@@ -824,7 +950,10 @@ void InteractiveMarkerInput<DataT, rotation_only>::changed(bool required,
                                                            bool interactive,
                                                            std::shared_ptr<InteractiveMarkerServer> int_server)
 {
-  if(std::any_of(edits_.begin(), edits_.end(), [](const auto * edit) { return edit->hasFocus(); })) { return; }
+  if(std::any_of(edits_.begin(), edits_.end(), [](const auto * edit) { return edit->hasFocus(); }))
+  {
+    return;
+  }
   changed_(required);
   data_ = default_;
   default_data_ = data_;
@@ -836,7 +965,10 @@ template<typename DataT, bool rotation_only>
 mc_rtc::Configuration InteractiveMarkerInput<DataT, rotation_only>::serialize() const
 {
   mc_rtc::Configuration out;
-  if constexpr(std::is_same_v<DataT, sva::PTransformd> && rotation_only) { out.add("data", data_.rotation()); }
+  if constexpr(std::is_same_v<DataT, sva::PTransformd> && rotation_only)
+  {
+    out.add("data", data_.rotation());
+  }
   else
   {
     out.add("data", data_);
@@ -900,7 +1032,10 @@ void InteractiveMarkerInput<DataT, rotation_only>::reset_edits()
   {
     auto & data = [this]() -> Eigen::Vector3d &
     {
-      if constexpr(std::is_same_v<Eigen::Vector3d, DataT>) { return data_; }
+      if constexpr(std::is_same_v<Eigen::Vector3d, DataT>)
+      {
+        return data_;
+      }
       else
       {
         return data_.translation();
@@ -993,7 +1128,10 @@ void Object::fill(const mc_rtc::Configuration & value)
 {
   for(auto & el : container_->elements())
   {
-    if(value.has(el->name())) { el->fill(value(el->name())); }
+    if(value.has(el->name()))
+    {
+      el->fill(value(el->name()));
+    }
   }
 }
 
@@ -1026,7 +1164,10 @@ void GenericArray::changed(bool required,
                            std::optional<std::vector<mc_rtc::Configuration>> data,
                            FormElementContainer *)
 {
-  if(template_->empty()) { return; }
+  if(template_->empty())
+  {
+    return;
+  }
   changed_(required);
   if(!data)
   {
@@ -1044,9 +1185,15 @@ void GenericArray::changed(bool required,
 void GenericArray::updateValues(const std::vector<mc_rtc::Configuration> & data_)
 {
   // Remove extraneous elements
-  while(values_->elements().size() > data_.size()) { values_->remove_element(values_->elements().back()); }
+  while(values_->elements().size() > data_.size())
+  {
+    values_->remove_element(values_->elements().back());
+  }
   // Update existing elements
-  for(size_t i = 0; i < values_->elements().size(); ++i) { values_->elements()[i]->fill(data_[i]); }
+  for(size_t i = 0; i < values_->elements().size(); ++i)
+  {
+    values_->elements()[i]->fill(data_[i]);
+  }
   // Create missing elements
   for(size_t i = values_->elements().size(); i < data_.size(); ++i)
   {
@@ -1059,7 +1206,10 @@ void GenericArray::updateValues(const std::vector<mc_rtc::Configuration> & data_
 mc_rtc::Configuration GenericArray::serialize() const
 {
   mc_rtc::Configuration out = mc_rtc::Configuration::rootArray();
-  for(const auto & v : values_->elements()) { out.push(v->serialize()); }
+  for(const auto & v : values_->elements())
+  {
+    out.push(v->serialize());
+  }
   return out;
 }
 
@@ -1086,7 +1236,10 @@ void GenericArray::unlock()
 
 void GenericArray::addValue(const std::string & name)
 {
-  if(template_->empty()) { return; }
+  if(template_->empty())
+  {
+    return;
+  }
   values_->add_element(template_->element()->clone(this, name));
 }
 
@@ -1137,7 +1290,10 @@ void OneOf::changed(bool required,
   changed_(required);
   if(!data)
   {
-    if(active_) { updateValue(-1, {}); }
+    if(active_)
+    {
+      updateValue(-1, {});
+    }
   }
   else
   {
@@ -1186,14 +1342,20 @@ void OneOf::fill(const mc_rtc::Configuration & value)
 {
   if(value.isArray())
   {
-    if(value.size() != 2) { mc_rtc::log::error_and_throw("Wrong data to fill OneOf: {}", value.dump(true, true)); }
+    if(value.size() != 2)
+    {
+      mc_rtc::log::error_and_throw("Wrong data to fill OneOf: {}", value.dump(true, true));
+    }
     updateValue(value[0], value[1]);
   }
 }
 
 void OneOf::updateValue(int idx, mc_rtc::Configuration data)
 {
-  if(container_->elements().size() == 0) { return; }
+  if(container_->elements().size() == 0)
+  {
+    return;
+  }
   selector_->blockSignals(true);
   if(idx < 0)
   {
@@ -1212,7 +1374,10 @@ void OneOf::updateValue(int idx, mc_rtc::Configuration data)
     {
       mc_rtc::log::error_and_throw("Data out of range for OneOf::updateValue");
     }
-    if(active_) { active_->deleteLater(); }
+    if(active_)
+    {
+      active_->deleteLater();
+    }
     auto template_ = container_->elements()[data_.first];
     active_ = template_->clone(this, template_->name());
     activeLayout_->addWidget(active_);
@@ -1221,7 +1386,10 @@ void OneOf::updateValue(int idx, mc_rtc::Configuration data)
   if(active_)
   {
     data_.second = data;
-    if(!data_.second.empty()) { active_->fill(data_.second); }
+    if(!data_.second.empty())
+    {
+      active_->fill(data_.second);
+    }
   }
   selector_->blockSignals(false);
 }
@@ -1229,10 +1397,19 @@ void OneOf::updateValue(int idx, mc_rtc::Configuration data)
 void OneOf::update()
 {
   const auto & templates = container_->elements();
-  if(templates.size() == 0 || templates.size() == selector_->count()) { return; }
+  if(templates.size() == 0 || templates.size() == selector_->count())
+  {
+    return;
+  }
   selector_->blockSignals(true);
-  while(selector_->count()) { selector_->removeItem(0); }
-  for(const auto & t : templates) { selector_->addItem(t->name().c_str()); }
+  while(selector_->count())
+  {
+    selector_->removeItem(0);
+  }
+  for(const auto & t : templates)
+  {
+    selector_->addItem(t->name().c_str());
+  }
   selector_->setCurrentIndex(-1);
   selector_->blockSignals(false);
 }

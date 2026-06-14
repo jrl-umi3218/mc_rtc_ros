@@ -23,7 +23,10 @@ QApplication * app_ = nullptr;
 
 void signal_handler(int)
 {
-  if(app_) { app_->exit(); }
+  if(app_)
+  {
+    app_->exit();
+  }
 }
 
 int main(int argc, char * argv[])

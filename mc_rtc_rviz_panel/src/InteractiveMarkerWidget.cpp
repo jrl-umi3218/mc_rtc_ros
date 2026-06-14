@@ -27,7 +27,10 @@ InteractiveMarkerWidget::InteractiveMarkerWidget(const ClientWidgetParam & param
   }
   button_->setCheckable(true);
   button_->setChecked(!visible());
-  if(!visible()) { toggled(!visible()); }
+  if(!visible())
+  {
+    toggled(!visible());
+  }
   connect(button_, SIGNAL(toggled(bool)), this, SLOT(toggled(bool)));
 }
 

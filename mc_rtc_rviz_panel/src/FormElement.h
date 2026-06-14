@@ -269,7 +269,10 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
                           int max_size)
 : CommonArrayInput(parent, name, required), fixed_size_(fixed_size), min_size_(min_size), max_size_(max_size)
 {
-  if(min_size == max_size) { updateStride(min_size); }
+  if(min_size == max_size)
+  {
+    updateStride(min_size);
+  }
   spanning_ = true;
   auto mainLayout = new QVBoxLayout(this);
   auto w = new QWidget(this);
@@ -281,7 +284,10 @@ ArrayInput<T>::ArrayInput(QWidget * parent,
     add_button_ = new QPushButton("+");
     connect(add_button_, SIGNAL(released()), this, SLOT(plusReleased()));
     mainLayout->addWidget(add_button_);
-    if(edits_.size() == static_cast<size_t>(max_size_)) { add_button_->hide(); }
+    if(edits_.size() == static_cast<size_t>(max_size_))
+    {
+      add_button_->hide();
+    }
   }
 }
 
@@ -293,13 +299,19 @@ void ArrayInput<T>::reset()
     for(int j = 0; j < layout_->columnCount(); ++j)
     {
       auto itm = layout_->itemAtPosition(i, j);
-      if(itm) { itm->widget()->deleteLater(); }
+      if(itm)
+      {
+        itm->widget()->deleteLater();
+      }
     }
   }
   edits_.clear();
   for(int i = 0; i < min_size_; ++i)
   {
-    if(is_square_) { add_edit(i % stride_ == next_row_ ? T{1} : T{0}); }
+    if(is_square_)
+    {
+      add_edit(i % stride_ == next_row_ ? T{1} : T{0});
+    }
     else
     {
       add_edit(T{});
@@ -310,7 +322,10 @@ void ArrayInput<T>::reset()
 template<typename T>
 void ArrayInput<T>::updateStride(size_t size)
 {
-  if(size < 6) { stride_ = static_cast<int>(size); }
+  if(size < 6)
+  {
+    stride_ = static_cast<int>(size);
+  }
   else if(size == 9)
   {
     is_square_ = true;
@@ -344,7 +359,10 @@ mc_rtc::Configuration ArrayInput<T>::serialize() const
 {
   mc_rtc::Configuration c;
   auto out = c.array("DATA", edits_.size());
-  for(auto e : edits_) { out.push(edit2data(e)); }
+  for(auto e : edits_)
+  {
+    out.push(edit2data(e));
+  }
   return out;
 }
 
@@ -352,10 +370,19 @@ template<typename T>
 void ArrayInput<T>::fill(const mc_rtc::Configuration & data_)
 {
   std::vector<T> data = data_;
-  if(data.size() < min_size_) { mc_rtc::log::error_and_throw("Should have engouh data to fill ArrayInput"); }
+  if(data.size() < min_size_)
+  {
+    mc_rtc::log::error_and_throw("Should have engouh data to fill ArrayInput");
+  }
   reset();
-  for(size_t i = 0; i < edits_.size(); ++i) { data2edit(data[i], edits_[i]); }
-  for(size_t i = edits_.size(); i < data.size(); ++i) { add_edit(data[i]); }
+  for(size_t i = 0; i < edits_.size(); ++i)
+  {
+    data2edit(data[i], edits_[i]);
+  }
+  for(size_t i = edits_.size(); i < data.size(); ++i)
+  {
+    add_edit(data[i]);
+  }
 }
 
 template<typename T>
@@ -367,7 +394,10 @@ void ArrayInput<T>::add_edit(const T & def)
   connect(edit, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
   layout_->addWidget(edit, next_row_, next_column_++);
   edits_.push_back(edit);
-  if(edits_.size() == static_cast<size_t>(max_size_) && add_button_) { add_button_->hide(); }
+  if(edits_.size() == static_cast<size_t>(max_size_) && add_button_)
+  {
+    add_button_->hide();
+  }
   if(!fixed_size_ && static_cast<int>(edits_.size()) > min_size_)
   {
     auto button = new QPushButton("-");
@@ -390,7 +420,10 @@ void ArrayInput<T>::minusReleased()
   for(int i = 0; i < layout_->rowCount(); ++i)
   {
     auto item = layout_->itemAtPosition(i, 1);
-    if(!item) { continue; }
+    if(!item)
+    {
+      continue;
+    }
     auto w = item->widget();
     if(w == button)
     {
@@ -399,7 +432,10 @@ void ArrayInput<T>::minusReleased()
     }
   }
   edits_.erase(std::find(edits_.begin(), edits_.end(), edit));
-  if(edits_.size() < static_cast<size_t>(max_size_) && add_button_) { add_button_->show(); }
+  if(edits_.size() < static_cast<size_t>(max_size_) && add_button_)
+  {
+    add_button_->show();
+  }
   delete edit;
   delete button;
 }

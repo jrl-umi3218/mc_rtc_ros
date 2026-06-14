@@ -40,7 +40,10 @@ private:
 PlotDialog::PlotDialog(PlotWidget * plot, PlotTabWidget * parent, QString title)
 : QDialog(parent), plot_(plot), parent_(parent)
 {
-  if(parent->is_done(plot)) { title += " (DONE)"; }
+  if(parent->is_done(plot))
+  {
+    title += " (DONE)";
+  }
   setWindowTitle(title);
   auto layout = new QVBoxLayout(this);
   layout->addWidget(plot);
@@ -159,9 +162,15 @@ void PlotTabBar::tabLayoutChange()
   for(int i = 0; i < count(); ++i)
   {
     auto pop_button = static_cast<PopTabButton *>(tabButton(i, QTabBar::LeftSide));
-    if(pop_button) { pop_button->update(i); }
+    if(pop_button)
+    {
+      pop_button->update(i);
+    }
     auto close_button = static_cast<CloseTabButton *>(tabButton(i, QTabBar::RightSide));
-    if(close_button) { close_button->update(i); }
+    if(close_button)
+    {
+      close_button->update(i);
+    }
   }
 }
 
@@ -210,7 +219,10 @@ bool PlotTabWidget::wasSeen()
         for(size_t i = 0; i < dialogs_.size(); ++i)
         {
           auto & diag = dialogs_[i];
-          if(diag->plot() == plot) { diag->setWindowTitle(diag->windowTitle() + " (DONE)"); }
+          if(diag->plot() == plot)
+          {
+            diag->setWindowTitle(diag->windowTitle() + " (DONE)");
+          }
         }
       }
     }
@@ -230,10 +242,16 @@ void PlotTabWidget::start_plot(uint64_t id, const std::string & title)
     size_t i = 0;
     for(const auto & p : plots_)
     {
-      if(p.second->title() == title) { i += 1; }
+      if(p.second->title() == title)
+      {
+        i += 1;
+      }
     }
     std::string tabTitle = title;
-    if(i != 0) { tabTitle += " (" + std::to_string(i) + ")"; }
+    if(i != 0)
+    {
+      tabTitle += " (" + std::to_string(i) + ")";
+    }
     plots_[id] = new PlotWidget(title, this);
     tab_->addTab(plots_[id], tabTitle.c_str());
     tab_->setCurrentIndex(tab_->count() - 1);
@@ -302,7 +320,10 @@ void PlotTabWidget::closeTabOnRequest(int i)
 
 void PlotTabWidget::previousTab()
 {
-  if(tab_->currentIndex() != 0) { tab_->setCurrentIndex(tab_->currentIndex() - 1); }
+  if(tab_->currentIndex() != 0)
+  {
+    tab_->setCurrentIndex(tab_->currentIndex() - 1);
+  }
   else
   {
     tab_->setCurrentIndex(tab_->count() - 1);
@@ -311,7 +332,10 @@ void PlotTabWidget::previousTab()
 
 void PlotTabWidget::nextTab()
 {
-  if(tab_->currentIndex() != tab_->count() - 1) { tab_->setCurrentIndex(tab_->currentIndex() + 1); }
+  if(tab_->currentIndex() != tab_->count() - 1)
+  {
+    tab_->setCurrentIndex(tab_->currentIndex() + 1);
+  }
   else
   {
     tab_->setCurrentIndex(0);
@@ -333,7 +357,10 @@ void PlotTabWidget::close_dialog(PlotDialog * dialog)
 {
   auto plot = dialog->plot();
   auto title = dialog->windowTitle();
-  if(title.endsWith(" (DONE)")) { title.chop(strlen(" (DONE)")); }
+  if(title.endsWith(" (DONE)"))
+  {
+    title.chop(strlen(" (DONE)"));
+  }
   add_plot_widget(title, plot);
   for(auto it = dialogs_.begin(); it != dialogs_.end(); ++it)
   {
