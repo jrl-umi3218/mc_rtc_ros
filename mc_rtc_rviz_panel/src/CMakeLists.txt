@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
+# Copyright 2016-2026 CNRS-UM LIRMM, CNRS-AIST JRL
 #
 
 set(MOC_HEADERS
@@ -133,12 +133,7 @@ endif()
 target_compile_options(_gui_objects PRIVATE -fPIC)
 target_link_libraries(_gui_objects PUBLIC Qwt::Qwt mc_rtc::mc_control_client
                                           mc_rtc::mc_rtc_ros)
-if(ROS_VERSION EQUAL 1)
-  add_dependencies(_gui_objects ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(_gui_objects PUBLIC ${catkin_LIBRARIES})
-elseif(ROS_VERSION EQUAL 2)
-  target_link_libraries(_gui_objects PUBLIC ROSDependencies)
-endif()
+target_link_libraries(_gui_objects PUBLIC ROSDependencies)
 
 set(PANEL_SOURCE_FILES
     Panel.cpp
@@ -156,27 +151,17 @@ set(PANEL_SOURCE_FILES
     Panel_visual.cpp)
 add_library(${PROJECT_NAME} SHARED ${PANEL_SOURCE_FILES} ${HEADER_FILES}
                                    ${MOC_HEADERS})
-if(ROS_VERSION EQUAL 2)
-  target_compile_definitions(
-    ${PROJECT_NAME} PRIVATE RVIZ_DEFAULT_PLUGINS_BUILDING_LIBRARY
-                            MC_RTC_RVIZ_PANEL_IS_ROS2)
-endif()
+target_compile_definitions(
+  ${PROJECT_NAME} PRIVATE RVIZ_DEFAULT_PLUGINS_BUILDING_LIBRARY
+                          MC_RTC_RVIZ_PANEL_IS_ROS2)
 target_link_libraries(${PROJECT_NAME} PUBLIC _gui_objects)
 
 add_executable(mc_rtc_gui main.cpp)
 target_link_libraries(mc_rtc_gui PUBLIC ${PROJECT_NAME})
 target_compile_options(mc_rtc_gui PRIVATE -fPIC)
 
-if(ROS_VERSION EQUAL 1)
-  install(
-    TARGETS ${PROJECT_NAME} mc_rtc_gui
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-elseif(ROS_VERSION EQUAL 2)
-  install(
-    TARGETS ${PROJECT_NAME} mc_rtc_gui
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin)
-endif()
+install(
+  TARGETS ${PROJECT_NAME} mc_rtc_gui
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
