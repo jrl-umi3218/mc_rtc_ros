@@ -1,20 +1,17 @@
 Source: mc-rtc-ros
 Priority: optional
-Maintainer: Pierre Gergondet <pierre.gergondet@gmail.com>
+Maintainer: Arnaud Tanguy <arn.tanguy+ppa@gmail.com>
 Standards-Version: 3.9.5
 Section: misc
 Homepage: https://github.com/jrl-umi3218/mc_rtc_msgs
 Vcs-git: https://github.com/jrl-umi3218/mc_rtc_msgs
 Vcs-Browser: https://github.com/jrl-umi3218/mc_rtc_msgs
-Build-Depends: debhelper (>= 9),
+Build-Depends: debhelper-compat (= 13),
                cmake,
                qtbase5-dev | qt5-default,
-               qt6-base-dev,
                libqwt-qt5-dev,
-# ros-@ROS_DISTRO@-mc-rtc-plugin,
-#ROS1  ros-@ROS_DISTRO@-rviz,
-#ROS1  ros-@ROS_DISTRO@-tf,
-#ROS2  ros-@ROS_DISTRO@-rviz2,
-#ROS2  ros-@ROS_DISTRO@-tf2,
-#ROS2  ros-@ROS_DISTRO@-visualization-msgs,
+               ros-@ROS_DISTRO@-mc-rtc-plugin,
+               ros-@ROS_DISTRO@-rviz2,
+               ros-@ROS_DISTRO@-tf2,
+               ros-@ROS_DISTRO@-visualization-msgs,
                libmc-rtc-dev

@@ -4,8 +4,7 @@ Architecture: any
 Section: science
 Depends: ${mic:Depends},
          ${shlibs:Depends},
-#ROS1         ros-@ROS_DISTRO@-rviz
-#ROS2         ros-@ROS_DISTRO@-rviz2
+         ros-@ROS_DISTRO@-rviz2
 Description: mc-rtc - RViZ panel
  RViZ plugin implementing mc_rtc GUI
 
