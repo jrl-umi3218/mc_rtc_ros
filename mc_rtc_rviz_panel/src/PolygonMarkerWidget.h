@@ -8,7 +8,7 @@
 #include "utils.h"
 
 #include <mc_rtc/gui/types.h>
-#include <mc_rtc/ros.h>
+#include <mc_rtc_ros/ros.h>
 
 namespace mc_rtc_rviz
 {
