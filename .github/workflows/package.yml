@@ -13,6 +13,7 @@ on:
     - ".gitlab-ci.yml"
     - ".jrl-ci"
     - README.md
+    - CHANGELOG.md
     - ".github/workflows/build.yml"
     - ".pre-commit-config.yaml"
     branches:
