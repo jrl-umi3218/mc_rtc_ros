@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.8.1] - 2026-07-15
+
 ## What's changed
 
 - Add ubuntu noble packaging by @arntanguy in https://github.com/jrl-umi3218/mc_rtc_ros/pull/68

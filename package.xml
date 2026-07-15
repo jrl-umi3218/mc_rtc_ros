@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>mc_rtc_ros</name>
-  <version>1.8.0</version>
+  <version>1.8.1</version>
   <description>Metapackage for mc_rtc ROS integration (mc_rtc_rviz_panel, mc_rtc_ticker)</description>
   <maintainer email="arn.tanguy@gmail.com">Arnaud Tanguy</maintainer>
   <license>BSD</license>
