@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<package>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>mc_rtc_ticker</name>
   <version>1.6.1</version>
   <description>The mc_rtc_ticker package</description>
@@ -8,23 +9,13 @@
   <maintainer email="pierre.gergondet@gmail.com">Pierre Gergondet</maintainer>
 
   <license>BSD</license>
+  <url type="repository">https://github.com/jrl-umi3218/mc_rtc_ros</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>tf2_eigen</build_depend>
-  <build_depend>tf2_ros</build_depend>
-  <build_depend>visualization_msgs</build_depend>
-  <build_depend>xacro</build_depend>
-
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>tf2_eigen</run_depend>
-  <run_depend>tf2_ros</run_depend>
-  <run_depend>visualization_msgs</run_depend>
-  <run_depend>xacro</run_depend>
+  <exec_depend>rviz2</exec_depend>
 
   <export>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
