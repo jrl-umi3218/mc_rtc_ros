@@ -2,13 +2,13 @@
 # Copyright 2016-2019 CNRS-UM LIRMM, CNRS-AIST JRL
 #
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.22)
 set(CMAKE_CXX_STANDARD 17)
 set(PROJECT_NAME mc_rtc_ticker)
 project(
   ${PROJECT_NAME}
   LANGUAGES CXX
-  VERSION 1.6.1)
+  VERSION 1.8.2)
 
 find_package(ament_cmake REQUIRED)
 

@@ -2,6 +2,34 @@
 
 ## [Unreleased]
 
+## [1.8.2] - 2026-11-23
+
+* Fix Qt6 detection for ros versions > lyrical
+* Fix version numbers
+
+## [1.8.1] - 2026-07-15
+
+## What's changed
+
+- Add ubuntu noble packaging by @arntanguy in https://github.com/jrl-umi3218/mc_rtc_ros/pull/68
+
+**Full Changelog**: https://github.com/jrl-umi3218/mc_rtc_ros/compare/v1.8.1...v1.8.0
+
+## [1.8.0] - 2026-07-02
+
+## What's Changed
+* fix(markers): Ensure Arrowmarkerwidget is deleted by @arntanguy in https://github.com/jrl-umi3218/mc_rtc_ros/pull/59
+* Handle updated schemas by @arntanguy in https://github.com/jrl-umi3218/mc_rtc_ros/pull/61
+* Nix build support by @arntanguy in https://github.com/jrl-umi3218/mc_rtc_ros/pull/63
+* feat: compatibility with QT6 by @Kooolkimooov in https://github.com/jrl-umi3218/mc_rtc_ros/pull/65
+* style: update pre-commit by @arntanguy in https://github.com/jrl-umi3218/mc_rtc_ros/pull/66
+
+## New Contributors
+* @Kooolkimooov made their first contribution in https://github.com/jrl-umi3218/mc_rtc_ros/pull/65
+
+**Full Changelog**: https://github.com/jrl-umi3218/mc_rtc_ros/compare/v1.7.0...v1.8.0
+
+
 ## [1.7.0] - 2025-08-28
 
 ### What's Changed
