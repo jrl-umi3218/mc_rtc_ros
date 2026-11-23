@@ -38,28 +38,15 @@ else()
   set(ROS_DISTRO "$ENV{ROS_DISTRO}")
 endif()
 
-# Stricty speaking we'd want to check <= indigo but the goal is to support 14.04
-# and strictly go forward from that
-if(NOT DEFINED ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
-  set(FORCE_QT5 0)
-else()
-  set(FORCE_QT5 $ENV{MC_RTC_RVIZ_PANEL_FORCE_QT5})
-endif()
-
-if(NOT ${FORCE_QT5} AND "${ROS_DISTRO}" STREQUAL "lyrical")
+if("${ROS_DISTRO}" STREQUAL "humble"
+   OR "${ROS_DISTRO}" STREQUAL "jazzy"
+   OR "${ROS_DISTRO}" STREQUAL "kilted")
+  set(USE_QT5 1)
+else() # from ros lyrical onwards, Qt6 is used
   set(USE_QT6 1)
-else()
-  set(USE_QT6 0)
 endif()
 
-if(NOT ${FORCE_QT5} AND "${ROS_DISTRO}" STREQUAL "indigo")
-  find_package(
-    Qt4
-    COMPONENTS QtCore QtGui
-    REQUIRED)
-  qt4_wrap_cpp(MOC_FILES ${MOC_HEADERS})
-  qt4_add_resources(QRC_FILES icons.qrc)
-elseif(USE_QT6)
+if(USE_QT6)
   find_package(
     Qt6
     COMPONENTS Core Gui Widgets
@@ -123,11 +110,9 @@ set(SOURCE_FILES
     ${QRC_FILES})
 
 add_library(_gui_objects OBJECT ${SOURCE_FILES})
-if(NOT ${FORCE_QT5} AND "${ROS_DISTRO}" STREQUAL "indigo")
-  target_link_libraries(_gui_objects PUBLIC Qt4::QtCore Qt4::QtGui)
-elseif(USE_QT6)
+if(USE_QT6)
   target_link_libraries(_gui_objects PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
-else()
+elseif(USE_QT5)
   target_link_libraries(_gui_objects PUBLIC Qt5::Core Qt5::Gui Qt5::Widgets)
 endif()
 target_compile_options(_gui_objects PRIVATE -fPIC)
